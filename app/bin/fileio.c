@@ -35,7 +35,6 @@
 #include "layout.h"
 #include "manifest.h"
 #include "misc.h"
-#include "param.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
@@ -45,6 +44,7 @@
 #include "dynstring.h"
 #include "common-ui.h"
 #include "ctrain.h"
+#include "form.h"
 
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
@@ -61,6 +61,7 @@ static coOrd paste_offset, cursor_offset;
 EXPORT wBool_t bExample = FALSE;
 EXPORT wBool_t bReadOnly = FALSE;
 
+/** @logcmd @showrefby `timereadfile=n` `fileio.c` */
 static int log_timereadfile = 0;
 
 #ifdef WINDOWS
@@ -104,6 +105,9 @@ EXPORT char * curSubContents;
 
 #define PARAM_DEMO (-1)
 
+#define RECENT_FILE_SECTION "recentfiles"
+#define RECENT_FILE_KEY "file"
+
 EXPORT dynArr_t paramProc_da;
 
 
@@ -115,7 +119,7 @@ EXPORT char * GetNextLine( void )
 	}
 	if (fgets( paramLine, sizeof paramLine, paramFile ) == NULL) {
 		sprintf( message, "INPUT ERROR: premature EOF on %s", paramFileName );
-		wNoticeEx( NT_ERROR, message, _("Ok"), NULL );
+		wNoticeWithIcon( NT_ERROR, message, _("Ok"), NULL );
 		if ( paramFile ) {
 			fclose( paramFile );
 			paramFile = NULL;
@@ -128,50 +132,7 @@ EXPORT char * GetNextLine( void )
 }
 
 
-/**
- * Show an error message if problems occur during loading of a param or layout file.
- * The user has the choice to cancel the operation or to continue. If operation is
- * canceled the open file is closed.
- *
- * \param IN msg error message
- * \param IN showLine set to true if current line should be included in error message
- * \param IN ... variable number additional error information
- * \return TRUE to continue, FALSE to abort operation
- *
- */
-
-EXPORT int InputError(
-        char * msg,
-        BOOL_T showLine,
-        ... )
-{
-	va_list ap;
-	char * mp = message;
-	int ret;
-
-	mp += sprintf( message, "INPUT ERROR: %s:%d\n",
-	               paramFileName, paramLineNum );
-	va_start( ap, showLine );
-	mp += vsprintf( mp, msg, ap );
-	va_end( ap );
-	if (showLine) {
-		*mp++ = '\n';
-		strcpy( mp, paramLine );
-	}
-	strcat( mp, _("\nDo you want to continue?") );
-	if (!(ret = wNoticeEx( NT_ERROR, message, _("Continue"), _("Stop") ))) {
-		if ( paramFile ) {
-			fclose(paramFile);
-			paramFile = NULL;
-		}
-		if ( paramFileName ) {
-			free( paramFileName );
-			paramFileName = NULL;
-		}
-	}
-	return ret;
-}
-
+/* InputError() moved to getargs.c (2026-07-11) -- see that file for why. */
 
 EXPORT void SyntaxError(
         char * event,
@@ -183,248 +144,11 @@ EXPORT void SyntaxError(
 }
 
 
-/**
- * Parse a line in XTrackCAD's file format
- *
- * \param line IN line to parse
- * \param format IN ???
- *
- * \return FALSE in case of parsing error, TRUE on success
- * In the error case, InputError had been called which may have closed the input file (paramFile)
- *
- * format chars are:
- * 0 - read a number and discard
- * X - no read, *pi = 0
- * Y - no read, *pf = 0L
- * Z - no read, *pl = 0.0
- * L - *pi = number
- * d - *pi = number
- * w - *pf = read a width
- * u - *pul = number
- * l - *pl = number
- * f - *pf = number
- * z - *pf = 0.0
- * p - *pp = ( number, number ) a coOrd
- * s - *ps = string, bounded by a mandatory inline width (e.g. "s9" for a
- *     10-byte buffer, mirroring scanf's "%9s") -- the width is the max
- *     characters copied, not counting the terminating NUL
- * q - *ps = quoted string
- * c - *qp = position of next non-space char or NULL
- */
-
-EXPORT BOOL_T GetArgs(
-        char * line,
-        const char * format,
-        ... )
-{
-	char * cp, * cq;
-	long * pl;
-	unsigned long *pul;
-	int * pi;
-	FLOAT_T *pf;
-	coOrd p, *pp;
-	char * ps;
-	char ** qp;
-	va_list ap;
-	char * sError = NULL;
-
-	cp = line;
-	va_start( ap, format );
-	for ( ; sError==NULL && *format; format++ ) {
-		while (isspace((unsigned char)*cp)) { cp++; }
-		if (!*cp && strchr( "XZYzc", *format ) == NULL ) {
-			sError = "EOL unexpected";
-			break;
-		}
-		switch (*format) {
-		case '0':
-			(void)strtol( cp, &cq, 10 );
-			if (cp == cq) {
-				sError = "%s: expected integer";
-				break;
-			}
-			cp = cq;
-			break;
-		case 'X':
-			pi = va_arg( ap, int * );
-			*pi = 0;
-			break;
-		case 'Z':
-			pl = va_arg( ap, long * );
-			*pl = 0;
-			break;
-		case 'Y':
-			pf = va_arg( ap, FLOAT_T * );
-			*pf = 0;
-			break;
-		case 'L':
-			pi = va_arg( ap, int * );
-			*pi = (int)strtol( cp, &cq, 10 );
-			if (cp == cq) {
-				sError = "%s: expected integer";
-				break;
-			}
-			cp = cq;
-			break;
-		case 'd':
-			pi = va_arg( ap, int * );
-			*pi = (int)strtol( cp, &cq, 10 );
-			if (cp == cq) {
-				sError = "%s: expected integer";
-				break;
-			}
-			cp = cq;
-			break;
-		case 'w':
-			pf = va_arg( ap, FLOAT_T * );
-			*pf = (FLOAT_T)strtol( cp, &cq, 10 );
-			if (cp == cq) {
-				sError = "%s: expected integer";
-				break;
-			}
-			if (*cq == '.') {
-				*pf = strtod( cp, &cq );
-			} else {
-				*pf /= mainD.dpi;
-			}
-			cp = cq;
-			break;
-		case 'u':
-			pul = va_arg( ap, unsigned long * );
-			*pul = strtoul( cp, &cq, 10 );
-			if (cp == cq) {
-				sError = "%s: expected integer";
-				break;
-			}
-			cp = cq;
-			break;
-		case 'l':
-			pl = va_arg( ap, long * );
-			*pl = strtol( cp, &cq, 10 );
-			if (cp == cq) {
-				sError = "%s: expected integer";
-				break;
-			}
-			cp = cq;
-			break;
-		case 'f':
-			pf = va_arg( ap, FLOAT_T * );
-			*pf = strtod( cp, &cq );
-			if (cp == cq) {
-				sError = "%s: expected float";
-				break;
-			}
-			cp = cq;
-			break;
-		case 'z':
-			pf = va_arg( ap, FLOAT_T * );
-			*pf = 0.0;
-			break;
-		case 'p':
-			pp = va_arg( ap, coOrd * );
-			p.x = strtod( cp, &cq );
-			if (cp == cq) {
-				sError = "%s: expected float";
-				break;
-			}
-			cp = cq;
-			p.y = strtod( cp, &cq );
-			if (cp == cq) {
-				sError = "%s: expected float";
-				break;
-			}
-			cp = cq;
-			*pp = p;
-			break;
-		case 's': {
-			char * ps0;
-			size_t maxLen = 0;
-			ps = va_arg( ap, char * );
-			/* Mandatory inline width, e.g. "s9" -- see format-chars comment
-			 * above. A missing width is a caller bug (every real call site
-			 * has a fixed-size destination buffer), not malformed input, so
-			 * it's enforced with CHECK() rather than sError. */
-			while (isdigit((unsigned char)format[1])) {
-				maxLen = maxLen * 10 + (size_t)(format[1] - '0');
-				format++;
-			}
-			CHECK( maxLen > 0 );
-			while (isspace((unsigned char)*cp)) { cp++; }
-			ps0 = ps;
-			while (*cp && !isspace((unsigned char)*cp)) {
-				if ((size_t)(ps - ps0) >= maxLen) {
-					sError = "%s: value too long";
-					break;
-				}
-				*ps++ = *cp++;
-			}
-			if (sError) {
-				break;
-			}
-			*ps++ = '\0';
-			break;
-		}
-		case 'q':
-			qp = va_arg( ap, char * * );
-			if (*cp != '\"')
-				/* Stupid windows */
-			{
-				cq = strchr( cp, '\"' );
-			} else {
-				cq = cp;
-			}
-			if (cq!=NULL) {
-				cp = cq;
-				ps = &message[0];
-				cp++;
-				while (*cp) {
-					CHECK( (ps-message)<sizeof message );
-					if (*cp == '\"') {
-						if (*++cp == '\"') {
-							*ps++ = '\"';
-						} else {
-							*ps = '\0';
-							cp++;
-							break;
-						}
-					} else {
-						*ps++ = *cp;
-					}
-					cp++;
-				}
-				*ps = '\0';
-			} else {
-				message[0] = '\0';
-			}
-#ifdef UTFCONVERT
-			ConvertUTF8ToSystem(message);
-#endif
-			*qp = (char*)ConvertFromEscapedText(message);
-			break;
-		case 'c':
-			qp = va_arg( ap, char * * );
-			while (isspace((unsigned char)*cp)) { cp++; }
-			if (*cp) {
-				*qp = cp;
-			} else {
-				*qp = NULL;
-			}
-			break;
-		default:
-			CHECKMSG( FALSE, ( "getArgs: bad format char: %c", *format ) );
-		}
-	}
-	va_end( ap );
-	if ( sError ) {
-		InputError( sError, TRUE, cp );
-		return FALSE;
-	}
-	return TRUE;
-}
+/* GetArgs() moved to getargs.c (2026-07-11) -- see that file for why. */
 
 
 
-wBool_t IsEND( char * sEnd )
+wBool_t IsEND( const char * sEnd )
 {
 	char * cp;
 	wBool_t bAllowNakedENDs = paramVersion < VERSION_NONAKEDENDS;
@@ -513,9 +237,8 @@ EXPORT wBool_t ParseRoomSize(
 /**
  * Parameter file parser definitions
  *
- * \param [IN] name command
- * \param [IN] proc function for reading the parameter definition
- * \param [IN] delete if not NULL function for freeing the definition
+ * \param[in] name command
+ * \param[in] proc function for reading the parameter definition
  */
 EXPORT void AddParam(
         char * name,
@@ -574,7 +297,7 @@ EXPORT char * PutTitle( char * cp )
 
 void SetWindowTitle( void )
 {
-	char *filename;
+	const char *filename;
 
 	if ( changed > 2 || inPlayback ) {
 		return;
@@ -605,13 +328,29 @@ static char * checkPtFileName1;
 static char * checkPtFileName2;
 static char * checkPtFileNameBackup;
 
+/**
+ * Compute checkPtFileName1/checkPtFileName2 if not already done. DoCheckPoint()
+ * needs both set before it can save/rename a checkpoint; historically only
+ * ExistsCheckpoint() computed them, as a side effect of its own unrelated
+ * existence check, so any startup path that skipped calling ExistsCheckpoint()
+ * (e.g. -T regression-test mode, which has no reason to probe for a resumable
+ * checkpoint) left DoCheckPoint() trying to save to a NULL filename the first
+ * time a checkpoint was actually due. Idempotent and cheap, so both callers
+ * can call it unconditionally rather than relying on call order.
+ */
+static void EnsureCheckpointFileNames( void )
+{
+	MakeFullpath(&checkPtFileName1, workingDir, sCheckPointF, NULL);
+	MakeFullpath(&checkPtFileName2, workingDir, sCheckPoint1F, NULL);
+}
+
 /** Read the layout design.
  *
- * \param IN pathName filename including directory
- * \param IN fileName pointer to filename part in pathName
- * \param IN full
- * \param IN noSetCurDir if FALSE current directory is changed to file location
- * \param IN complain  if FALSE error messages are supressed
+ * \param[in] pathName filename including directory
+ * \param[in] fileName pointer to filename part in pathName
+ * \param[in] full
+ * \param[in] noSetCurDir if FALSE current directory is changed to file location
+ * \param[in] complain  if FALSE error messages are supressed
  *
  * \return FALSE in case of load error
  */
@@ -660,7 +399,8 @@ BOOL_T ReadTrackFile(
 		paramLineNum++;
 		if (strlen(paramLine) == (sizeof paramLine) -1 &&
 		    paramLine[(sizeof paramLine)-1] != '\n') {
-			if ( !(ret = InputError( "Line too long", TRUE ))) {
+			ret = InputError( "Line too long", TRUE );
+			if ( !ret ) {
 				break;
 			}
 		}
@@ -696,7 +436,8 @@ BOOL_T ReadTrackFile(
 				break;
 			}
 		} else if (!full) {
-			if ( !(ret = InputError( "unknown command", TRUE ))) {
+			ret = InputError( "unknown command", TRUE );
+			if ( !ret ) {
 				break;
 			}
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
@@ -715,13 +456,15 @@ BOOL_T ReadTrackFile(
 				/*wFloatSetValue( roomSizeXPD.control, PutDim(roomSize.x) );*/
 				/*wFloatSetValue( roomSizeYPD.control, PutDim(roomSize.y) );*/
 			} else {
-				if ( !(ret = InputError( "ROOMSIZE: bad value", TRUE ))) {
+				ret = InputError( "ROOMSIZE: bad value", TRUE );
+				if ( !ret ) {
 					break;
 				}
 			}
 		} else if (strncmp( paramLine, "SCALE ", 6 ) == 0) {
 			if ( !DoSetScale( paramLine+6 ) ) {
-				if ( !(ret = InputError( "SCALE: bad value", TRUE ))) {
+				ret = InputError( "SCALE: bad value", TRUE );
+				if ( !ret ) {
 					break;
 				}
 			}
@@ -801,7 +544,6 @@ int LoadTracks(
 	bReadOnly = bExample;
 	paramVersion = -1;
 	wSetCursor( mainD.d, wCursorWait );
-	Reset();
 	ClearTracks();
 	ResetLayers();
 	checkPtMark = changed = 0;
@@ -894,13 +636,7 @@ int LoadTracks(
 
 	}
 
-	if ( bExample ) {
-		bReadOnly = TRUE;
-	} else if ( access( fileName[0], W_OK ) == -1 ) {
-		bReadOnly = TRUE;
-	} else {
-		bReadOnly = FALSE;
-	}
+	bReadOnly = bExample || ( access( fileName[0], W_OK ) == -1 );
 
 	char *copyOfFileName = MyStrdup(fileName[0]);
 
@@ -908,19 +644,13 @@ int LoadTracks(
 	if (loadXTC
 	    && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, TRUE, TRUE )) {
 
-		nameOfFile = NULL;
-		extOfFile = NULL;
+		//nameOfFile = NULL;
+		//extOfFile = NULL;
 		SetCurrentPath( LAYOUTPATHKEY, copyOfFileName );
 		SetLayoutFullPath(copyOfFileName);
 		SetWindowTitle();
 
-		if ( ! bExample && (nameOfFile != NULL) ) {
-			char * copyFile = strdup(fileName[0]);
-			char * listName = FindFilename(strdup(
-			                                       fileName[0]));  //Make sure the list name is new
-			wMenuListAdd( fileList_ml, 0, listName, copyFile );
-		}
-
+		AddToRecentFiles(nameOfFile, fileName[0]);
 
 		ResolveIndex();
 		LOG( log_timereadfile, 1, ( "Read time (%s) = %lu mS \n", fileName[0],
@@ -943,6 +673,37 @@ int LoadTracks(
 	return TRUE;
 }
 
+void AddToRecentFiles(const char* displayFileName, const char* fullFileName)
+{
+	if (!bExample && (displayFileName != NULL)) {
+		const char* copyFile = MyStrdup(fullFileName);
+		const char* listName = FindFilename(strdup(fullFileName));
+		wMenuListAdd(fileList_ml, 0, listName, copyFile);
+
+		SaveRecentFileList();
+	}
+}
+
+void
+SaveRecentFileList()
+{
+	int count = wMenuListGetCount(fileList_ml);		//index is zero based,
+	DynString key;
+	DynStringMalloc(&key, 0);
+
+	if (count) {
+		for (int index = 0; index < count; index++) {
+			void* attributes;
+
+			if (wMenuListGet(fileList_ml, index, &attributes)) {
+				DynStringPrintf(&key, RECENT_FILE_KEY "%d", count - index -1 );
+				wPrefSetString(RECENT_FILE_SECTION, DynStringToCStr(&key), (char*)attributes);
+			}
+		}
+	}
+	DynStringFree(&key);
+}
+
 /**
  * Load the layout specified by data. Filename may contain a full
  * path.
@@ -953,7 +714,7 @@ int LoadTracks(
 
 EXPORT void DoFileList(
         int index,
-        char * label,
+        const char * label,
         void * data )
 {
 	char *pathName = (char*)data;
@@ -1011,8 +772,8 @@ static BOOL_T DoSaveTracks(
 /************************************************
  * Copy Dependency - copy file into another directory
  *
- * \param IN name
- * \param IN target_dir
+ * \param[in] name
+ * \param[in] target_dir
  *
  * \returns TRUE for success
  *
@@ -1187,32 +948,16 @@ static int SaveTracks(
 EXPORT void SaveState(void)
 {
 	wWinPix_t width, height;
-	const char * fileName;
-	void * pathName;
-	char file[6];
-	int inx;
 
 	wWinGetSize(mainW, &width, &height);
 	wPrefSetInteger("draw", "mainwidth", (int)width);
 	wPrefSetInteger("draw", "mainheight", (int)height);
 	SaveParamFileList();
-	ParamUpdatePrefs();
+	FormUpdatePrefs();
 
 	wPrefSetString( "misc", "lastlayout", GetLayoutFullPath());
 	wPrefSetInteger( "misc", "lastlayoutexample", bExample );
 
-	if (fileList_ml) {
-		strcpy(file, "file");
-		file[5] = 0;
-		for (inx = 0; inx < NUM_FILELIST; inx++) {
-			fileName = wMenuListGet(fileList_ml, inx, &pathName);
-			if (fileName) {
-				file[4] = '0' + inx;
-				sprintf(message, "%s", (char* )pathName);
-				wPrefSetString("filelist", file, message);
-			}
-		}
-	}
 	wPrefFlush("");
 }
 static void SetAutoSave()
@@ -1276,7 +1021,8 @@ EXPORT void DoLoad( void )
 EXPORT void DoExamples( void )
 {
 	if (examplesFile_fs == NULL) {
-		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Example Tracks"),
+		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, FSO_SETFOLDERALWAYS,
+		                                 _("Example Tracks"),
 		                                 sSourceFilePattern, LoadTracks, NULL );
 	}
 	bExample = TRUE;
@@ -1294,6 +1040,8 @@ static char sCheckPointBF[STR_LONG_SIZE];
 static void DoCheckPoint( void )
 {
 	int rc;
+
+	EnsureCheckpointFileNames();
 
 	if (!checkPtFileNameBackup || (changed <= checkPtInterval+1)) {
 		sprintf(sCheckPointBF,"%s00.bkp",GetLayoutFilename());
@@ -1365,8 +1113,6 @@ EXPORT void TryCheckPoint()
  * normally through the exit choice, files and directories that were created
  * temporarily are removed: xtrkcad.ckp
  *
- * \param none
- * \return none
  *
  */
 
@@ -1385,19 +1131,15 @@ EXPORT void CleanupCheckpointFiles( void )
 /**
  * Remove all temporary files used for archive handling. When the program terminates
  * normally through the exit choice, files and directories that were created
- * temporarily are removed: zip_in.<pid> and zip_out.<pid>
+ * temporarily are removed: zip_in.\<pid\> and zip_out.\<pid\>
  *
- * \param none
- * \return none
  *
  */
 
 EXPORT void CleanupTempArchive(void)
 {
-	char* tempDir;
-
 	for (int i = ARCHIVE_READ; i <= ARCHIVE_WRITE; ++i) {
-		tempDir = GetZipDirectoryName(i);
+		char* tempDir = GetZipDirectoryName(i);
 		if (tempDir) {
 			DeleteDirectory(tempDir);
 			free(tempDir);
@@ -1409,7 +1151,6 @@ EXPORT void CleanupTempArchive(void)
  * Check for existence of checkpoint file. Existence of a checkpoint file means that XTrkCAD was not properly
  * terminated.
  *
- * \param none
  * \return TRUE if exists, FALSE otherwise
  *
  */
@@ -1418,8 +1159,7 @@ EXPORT int ExistsCheckpoint( void )
 {
 	struct stat fileStat;
 
-	MakeFullpath(&checkPtFileName1, workingDir, sCheckPointF, NULL);
-	MakeFullpath(&checkPtFileName2, workingDir, sCheckPoint1F, NULL);
+	EnsureCheckpointFileNames();
 
 	if ( !stat( checkPtFileName1, &fileStat ) ) {
 		return TRUE;
@@ -1431,8 +1171,7 @@ EXPORT int ExistsCheckpoint( void )
 /**
  * Load checkpoint file
  *
- * \param if TRUE reuse old filename
- * \param filename returned
+ * \param sameName IN TRUE reuse old filename
  * \return TRUE if exists, FALSE otherwise
  *
  */
@@ -1455,7 +1194,7 @@ EXPORT int LoadCheckpoint( BOOL_T sameName )
 
 		if (sameName) {
 			long iExample;
-			char * initialFile = (char*)wPrefGetString("misc", "lastlayout");
+			const char * initialFile = (char*)wPrefGetString("misc", "lastlayout");
 			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
 			bExample = (iExample == 1);
 			if (initialFile && strlen(initialFile)) {
@@ -1509,7 +1248,7 @@ static int ImportTracks(
         char **fileName,
         void * data )
 {
-	char *nameOfFile;
+	const char *nameOfFile;
 	long paramVersionOld = paramVersion;
 
 	CHECK( fileName != NULL );
@@ -1548,7 +1287,7 @@ static int ImportTracks(
 	return TRUE;
 }
 
-static void DoImport( void * type )
+static void DoImport( const void * type )
 {
 	if (importFile_fs == NULL)
 		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0,
@@ -1558,13 +1297,13 @@ static void DoImport( void * type )
 	wFilSelect( importFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 }
 
-EXPORT void DoImportObjects( void * unused )
+EXPORT void DoImportObjects( const void * unused )
 {
 	importAsModule = FALSE;
 	DoImport( unused );
 }
 
-EXPORT void DoImportModule( void * unused )
+EXPORT void DoImportModule( const void * unused )
 {
 	importAsModule = TRUE;
 	DoImport( unused );
@@ -1736,14 +1475,16 @@ EXPORT void EditClone( void * unused )
 
 EXPORT void LoadFileList(void)
 {
-	char file[6];
-	int inx;
+	DynString key;
 	const char * cp;
 	const char *fileName, *pathName;
-	strcpy(file, "fileX");
-	for (inx = NUM_FILELIST - 1; inx >= 0; inx--) {
-		file[4] = '0' + inx;
-		cp = wPrefGetString("filelist", file);
+
+	DynStringMalloc(&key, 0);
+
+	for (int inx = 0; inx <NUM_FILELIST; inx++) {
+
+		DynStringPrintf(&key, RECENT_FILE_KEY "%d", inx);
+		cp = wPrefGetString(RECENT_FILE_SECTION, DynStringToCStr(&key));
 		if (!cp) {
 			continue;
 		}
@@ -1753,6 +1494,8 @@ EXPORT void LoadFileList(void)
 			wMenuListAdd(fileList_ml, 0, fileName, pathName);
 		}
 	}
+
+	DynStringFree(&key);
 }
 
 

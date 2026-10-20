@@ -32,7 +32,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = XTrackCAD
+PROJECT_NAME           = XTrkCAD
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -44,14 +44,14 @@ PROJECT_NUMBER         = @XTRKCAD_VERSION@
 # for a project that appears at the top of each page and should give viewer a
 # quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          =
+PROJECT_BRIEF          = "Model railroad layout design and operation software"
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included
 # in the documentation. The maximum height of the logo should not exceed 55
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           =
+PROJECT_LOGO           = "@XTrkCAD_SOURCE_DIR@/docs/doxygen/logo.png"
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
@@ -163,7 +163,8 @@ FULL_PATH_NAMES        = YES
 # will be relative from the directory where doxygen is started.
 # This tag requires that the tag FULL_PATH_NAMES is set to YES.
 
-STRIP_FROM_PATH        = "@XTrkCAD_SOURCE_DIR@/app/"
+STRIP_FROM_PATH        = "@XTrkCAD_SOURCE_DIR@/app/" \
+                         "@XTrkCAD_SOURCE_DIR@"
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of the
 # path mentioned in the documentation of a class, which tells the reader which
@@ -735,7 +736,7 @@ FILE_VERSION_FILTER    =
 # DoxygenLayout.xml, doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-LAYOUT_FILE            =
+LAYOUT_FILE            = "@sourcedoc_BINARY_DIR@/DoxygenLayout.xml"
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -798,12 +799,14 @@ WARN_NO_PARAMDOC       = NO
 # NOTE: upstream Hg (SF rev 6446/6432, 2026-05-07) enabled FAIL_ON_WARNINGS
 # here; this file was ported from Hg on 2026-07-16 to close a longstanding
 # git/Hg divergence (git's copy predated that change and had drifted onto a
-# different Doxygen-version template entirely). Deliberately kept at NO for
-# now -- reconciling to FAIL_ON_WARNINGS surfaces ~435 pre-existing
-# @param/return-type doc gaps across app/bin and app/wlib that need their
-# own triage-or-suppress pass, not a silent gate flip.
+# different Doxygen-version template entirely). Deliberately kept at NO
+# initially (930 pre-existing @param/return-type doc gaps across app/bin and
+# app/wlib/gtk3lib) while those were triaged and fixed in bugs #650/#651
+# (Doxyfile sync), #653/#654 (doc-comment triage, 930 -> 0 outside
+# app/bin/cars -- see .claude/doxygen-triage-plan.md for the full history).
+# Now matches Hg, gating for real.
 
-WARN_AS_ERROR          = NO
+WARN_AS_ERROR          = FAIL_ON_WARNINGS
 
 # The WARN_FORMAT tag determines the format of the warning messages that doxygen
 # can produce. The string should contain the $file, $line, and $text tags, which
@@ -833,9 +836,25 @@ WARN_LOGFILE           = ./doxygen.log
 
 INPUT                  = "@XTrkCAD_SOURCE_DIR@/app/bin" \
                          "@XTrkCAD_SOURCE_DIR@/app/wlib/@XTrkCAD_WLIB_DIR@" \
+                         "@XTrkCAD_SOURCE_DIR@/app/wlib/@XTrkCAD_WLIB_DIR@/unix" \
                          "@XTrkCAD_SOURCE_DIR@/app/wlib/include/wlib.h" \
                          "@XTrkCAD_SOURCE_DIR@/app/dynstring" \
-                         "@XTrkCAD_SOURCE_DIR@/app/bin/cars"
+                         "@XTrkCAD_SOURCE_DIR@/app/bin/appmainwindow" \
+                         "@XTrkCAD_SOURCE_DIR@/app/bin/cars" \
+                         "@XTrkCAD_SOURCE_DIR@/app/bin/form" \
+                         "@XTrkCAD_SOURCE_DIR@/app/bin/parts" \
+                         "@XTrkCAD_BINARY_DIR@" \
+                         "@XTrkCAD_BINARY_DIR@/app/help" \
+                         "@XTrkCAD_BINARY_DIR@/app/wlib/@XTrkCAD_WLIB_DIR@/ui" \
+                         "@XTrkCAD_BINARY_DIR@/app/wlib/@XTrkCAD_WLIB_DIR@/symbols" \
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/mainpage.md" \
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/creating-a-report.md" \
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/building.md" \
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/advanced.md" \
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/flatpak.md" \
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/logcommands.md" \
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/regression-tests.md" \
+                         "@XTrkCAD_SOURCE_DIR@/docs/doxygen/development-process.md"
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -929,7 +948,7 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             =
+IMAGE_PATH             = "@XTrkCAD_SOURCE_DIR@/docs/doxygen/images/regression-tests"
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -985,7 +1004,7 @@ FILTER_SOURCE_PATTERNS =
 # (index.html). This can be useful if you have a project on for instance GitHub
 # and want to reuse the introduction page also for the doxygen output.
 
-USE_MDFILE_AS_MAINPAGE =
+USE_MDFILE_AS_MAINPAGE = "@XTrkCAD_SOURCE_DIR@/docs/doxygen/mainpage.md"
 
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
@@ -1164,7 +1183,7 @@ HTML_FILE_EXTENSION    = .html
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER            =
+HTML_HEADER            = "@XTrkCAD_SOURCE_DIR@/docs/doxygen/header.html"
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1175,6 +1194,12 @@ HTML_HEADER            =
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
 HTML_FOOTER            =
+
+# Doxygen's own built-in copy-to-clipboard button on code blocks is disabled
+# (NO) in favor of Doxygen Awesome's fragment-copy-button JS extension, which
+# is what the theme's own docs say to do when using that extension.
+
+HTML_COPY_CLIPBOARD    = NO
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1199,7 +1224,9 @@ HTML_STYLESHEET        =
 # list). For an example see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  =
+HTML_EXTRA_STYLESHEET  = "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome.css" \
+                         "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-sidebar-only.css" \
+                         "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-sidebar-only-darkmode-toggle.css"
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1209,7 +1236,17 @@ HTML_EXTRA_STYLESHEET  =
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       =
+HTML_EXTRA_FILES       = "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-darkmode-toggle.js" \
+                         "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-fragment-copy-button.js" \
+                         "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-paragraph-link.js" \
+                         "@DOXYGEN_AWESOME_CSS_DIR@/doxygen-awesome-interactive-toc.js"
+
+# HTML_COLORSTYLE is required (set to LIGHT) by the Doxygen Awesome theme for
+# Doxygen >= 1.9.5 -- the theme manages its own light/dark switching via the
+# dark-mode-toggle JS extension instead, so AUTO_LIGHT/AUTO_DARK/TOGGLE would
+# conflict with it.
+
+HTML_COLORSTYLE        = LIGHT
 
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. Doxygen
 # will adjust the colors in the style sheet and background images according to
@@ -1469,9 +1506,22 @@ ECLIPSE_DOC_ID         = org.doxygen.Project
 # it. Since the tabs in the index contain the same information as the navigation
 # tree, you can set this option to YES if you also set GENERATE_TREEVIEW to YES.
 # The default value is: NO.
+#
+# Deliberately set to YES here, deviating from Doxygen Awesome's own
+# documented sidebar-only recommendation of NO: with NO, the search box ends
+# up rendered inside Doxygen's classic top tab bar (a <li id="searchBoxPos2">
+# at the end of the full tab/submenu list), which the sidebar-only theme's
+# CSS clips out of view along with the rest of that tab bar -- verified
+# empirically (a rendered screenshot showed no visible search box or
+# dark-mode toggle button at all with DISABLE_INDEX=NO). With YES, the
+# classic tab bar is skipped entirely and the search box renders directly in
+# the title row's own <td> instead, un-clipped, which the theme's CSS styles
+# correctly -- verified both render and work. GENERATE_TREEVIEW=YES already
+# gives full navigation via the sidebar tree, so nothing is lost by disabling
+# the redundant tab-bar index.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-DISABLE_INDEX          = NO
+DISABLE_INDEX          = YES
 
 # The GENERATE_TREEVIEW tag is used to specify whether a tree-like index
 # structure should be generated to display hierarchical information. If the tag
@@ -1488,7 +1538,19 @@ DISABLE_INDEX          = NO
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-GENERATE_TREEVIEW      = NO
+GENERATE_TREEVIEW      = YES
+
+# FULL_SIDEBAR is a Doxygen Awesome sidebar-only-theme setting -- NO keeps the
+# top title/search bar and puts only file/page/class navigation in the
+# sidebar, which is what the theme's sidebar-only CSS variant expects.
+
+FULL_SIDEBAR           = NO
+
+# Doxygen's own built-in per-page outline panel is disabled (NO) in favor of
+# Doxygen Awesome's interactive-toc JS extension, which is what the theme's
+# own docs say to do when using that extension (Doxygen >= 1.14.0).
+
+PAGE_OUTLINE_PANEL     = NO
 
 # The ENUM_VALUES_PER_LINE tag can be used to set the number of enum values that
 # doxygen will group on one line in the generated HTML documentation.
@@ -1592,7 +1654,7 @@ MATHJAX_CODEFILE       =
 # The default value is: YES.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-SEARCHENGINE           = NO
+SEARCHENGINE           = YES
 
 # When the SERVER_BASED_SEARCH tag is enabled the search engine will be
 # implemented using a web server instead of a web client using Javascript. There

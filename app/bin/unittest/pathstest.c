@@ -3,11 +3,15 @@
 */
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <setjmp.h>
+
+#include <cmocka.h>
+
 #include <string.h>
 #include <stdio.h>
-#include <setjmp.h>
-#include <cmocka.h>
 
 #include <dynstring.h>
 #include "../paths.h"
@@ -150,6 +154,19 @@ static void FindExtensionTest(void **state)
 	assert_string_equal(FindFileExtension(noext),   "");
 }
 
+static void AddExtensionTest(void **state)
+{
+	char buf[64];
+	(void)state;
+	strcpy(buf, "layout");
+	AddDefaultExtension(buf, ".xtc");
+	assert_string_equal(buf, "layout.xtc");
+
+	strcpy(buf, "layout.xtce");
+	AddDefaultExtension(buf, ".xtc");
+	assert_string_equal(buf, "layout.xtce");  /* existing ext unchanged */
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
@@ -158,6 +175,7 @@ int main(void)
 		cmocka_unit_test(ConvertPath),
 		cmocka_unit_test(FindFilenameTest),
 		cmocka_unit_test(FindExtensionTest),
+		cmocka_unit_test(AddExtensionTest),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }

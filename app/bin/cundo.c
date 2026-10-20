@@ -83,6 +83,8 @@
  *
  */
 
+/** @logcmd @showrefby `undo=n` `cundo.c` — undo/redo transaction stack (`InitCmdUndo`); see also
+ * `undostream.c`'s separate `undo` registration for the underlying stream I/O */
 static int log_undo = 0;	/**< loglevel, can only be set at compile time */
 
 #define UNDO_STACK_SIZE (10)
@@ -114,12 +116,12 @@ static char ModifyOp = 1;
 static char DeleteOp = 2;
 
 #define INC_UNDO_INX( INX ) {\
-		if (++INX >= UNDO_STACK_SIZE) \
-			INX = 0; \
+		if (++(INX) >= UNDO_STACK_SIZE) \
+			(INX) = 0; \
 		}
 #define DEC_UNDO_INX( INX ) {\
-		if (--INX < 0) \
-			INX = UNDO_STACK_SIZE-1; \
+		if (--(INX) < 0) \
+			(INX) = UNDO_STACK_SIZE-1; \
 		}
 
 static stream_t undoStream;
@@ -140,19 +142,18 @@ void UndoSuspend( void )
 }
 
 
-static void DumpStream( FILE * outf, stream_p stream, char * name )
+static void DumpStream( FILE * outf, stream_p stream, const char * name )
 {
 	long binx;
 	long i, j;
 	uintptr_t off;
-	streamBlocks_p blk;
 	int zeroCnt;
-	static char zeros[16] = { 0 };
+	static const char zeros[16] = { 0 };
 	fprintf( outf, "Dumping %s\n", name );
 	off = stream->startBInx*BSTREAM_SIZE;
 	zeroCnt = 0;
 	for ( binx=0; binx<stream->stream_da.cnt; binx++ ) {
-		blk = DYNARR_N( streamBlocks_p, stream->stream_da, binx );
+		streamBlocks_p blk = DYNARR_N( streamBlocks_p, stream->stream_da, binx );
 		for ( i=0; i<BSTREAM_SIZE; i+= 16 ) {
 			if ( memcmp( &((*blk)[i]), zeros, 16 ) == 0 ) {
 				zeroCnt++;
@@ -186,18 +187,29 @@ BOOL_T UndoFail( char * cause, uintptr_t val, char * fileName,
                  int lineNumber )
 {
 	int inx, cnt;
-	undoStack_p us;
 	FILE * outf;
 	time_t clock;
 	char *temp;
-	NoticeMessage( MSG_UNDO_ASSERT, _("Ok"), NULL, fileName, lineNumber, val, val,
-	               cause );
+	if (bRunTests) {
+		// Headless regression run: NoticeMessage() is a modal dialog that
+		// would hang forever waiting for a click that never comes. Log
+		// instead — the diagnostics below still get written to sUndoF.
+		lprintf( "UNDO ASSERT FAILED: %s @ %s:%d (val=%lld)\n", cause, fileName,
+		         lineNumber, (long long)val );
+	} else {
+		NoticeMessage( MSG_UNDO_ASSERT, _("Ok"), NULL, fileName, lineNumber, val, val,
+		               cause );
+	}
 	MakeFullpath(&temp, workingDir, sUndoF, NULL);
 	outf = fopen( temp, "a+" );
 	free(temp);
 	if ( outf == NULL ) {
-		NoticeMessage(  MSG_OPEN_FAIL, _("Ok"), NULL, _("Undo Trace"), temp,
-		                strerror(errno) );
+		if (bRunTests) {
+			lprintf( "UndoFail: could not open trace file: %s\n", strerror(errno) );
+		} else {
+			NoticeMessage(  MSG_OPEN_FAIL, _("Ok"), NULL, _("Undo Trace"), temp,
+			                strerror(errno) );
+		}
 		return FALSE;
 	}
 	time( &clock );
@@ -215,7 +227,7 @@ BOOL_T UndoFail( char * cause, uintptr_t val, char * fileName,
 		inx = 0;
 	}
 	for (cnt=0; cnt<UNDO_STACK_SIZE; cnt++) {
-		us = &undoStack[inx];
+		undoStack_p us = &undoStack[inx];
 		fprintf( outf,
 		         "US[%d]: M:%d N:%d D:%d TC:%d NT:"SLOG_FMT" OT:"SLOG_FMT" NT:"SLOG_FMT" US:"SLOG_FMT" UE:"SLOG_FMT" RS:"SLOG_FMT" RE:"SLOG_FMT" NR:%d\n",
 		         inx, us->modCnt, us->newCnt, us->delCnt, us->trackCount,
@@ -319,13 +331,12 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 		return FALSE;
 	}
 	long Addsize;
-	void * tempBuff;
 	/* Fix up pts to be as big as it was before -> because it may have changed since */
 	if (!ReadStream (stream, &Addsize, sizeof Addsize)) {
 		return FALSE;
 	}
 	if (Addsize) {
-		tempBuff = MyMalloc(Addsize);
+		void * tempBuff = MyMalloc(Addsize);
 		if (!ReadStream( stream, tempBuff, Addsize )) {
 			return FALSE;
 		}
@@ -454,7 +465,7 @@ static BOOL_T DeleteInStream( stream_p stream, uintptr_t start, uintptr_t end )
  * \param stream
  * \param start
  * \param end
- * \param trk
+ * \param trk0
  *
  * Note: does not set trk->delete flag
  */
@@ -464,16 +475,15 @@ static BOOL_T SetDeleteOpInStream( stream_p stream, uintptr_t start,
 	char op;
 	track_p trk;
 	track_t tempTrk;
-	size_t binx, boff;
 	streamBlocks_p blk;
 
 	LOG( log_undo, 3, ( "        SetDeleteOpInStream T%d @ "SLOG_FMT"\n",
 	                    GetTrkIndex(trk0), (uintptr_t)trk0) );
 	stream->curr = start;
 	while (stream->curr < end) {
-		binx = stream->curr/BSTREAM_SIZE;
+		size_t binx = stream->curr/BSTREAM_SIZE;
 		binx -= stream->startBInx;
-		boff = stream->curr%BSTREAM_SIZE;
+		size_t boff = stream->curr%BSTREAM_SIZE;
 		if (!ReadStream( stream, &op, sizeof op )) {
 			return FALSE;
 		}
@@ -510,9 +520,6 @@ static void SetButtons( BOOL_T undoSetting, BOOL_T redoSetting )
 {
 	static BOOL_T undoButtonEnabled = FALSE;
 	static BOOL_T redoButtonEnabled = FALSE;
-	int index;
-	static char undoHelp[STR_SHORT_SIZE];
-	static char redoHelp[STR_SHORT_SIZE];
 
 	if (undoButtonEnabled != undoSetting) {
 		wControlActive( (wControl_p)undoB, undoSetting );
@@ -523,18 +530,20 @@ static void SetButtons( BOOL_T undoSetting, BOOL_T redoSetting )
 		redoButtonEnabled = redoSetting;
 	}
 	if (undoSetting) {
+		static char undoHelp[STR_SHORT_SIZE];
 		sprintf( undoHelp, _("Undo: %s"), undoStack[undoHead].label );
-		wControlSetBalloonText( (wControl_p)undoB, undoHelp );
+		wTooltipSetText( (wControl_p)undoB, undoHelp );
 	} else {
-		wControlSetBalloonText( (wControl_p)undoB, _("Undo last command") );
+		wTooltipSet((wControl_p)undoB, NULL, "cmdUndo");
 	}
 	if (redoSetting) {
-		index = undoHead;
+		int index = undoHead;
 		INC_UNDO_INX(index);
+		static char redoHelp[STR_SHORT_SIZE];
 		sprintf( redoHelp, _("Redo: %s"), undoStack[index].label );
-		wControlSetBalloonText( (wControl_p)redoB, redoHelp );
+		wTooltipSetText( (wControl_p)redoB, redoHelp );
 	} else {
-		wControlSetBalloonText( (wControl_p)redoB, _("Redo last undo") );
+		wTooltipSet((wControl_p)redoB, NULL, "cmdRedo");
 	}
 }
 
@@ -561,6 +570,10 @@ static int undoIgnoreEmpty = 0;
 
 /**
  * Start an Undo transcation
+ *
+ * \note Marks the layout as changed (calls SetFileChanged()) as soon as a real, non-empty
+ *       transaction begins -- callers that open an undo transaction do not need to call
+ *       SetFileChanged() themselves afterward.
  *
  * \param label help text for balloon help
  * \param format logging info
@@ -802,7 +815,8 @@ BOOL_T UndoDelete( track_p trk )
 		if (us->newTrks == trk) {
 			us->newTrks = trk->next;
 		}
-		if (!(ptrk = FindParent( trk, __LINE__ ))) {
+		ptrk = FindParent( trk, __LINE__ );
+		if (!ptrk) {
 			return FALSE;
 		}
 		if (trk->next == NULL) {
@@ -924,6 +938,10 @@ void UndoUndo( void * unused )
 
 	//redrawAll = (us->newCnt+us->modCnt) > incrementalDrawLimit;
 	redrawAll = TRUE;
+	// cppcheck-suppress knownConditionTrueFalse
+	// Incremental redraw is deliberately disabled above (hardcoded TRUE);
+	// this always does a full redraw instead. Not a bug, just an
+	// optimization currently switched off.
 	if (!redrawAll) {
 		for (trk=us->newTrks; trk; trk=trk->next ) {
 			UndrawNewTrack( trk );
@@ -934,7 +952,8 @@ void UndoUndo( void * unused )
 	if (us->needRedo) {
 		us->redoStart = us->redoEnd = redoStream.end;
 	}
-	if (!(us->oldTail=FindParent(us->newTrks,__LINE__))) {
+	us->oldTail=FindParent(us->newTrks,__LINE__);
+	if (!us->oldTail) {
 		return;
 	}
 	us->newTail = to_last;
@@ -966,7 +985,6 @@ void UndoUndo( void * unused )
 	oldCount = trackCount;
 	trackCount = us->trackCount;
 	us->trackCount = oldCount;
-	InfoCount( trackCount );
 
 	doCount--;
 	undoCount++;
@@ -974,7 +992,7 @@ void UndoUndo( void * unused )
 	AuditTracks( "undoUndo" );
 	SelectRecount();
 	SetButtons( doCount>0, TRUE );
-	wBalloonHelpUpdate();
+
 	wDrawDelayUpdate( mainD.d, FALSE );
 	undoStatus = TRUE;
 	return;
@@ -1011,6 +1029,10 @@ void UndoRedo( void * unused )
 
 	//redrawAll = (us->newCnt+us->modCnt) > incrementalDrawLimit;
 	redrawAll = TRUE;
+	// cppcheck-suppress knownConditionTrueFalse
+	// Incremental redraw is deliberately disabled above (hardcoded TRUE);
+	// this always does a full redraw instead. Not a bug, just an
+	// optimization currently switched off.
 	if (!redrawAll) {
 		RedrawInStream( &redoStream, us->redoStart, us->redoEnd, FALSE );
 	}
@@ -1046,7 +1068,6 @@ void UndoRedo( void * unused )
 	oldCount = trackCount;
 	trackCount = us->trackCount;
 	us->trackCount = oldCount;
-	InfoCount( trackCount );
 
 	undoCount--;
 	doCount++;
@@ -1054,7 +1075,7 @@ void UndoRedo( void * unused )
 	AuditTracks( "undoRedo" );
 	SelectRecount();
 	SetButtons( TRUE, undoCount>0 );
-	wBalloonHelpUpdate();
+
 	wDrawDelayUpdate( mainD.d, FALSE );
 	undoStatus = TRUE;
 	return;
@@ -1064,4 +1085,5 @@ void UndoRedo( void * unused )
 void InitCmdUndo( void )
 {
 	log_undo = LogFindIndex( "undo" );
+	InitUndoStream();
 }

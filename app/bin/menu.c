@@ -1,4 +1,4 @@
-/* file misc.c
+/* file menu.c
  * Main routine and initialization for the application
  */
 
@@ -20,27 +20,32 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-
-
 #include "menu.h"
 #include "common.h"
 #include "compound.h"
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
+#include "draw.h"
 #include "fileio.h"
+#include "form.h"
+#include "icons.h"
 #include "layout.h"
-#include "param.h"
-#include "include/problemrep.h"
+#include "mapwindow.h"
+#include "paths.h"
+#include "problemrep.h"
+#include "reports.h"
 #include "smalldlg.h"
 #include "common-ui.h"
 #include "ctrain.h"
 
-#include "include/toolbar.h"
+#include "toolbar.h"
+#include "wlib.h"
 
+static paramGroup_t menuPG;
 static paramData_t menuPLs[101] = {
-	{PD_LONG, NULL, "toolbarset", PDO_NOPREF},
-	{PD_LONG, &curTurnoutEp, "cur-turnout-ep"}
+	{PD_LONG, NULL, "toolbarset", PDO_NOPREF, .group = &menuPG },
+	{PD_LONG, &curTurnoutEp, "cur-turnout-ep", .group = &menuPG}
 };
 static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
 
@@ -50,22 +55,25 @@ EXPORT wMenu_p demoM;
 EXPORT wMenu_p popup1M, popup2M;
 static wMenu_p popup1aM, popup2aM;
 static wMenu_p popup1mM, popup2mM;
-EXPORT wButton_p undoB;
-EXPORT wButton_p redoB;
-EXPORT wButton_p zoomUpB;
-EXPORT wButton_p zoomDownB;
-EXPORT wButton_p zoomExtentsB;
-EXPORT wButton_p mapShowB;
-static wButton_p magnetsB;
-EXPORT wMenuToggle_p mapShowMI;
+wControl_p undoB;
+wControl_p redoB;
+wControl_p zoomUpB;
+wControl_p zoomDownB;
+wControl_p zoomExtentsB;
+wControl_p mapShowB;
+static wControl_p magnetsB;
+EXPORT wControl_p mapShowMI;
 static wMenuToggle_p magnetsMI;
-EXPORT wMenuList_p winList_mi;
-EXPORT wMenuList_p fileList_ml;
+wControl_p fileList_ml;
 EXPORT wMenuToggle_p snapGridEnableMI;
 EXPORT wMenuToggle_p snapGridShowMI;
 
 static int cmdGroup;
+static void HandleCmdGroupChange(int currentGroup);
+static wMenu_p buttonGroupPopupM = NULL;
 
+/** @logcmd @showrefby `menu=n` `menu.c` */
+static int log_menu;
 /*--------------------------------------------------------------------*/
 typedef struct {
 	char * label;
@@ -74,9 +82,8 @@ typedef struct {
 static dynArr_t menuTrace_da;
 #define menuTrace(N) DYNARR_N( menuTrace_t, menuTrace_da, N )
 
-static void DoMenuTrace(wMenu_p menu, const char * label, void * data)
+static void DoMenuTrace(wMenu_p menu, const char * label, const void * data)
 {
-	/*printf( "MENUTRACE: %s/%s\n", (char*)data, label );*/
 	if (recordF) {
 		fprintf(recordF, "MOUSE 1 %0.3f %0.3f\n", oldMarker.x, oldMarker.y);
 		fprintf(recordF, "MENU %0.3f %0.3f \"%s\" \"%s\"\n", oldMarker.x,
@@ -93,7 +100,7 @@ EXPORT wMenu_p MenuRegister(const char * label)
 	mt = &menuTrace(menuTrace_da.cnt - 1);
 	mt->label = strdup(label);
 	mt->menu = m;
-	wMenuSetTraceCallBack(m, DoMenuTrace, mt->label);
+	wMenuSetTraceCallBack(m, DoMenuTrace, strdup(label));
 	return m;
 }
 
@@ -126,7 +133,7 @@ static void MenuPlayback(char * line)
  */
 
 
-static wWin_p addElevW;
+static wControl_p addElevW;
 #define addElevF (wFloat_p)addElevPD.control
 static DIST_T addElevValueV;
 static void DoAddElev(void * unused);
@@ -134,14 +141,14 @@ static void DoAddElev(void * unused);
 static paramFloatRange_t rn1000_1000 = { -1000.0, 1000.0 };
 static paramData_t addElevPLs[] = { {
 		PD_FLOAT, &addElevValueV, "value",
-		PDO_NOPREF|PDO_DIM, &rn1000_1000, NULL, 0
+		PDO_NOPREF|PDO_DIM, &rn1000_1000, N_("Raise/lower by:"),
 	}
 };
 static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, COUNT( addElevPLs ) };
 
 static void DoAddElev(void * unused)
 {
-	ParamLoadData(&addElevPG);
+	FormFetchData(&addElevPG);
 	AddElevations(addElevValueV);
 	wHide(addElevW);
 }
@@ -153,9 +160,10 @@ static void ShowAddElevations(void * unused)
 		return;
 	}
 	if (addElevW == NULL)
-		addElevW = ParamCreateDialog(&addElevPG,
-		                             MakeWindowTitle(_("Change Elevations")), _("Change"), DoAddElev,
-		                             ParamCancel_Current, FALSE, NULL, 0, NULL);
+		addElevW = FormCreateDialog(&addElevPG,
+		                            MakeWindowTitle(_("Raise/Lower Elevations")),
+		                            _("Ok"), DoAddElev,
+		                            _("Cancel"), FormCancel_Current, FALSE, 0, NULL);
 	wShow(addElevW);
 }
 
@@ -166,9 +174,9 @@ static void ShowAddElevations(void * unused)
  */
 
 
-static wWin_p rotateW;
-static wWin_p indexW;
-static wWin_p moveW;
+static wControl_p rotateW;
+static wControl_p indexW;
+static wControl_p moveW;
 static double rotateValue;
 static char trackIndex[STR_LONG_SIZE];
 static coOrd moveValue;
@@ -178,21 +186,26 @@ static moveDialogCallBack_t moveDialogCallBack;
 
 static void RotateEnterOk(void * unused);
 
-static paramFloatRange_t rn360_360 = { -360.0, 360.0, 80 };
-static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_NOPREF|PDO_ANGLE|PDO_NORECORD, &rn360_360, N_("Angle:") } };
+static paramFloatRange_t rn360_360 = { -360.0, 360.0, 20 };
+static paramGroup_t rotatePG;
+static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_NOPREF|PDO_ANGLE|PDO_NORECORD, &rn360_360, N_("Angle:"), .group = &rotatePG } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, COUNT( rotatePLs ) };
 
 static void IndexEnterOk(void * unused);
+
+static paramGroup_t indexPG;
 static paramData_t indexPLs[] = {
-	{ PD_STRING, &trackIndex, "select",	PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH, I2VP(STR_SIZE-1), N_("Indexes:"), 0, 0, sizeof(trackIndex) }
+	{ PD_STRING, &trackIndex, "select",	PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH, I2VP(20), N_("Indexes:"), 0, 0, sizeof(trackIndex), .group=&indexPG }
 };
 static paramGroup_t indexPG = { "index", 0, indexPLs, COUNT( indexPLs ) };
 
-static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
+static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 20 };
 static void MoveEnterOk(void * unused);
+
+static paramGroup_t movePG;
 static paramData_t movePLs[] = {
-	{ PD_FLOAT, &moveValue.x, "moveX", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move X:") },
-	{ PD_FLOAT, &moveValue.y, "moveY", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move Y:") }
+	{ PD_FLOAT, &moveValue.x, "moveX", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move X:"), .group=&movePG},
+	{ PD_FLOAT, &moveValue.y, "moveY", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move Y:"), .group=&movePG}
 };
 static paramGroup_t movePG = { "move", 0, movePLs, COUNT( movePLs ) };
 
@@ -200,9 +213,10 @@ static void StartRotateDialog(void * funcVP)
 {
 	rotateDialogCallBack_t func = funcVP;
 	if (rotateW == NULL)
-		rotateW = ParamCreateDialog(&rotatePG, MakeWindowTitle(_("Rotate")),
-		                            _("Ok"), RotateEnterOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
-	ParamLoadControls(&rotatePG);
+		rotateW = FormCreateDialog(&rotatePG, MakeWindowTitle(_("Rotate")),
+		                           _("Ok"), RotateEnterOk,
+		                           _("Cancel"), FormCancel_Current, FALSE, 0, NULL);
+	FormLoadControls(&rotatePG);
 	rotateDialogCallBack = func;
 	wShow(rotateW);
 }
@@ -211,9 +225,10 @@ static void StartIndexDialog(void * funcVP)
 {
 	indexDialogCallBack_t func = funcVP;
 	if (indexW == NULL)
-		indexW = ParamCreateDialog(&indexPG, MakeWindowTitle(_("Select Index")),
-		                           _("Ok"), IndexEnterOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
-	ParamLoadControls(&indexPG);
+		indexW = FormCreateDialog(&indexPG, MakeWindowTitle(_("Select Index")),
+		                          _("Ok"), IndexEnterOk,
+		                          _("Cancel"), FormCancel_Current, FALSE, 0, NULL);
+	FormLoadControls(&indexPG);
 	indexDialogCallBack = func;
 	trackIndex[0] = '\0';
 	wShow(indexW);
@@ -223,16 +238,19 @@ static void StartMoveDialog(void * funcVP)
 {
 	moveDialogCallBack_t func = funcVP;
 	if (moveW == NULL)
-		moveW = ParamCreateDialog(&movePG, MakeWindowTitle(_("Move")), _("Ok"),
-		                          MoveEnterOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
-	ParamLoadControls(&movePG);
+		moveW = FormCreateDialog(&movePG, MakeWindowTitle(_("Move")),
+		                         _("Ok"), MoveEnterOk,
+		                         _("Cancel"), FormCancel_Current,
+		                         FALSE, 0, NULL);
+
+	FormLoadControls(&movePG);
 	moveDialogCallBack = func;
 	wShow(moveW);
 }
 
 static void MoveEnterOk(void * unused)
 {
-	ParamLoadData(&movePG);
+	FormFetchData(&movePG);
 	if ( moveValue.x != 0.0 ||
 	     moveValue.y != 0.0 ) {
 		moveDialogCallBack(&moveValue);
@@ -242,20 +260,16 @@ static void MoveEnterOk(void * unused)
 
 static void IndexEnterOk(void * unused)
 {
-	ParamLoadData(&indexPG);
+	FormFetchData(&indexPG);
 	indexDialogCallBack(trackIndex);
 	wHide(indexW);
 }
 
 static void RotateEnterOk(void * unused)
 {
-	ParamLoadData(&rotatePG);
+	FormFetchData(&rotatePG);
 	if ( rotateValue != 0.0 ) {
-		if (angleSystem == ANGLE_POLAR) {
-			rotateDialogCallBack(I2VP(rotateValue * 1000));
-		} else {
-			rotateDialogCallBack(I2VP(rotateValue * 1000));
-		}
+		rotateDialogCallBack(I2VP(rotateValue * 1000));
 	}
 	wHide(rotateW);
 }
@@ -295,6 +309,8 @@ EXPORT void AddRotateMenu(wMenu_p m, rotateDialogCallBack_t func)
  *
  */
 
+
+
 static void ChkLoad(void * unused)
 {
 	Confirm(_("Load"), DoLoad);
@@ -307,13 +323,12 @@ static void ChkExamples( void * unused )
 
 static void ChkRevert(void * unused)
 {
-	int rc;
-
 	if (changed) {
-		rc = wNoticeEx(NT_WARNING,
-		               _("Do you want to return to the last saved state?\n\n"
-		                 "Revert will cause all changes done since last save to be lost."),
-		               _("&Revert"), _("&Cancel"));
+		int rc;
+		rc = wNoticeWithIcon(NT_WARNING,
+		                     _("Do you want to return to the last saved state?\n\n"
+		                       "Revert will cause all changes done since last save to be lost."),
+		                     _("&Revert"), _("&Cancel"));
 		if (rc) {
 			/* load the file */
 			char *filename = GetLayoutFullPath();
@@ -342,6 +357,16 @@ static void DoCommandBIndirect(void * cmdInxP)
 	DoCommandB(I2VP(cmdInx));
 }
 
+void ToggleSetInMenuToolbar(wControl_p menuItem, wControl_p toolbarButton,
+                            wBool_t newState)
+{
+	wMenuToggleSet(menuItem, newState);
+
+	if (toolbarButton) {
+		wButtonSetBusy(toolbarButton, newState);
+	}
+}
+
 /**
  * Set magnets state
  */
@@ -350,17 +375,25 @@ EXPORT int MagneticSnap(int state)
 	int oldState = magneticSnap;
 	magneticSnap = state;
 	wPrefSetInteger("misc", "magnets", magneticSnap);
-	wMenuToggleSet(magnetsMI, magneticSnap);
-	wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
+
+	ToggleSetInMenuToolbar(magnetsMI, magnetsB, magneticSnap);
+
 	return oldState;
 }
 
 /**
- * Toggle magnets on/off
+ * Toggle magnets on/off. Additional flag to avoid recursive calls while
+ * UI elements in toolbar and menu are sync'ed
  */
 static void MagneticSnapToggle(void * unused)
 {
 	MagneticSnap(!magneticSnap);
+	// static int inTransition = FALSE;
+	// if (!inTransition) {
+	// 	inTransition = TRUE;
+	// 	MagneticSnap(!magneticSnap);
+	// 	inTransition = FALSE;
+	// }
 }
 
 
@@ -369,48 +402,62 @@ EXPORT void SelectFont(void * unused)
 	wSelectFont(_("XTrackCAD Font"));
 }
 
+#define MAX_STICKY_GROUPS 32
 
 EXPORT long stickySet = 0;
-static wWin_p stickyW;
-static const char * stickyLabels[33];
+static wControl_p stickyW;
+static const char * stickyLabels[MAX_STICKY_GROUPS + 1];
+// Stable per-group persistence key (a command's or button group's helpKey),
+// parallel to stickyLabels. Indexed by stickyIndex, which is only a stable
+// identifier within one run -- the bit position it maps to can shift across
+// builds whenever a command's IC_STICKY flag changes (see SF #591 / commit
+// 6080), so the ini file is keyed by this string, never by stickyIndex.
+static const char * stickyKeys[MAX_STICKY_GROUPS + 1];
+
+// Sticky button tracking
+static int stickyCnt = 0;
+
 static paramData_t stickyPLs[] = { {
-		PD_TOGGLE, &stickySet, "set", PDO_NOPSHUPD,
+		PD_TOGGLE, &stickySet, "set", PDO_NOPSHUPD|PDO_NOPREF,
 		stickyLabels, "", 0
 	}
 };
-static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
-                                 COUNT( stickyPLs )
-                               };
+static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,COUNT( stickyPLs )};
 
 static void StickyOk(void * unused)
 {
 	long changes = GetChanges( &stickyPG );
+
+	// stickyPLs' "set" field is PDO_NOPREF, so the generic dialog Ok
+	// handler never persists stickySet as a raw bitmask (its bit meaning
+	// isn't stable across builds). Persist per-key instead.
+	for (int i = 0; i < stickyCnt; i++) {
+		if (stickyKeys[i]) {
+			wPrefSetInteger("sticky", stickyKeys[i], (stickySet >> i) & 1L);
+		}
+	}
+	wPrefFlush(NULL);
+
 	wHide(stickyW);
 	DoChangeNotification(changes);
 }
 
 
-static void StickyChange( long chsnges )
-{
-}
-
-static void StickyDlgUpdate(
-        paramGroup_p pg,
-        int inx,
-        void * valueP )
+static void StickyChange( long changes )
 {
 }
 
 EXPORT void DoSticky(void * unused)
 {
 	if (!stickyW) {
-		stickyW = ParamCreateDialog(&stickyPG,
-		                            MakeWindowTitle(_("Sticky Commands")),
-		                            _("Ok"), StickyOk,
-		                            ParamCancel_Restore,
-		                            TRUE, NULL, 0, StickyDlgUpdate );
+		FormRegister(&stickyPG);
+
+		stickyW = FormCreateDialog(&stickyPG, MakeWindowTitle(_("Sticky Commands")),
+		                           _("Ok"), StickyOk,
+		                           _("Cancel"), FormCancel_Restore,
+		                           TRUE, F_RESIZE, NULL);
 	}
-	ParamLoadControls(&stickyPG);
+	FormLoadControls(&stickyPG);
 	wShow(stickyW);
 }
 
@@ -420,7 +467,7 @@ EXPORT void DoSticky(void * unused)
  *
  */
 
-static wWin_p debugW;
+static wControl_p debugW;
 
 static int debugCnt = 0;
 static paramIntegerRange_t r0_100 = { 0, 100, 80 };
@@ -429,8 +476,10 @@ static paramData_t debugPLs[30];
 static paramData_t p0[] = {
 	{ PD_BUTTON, TestMallocs, "test", PDO_DLGHORZ, NULL, N_("Test Mallocs") }
 };
-static long debug_values[30];
-static int debug_index[30];
+
+#define MAX_ACTIVE_LOGS	30
+static long debug_values[MAX_ACTIVE_LOGS];
+static int debug_index[MAX_ACTIVE_LOGS];
 
 static paramGroup_t debugPG = { "debug", 0, debugPLs, 0 };
 
@@ -445,9 +494,10 @@ static void DebugOk(void * unused)
 static void CreateDebugW(void)
 {
 	debugPG.paramCnt = debugCnt+1;
-	ParamRegister(&debugPG);
-	debugW = ParamCreateDialog(&debugPG, MakeWindowTitle(_("Debug")), _("Ok"),
-	                           DebugOk, ParamCancel_Current, FALSE, NULL, 0, NULL);
+	FormRegister(&debugPG);
+	debugW = FormCreateDialog(&debugPG, MakeWindowTitle(_("Debug")),
+	                          _("Ok"),DebugOk,
+	                          _("Cancel"), FormCancel_Current, FALSE, 0, NULL);
 	wHide(debugW);
 }
 
@@ -457,7 +507,7 @@ static void InitDebug(const char * label, long * valueP)
 	memset(&debugPLs[debugCnt+1], 0, sizeof debugPLs[debugCnt]);
 	debugPLs[debugCnt+1].type = PD_LONG;
 	debugPLs[debugCnt+1].valueP = valueP;
-	debugPLs[debugCnt+1].nameStr = label;
+	debugPLs[debugCnt+1].nameStr = CAST_AWAY_CONST label;
 	debugPLs[debugCnt+1].winData = &r0_100;
 	debugPLs[debugCnt+1].winLabel = label;
 	debugCnt++;
@@ -471,8 +521,8 @@ static void DebugInit(void * unused)
 		BOOL_T default_line = FALSE;
 		debugCnt = 0;    //Reset to start building the dynamic dialog over again
 		int i = 0;
-		for ( int inx=0; inx<logTable_da.cnt; inx++ ) {
-			if (logTable(inx).name[0]) {
+		for ( int inx=0; inx<logTable_da.cnt && inx < MAX_ACTIVE_LOGS; inx++ ) {
+			if (logTable(inx).name[0] ) {
 				debug_values[i] = logTable(inx).level;
 				debug_index[i] = inx;
 				InitDebug(logTable(inx).name,&debug_values[i]);
@@ -488,10 +538,10 @@ static void DebugInit(void * unused)
 			}
 		}
 
-		//ParamCreateControls( &debugPG, NULL );
+		//FormCreateControls( &debugPG, NULL );
 		CreateDebugW();
 	}
-	ParamLoadControls( &debugPG );
+	FormLoadControls( &debugPG );
 	wShow(debugW);
 }
 
@@ -510,18 +560,14 @@ EXPORT void EnableMenus( void )
 		if (menuPG.paramPtr[inx].control == NULL) {
 			continue;
 		}
-		if ((menuPG.paramPtr[inx].option & IC_SELECTED) && selectedTrackCount <= 0) {
-			enable = FALSE;
-		} else if ((programMode == MODE_TRAIN
-		            && (menuPG.paramPtr[inx].option & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY))
-		            == 0)
-		           || (programMode != MODE_TRAIN
-		               && (menuPG.paramPtr[inx].option & IC_MODETRAIN_ONLY) != 0)) {
-			enable = FALSE;
-		} else {
-			enable = TRUE;
-		}
-		wMenuPushEnable((wMenuPush_p) menuPG.paramPtr[inx].control, enable);
+		enable = !(((menuPG.paramPtr[inx].option & IC_SELECTED)
+		            && selectedTrackCount <= 0)
+		           || ((programMode == MODE_TRAIN
+		                && (menuPG.paramPtr[inx].option & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY))
+		                == 0)
+		               || (programMode != MODE_TRAIN
+		                   && (menuPG.paramPtr[inx].option & IC_MODETRAIN_ONLY) != 0)));
+		wMenuPushEnable(menuPG.paramPtr[inx].control, enable);
 	}
 }
 /*****************************************************************************
@@ -530,11 +576,11 @@ EXPORT void EnableMenus( void )
  *
  */
 
-static wMenuList_p messageList_ml;
+static wControl_p messageList_ml;
 #define MESSAGE_LIST_EMPTY			N_("No Messages")
 
 EXPORT void MessageListAppend(
-        char * cp1,
+        const char * cp1,
         const char * msgSrc )
 {
 	static wBool_t messageListIsEmpty = TRUE;
@@ -548,15 +594,16 @@ EXPORT void MessageListAppend(
 
 static void ShowMessageHelp(int index, const char * label, void * data)
 {
-	char msgKey[STR_SIZE], *cp, *msgSrc;
+	char msgKey[STR_SIZE];
+	const char *cp, *msgSrc;
 	msgSrc = (char*) data;
 	if (!msgSrc) {
 		return;
 	}
 	cp = strchr(msgSrc, '\t');
 	if (cp == NULL) {
-		sprintf(msgKey, _("No help for %s"), msgSrc);
-		wNoticeEx( NT_INFORMATION, msgKey, _("Ok"), NULL);
+		snprintf(msgKey, STR_SIZE, _("No help for %s"), msgSrc);
+		wNoticeWithIcon( NT_INFORMATION, msgKey, _("Ok"), NULL);
 		return;
 	}
 	memcpy(msgKey, msgSrc, cp - msgSrc);
@@ -571,7 +618,7 @@ static void ShowMessageHelp(int index, const char * label, void * data)
  */
 
 // defined in ${BUILDIR}/app/bin/bllnhlp.c
-extern wBalloonHelp_t balloonHelp[];
+extern wTooltip_t tooltipTexts[];
 
 #ifdef DEBUG
 #define CHECK_BALLOONHELP
@@ -588,18 +635,18 @@ int * balloonHelpCnts;
 
 EXPORT const char * GetBalloonHelpStr(const char * helpKey)
 {
-	wBalloonHelp_t * bh;
+	wTooltip_t * bh;
 #ifdef CHECK_UNUSED_BALLOONHELP
 	if ( balloonHelpCnts == NULL ) {
-		for ( bh=balloonHelp; bh->name; bh++ );
-		balloonHelpCnts = (int*)malloc( (sizeof *(int*)0) * (bh-balloonHelp) );
-		memset( balloonHelpCnts, 0, (sizeof *(int*)0) * (bh-balloonHelp) );
+		for ( bh=tooltipTexts; bh->name; bh++ );
+		balloonHelpCnts = (int*)malloc( (sizeof *(int*)0) * (bh-tooltipTexts) );
+		memset( balloonHelpCnts, 0, (sizeof *(int*)0) * (bh-tooltipTexts) );
 	}
 #endif
-	for (bh = balloonHelp; bh->name; bh++) {
+	for (bh = tooltipTexts; bh->name; bh++) {
 		if (strcmp(bh->name, helpKey) == 0) {
 #ifdef CHECK_UNUSED_BALLOONHELP
-			balloonHelpCnts[(bh-balloonHelp)]++;
+			balloonHelpCnts[(bh-tooltipTexts)]++;
 #endif
 			return _(bh->value);
 		}
@@ -614,9 +661,9 @@ EXPORT const char * GetBalloonHelpStr(const char * helpKey)
 static void ShowUnusedBalloonHelp( void )
 {
 	int cnt;
-	for ( cnt=0; balloonHelp[cnt].name; cnt++ )
+	for ( cnt=0; tooltipTexts[cnt].name; cnt++ )
 		if ( balloonHelpCnts[cnt] == 0 ) {
-			fprintf( stderr, "unused BH %s\n", balloonHelp[cnt].name );
+			fprintf( stderr, "unused BH %s\n", tooltipTexts[cnt].name );
 		}
 }
 #endif
@@ -627,222 +674,544 @@ static void ShowUnusedBalloonHelp( void )
  *
  */
 
-
-EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon,
-                                  long options,
-                                  wButtonCallBack_p action, void * context)
+wControl_p AddToolbarButton(const char* helpStr, wIcon_p icon, long options,
+                            wButtonCallBack_p action, void* context)
 {
-	wButton_p bb;
-	wIndex_t inx;
+	wControl_p bb;
 
-	GetBalloonHelpStr(helpStr);
 	if (context == NULL) {
-		for (inx = 0; inx < menuPG.paramCnt; inx++) {
+		for (wIndex_t inx = 0; inx < menuPG.paramCnt; inx++) {
 			if (action != DoCommandB && menuPG.paramPtr[inx].valueP == I2VP(action)) {
+				// button is used to trigger a menu entry
 				context = &menuPG.paramPtr[inx];
-				action = ParamMenuPush;
+				action = FormMenuPush;
 				menuPG.paramPtr[inx].context = I2VP(buttonCnt);
 				menuPG.paramPtr[inx].option |= IC_PLAYBACK_PUSH;
 				break;
 			}
 		}
 	}
-	bb = wButtonCreate(mainW, 0, 0, helpStr, (char*) icon,
-	                   BO_ICON/*|((options&IC_CANCEL)?BB_CANCEL:0)*/, 0, action, context);
-	ToolbarControlAdd((wControl_p) bb, options, cmdGroup);
+	long opt = 0L;
+	if (options & IC_ABUT) {
+		opt = BO_ABUT;
+	}
+
+	HandleCmdGroupChange(cmdGroup);
+
+	if (options & IC_TOGGLE) {
+		LOG( log_menu, 2, ( "Toggle toolbar button: %s\n", helpStr ) );
+		bb = wToggleCreateForToolbar(mainW, 0, 0, helpStr, icon,
+		                             opt | BO_ICON, 0, action, context);
+	} else if (options & IC_STICKY) {
+		LOG( log_menu, 2, ( "Sticky toolbar button: %s\n", helpStr ) );
+		bb = wStickyCreateForToolbar(mainW, 0, 0, helpStr, icon,
+		                             opt | BO_ICON, 0, action, context);
+	} else {
+		LOG( log_menu, 2, ( "Normal toolbar button: %s\n", helpStr ) );
+		bb = wButtonCreateForToolbar(mainW, 0, 0, helpStr, icon,
+		                             opt | BO_ICON, 0, action, context);
+	}
+
+	ToolbarControlAdd(bb, options, cmdGroup);
+
 	return bb;
 }
 
-#include "bitmaps/down.image3"
-static const char * buttonGroupMenuTitle;
-static const char * buttonGroupHelpKey;
-static const char * buttonGroupStickyLabel;
-static wMenu_p buttonGroupPopupM;
-static int stickyCnt = 0;
+/*****************************************************************************
+ *
+ * CONSTANTS AND ENUMS
+ *
+ */
 
-EXPORT void ButtonGroupBegin(const char * menuTitle, const char * helpKey,
-                             const char * stickyLabel)
+
+
+// Maximum number of sticky button groups
+#ifndef MAX_STICKY_GROUPS
+#define MAX_STICKY_GROUPS 32
+#endif
+
+/*****************************************************************************
+ *
+ * STATIC VARIABLES
+ *
+ */
+
+// Button group state - managed by ButtonGroupBegin/End
+static const char *buttonGroupMenuTitle = NULL;
+static const char *buttonGroupHelpKey = NULL;
+static const char *buttonGroupStickyLabel = NULL;
+
+// Static menu state for button groups
+static wMenu_p commandsSubmenu = NULL;
+static wMenu_p popup1Submenu = NULL;
+static wMenu_p popup2Submenu = NULL;
+
+// Track previous cmdGroup to detect changes
+static int prevCmdGroup = -1;
+static wControl_p currentSplitButton = NULL;  // Track active split button
+
+/*****************************************************************************
+ *
+ * HELPER FUNCTIONS
+ *
+ */
+
+/**
+ * Get the appropriate popup menus based on option flags.
+ *
+ * \param options Option flags (IC_POPUP2, IC_POPUP3, etc.)
+ * \param p1m OUT First popup menu
+ * \param p2m OUT Second popup menu
+ */
+static void GetPopupMenus(long options, wMenu_p *p1m, wMenu_p *p2m)
+{
+	if (!p1m || !p2m) {
+		return;
+	}
+
+	if (options & IC_POPUP2) {
+		*p1m = popup1aM;
+		*p2m = popup2aM;
+	} else if (options & IC_POPUP3) {
+		*p1m = popup1mM;
+		*p2m = popup2mM;
+	} else {
+		*p1m = popup1M;
+		*p2m = popup2M;
+	}
+}
+
+/**
+ * Create submenus for a button group.
+ *
+ * \param menu Main menu to add submenu to
+ * \param options Option flags
+ * \return TRUE on success, FALSE on failure
+ */
+static wBool_t CreateButtonGroupSubmenus(wMenu_p menu, long options)
+{
+	if (!menu || !buttonGroupMenuTitle) {
+		return FALSE;
+	}
+
+	// Create main commands submenu
+	commandsSubmenu = wMenuMenuCreate(menu, "", buttonGroupMenuTitle);
+	if (!commandsSubmenu) {
+		fprintf(stderr, "ERROR: Failed to create commands submenu\n");
+		return FALSE;
+	}
+
+	// Determine which popup menus to use
+	wMenu_p popup1Parent, popup2Parent;
+
+	if (options & IC_POPUP2) {
+		popup1Parent = popup1aM;
+		popup2Parent = popup2aM;
+	} else if (options & IC_POPUP3) {
+		popup1Parent = popup1mM;
+		popup2Parent = popup2mM;
+	} else {
+		popup1Parent = popup1M;
+		popup2Parent = popup2M;
+	}
+
+	// Create popup submenus
+	popup1Submenu = wMenuMenuCreate(popup1Parent, "", buttonGroupMenuTitle);
+	popup2Submenu = wMenuMenuCreate(popup2Parent, "", buttonGroupMenuTitle);
+
+	if (!popup1Submenu || !popup2Submenu) {
+		fprintf(stderr, "ERROR: Failed to create popup submenus\n");
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/**
+ * Setup sticky button behavior and update sticky labels.
+ *
+ * \param options Option flags
+ * \param newButtonGroup TRUE if this is a new button group
+ * \param nameStr Button name
+ * \param helpKey Stable help key for this button (never NULL, see
+ *        AddMenuButton); used as the persistence key when this call
+ *        allocates a new sticky group, in place of buttonGroupHelpKey
+ * \param stickyIndexOut OUT Index of sticky group (if created)
+ * \return Sticky mask for this button, or 0 if not sticky
+ */
+static long SetupStickyBehavior(long options, wBool_t newButtonGroup,
+                                const char *nameStr, const char *helpKey,
+                                int *stickyIndexOut)
+{
+	// Not a sticky button
+	if (!(options & IC_STICKY)) {
+		return 0;
+	}
+
+	int stickyIndex;
+	wBool_t allocating = (buttonGroupPopupM == NULL || newButtonGroup);
+
+	// Check if we need to start a new sticky group
+	if (allocating) {
+		// Validate we haven't exceeded maximum groups
+		if (stickyCnt >= MAX_STICKY_GROUPS) {
+			fprintf(stderr, "ERROR: Exceeded maximum sticky groups (%d)\n",
+			        MAX_STICKY_GROUPS);
+			return 0;
+		}
+
+		// Allocate new sticky group
+		stickyIndex = stickyCnt;
+		stickyCnt++;
+	} else {
+		// Use existing sticky group
+		stickyIndex = stickyCnt - 1;
+	}
+
+	// Set the label for this sticky group
+	// Use group label if in a button group, otherwise use button name
+	if (buttonGroupPopupM != NULL && buttonGroupStickyLabel != NULL) {
+		stickyLabels[stickyIndex] = buttonGroupStickyLabel;
+	} else if (nameStr) {
+		stickyLabels[stickyIndex] = nameStr;
+	} else {
+		stickyLabels[stickyIndex] = "Unknown";
+	}
+
+	// Calculate sticky mask
+	long stickyMask = 1L << stickyIndex;
+
+	if (allocating) {
+		// Persist/restore by stable key, not by stickyIndex: the bit
+		// position a command gets here can shift across builds whenever
+		// any earlier-registered command's IC_STICKY flag is added or
+		// removed (this has happened, see SF #591 / commit 6080), which
+		// would otherwise silently misapply a stale saved bitmask to the
+		// wrong commands -- including ones that opted out via
+		// IC_INITNOTSTICKY.
+		const char *key = (buttonGroupPopupM != NULL && buttonGroupHelpKey != NULL)
+		                  ? buttonGroupHelpKey : helpKey;
+		stickyKeys[stickyIndex] = key;
+
+		long onOff = (options & IC_INITNOTSTICKY) == 0;
+		if (key) {
+			wPrefGetInteger("sticky", key, &onOff, onOff);
+		}
+		if (onOff) {
+			stickySet |= stickyMask;
+		} else {
+			stickySet &= ~stickyMask;
+		}
+	}
+
+	if (stickyIndexOut) {
+		*stickyIndexOut = stickyIndex;
+	}
+
+	return stickyMask;
+}
+
+
+/**
+ * Check if a dropdown menu will be needed for this button.
+ * This is used to determine if a split button should be created.
+ *
+ * \return TRUE if this button will trigger creation of a dropdown menu
+ */
+
+static wBool_t WillNeedDropdown(void)
+{
+	// Dropdown is needed if we're about to start a new button group
+	return (buttonGroupMenuTitle != NULL && buttonGroupPopupM == NULL);
+}
+
+/**
+ * Add a gap after the previous command group using a separator.
+ * The gap size depends on whether BG_BIGGAP was set in the previous cmdGroup.
+ *
+ * \param prevGroup Previous command group flags
+ */
+static void AddGapAfterGroup(int prevGroup)
+{
+	if (prevGroup < 0) {
+		return;  // No previous group
+	}
+
+	// Determine gap width based on previous group's flags
+	int width = (prevGroup & BG_BIGGAP) ? 16 : 8;
+
+	// Create invisible separator
+	wControl_p separator = wSeparatorCreateForToolbar(mainW, width);
+
+	if (separator) {
+		long option = (prevGroup & BG_BIGGAP) ? BO_BIGGAP : BO_GAP;
+		ToolbarGapAdd(separator, option, prevGroup);
+	}
+}
+
+/**
+ * Check if cmdGroup has changed and add gap if needed.
+ * Should be called at the start of AddMenuButton.
+ *
+ * \param currentGroup Current cmdGroup value
+ */
+static void HandleCmdGroupChange(int currentGroup)
+{
+	// Check if this is a new command group
+	if (prevCmdGroup >= 0 && prevCmdGroup != currentGroup) {
+		// cmdGroup changed - add gap after previous group
+		AddGapAfterGroup(prevCmdGroup);
+	}
+
+	// Update tracked cmdGroup
+	prevCmdGroup = currentGroup;
+}
+/*****************************************************************************
+ *
+ * MAIN FUNCTION
+ *
+ */
+
+/**
+ * Add a menu button with toolbar button and menu entries.
+ */
+EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
+                              const char *helpKey, const char *nameStr,
+                              wIcon_p icon, int reqLevel, long options,
+                              long acclKey, void *context)
+{
+	if (!menu || !helpKey || !nameStr) {
+		return -1;
+	}
+
+	// Handle command group changes
+	HandleCmdGroupChange(cmdGroup);
+
+	wIndex_t buttInx = -1;
+	wBool_t newButtonGroup = FALSE;
+	long stickyMask = 0;
+	wControl_p cmdMenus[NUM_CMDMENUS] = {NULL, NULL, NULL, NULL};
+
+	// ========================================================================
+	// Toolbar Button Creation
+	// ========================================================================
+
+	if (icon != NULL) {
+		if (buttonGroupPopupM != NULL) {
+			// Already in button group
+			if (currentSplitButton != NULL) {
+				// Split button already exists - keep its current icon (the first one)
+				// Don't update icon or context during group building
+				buttInx = buttonCnt - 1;
+			} else {
+				// Regular button group
+				if (buttonCnt < 2) {
+					return -1;
+				}
+				buttInx = buttonCnt - 2;
+			}
+		} else {
+			// Not in button group yet
+			wBool_t useSplitButton = WillNeedDropdown();
+
+			if (useSplitButton) {
+				// Create popup menu first
+				buttonGroupPopupM = wMenuPopupCreate(mainW, buttonGroupMenuTitle);
+				if (!buttonGroupPopupM) {
+					return -1;
+				}
+
+				// Create button using existing function
+				buttInx = buttonCnt;
+				wControl_p button = AddToolbarButton(helpKey, icon, options,
+				                                     DoCommandB, I2VP(commandCnt));
+
+				if (button) {
+					// Wrap it as a split button (modifies button in place)
+					wButtonMakeSplit(button, buttonGroupPopupM);
+					currentSplitButton = button;
+				}
+
+				newButtonGroup = TRUE;
+				CreateButtonGroupSubmenus(menu, options);
+			} else {
+				// Create regular button
+				buttInx = buttonCnt;
+				AddToolbarButton(helpKey, icon, options, DoCommandB, I2VP(commandCnt));
+			}
+		}
+	}
+
+	// ========================================================================
+	// Sticky Button Setup
+	// ========================================================================
+
+	if (nameStr[0] != '\0') {
+		int stickyIndex;
+		stickyMask = SetupStickyBehavior(options, newButtonGroup, nameStr,
+		                                 helpKey, &stickyIndex);
+	}
+
+	// ========================================================================
+	// Menu Entry Creation
+	// ========================================================================
+
+	// nameStr is unchanged since the Sticky Button Setup check above; kept
+	// as a separate guard to preserve the phase-by-phase structure of this
+	// function rather than merging two logically distinct sections.
+	// cppcheck-suppress duplicateCondition
+	if (nameStr[0] != '\0') {
+		wMenu_p targetMenu = (buttonGroupPopupM && commandsSubmenu) ?
+		                     commandsSubmenu : menu;
+
+		cmdMenus[MENU_MAIN] = wMenuPushCreate(targetMenu, helpKey, nameStr,
+		                                      acclKey, DoCommandB, I2VP(commandCnt));
+
+		if (buttonGroupPopupM) {
+			cmdMenus[MENU_BUTTONGROUP] = wMenuPushCreate(
+			                                     buttonGroupPopupM, helpKey, GetBalloonHelpStr(helpKey),
+			                                     0, DoCommandB, I2VP(commandCnt));
+		}
+
+		if (options & (IC_POPUP | IC_POPUP2 | IC_POPUP3)) {
+			wMenu_p popup1Menu, popup2Menu;
+
+			if (buttonGroupPopupM) {
+				popup1Menu = popup1Submenu;
+				popup2Menu = popup2Submenu;
+			} else {
+				GetPopupMenus(options, &popup1Menu, &popup2Menu);
+			}
+
+			if (!(options & IC_SELECTED) && popup1Menu) {
+				cmdMenus[MENU_POPUP1] = wMenuPushCreate(popup1Menu, helpKey,
+				                                        nameStr, 0, DoCommandB,
+				                                        I2VP(commandCnt));
+			}
+
+			if (popup2Menu) {
+				cmdMenus[MENU_POPUP2] = wMenuPushCreate(popup2Menu, helpKey,
+				                                        nameStr, 0, DoCommandB,
+				                                        I2VP(commandCnt));
+			}
+		}
+	}
+
+	// ========================================================================
+	// Command Registration
+	// ========================================================================
+
+	wIndex_t cmdInx = AddCommand(command, helpKey, nameStr, icon, reqLevel,
+	                             options, acclKey, buttInx, stickyMask,
+	                             cmdMenus, context);
+
+	return cmdInx;
+}
+
+/*****************************************************************************
+ *
+ * BUTTON GROUP MANAGEMENT
+ *
+ */
+
+/**
+ * Begin a new button group.
+ * Subsequent AddMenuButton calls will be grouped under a dropdown menu.
+ *
+ * @param menuTitle Title for the button group menu
+ * @param helpKey Help key for the group
+ * @param stickyLabel Label for sticky button behavior
+ */
+EXPORT void ButtonGroupBegin(const char *menuTitle, const char *helpKey,
+                             const char *stickyLabel)
 {
 	buttonGroupMenuTitle = menuTitle;
 	buttonGroupHelpKey = helpKey;
 	buttonGroupStickyLabel = stickyLabel;
 	buttonGroupPopupM = NULL;
+	currentSplitButton = NULL;
+
+	// Reset submenu pointers for new group
+	commandsSubmenu = NULL;
+	popup1Submenu = NULL;
+	popup2Submenu = NULL;
 }
 
+/**
+ * End the current button group.
+ * Subsequent AddMenuButton calls will create standalone buttons.
+ */
 EXPORT void ButtonGroupEnd(void)
 {
 	buttonGroupMenuTitle = NULL;
 	buttonGroupHelpKey = NULL;
+	buttonGroupStickyLabel = NULL;
 	buttonGroupPopupM = NULL;
 }
 
-EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
-                              const char * helpKey, const char * nameStr, wIcon_p icon, int reqLevel,
-                              long options, long acclKey, void * context)
-{
-	wIndex_t buttInx = -1;
-	wIndex_t cmdInx;
-	wBool_t newButtonGroup = FALSE;
-	wMenu_p tm, p1m, p2m;
-	static wIcon_p openbuttIcon = NULL;
-	static wMenu_p commandsSubmenu;
-	static wMenu_p popup1Submenu;
-	static wMenu_p popup2Submenu;
-
-	if (icon) {
-		if (buttonGroupPopupM != NULL) {
-			buttInx = buttonCnt - 2;
-		} else {
-			buttInx = buttonCnt;
-			AddToolbarButton(helpKey, icon, options,
-			                 DoCommandB,
-			                 I2VP(commandCnt));
-		}
-		if (buttonGroupMenuTitle != NULL && buttonGroupPopupM == NULL) {
-			if (openbuttIcon == NULL) {
-				openbuttIcon = wIconCreatePixMap(down_image3[iconSize]);
-			}
-			buttonGroupPopupM = wMenuPopupCreate(mainW, buttonGroupMenuTitle);
-			AddToolbarButton(buttonGroupHelpKey, openbuttIcon, IC_ABUT,
-			                 (wButtonCallBack_p) wMenuPopupShow,
-			                 buttonGroupPopupM);
-			newButtonGroup = TRUE;
-			commandsSubmenu = wMenuMenuCreate(menu, "", buttonGroupMenuTitle);
-			if (options & IC_POPUP2) {
-				popup1Submenu = wMenuMenuCreate(popup1aM, "",	buttonGroupMenuTitle);
-				popup2Submenu = wMenuMenuCreate(popup2aM, "",	buttonGroupMenuTitle);
-			} else if (options & IC_POPUP3) {
-				popup1Submenu= wMenuMenuCreate(popup1mM, "",	buttonGroupMenuTitle);
-				popup2Submenu = wMenuMenuCreate(popup2mM, "",	buttonGroupMenuTitle);
-
-			} else {
-				popup1Submenu = wMenuMenuCreate(popup1M, "",	buttonGroupMenuTitle);
-				popup2Submenu = wMenuMenuCreate(popup2M, "",	buttonGroupMenuTitle);
-			}
-		}
-	}
-	long stickyMask = 0;
-	wMenuPush_p cmdMenus[NUM_CMDMENUS] = { NULL, NULL, NULL, NULL };
-	if (nameStr[0] != '\0') {
-		if (options & IC_STICKY) {
-			if (buttonGroupPopupM == NULL || newButtonGroup) {
-				CHECK( stickyCnt <= 32 );
-				stickyCnt++;
-			}
-			if (buttonGroupPopupM == NULL) {
-				stickyLabels[stickyCnt - 1] = nameStr;
-			} else {
-				stickyLabels[stickyCnt - 1] = buttonGroupStickyLabel;
-			}
-			stickyLabels[stickyCnt] = NULL;
-			stickyMask = 1L<<(stickyCnt-1);
-			if ( ( options & IC_INITNOTSTICKY ) == 0 ) {
-				stickySet |= stickyMask;
-			}
-		}
-		if (buttonGroupPopupM) {
-			cmdMenus[0] = wMenuPushCreate(buttonGroupPopupM,
-			                              helpKey, GetBalloonHelpStr(helpKey), 0, DoCommandB,
-			                              I2VP(commandCnt));
-			tm = commandsSubmenu;
-			p1m = popup1Submenu;
-			p2m = popup2Submenu;
-		} else {
-			tm = menu;
-			p1m = (options & IC_POPUP2) ? popup1aM : (options & IC_POPUP3) ? popup1mM :
-			      popup1M;
-			p2m = (options & IC_POPUP2) ? popup2aM : (options & IC_POPUP3) ? popup2mM :
-			      popup2M;
-		}
-		cmdMenus[1] = wMenuPushCreate(tm, helpKey, nameStr, acclKey,
-		                              DoCommandB, I2VP(commandCnt));
-		if ((options & (IC_POPUP | IC_POPUP2 | IC_POPUP3))) {
-			if (!(options & IC_SELECTED)) {
-				cmdMenus[2] = wMenuPushCreate(p1m, helpKey, nameStr,
-				                              0, DoCommandB, I2VP(commandCnt));
-			}
-			cmdMenus[3] = wMenuPushCreate(p2m, helpKey, nameStr, 0,
-			                              DoCommandB, I2VP(commandCnt));
-		}
-	}
-
-	cmdInx = AddCommand(command, helpKey, nameStr, icon, reqLevel, options,
-	                    acclKey, buttInx, stickyMask, cmdMenus, context);
-	return cmdInx;
-}
-
+/**  these seem to be menu entries that will be  used by demo playback */
 
 static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
                                const char * label, long acclKey, void * func, long option, void * context)
 {
-	wMenuPush_p mp;
-	mp = wMenuPushCreate(m1, name, label, acclKey, ParamMenuPush,
+	wControl_p mp;
+	mp = wMenuPushCreate(m1, name, label, acclKey, FormMenuPush,
 	                     &menuPLs[menuPG.paramCnt]);
 	if (m2)
-		wMenuPushCreate(m2, name, label, acclKey, ParamMenuPush,
+		wMenuPushCreate(m2, name, label, acclKey, FormMenuPush,
 		                &menuPLs[menuPG.paramCnt]);
 	menuPLs[menuPG.paramCnt].control = (wControl_p) mp;
 	menuPLs[menuPG.paramCnt].type = PD_MENUITEM;
 	menuPLs[menuPG.paramCnt].valueP = func;
-	menuPLs[menuPG.paramCnt].nameStr = name;
+	menuPLs[menuPG.paramCnt].nameStr = CAST_AWAY_CONST name;
 	menuPLs[menuPG.paramCnt].option = option;
 	menuPLs[menuPG.paramCnt].context = context;
 
-	if (name) {
-		GetBalloonHelpStr(name);
-	}
 	menuPG.paramCnt++;
 	CHECK( menuPG.paramCnt < COUNT(menuPLs) );
 }
 
-#include "bitmaps/zoom-in.image3"
-#include "bitmaps/zoom-choose.image3"
-#include "bitmaps/zoom-out.image3"
-#include "bitmaps/zoom-extent.image3"
-#include "bitmaps/undo.image3"
-#include "bitmaps/redo.image3"
-#include "bitmaps/doc-export.image3"
-#include "bitmaps/doc-export-bmap.image3"
-#include "bitmaps/doc-export-dxf.image3"
-#if XTRKCAD_CREATE_SVG
-#include "bitmaps/doc-export-svg.image3"
-#endif
-#include "bitmaps/doc-import.image3"
-// #include "bitmaps/doc-import-dxf.image3"
-#include "bitmaps/doc-import-mod.image3"
-#include "bitmaps/doc-new.image3"
-#include "bitmaps/doc-save.image3"
-#include "bitmaps/doc-open.image3"
-#include "bitmaps/doc-setup.image3"
-#include "bitmaps/parameter.image3"
-#include "bitmaps/map.image3"
-#include "bitmaps/magnet.image3"
-
 //static wMenu_p toolbarM;
 static addButtonCallBack_t paramFilesCallback;
 
+// wPrintSetup() takes a wPrintSetupCallBack_p, but its callback parameter is
+// never used (see app/wlib/gtk3lib/print.c) -- this wrapper lets it be used
+// as a menu/toolbar callback without casting through a mismatched signature.
+static void PrintSetupMenuCB(void *context)
+{
+	wPrintSetup(NULL);
+}
+
+// wMenuPopupShow() takes a wControl_p (an ordinary object pointer,
+// representation-identical to void*); this wrapper matches
+// wButtonCallBack_p's real signature instead of casting through a mismatch.
+static void ZoomChooserButtonCB(void *context)
+{
+	wMenuPopupShow((wControl_p)context);
+}
+
 EXPORT void CreateMenus(void)
 {
-	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM,
-	        manageM, addM, changeM, drawM;
+	log_menu =  LogFindIndex( "menu" );
+	wMenu_p fileM, editM, viewM, optionM, macroM, helpM,
+	        manageM, addM, changeM, drawM, reportsM;
 	wMenu_p zoomM, zoomSubM;
 
-	wMenuPush_p zoomInM, zoomOutM, zoomExtentsM;
+	wControl_p zoomInM, zoomOutM, zoomExtentsM;
+	InitToolbar();
 
-	wPrefGetInteger("DialogItem", "pref-iconsize", (long *) &iconSize, 0);
-
-	wSetBalloonHelp( balloonHelp );
-	fileM = wMenuBarAdd(mainW, "menuFile", _("&File"));
-	editM = wMenuBarAdd(mainW, "menuEdit", _("&Edit"));
-	viewM = wMenuBarAdd(mainW, "menuView", _("&View"));
-	addM = wMenuBarAdd(mainW, "menuAdd", _("&Add"));
-	changeM = wMenuBarAdd(mainW, "menuChange", _("&Change"));
-	drawM = wMenuBarAdd(mainW, "menuDraw", _("&Draw"));
-	manageM = wMenuBarAdd(mainW, "menuManage", _("&Manage"));
-	optionM = wMenuBarAdd(mainW, "menuOption", _("&Options"));
-	macroM = wMenuBarAdd(mainW, "menuMacro", _("&Macro"));
-	windowM = wMenuBarAdd(mainW, "menuWindow", _("&Window"));
-	helpM = wMenuBarAdd(mainW, "menuHelp", _("&Help"));
+	wInitTooltip( tooltipTexts, TooltipsGetCount() );
+	fileM = wMenuBarAdd(mainW, "menuFile", _("_File"));
+	editM = wMenuBarAdd(mainW, "menuEdit", _("_Edit"));
+	viewM = wMenuBarAdd(mainW, "menuView", _("_View"));
+	addM = wMenuBarAdd(mainW, "menuAdd", _("_Add"));
+	changeM = wMenuBarAdd(mainW, "menuChange", _("_Change"));
+	drawM = wMenuBarAdd(mainW, "menuDraw", _("_Draw"));
+	manageM = wMenuBarAdd(mainW, "menuManage", _("_Manage"));
+	reportsM = wMenuBarAdd(mainW, "menuReports", _("_Reports"));
+	optionM = wMenuBarAdd(mainW, "menuOption", _("_Options"));
+	macroM = wMenuBarAdd(mainW, "menuMacro", _("Mac_ro"));
+	helpM = wMenuBarAdd(mainW, "menuHelp", _("_Help"));
 
 	/*
 	 * POPUP MENUS
@@ -897,19 +1266,28 @@ EXPORT void CreateMenus(void)
 	                DoZoomExtents, I2VP(1));
 	wMenuPushCreate(popup2M, "cmdZoomExtents", _("Zoom Extents"), 0,
 	                DoZoomExtents, I2VP(1));
-	/* Display */
-	MiscMenuItemCreate(popup1M, popup2M, "cmdGridEnable", _("Enable SnapGrid"),
-	                   0, SnapGridEnable, 0, NULL);
-	MiscMenuItemCreate(popup1M, popup2M, "cmdGridShow", _("SnapGrid Show"), 0,
-	                   SnapGridShow, 0, NULL);
-	MiscMenuItemCreate(popup1M, popup2M, "cmdMagneticSnap",
-	                   _(" Enable Magnetic Snap"), 0,
-	                   MagneticSnapToggle, 0, NULL);
-	MiscMenuItemCreate(popup1M, popup2M, "cmdMapShow", _("Show/Hide Map"), 0,
-	                   MapWindowToggleShow, 0, NULL);
-	MiscMenuItemCreate(popup1M, popup2M, "cmdBackgroundShow",
-	                   _("Show/Hide Background"), 0,
-	                   BackgroundToggleShow, 0, NULL);
+	/* Display toggles — created here to preserve menu order, registered in
+	 * their ToggleGroups later once the view-menu masters are established. */
+	wMenuToggle_p p1GridEnable = wMenuToggleCreate(popup1M, "cmdGridEnable",
+	                             _("Enable SnapGrid"), 0, FALSE, SnapGridEnable, NULL);
+	wMenuToggle_p p2GridEnable = wMenuToggleCreate(popup2M, "cmdGridEnable",
+	                             _("Enable SnapGrid"), 0, FALSE, SnapGridEnable, NULL);
+	wMenuToggle_p p1GridShow = wMenuToggleCreate(popup1M, "cmdGridShow",
+	                           _("Show SnapGrid"), 0, FALSE, SnapGridShow, NULL);
+	wMenuToggle_p p2GridShow = wMenuToggleCreate(popup2M, "cmdGridShow",
+	                           _("Show SnapGrid"), 0, FALSE, SnapGridShow, NULL);
+	wMenuToggle_p p1MagSnap = wMenuToggleCreate(popup1M, "cmdMagneticSnap",
+	                          _("Enable Magnetic Snap"), 0, FALSE, MagneticSnapToggle, NULL);
+	wMenuToggle_p p2MagSnap = wMenuToggleCreate(popup2M, "cmdMagneticSnap",
+	                          _("Enable Magnetic Snap"), 0, FALSE, MagneticSnapToggle, NULL);
+	wMenuToggle_p p1MapShow = wMenuToggleCreate(popup1M, "cmdMapShow",
+	                          _("Show/Hide Map"), 0, FALSE, MapWindowToggleShow, NULL);
+	wMenuToggle_p p2MapShow = wMenuToggleCreate(popup2M, "cmdMapShow",
+	                          _("Show/Hide Map"), 0, FALSE, MapWindowToggleShow, NULL);
+	wMenuToggle_p p1BgShow = wMenuToggleCreate(popup1M, "cmdBackgroundShow",
+	                         _("Show/Hide Background"), 0, FALSE, BackgroundToggleShow, NULL);
+	wMenuToggle_p p2BgShow = wMenuToggleCreate(popup2M, "cmdBackgroundShow",
+	                         _("Show/Hide Background"), 0, FALSE, BackgroundToggleShow, NULL);
 	wMenuSeparatorCreate(popup1M);
 	wMenuSeparatorCreate(popup2M);
 	/* Copy/Paste */
@@ -923,12 +1301,12 @@ EXPORT void CreateMenus(void)
 	                   EditClone, 0, NULL);
 	/*Select*/
 	MiscMenuItemCreate(popup1M, popup2M, "cmdSelectAll", _("Select All"), 0,
-	                   (wMenuCallBack_p) SetAllTrackSelect, 0, I2VP(1));
+	                   SetAllTrackSelectCB, 0, I2VP(1));
 	MiscMenuItemCreate(popup1M, popup2M, "cmdSelectCurrentLayer",
 	                   _("Select Current Layer"), 0,
 	                   SelectCurrentLayer, 0, NULL);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDeselectAll", _("Deselect All"), 0,
-	                   (wMenuCallBack_p) SetAllTrackSelect, 0, I2VP(FALSE));
+	                   SetAllTrackSelectCB, 0, I2VP(FALSE));
 	wMenuPushCreate(popup1M, "cmdSelectIndex", _("Select Track Index..."), 0,
 	                StartIndexDialog, &SelectByIndex);
 	wMenuPushCreate(popup2M, "cmdSelectIndex", _("Select Track Index..."), 0,
@@ -941,7 +1319,7 @@ EXPORT void CreateMenus(void)
 	wMenuSeparatorCreate(popup1M);
 	wMenuSeparatorCreate(popup2M);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDelete", _("Delete"), 0,
-	                   (wMenuCallBack_p) SelectDelete, 0, NULL);
+	                   SelectDeleteCB, 0, NULL);
 	wMenuSeparatorCreate(popup2M);
 	popup1aM = wMenuMenuCreate(popup1M, "", _("Add..."));
 	popup2aM = wMenuMenuCreate(popup2M, "", _("Add..."));
@@ -953,61 +1331,76 @@ EXPORT void CreateMenus(void)
 	/*
 	 * FILE MENU
 	 */
-	MiscMenuItemCreate(fileM, NULL, "menuFile-clear", _("&New ..."), ACCL_NEW,
+	MiscMenuItemCreate(fileM, NULL, "clear", _("_New ..."), ACCL_NEW,
 	                   DoClear, 0, NULL);
-	wMenuPushCreate(fileM, "menuFile-load", _("&Open ..."), ACCL_OPEN,
+	wMenuPushCreate(fileM, "load", _("_Open ..."), ACCL_OPEN,
 	                ChkLoad, NULL);
+
+	wMenu_p recentuseMenu = wMenuMenuCreate(fileM, "menuRecentlyUsedFiles",
+	                                        _("Recent files"));
+	fileList_ml = wMenuListCreate(recentuseMenu, "fileListMenu", NEWEST_TOP,
+	                              NUM_FILELIST,
+	                              ChkFileList);
+
 	wMenuSeparatorCreate(fileM);
 
-	wMenuPushCreate(fileM, "menuFile-save", _("&Save"), ACCL_SAVE,
+	wMenuPushCreate(fileM, "save", _("_Save"), ACCL_SAVE,
 	                DoSave, NULL);
-	wMenuPushCreate(fileM, "menuFile-saveAs", _("Save &As ..."), ACCL_SAVEAS,
+	wMenuPushCreate(fileM, "saveAs", _("Save _As ..."), ACCL_SAVEAS,
 	                DoSaveAs, NULL);
-	wMenuPushCreate(fileM, "menuFile-revert", _("Revert"), ACCL_REVERT,
+	wMenuPushCreate(fileM, "revert", _("Revert"), ACCL_REVERT,
 	                ChkRevert, NULL);
-	wMenuSeparatorCreate(fileM);
 
-	cmdGroup = BG_FILE;
-	AddToolbarButton("menuFile-clear", wIconCreatePixMap(doc_new_image3[iconSize]),
+	cmdGroup = BG_FILE | BG_BIGGAP;
+	AddToolbarButton("clear", CreateToolbarIconFromResource("doc-new.png"),
 	                 IC_MODETRAIN_TOO, DoClear, NULL);
-	AddToolbarButton("menuFile-load", wIconCreatePixMap(doc_open_image3[iconSize]),
+	AddToolbarButton("load", CreateToolbarIconFromResource("doc-open.png"),
 	                 IC_MODETRAIN_TOO, ChkLoad, NULL);
-	AddToolbarButton("menuFile-save", wIconCreatePixMap(doc_save_image3[iconSize]),
+	AddToolbarButton("save", CreateToolbarIconFromResource("doc-save.png"),
 	                 IC_MODETRAIN_TOO, DoSave, NULL);
+	wMenuSeparatorCreate(fileM);
 
 	cmdGroup = BG_PRINT;
 	MiscMenuItemCreate(fileM, NULL, "printSetup", _("P&rint Setup ..."),
-	                   ACCL_PRINTSETUP, (wMenuCallBack_p) wPrintSetup, 0,
+	                   ACCL_PRINTSETUP, PrintSetupMenuCB, 0,
 	                   I2VP(0));
 	InitCmdPrint(fileM);
 	AddToolbarButton("menuFile-setup",
-	                 wIconCreatePixMap(doc_setup_image3[iconSize]),
-	                 IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, I2VP(0));
+	                 CreateToolbarIconFromResource("doc-setup.png"),
+	                 IC_MODETRAIN_TOO, PrintSetupMenuCB, I2VP(0));
 
 	wMenuSeparatorCreate(fileM);
-	MiscMenuItemCreate(fileM, NULL, "cmdImport", _("&Import"), ACCL_IMPORT,
+
+	wMenu_p importM = wMenuMenuCreate(fileM, "menuImport", _("_Import"));
+	MiscMenuItemCreate(importM, NULL, "cmdImport", _("_XTrackCAD Import (xti) ..."),
+	                   ACCL_IMPORT,
 	                   DoImportObjects, 0, I2VP(0));
-	MiscMenuItemCreate(fileM, NULL, "cmdImportModule", _("Import &Module"),
+	MiscMenuItemCreate(importM, NULL, "cmdImportModule",
+	                   _("XTrackCAD _Module (xti) ..."),
 	                   ACCL_IMPORT_MOD,
 	                   DoImportModule, 0, I2VP(1));
-	MiscMenuItemCreate(fileM, NULL, "cmdImportDxf", _("Import &Dxf"),
+	MiscMenuItemCreate(importM, NULL, "cmdImportDxf",
+	                   _("_Drawing Interchange Format (dxf) ..."),
 	                   ACCL_IMPORT_DXF,
 	                   DoImportDxf, 0, I2VP(1));
 
-	wMenuSeparatorCreate(fileM);
-
-	MiscMenuItemCreate(fileM, NULL, "cmdExport", _("E&xport"), ACCL_EXPORT,
+	wMenu_p exportM = wMenuMenuCreate(fileM, "menuExport", _("E_xport"));
+	MiscMenuItemCreate(exportM, NULL, "cmdExport", _("_XTrackCAD Export (xti)..."),
+	                   ACCL_EXPORT,
 	                   DoExport, IC_SELECTED, NULL);
-	MiscMenuItemCreate(fileM, NULL, "cmdOutputbitmap", _("Export to &Bitmap"),
+	MiscMenuItemCreate(exportM, NULL, "cmdOutputbitmap", _("_Bitmap (jpg, png)..."),
 	                   ACCL_PRINTBM, OutputBitMapInit(), 0,
 	                   NULL);
-	MiscMenuItemCreate(fileM, NULL, "cmdExportDXF", _("Export D&XF"),
+	MiscMenuItemCreate(exportM, NULL, "cmdExportDXF",
+	                   _("_Drawing Interchange Format (dxf)..."),
 	                   ACCL_EXPORTDXF, DoExportDxf, IC_SELECTED,
 	                   NULL);
 #if XTRKCAD_CREATE_SVG
-	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export S&VG"),
+	MiscMenuItemCreate( exportM, NULL, "cmdExportSVG",
+	                    _("_Scalable Vector Graphics (svg)..."),
 	                    ACCL_EXPORTSVG, DoExportSVG, IC_SELECTED, NULL);
 #endif
+
 	wMenuSeparatorCreate(fileM);
 
 	paramFilesCallback = ParamFilesInit();
@@ -1016,38 +1409,40 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(fileM, NULL, "cmdFileNote", _("No&tes ..."), ACCL_NOTES,
 	                   DoNote, 0, NULL);
 
+
+	//fileList_ml = wMenuListCreate(fileM, "menuFileList", NEWEST_TOP, NUM_FILELIST,
+	//                              ChkFileList);
 	wMenuSeparatorCreate(fileM);
-	fileList_ml = wMenuListCreate(fileM, "menuFileList", NUM_FILELIST,
-	                              ChkFileList);
-	wMenuSeparatorCreate(fileM);
-	wMenuPushCreate(fileM, "menuFile-quit", _("E&xit"), 0,
+	wMenuPushCreate(fileM, "quit", _("E&xit"), 0,
 	                DoQuit, NULL);
 
 	InitCmdExport();
 
 	AddToolbarButton("menuFile-parameter",
-	                 wIconCreatePixMap(parameter_image3[iconSize]),
+	                 CreateToolbarIconFromResource("parameter.png"),
 	                 IC_MODETRAIN_TOO, paramFilesCallback, NULL);
 
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton("cmdZoomIn",
-	                           wIconCreatePixMap(zoom_in_image3[iconSize]),
+	                           CreateToolbarIconFromResource("zoom-in.png"),
 	                           IC_MODETRAIN_TOO, DoZoomUp, NULL);
 	zoomM = wMenuPopupCreate(mainW, "");
-	AddToolbarButton("cmdZoom", wIconCreatePixMap(zoom_choose_image3[iconSize]),
+	AddToolbarButton("cmdZoom", CreateToolbarIconFromResource("zoom-choose.png"),
 	                 IC_MODETRAIN_TOO,
-	                 (wButtonCallBack_p) wMenuPopupShow, zoomM);
+	                 ZoomChooserButtonCB, zoomM);
 	zoomDownB = AddToolbarButton("cmdZoomOut",
-	                             wIconCreatePixMap(zoom_out_image3[iconSize]),
+	                             CreateToolbarIconFromResource("zoom-out.png"),
 	                             IC_MODETRAIN_TOO, DoZoomDown, NULL);
 	zoomExtentsB = AddToolbarButton("cmdZoomExtent",
-	                                wIconCreatePixMap(zoom_extent_image3[iconSize]),
+	                                CreateToolbarIconFromResource("zoom-extent.png"),
 	                                IC_MODETRAIN_TOO, DoZoomExtents, NULL);
 
 	cmdGroup = BG_UNDO;
-	undoB = AddToolbarButton("cmdUndo", wIconCreatePixMap(undo_image3[iconSize]), 0,
+	undoB = AddToolbarButton("cmdUndo", CreateToolbarIconFromResource("undo.png"),
+	                         0,
 	                         UndoUndo, NULL);
-	redoB = AddToolbarButton("cmdRedo", wIconCreatePixMap(redo_image3[iconSize]), 0,
+	redoB = AddToolbarButton("cmdRedo", CreateToolbarIconFromResource("redo.png"),
+	                         0,
 	                         UndoRedo, NULL);
 
 	wControlActive((wControl_p) undoB, FALSE);
@@ -1071,7 +1466,7 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(editM, NULL, "cmdClone", _("C&lone"), ACCL_CLONE,
 	                   EditClone, 0, NULL);
 	MiscMenuItemCreate(editM, NULL, "cmdDelete", _("De&lete"), ACCL_DELETE,
-	                   (wMenuCallBack_p) SelectDelete, IC_SELECTED, NULL);
+	                   SelectDeleteCB, IC_SELECTED, NULL);
 	MiscMenuItemCreate(editM, NULL, "cmdMoveToCurrentLayer",
 	                   _("Move To Current Layer"), ACCL_MOVCURLAYER,
 	                   MoveSelectedTracksToCurrentLayer,
@@ -1079,13 +1474,13 @@ EXPORT void CreateMenus(void)
 	wMenuSeparatorCreate( editM );
 	menuPLs[menuPG.paramCnt].context = I2VP(1);
 	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", _("Select &All"),
-	                    ACCL_SELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0, I2VP(TRUE) );
+	                    ACCL_SELECTALL, SetAllTrackSelectCB, 0, I2VP(TRUE) );
 	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer",
 	                    _("Select Current Layer"), ACCL_SETCURLAYER, SelectCurrentLayer, 0, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdSelectByIndex", _("Select By Index"), 0L,
 	                    StartIndexDialog, 0, &SelectByIndex );
 	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", _("&Deselect All"),
-	                    ACCL_DESELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0, I2VP(FALSE) );
+	                    ACCL_DESELECTALL, SetAllTrackSelectCB, 0, I2VP(FALSE) );
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", _("&Invert Selection"), 0L,
 	                    InvertTrackSelect, 0, NULL);
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectOrphaned",
@@ -1139,12 +1534,26 @@ EXPORT void CreateMenus(void)
 	                (wMenuCallBack_p) DoRedraw, NULL);
 	wMenuSeparatorCreate(viewM);
 
+	/* Read grid prefs before creating the toggles so that the ToggleGroup
+	 * masters start in the correct state.  If we used hardcoded FALSE here,
+	 * wToggleGroupSetActive() in InitSnapGridButtons() would change the master
+	 * from FALSE to the pref value, firing notify_active → SnapGridEnable /
+	 * SnapGridShow, which would immediately invert the state. */
+	long gridHorzEnable, gridVertEnable, gridShow;
+	wPrefGetInteger("grid", "horzenable", &gridHorzEnable, 1);
+	wPrefGetInteger("grid", "vertenable", &gridVertEnable, 1);
+	wPrefGetInteger("grid", "show",       &gridShow,       0);
+
 	snapGridEnableMI = wMenuToggleCreate(viewM, "cmdGridEnable",
-	                                     _("Enable SnapGrid"), ACCL_SNAPENABLE, 0,
+	                                     _("Enable SnapGrid"), ACCL_SNAPENABLE,
+	                                     (wBool_t)(gridHorzEnable || gridVertEnable),
 	                                     SnapGridEnable, NULL);
+	wToggleGroupRegister(snapGridEnableMI, TOGGLEGRP_GRID_ENABLE);
+
 	snapGridShowMI = wMenuToggleCreate(viewM, "cmdGridShow", _("Show SnapGrid"),
 	                                   ACCL_SNAPSHOW,
-	                                   FALSE, SnapGridShow, NULL);
+	                                   (wBool_t)gridShow, SnapGridShow, NULL);
+	wToggleGroupRegister(snapGridShowMI, TOGGLEGRP_GRID_SHOW);
 	InitGrid(viewM);
 
 	// visibility toggle for anchors
@@ -1156,19 +1565,15 @@ EXPORT void CreateMenus(void)
 	                              _("Enable Magnetic Snap"),
 	                              0, magneticSnap,
 	                              MagneticSnapToggle, NULL);
+	wToggleGroupRegister(magnetsMI, TOGGLEGRP_MAGNETS);
 
-	// visibility toggle for map window
-	// get the start value
-	long mapVisible_long;
-	wPrefGetInteger("misc", "mapVisible", (long *) &mapVisible_long, 1);
-	mapVisible = mapVisible_long ? TRUE : FALSE;
 	mapShowMI = wMenuToggleCreate(viewM, "cmdMapShow", _("Show/Hide Map"),
-	                              ACCL_MAPSHOW, mapVisible,
+	                              ACCL_MAPSHOW, MapGetVisiblePref(),
 	                              MapWindowToggleShow, NULL);
+	wToggleGroupRegister(mapShowMI, TOGGLEGRP_MAP_VISIBLE);
 
 	wMenuSeparatorCreate(viewM);
 
-	InitToolbar();
 	MiscMenuItemCreate(viewM, NULL, "cmdToolbarOpt", _("&Toolbar Options..."),
 	                   0L, DoToolbar, IC_MODETRAIN_TOO, NULL);
 
@@ -1178,16 +1583,33 @@ EXPORT void CreateMenus(void)
 	cmdGroup = BG_SNAP;
 	InitSnapGridButtons();
 	magnetsB = AddToolbarButton("cmdMagneticSnap",
-	                            wIconCreatePixMap(magnet_image3[iconSize]),
-	                            IC_MODETRAIN_TOO, MagneticSnapToggle, NULL);
-	wControlLinkedSet((wControl_p) magnetsMI, (wControl_p) magnetsB);
-	wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
+	                            CreateToolbarIconFromResource("magnet.png"),
+	                            IC_MODETRAIN_TOO | IC_TOGGLE, MagneticSnapToggle, NULL);
+	wToggleGroupRegister(magnetsB, TOGGLEGRP_MAGNETS);
+	wToggleGroupSetActive(TOGGLEGRP_MAGNETS, magneticSnap);
+
+	// wControlLinkedSet(magnetsMI,  magnetsB);
+	// wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
 
 	mapShowB = AddToolbarButton("cmdMapShow",
-	                            wIconCreatePixMap(map_image3[iconSize]),
-	                            IC_MODETRAIN_TOO, MapWindowToggleShow, NULL);
-	wControlLinkedSet((wControl_p) mapShowMI, (wControl_p) mapShowB);
-	wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
+	                            CreateToolbarIconFromResource("map.png"),
+	                            IC_MODETRAIN_TOO | IC_TOGGLE, MapWindowToggleShow, NULL);
+	wToggleGroupRegister(mapShowB, TOGGLEGRP_MAP_VISIBLE);
+	wToggleGroupSetActive(TOGGLEGRP_MAP_VISIBLE, mapVisible);
+
+	/* Register popup toggles as ToggleGroup members now that all masters
+	 * exist.  G_BINDING_SYNC_CREATE immediately syncs each item to the
+	 * master state, so the FALSE passed at creation time is irrelevant. */
+	wToggleGroupRegister(p1GridEnable, TOGGLEGRP_GRID_ENABLE);
+	wToggleGroupRegister(p2GridEnable, TOGGLEGRP_GRID_ENABLE);
+	wToggleGroupRegister(p1GridShow,   TOGGLEGRP_GRID_SHOW);
+	wToggleGroupRegister(p2GridShow,   TOGGLEGRP_GRID_SHOW);
+	wToggleGroupRegister(p1MagSnap,    TOGGLEGRP_MAGNETS);
+	wToggleGroupRegister(p2MagSnap,    TOGGLEGRP_MAGNETS);
+	wToggleGroupRegister(p1MapShow,    TOGGLEGRP_MAP_VISIBLE);
+	wToggleGroupRegister(p2MapShow,    TOGGLEGRP_MAP_VISIBLE);
+	wToggleGroupRegister(p1BgShow,     TOGGLEGRP_BG_VISIBLE);
+	wToggleGroupRegister(p2BgShow,     TOGGLEGRP_BG_VISIBLE);
 
 	/*
 	 * ADD MENU
@@ -1262,9 +1684,10 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(changeM, NULL, "cmdClearElevations",
 	                   _("Clear Elevations"), ACCL_CLRELEV,
 	                   ClearElevations, IC_SELECTED, NULL);
-	MiscMenuItemCreate(changeM, NULL, "cmdElevation", _("Recompute Elevations"),
+	MiscMenuItemCreate(changeM, NULL, "cmdRecomputeElevations",
+	                   _("Recompute Elevations"),
 	                   0, RecomputeElevations, 0, NULL);
-	ParamRegister(&addElevPG);
+	FormRegister(&addElevPG);
 
 	/*
 	 * DRAW MENU
@@ -1280,28 +1703,28 @@ EXPORT void CreateMenus(void)
 	/*
 	 * OPTION MENU
 	 */
-	MiscMenuItemCreate(optionM, NULL, "cmdLayout", _("L&ayout ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdLayout", _("L&ayout..."),
 	                   ACCL_LAYOUTW, LayoutInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdDisplay", _("&Display ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdDisplay", _("&Display..."),
 	                   ACCL_DISPLAYW, DisplayInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdCmdopt", _("Co&mmand ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdCmdopt", _("Co&mmand..."),
 	                   ACCL_CMDOPTW, CmdoptInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdEasement", _("&Easements ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdEasement", _("&Easements..."),
 	                   ACCL_EASEW, DoEasementRedir,
 	                   IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "fontSelW", _("&Fonts ..."), ACCL_FONTW,
+	MiscMenuItemCreate(optionM, NULL, "fontSelW", _("&Fonts..."), ACCL_FONTW,
 	                   SelectFont, IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdSticky", _("Stic&ky ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdSticky", _("Stic&ky..."),
 	                   ACCL_STICKY, DoSticky, IC_MODETRAIN_TOO,
 	                   NULL);
 	if (extraButtons) {
 		menuPLs[menuPG.paramCnt].context = debugW;
-		MiscMenuItemCreate(optionM, NULL, "cmdDebug", _("&Debug ..."), 0,
+		MiscMenuItemCreate(optionM, NULL, "cmdDebug", _("&Debug..."), 0,
 		                   DebugInit, IC_MODETRAIN_TOO, NULL);
 	}
-	MiscMenuItemCreate(optionM, NULL, "cmdPref", _("&Preferences ..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdPref", _("&Preferences..."),
 	                   ACCL_PREFERENCES, PrefInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdColor", _("&Colors ..."), ACCL_COLORW,
+	MiscMenuItemCreate(optionM, NULL, "cmdColor", _("&Colors..."), ACCL_COLORW,
 	                   ColorInit(), IC_MODETRAIN_TOO, NULL);
 
 	/*
@@ -1311,13 +1734,6 @@ EXPORT void CreateMenus(void)
 	                DoRecord, NULL);
 	wMenuPushCreate(macroM, "cmdDemo", _("&Play Back ..."), ACCL_PLAYBACK,
 	                DoPlayBack, NULL);
-
-	/*
-	 * WINDOW MENU
-	 */
-	wMenuPushCreate(windowM, "menuWindow", _("Main window"), 0,
-	                (wMenuCallBack_p) wShow, mainW);
-	winList_mi = wMenuListCreate(windowM, "menuWindow", -1, DoShowWindow);
 
 	/*
 	 * HELP MENU
@@ -1330,17 +1746,17 @@ EXPORT void CreateMenus(void)
 	wMenuSeparatorCreate(helpM);
 	wMenu_p messageListM = wMenuMenuCreate(helpM, "menuHelpRecentMessages",
 	                                       _("Recent Messages"));
-	messageList_ml = wMenuListCreate(messageListM, "messageListM", 10,
+	messageList_ml = wMenuListCreate(messageListM, "messageListM", NEWEST_TOP, 10,
 	                                 ShowMessageHelp);
 	wMenuListAdd(messageList_ml, 0, _(MESSAGE_LIST_EMPTY), NULL);
-	wMenuPushCreate(helpM, "menuHelpProblemrep", _("Collect Problem Info"), 0,
+	wMenuPushCreate(helpM, "menuHelpProblemrep", _("Collect Problem Info..."), 0,
 	                DoProblemCollect, NULL);
 
 	/* tip of the day */
 	wMenuSeparatorCreate( helpM );
 	wMenuPushCreate( helpM, "cmdTip", _("Tip of the Day..."), 0, ShowTip,
 	                 I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP));
-	demoM = wMenuMenuCreate( helpM, "cmdDemo", _("&Demos") );
+	demoM = wMenuMenuCreate( helpM, "cmdDemo", _("_Demos") );
 	wMenuPushCreate( helpM, "cmdExamples", _("Examples..."), 0, ChkExamples, NULL);
 
 	/* about window */
@@ -1361,9 +1777,9 @@ EXPORT void CreateMenus(void)
 	                        _("Tur&nout Designer...")));
 
 	MiscMenuItemCreate(manageM, NULL, "cmdContmgm",
-	                   _("Layout &Control Elements"), ACCL_CONTMGM,
+	                   _("Layout &Control Elements..."), ACCL_CONTMGM,
 	                   ControlMgrInit(), 0, NULL);
-	MiscMenuItemCreate(manageM, NULL, "cmdGroup", _("&Group"), ACCL_GROUP,
+	MiscMenuItemCreate(manageM, NULL, "cmdGroup", _("&Group..."), ACCL_GROUP,
 	                   DoGroup, IC_SELECTED, NULL);
 	MiscMenuItemCreate(manageM, NULL, "cmdUngroup", _("&Ungroup"), ACCL_UNGROUP,
 	                   DoUngroup, IC_SELECTED, NULL);
@@ -1375,21 +1791,43 @@ EXPORT void CreateMenus(void)
 	                   _("Update Turnouts and Structures"), 0,
 	                   DoRefreshCompound, 0, NULL);
 
-	MiscMenuItemCreate(manageM, NULL, "cmdCarInventory", _("Car Inventory"),
+	MiscMenuItemCreate(manageM, NULL, "cmdCarInventory", _("Car Inventory..."),
 	                   ACCL_CARINV, DoCarDlg, IC_MODETRAIN_TOO,
 	                   NULL);
 
 	wMenuSeparatorCreate(manageM);
 
-	MiscMenuItemCreate(manageM, NULL, "cmdLayer", _("Layers ..."), ACCL_LAYERS,
+	MiscMenuItemCreate(manageM, NULL, "cmdLayer", _("Layers..."), ACCL_LAYERS,
 	                   InitLayersDialog(), 0, NULL);
 	wMenuSeparatorCreate(manageM);
 
-	MiscMenuItemCreate(manageM, NULL, "cmdEnumerate", _("Parts &List ..."),
+	MiscMenuItemCreate(manageM, NULL, "cmdEnumerate", _("Parts &List..."),
 	                   ACCL_PARTSLIST, EnumerateTracks, 0,
 	                   NULL);
 	MiscMenuItemCreate(manageM, NULL, "cmdPricelist", _("Price List..."),
 	                   ACCL_PRICELIST, PriceListInit(), 0, NULL);
+
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsUnconnected",
+	                   _("&Unconnected Endpoints ..."), ACCL_REPORTSUNCONN,
+	                   ReportsUnconnectedEndpoints, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsTurnout",
+	                   _("&Turnout Density ..."), ACCL_REPORTSTURNOUT,
+	                   ReportsTurnoutDensity, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsTrackLen",
+	                   _("Track &Lengths ..."), ACCL_REPORTSTRACKLEN,
+	                   ReportsTrackLengths, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsCurveStats",
+	                   _("&Curve Stats ..."), ACCL_REPORTSCURVESTATS,
+	                   ReportsCurveStats, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsEquipment",
+	                   _("&Equipment Suitability ..."), ACCL_REPORTSEQUIPMENT,
+	                   ReportsEquipmentSuitability, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsGaps",
+	                   _("&Gaps ..."), ACCL_REPORTSGAPS,
+	                   ReportsGaps, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsKinked",
+	                   _("&Kinked Joints ..."), ACCL_REPORTSKINKED,
+	                   ReportsKinkedJoints, 0, NULL);
 
 	cmdGroup = BG_LAYER;
 
@@ -1397,7 +1835,7 @@ EXPORT void CreateMenus(void)
 	InitCmdDescribe2(changeM);
 	InitCmdPan2(changeM);
 
-	// InitLayers2(changeM);
+	/**  \todo Layers for the toolbar */
 	InitLayers(BG_LAYER);
 
 	cmdGroup = BG_HOTBAR;
@@ -1405,14 +1843,13 @@ EXPORT void CreateMenus(void)
 
 	InitBenchDialog();
 
-	ParamRegister(&rotatePG);
-	ParamRegister(&movePG);
-	ParamRegister(&indexPG);
+	ToolbarLayout(NULL);
 
-	// stickySet is initialized by AddMenuButton based on IC_STICKY flag
-	// Now check to see if there is saved value
-	wPrefGetInteger( "DialogItem", "sticky-set", &stickySet, stickySet );
-	ParamRegister(&stickyPG);
+	// stickySet is already correctly populated per-key by each
+	// SetupStickyBehavior() call above; stickyPLs' "set" field is
+	// PDO_NOPREF so FormRegister won't reload/clobber it from the legacy
+	// raw-bitmask "sticky"/"set" ini key.
+	FormRegister(&stickyPG);
 	RegisterChangeNotification( StickyChange );
 }
 
@@ -1422,26 +1859,33 @@ static void InitCmdExport(void)
 	ButtonGroupBegin( _("Import/Export"), "cmdExportImportSetCmd",
 	                  _("Import/Export") );
 	cmdGroup = BG_EXPORTIMPORT;
-	AddToolbarButton("cmdExport", wIconCreatePixMap(doc_export_image3[iconSize]),
+	AddToolbarButton("cmdExport", CreateToolbarIconFromResource("doc-export.png"),
 	                 IC_SELECTED | IC_ACCLKEY, DoExport, NULL);
 	AddToolbarButton("cmdExportDXF",
-	                 wIconCreatePixMap(doc_export_dxf_image3[iconSize]),
+	                 CreateToolbarIconFromResource("doc-export-dxf.png"),
 	                 IC_SELECTED | IC_ACCLKEY, DoExportDxf, I2VP(1));
 	AddToolbarButton("cmdExportBmap",
-	                 wIconCreatePixMap(doc_export_bmap_image3[iconSize]), IC_ACCLKEY,
+	                 CreateToolbarIconFromResource("doc-export-bmap.png"), IC_ACCLKEY,
 	                 OutputBitMapInit(), NULL);
 #if XTRKCAD_CREATE_SVG
 	AddToolbarButton("cmdExportSVG",
-	                 wIconCreatePixMap(doc_export_svg_image3[iconSize]),
+	                 CreateToolbarIconFromResource("doc-export-svg.png"),
 	                 IC_ACCLKEY, DoExportSVG, NULL); // IC_SELECTED |
 #endif
-	AddToolbarButton("cmdImport", wIconCreatePixMap(doc_import_image3[iconSize]),
+	AddToolbarButton("cmdImport", CreateToolbarIconFromResource("doc-import.png"),
 	                 IC_ACCLKEY,
 	                 DoImportObjects, I2VP(0));
 	AddToolbarButton("cmdImportModule",
-	                 wIconCreatePixMap(doc_import_mod_image3[iconSize]), IC_ACCLKEY,
+	                 CreateToolbarIconFromResource("doc-import-mod.png"), IC_ACCLKEY,
 	                 DoImportModule, I2VP(1));
+	AddToolbarButton("cmdImportDxf",
+	                 CreateToolbarIconFromResource("doc-import-dxf.png"), IC_ACCLKEY,
+	                 DoImportDxf, I2VP(1));
 	ButtonGroupEnd();
-	ParamRegister( &menuPG );
+
+	FormRegister( &menuPG );
 	AddPlaybackProc( "MENU", MenuPlayback, NULL );
+
+	ButtonGroupEnd();
+
 }

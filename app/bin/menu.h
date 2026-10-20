@@ -25,17 +25,23 @@
 
 #include "common.h"
 
+/* ToggleGroup name constants */
+#define TOGGLEGRP_GRID_ENABLE   "misc cmdGridEnable"
+#define TOGGLEGRP_GRID_SHOW     "misc cmdGridShow"
+#define TOGGLEGRP_MAGNETS       "magnetsenable"
+#define TOGGLEGRP_MAP_VISIBLE   "mapvisible"
+#define TOGGLEGRP_BG_VISIBLE    "backgroundvisible"
+
 extern wMenu_p demoM;
 extern wMenu_p popup1M, popup2M;
-extern wButton_p undoB;
-extern wButton_p redoB;
-extern wButton_p zoomUpB;
-extern wButton_p zoomDownB;
-extern wButton_p zoomExtentsB;
-extern wButton_p mapShowB;
-extern wMenuToggle_p mapShowMI;
-extern wMenuList_p winList_mi;
-extern wMenuList_p fileList_ml;
+extern wControl_p undoB;
+extern wControl_p redoB;
+extern wControl_p zoomUpB;
+extern wControl_p zoomDownB;
+extern wControl_p zoomExtentsB;
+extern wControl_p mapShowB;
+extern wControl_p mapShowMI;
+extern wControl_p fileList_ml;
 extern wMenuToggle_p snapGridEnableMI;
 extern wMenuToggle_p snapGridShowMI;
 
@@ -53,11 +59,11 @@ extern void SelectFont(void * unused);
 extern void DoSticky(void * unused);
 
 extern void EnableMenus( void );
-extern void MessageListAppend( char *, const char * );
+extern void MessageListAppend( const char *, const char * );
 extern const char * GetBalloonHelpStr(const char * helpKey);
-extern wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon,
-                                  long options,
-                                  wButtonCallBack_p action, void * context);
+extern wControl_p AddToolbarButton(const char * helpStr, wIcon_p icon,
+                                   long options,
+                                   wButtonCallBack_p action, void * context);
 extern void ButtonGroupBegin(const char * menuTitle, const char * helpKey,
                              const char * stickyLabel);
 extern void ButtonGroupEnd(void);

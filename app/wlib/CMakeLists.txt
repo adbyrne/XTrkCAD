@@ -11,9 +11,6 @@ target_include_directories(xtrkcad-wlib
 	${xtrkcad-lib_SOURCE_DIR}
 )
 
-if(XTRKCAD_USE_GTK)
-	add_subdirectory(gtklib)
-else()
-	add_subdirectory(mswlib)
-endif()
+add_subdirectory(gtk3lib)
 
+# add_subdirectory(test)

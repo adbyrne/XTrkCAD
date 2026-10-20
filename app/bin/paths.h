@@ -23,12 +23,11 @@
 #ifndef HAVE_PATHS_H
 #define HAVE_PATHS_H
 
-#define PATH_TYPE_SIZE	10
-
 void SetCurrentPath( const char * pathType,	const char * fileName );
 char *GetCurrentPath(const char *pathType);
 void ConvertPathForward(char *string);
 char *FindFilename(char *path);
 char *FindFileExtension(char *path);
 void MakeFullpath(char **str, ...);
+void AddDefaultExtension(char *filename, const char *default_ext);
 #endif

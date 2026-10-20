@@ -58,7 +58,7 @@ static int GetLocalDistanceFormat(struct appDefault *ptrDefault,
                                   const void *additionalData);
 static const char *GetLocalPopularScale(struct appDefault *ptrDefault,
                                         const void *additionalData);
-static double GetLocalRoomSize(struct appDefault *ptrDefault,
+static double GetLocalRoomSize(const struct appDefault *ptrDefault,
                                const void *additionalData);
 static const char *GetParamFullPath(struct appDefault *ptrDefault,
                                     const void *additionalData);
@@ -210,11 +210,11 @@ InitializeRegionCode(void)
 	}
 #else
 	{
-		char *pLang;
+		const char *pLang;
 		pLang = getenv("LANG");
 
 		if (pLang) {
-			char *ptr;
+			const char *ptr;
 			ptr = strpbrk(pLang, "_-");
 
 			if (ptr) {
@@ -238,7 +238,7 @@ static bool UseMetric()
  */
 
 static double
-GetLocalRoomSize(struct appDefault *ptrDefault, const void *data)
+GetLocalRoomSize(const struct appDefault *ptrDefault, const void *data)
 {
 	if (!strcmp(ptrDefault->defaultKey, "draw.roomsizeY")) {
 		return (UseMetric() ? 125.0/2.54 : 48);
@@ -351,7 +351,7 @@ wPrefGetIntegerExt(const char *section, const char *name, long *result,
 			defaultValue = thisDefault->defaultValue.intValue;
 		} else {
 			defaultValue = (thisDefault->defaultValue.intFunction)(thisDefault,
-			                thisDefault->additionalData);
+			               thisDefault->additionalData);
 		}
 	}
 
@@ -382,7 +382,7 @@ wPrefGetFloatExt(const char *section, const char *name, double *result,
 			defaultValue = thisDefault->defaultValue.floatValue;
 		} else {
 			defaultValue = (thisDefault->defaultValue.floatFunction)(thisDefault,
-			                thisDefault->additionalData);
+			               thisDefault->additionalData);
 		}
 	}
 
@@ -415,7 +415,7 @@ wPrefGetStringExt(const char *section, const char *name)
 		defaultValue = thisDefault->defaultValue.stringValue;
 	} else {
 		defaultValue = (thisDefault->defaultValue.stringFunction)(thisDefault,
-		                thisDefault->additionalData);
+		               thisDefault->additionalData);
 	}
 	// Next call will get value from Prefs
 	wPrefSetString( section, name, defaultValue );

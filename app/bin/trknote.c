@@ -25,33 +25,31 @@
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
+#include "icons.h"
 #include "misc.h"
 #include "note.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "include/utf8convert.h"
+
+static int log_trknote = -1;
 
 EXPORT TRKTYP_T T_NOTE = -1;
 
 static wDrawBitMap_p note_bm, link_bm, document_bm;
 
 typedef struct {
-	wIconBitMap_t * image3;
+	char *icon;
 	int OP;
-	char * shortName;
 	char * cmdName;
 	char * helpKey;
 	long acclKey;
 } trknoteData_t;
 
-#include "bitmaps/sticky-note.image3"
-#include "bitmaps/sticky-link.image3"
-#include "bitmaps/sticky-doc.image3"
-
 static trknoteData_t noteTypes[] = {
-	{ sticky_note_image3, OP_NOTETEXT, N_("Note"), N_("Text Note"), "cmdTextNote", ACCL_NOTE },
-	{ sticky_link_image3, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
-	{ sticky_doc_image3, OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L },
+	{ "sticky-note.png", OP_NOTETEXT, N_("Text Note"), "cmdTextNote", ACCL_NOTE},
+	{ "sticky-link.png", OP_NOTELINK, N_("Weblink"), "cmdLinkNote", 0L},
+	{ "sticky-doc.png", OP_NOTEFILE, N_("Document"), "cmdFileNote", 0L},
 };
 
 static long curNoteType;
@@ -87,13 +85,13 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 {
 	struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
 	coOrd p[5];
-	int type[5];
 
 
 	if ((d->options & DC_SIMPLE) || mainD.scale >= 16) {
 		//while the icon is moved, draw a square with a lopped off corner
 		//because CmdMove draws all selected object into tempSeg and
 		//tempSegDrawFuncs doesn't have a BitMap drawing func
+		int type[5];
 		DIST_T dist;
 		dist = 0.8 + 0.1*(mainD.scale-16)/4;
 		p[0].x = p[1].x = xx->pos.x - dist;
@@ -127,7 +125,7 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 
 static DIST_T DistanceNote(track_p t, coOrd * p)
 {
-	struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
+	const struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
 	DIST_T d;
 	d = FindDistance(*p, xx->pos);
 
@@ -460,8 +458,10 @@ static BOOL_T QueryNote( track_p trk, int query )
 
 static wBool_t CompareNote( track_cp trk1, track_cp trk2 )
 {
-	struct extraDataNote_t *xx1 = GET_EXTRA_DATA( trk1, T_NOTE, extraDataNote_t );
-	struct extraDataNote_t *xx2 = GET_EXTRA_DATA( trk2, T_NOTE, extraDataNote_t );
+	const struct extraDataNote_t *xx1 = GET_EXTRA_DATA( trk1, T_NOTE,
+	                                    extraDataNote_t );
+	const struct extraDataNote_t *xx2 = GET_EXTRA_DATA( trk2, T_NOTE,
+	                                    extraDataNote_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
 	REGRESS_CHECK_INT( "Op", xx1, xx2, op )
@@ -546,6 +546,10 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 		case OP_NOTEFILE:
 			NewFileNoteUI(pos);
 			break;
+		default:
+			if ( log_trknote < 0 ) { log_trknote = LogFindIndex( "trknote" ); }
+			LOG( log_trknote, 1, ( "unexpected curNoteType %d in CmdNote\n", curNoteType ) )
+			break;
 		}
 
 		return C_CONTINUE;
@@ -562,6 +566,10 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 			case OP_NOTEFILE:
 				DrawBitMap(&tempD, oldPos, document_bm, normalColor);
 				break;
+			default:
+				if ( log_trknote < 0 ) { log_trknote = LogFindIndex( "trknote" ); }
+				LOG( log_trknote, 1, ( "unexpected curNoteType %d in CmdNote\n", curNoteType ) )
+				break;
 			}
 		}
 		return C_CONTINUE;
@@ -570,21 +578,21 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 		DescribeDone( NULL );
 		state_on = FALSE;
 		return C_CONTINUE;
+	default:
+		if ( log_trknote < 0 ) { log_trknote = LogFindIndex( "trknote" ); }
+		LOG( log_trknote, 1, ( "unexpected action %d in CmdNote\n", action ) )
+		break;
 	}
 
 	return C_CONTINUE;
 }
 
-#include "bitmaps/note.xbm"
-#include "bitmaps/link.xbm"
-#include "bitmaps/clip.xbm"
-
 void InitTrkNote(wMenu_p menu)
 {
-	note_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, note_bits);
-	link_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, link_bits);
-	document_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8,
-	                                clip_bits);
+	note_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "note.png");
+	link_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH, "link.png");
+	document_bm = wDrawBitMapCreate(mainD.d, 8, 8, XTRKCAD_SYMBOLS_PATH,
+	                                "clip.png");
 
 	ButtonGroupBegin(_("Notes"), "cmdNoteCmd", _("Add notes"));
 	for (int i = 0; i < NOTETYPESCOUNT; i++) {
@@ -592,7 +600,7 @@ void InitTrkNote(wMenu_p menu)
 		wIcon_p icon;
 
 		nt = noteTypes + i;
-		icon = wIconCreatePixMap(nt->image3[iconSize]);
+		icon = CreateToolbarIconFromResource(nt->icon);
 		AddMenuButton(menu, CmdNote, nt->helpKey, _(nt->cmdName), icon, LEVEL0_50,
 		              IC_STICKY | IC_POPUP2, nt->acclKey, I2VP(nt->OP));
 	}

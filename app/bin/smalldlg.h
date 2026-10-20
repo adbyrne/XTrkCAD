@@ -27,7 +27,7 @@
 #define SHOWTIP_PREVTIP (1L)
 #define SHOWTIP_FORCESHOW (2L)
 
-extern struct wWin_t * aboutW;
+extern wControl_p aboutW;
 
 void InitSmallDlg( void );
 void ShowTip( void * flagsVP );

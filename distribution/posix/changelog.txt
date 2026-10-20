@@ -1,2 +1,9 @@
-* Wed Jun 10 2015  Martin Fischer <m_fischer@users.sf.net> 
-- Initial RPM build configuration 
+* Wed Jun 03 2026  XTrkCAD Contributors <xtrkcad@sillub.com>
+- 5.4.0: GTK3 release — replaces GTK2 dependency with GTK3
+- Fix CPack: Debian arch variable, lowercase package name, correct RPM deps
+- Add GitHub Actions release workflow for automated package building
+- Windows: bundle GTK3 runtime DLLs via CMake RUNTIME_DEPENDENCY_SET
+- Add installation READMEs for macOS and Windows packages
+
+* Wed Jun 10 2015  Martin Fischer <m_fischer@users.sf.net>
+- Initial RPM build configuration

@@ -50,12 +50,6 @@ extern unsigned long playbackTimer;
 
 extern wBool_t executableOk;
 
-extern FILE * recordF;
-extern wBool_t inPlayback;
-extern wBool_t inPlaybackQuit;
-extern wWin_p demoW;
-extern int curDemo;
-
 #define ZIPFILETYPEEXTENSION "xtce"
 
 #define PARAM_SUBDIR "params"
@@ -72,6 +66,7 @@ extern int curDemo;
 #define MACROPATHKEY "macro"
 #define CUSTOMPATHKEY "custom"
 #define ARCHIVEPATHKEY "archive"
+#define REPORTPATHKEY "reports"
 
 typedef struct {
 	char * name;
@@ -87,17 +82,17 @@ char * GetNextLine( void );
 #define END_SIGNAL	"END$SIGNAL"
 #define END_SEGS	"END$SEGS"
 #define END_MESSAGE	"END$MESSAGE"
-wBool_t IsEND( char * sEnd );
+wBool_t IsEND( const char * sEnd );
 
 BOOL_T GetArgs( char *, const char *, ... );
 char * ReadMultilineText();
 BOOL_T ParseRoomSize( char *, coOrd * );
-int InputError( char *, BOOL_T, ... );
+int InputError( const char *, BOOL_T, ... );
 void SyntaxError( char *, wIndex_t, wIndex_t );
 
 void AddParam( char *name, readParam_t proc );
 
-FILE * OpenCustom( char * );
+FILE * OpenCustom( const char * );
 
 void SetWindowTitle( void );
 char * PutTitle( char * cp );
@@ -107,19 +102,23 @@ void DoParamFiles(void * unused);
 
 int LoadTracks( int cnt, char **fileName, void *data );
 
+void AddToRecentFiles(const char* displayFileName, const char* fullFileName);
+
+void SaveRecentFileList();
+
 void SaveState( void );
 void DoSave( void * doAfterSaveVP );
 void DoSaveAs( void * doAfterSaveVP );
 void DoLoad( void );
 void DoExamples( void );
-void DoFileList( int, char *, void * );
+void DoFileList( int, const char *, void * );
 void TryCheckPoint( void );
 void CleanupCheckpointFiles( void );
 void CleanupTempArchive( void );
 int ExistsCheckpoint( void );
 int LoadCheckpoint( BOOL_T );
-void DoImportObjects( void * typeVP );
-void DoImportModule( void * typeVP );
+void DoImportObjects( const void * typeVP );
+void DoImportModule( const void * typeVP );
 void DoImportDxf( void * unused );
 void DoExport( void * unused );
 void DoExportDxf( void * unused );
@@ -134,7 +133,7 @@ void EditClone( void * unused );
 
 
 void DoRecord( void * );
-void AddPlaybackProc( char *, playbackProc_p, void * );
+void AddPlaybackProc( const char *, playbackProc_p, void * );
 EXPORT void TakeSnapshot( drawCmd_p );
 void PlaybackMessage( char * );
 void DoPlayBack( void * );

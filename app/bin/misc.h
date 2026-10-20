@@ -30,10 +30,10 @@
  * Globals
  */
 
-extern int iconSize;
+extern long iconSize;
 extern wWinPix_t displayWidth;
 extern wWinPix_t displayHeight;
-extern wWin_p mainW;
+extern wControl_p mainW;
 extern char message[STR_HUGE_SIZE];
 extern long paramVersion;
 extern coOrd zero;
@@ -61,19 +61,15 @@ extern long hideSelectionWindow;	// not used
 
 #define wControlBelow( B )		(wControlGetPosY((wControl_p)(B))+wControlGetHeight((wControl_p)(B)))
 #define wControlBeside( B )		(wControlGetPosX((wControl_p)(B))+wControlGetWidth((wControl_p)(B)))
-
-/*
- * Safe Memory etc
- */
-extern BOOL_T TestMallocs( void );
-extern void * MyMalloc( size_t );
-extern void * MyRealloc( void *, size_t );
-extern void MyFree( void * );
-extern void * memdup( void *, size_t );
-extern char * MyStrdup( const char * );
+#include "mymalloc.h"
 
 extern char * ConvertFromEscapedText(const char * text);
 extern char * ConvertToEscapedText(const char * text);
+
+/* TRUE while running under -T (regression tests) — see misc.c. Assertion/
+ * abort handlers (AbortProg here, UndoFail in cundo.c) check this to skip
+ * blocking modal dialogs that would otherwise hang a headless run forever. */
+extern BOOL_T bRunTests;
 
 extern const char * AbortMessage( const char *, ... );
 extern void AbortProg( const char *, const char *, int, const char * );
@@ -96,14 +92,15 @@ extern int NoticeMessage2( int, const char *, const char*, const char *, ... );
 extern bool Confirm( char *, doSaveCallBack_p );
 extern void DoQuit( void * unused );
 extern void DoClear( void * unused );
-extern void MapWindowToggleShow( void * unused );
-extern void MapWindowShow( int state );
-extern void DoShowWindow(int index, const char * name, void * data);
 
-extern void wShow( wWin_p );
-extern void wHide( wWin_p );
+void ToggleSetInMenuToolbar(wControl_p menuItem, wControl_p toolbarButton,
+                            wBool_t newState);
+
+
+extern void wShow( wControl_p window);
+extern void wHide( wControl_p window );
 extern void CloseDemoWindows( void );
-extern void DefaultProc( wWin_p, winProcEvent, void * );
+extern void DefaultProc( wControl_p win, winProcEvent, const void * data);
 typedef void (*changeNotificationCallBack_t)( long );
 #define CHANGE_SCALE	(1<<0)
 #define CHANGE_PARAMS	(1<<1)
@@ -137,14 +134,13 @@ addButtonCallBack_t PriceListInit( void );
 addButtonCallBack_t ParamFilesInit( void );
 addButtonCallBack_t ControlMgrInit ( void );
 
-/* cdraw.h */
-track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text,
+/* cdraw.c */
+track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, const char * text,
                  CSIZE_T textSize, wDrawColor color, BOOL_T boxed,
                  BOOL_T filled, wDrawColor bg_color);
-void LoadFontSizeList( wList_p, long );
-void UpdateFontSizeList( long *, wList_p, wIndex_t );
-long GetFontSize(wIndex_t);
-long GetFontSizeIndex(long size);
+void LoadFontSizeList( wControl_p control, long fontSize);
+void UpdateFontSizeList( long *fontSizeR, wControl_p list,	wIndex_t listInx  );
+long GetStandardFontSize(long size);
 
 /* cnote.c */
 void ClearNote( void );
@@ -183,10 +179,10 @@ long GetBenchData( long, long );
 wIndex_t GetBenchListIndex( long );
 long SetBenchData( char *, wDrawWidth, wDrawColor );
 void DrawBench( drawCmd_p, coOrd, coOrd, wDrawColor, wDrawColor, long, long );
-void BenchUpdateOrientationList( long, wList_p );
-void BenchUpdateChoiceList( wIndex_t, wList_p, wList_p );
+void BenchUpdateOrientationList( long, wControl_p );
+void BenchUpdateChoiceList( wIndex_t, wControl_p, wControl_p );
 addButtonCallBack_t InitBenchDialog( void );
-void BenchLoadLists( wList_p, wList_p );
+void BenchLoadLists( wControl_p, wControl_p );
 void BenchGetDesc( long, char * );
 void CountBench( long, DIST_T );
 void TotalBench( void );
@@ -207,6 +203,7 @@ typedef int (*custMgmCallBack_p)( int, void * );
 void CustMgmLoad( wIcon_p, custMgmCallBack_p, void * );
 void CompoundCustMgmLoad();
 void CarCustMgmLoad();
+BOOL_T CarCustMgmChanged();
 BOOL_T CompoundCustomSave(FILE*);
 BOOL_T CarCustomSave(FILE*);
 
@@ -229,7 +226,7 @@ extern DIST_T easeL;
 
 /* denum.c */
 extern int enumerateMaxDescLen;
-void EnumerateList( long, FLOAT_T, char *, char * );
+void EnumerateList( long, FLOAT_T, const char *, const char * );
 void EnumerateStart(void);
 void EnumerateEnd(void);
 
@@ -276,7 +273,14 @@ void SetFileChanged(void);
 
 /* macro.c */
 extern long adjTimer;
-int RegressionTestAll();
+int RegressionTestAll(const char *target);
+extern FILE * recordF;
+extern wBool_t inPlayback;
+extern wBool_t inPlaybackQuit;
+extern wControl_p demoW;
+extern int curDemo;
+void SimulateButtonClick(wControl_p control);
+
 
 /* lprintf.c */
 typedef struct {
@@ -288,7 +292,7 @@ extern dynArr_t logTable_da;
 extern time_t logClock;
 void LogOpen( char * );
 void LogClose( void );
-void LogSet( char *, int );
+void LogSet( const char *, int );
 int LogFindIndex( const char * );
 void LogPrintf( const char *, ... );
 #define LOG( DBINX, DBLVL, DBMSG ) \
@@ -298,7 +302,7 @@ void LogPrintf( const char *, ... );
 #define LOG1( DBINX, DBMSG ) LOG( DBINX, 1, DBMSG )
 #define LOGNAME( DBNAME, DBMSG ) LOG( LogFindIndex( DBNAME ), DBMSG )
 
-#define NUM_FILELIST (5)
+#define NUM_FILELIST (10)
 #define lprintf LogPrintf
 
 /* track.c */

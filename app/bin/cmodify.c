@@ -27,7 +27,7 @@
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "drawgeom.h"
 #include "common.h"
@@ -35,6 +35,7 @@
 #include "cselect.h"
 #include "common-ui.h"
 #include "draw.h"
+#include "icons.h"
 
 EXPORT wIndex_t modifyCmdInx;
 
@@ -140,6 +141,10 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos)
 	case C_REDRAW:
 		rc = CmdBezModify(Dex.Trk, action, pos, trackGauge);
 		break;
+	default:
+		LOG( log_modify, 1, ( "unexpected action&0xFF %d in CreateRadiusAnchor\n",
+		                      action&0xFF ) )
+		break;
 	}
 	return rc;
 }
@@ -172,6 +177,10 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos)
 	case C_REDRAW:
 		rc = CmdCornuModify(Dex.Trk, action, pos, trackGauge);
 		break;
+	default:
+		LOG( log_modify, 1, ( "unexpected action&0xFF %d in CreateRadiusAnchor\n",
+		                      action&0xFF ) )
+		break;
 	}
 	return rc;
 }
@@ -188,8 +197,6 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos)
 	case C_DOWN:
 	case C_MOVE:
 	case C_UP:
-		rc = ModifyTrack( Dex.Trk, action, pos );
-		break;
 	case wActionMove:
 		rc = ModifyTrack( Dex.Trk, action, pos );
 		break;
@@ -199,9 +206,8 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos)
 			return ModifyTrack( Dex.Trk, action, pos );
 		}
 		//Enter/Space/Tab does not
-		if ((action>>8 !=32) && (action>>8 != 13) && (action>>8 != 9)) { return C_CONTINUE; }
 		if (((action>>8) == 9 && (MyGetKeyState()&WKEY_SHIFT))) { return C_TERMINATE; }
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_OK:
 		rc = ModifyTrack( Dex.Trk, C_OK, pos );
 		if (rc != C_CONTINUE) { modifyDrawMode = FALSE; }
@@ -250,14 +256,13 @@ STATUS_T CmdModify(
 	track_p trk, trk1;
 	ANGLE_T a0;
 	DIST_T d;
-	ANGLE_T a;
 	EPINX_T inx;
 	curveType_e curveType;
 	static BOOL_T changeTrackMode;
 
 
 	STATUS_T rc;
-	static DIST_T trackGauge;
+	static DIST_T modTrackGauge;
 
 	if ( changeTrackMode ) {
 		if ( action == C_MOVE ) {
@@ -277,7 +282,7 @@ STATUS_T CmdModify(
 		Dex.Trk = NULL;
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		/*ChangeParameter( &easementPD );*/
-		trackGauge = 0.0;
+		modTrackGauge = 0.0;
 		changeTrackMode = modifyRulerMode = FALSE;
 		modifyBezierMode = FALSE;
 		modifyCornuMode = FALSE;
@@ -328,7 +333,7 @@ STATUS_T CmdModify(
 
 			return C_ERROR;
 		}
-		trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
+		modTrackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 		if (QueryTrack( Dex.Trk, Q_CAN_MODIFY_CONTROL_POINTS )) { //Bezier
 			modifyBezierMode = TRUE;
 			if (ModifyBezier(C_START, pos) != C_CONTINUE) {			//Call Start with track
@@ -406,7 +411,8 @@ STATUS_T CmdModify(
 		if (modifyBezierMode) { return ModifyBezier(wActionMove, pos); }
 		track_p t;
 		wSetCursor(mainD.d,defaultCursor);
-		if (((t=OnTrack(&pos,FALSE,TRUE))!= NULL) && CheckTrackLayerSilent( t )) {
+		t=OnTrack(&pos,FALSE,TRUE);
+		if ((t != NULL) && CheckTrackLayerSilent( t )) {
 			EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 			if (QueryTrack( t, Q_IS_CORNU )) {
 				CreateCornuAnchor(pos,FALSE);
@@ -544,14 +550,13 @@ extendTrack:
 					Dex.Trk = NULL;
 					return C_ERROR;
 				}
-				trackGauge = GetTrkGauge( Dex.Trk );
+				modTrackGauge = GetTrkGauge( Dex.Trk );
 				Dex.pos00 = pos;
 CHANGE_TRACK:
 				if (GetTrackParams( PARAMS_EXTEND, Dex.Trk, Dex.pos00, &Dex.params)) {
 					if (Dex.params.ep == -1) {
 						Dex.Trk = NULL;
 						return C_CONTINUE;
-						break;
 					}
 					if (Dex.params.ep == 0) {
 						Dex.params.arcR = -Dex.params.arcR;
@@ -574,7 +579,7 @@ CHANGE_TRACK:
 			InfoMessage ( _("No track selected"));
 			return C_ERROR;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_RMOVE:
 extendTrackMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
@@ -649,9 +654,9 @@ extendTrackMove:
 			if ( QueryTrack( Dex.Trk, Q_IGNORE_EASEMENT_ON_EXTEND ) ) {
 				/* Ignore easements when extending turnouts or turntables */
 				Dex.jointD.x =
-				        Dex.jointD.r0 = Dex.jointD.r1 =
-				                                Dex.jointD.l0 = Dex.jointD.l1 =
-				                                                Dex.jointD.d0 = Dex.jointD.d1 = 0.0;
+				Dex.jointD.r0 = Dex.jointD.r1 =
+				Dex.jointD.l0 = Dex.jointD.l1 =
+				Dex.jointD.d0 = Dex.jointD.d1 = 0.0;
 				Dex.jointD.flip = Dex.jointD.negate = Dex.jointD.Scurve = FALSE;
 				d = Dex.curveData.curveRadius * Dex.curveData.a1 * 2.0*M_PI/360.0;
 			} else {					/* Easement code */
@@ -667,7 +672,7 @@ extendTrackMove:
 					}
 					Dex.jointD.negate = DifferenceBetweenAngles(Dex.angle,FindAngle(Dex.pos00,
 					                    pos))<0.0;
-					Dex.jointD.x = 2*trackGauge;  //Signal an easement present to JoinTracks
+					Dex.jointD.x = 2*modTrackGauge;  //Signal an easement present to JoinTracks
 				} else {
 					if ( easeR > 0.0 && Dex.r1 < easeR ) {
 						ErrorMessage( MSG_RADIUS_LSS_EASE_MIN,
@@ -712,13 +717,9 @@ extendTrackMove:
 			if (da < 0.0) {
 				da = 2*M_PI + da;
 			}
-			a = NormalizeAngle( Dex.angle - FindAngle( Dex.pos00,
-			                    Dex.curveData.curvePos ) );
-			if ( a < 180.0 ) {
-				a = NormalizeAngle( Dex.curveData.a0-90 );
-			} else {
-				a = NormalizeAngle( Dex.curveData.a0+Dex.curveData.a1+90.0 );
-			}
+			LOG( log_modify, 2, ("A0diff=%0.3f\n",
+			                     NormalizeAngle( Dex.angle - FindAngle( Dex.pos00,
+			                                     Dex.curveData.curvePos ) ) ) )
 			Dex.valid = TRUE;
 			if (action != C_RDOWN)
 				InfoMessage( _("Curve Track: Radius=%s Length=%s Angle=%0.3f"),
@@ -790,9 +791,11 @@ extendTrackUp:
 		if (modifyBezierMode) { return ModifyBezier(C_REDRAW, pos); }
 		if (modifyCornuMode) { return ModifyCornu(C_REDRAW, pos); }
 		if (modifyDrawMode) { return ModifyDraw(C_REDRAW, pos); }
-		DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, modTrackGauge,
+		            wDrawColorBlack,
 		            0 );
-		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, modTrackGauge,
+		            wDrawColorBlack,
 		            0 );
 
 		return C_CONTINUE;
@@ -855,7 +858,7 @@ extendTrackUp:
 		if (modifyCornuMode) {
 			return ModifyCornu(action, pos);
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	default:
 		if (modifyBezierMode) { return ModifyBezier(action, pos); }
 		if (modifyCornuMode) { return ModifyCornu(action, pos); }
@@ -868,21 +871,19 @@ extendTrackUp:
 	return C_CONTINUE;
 }
 
-
+
 /*****************************************************************************
  *
  * INITIALIZATION
  *
  */
 
-#include "bitmaps/extend.image3"
-
 void InitCmdModify( wMenu_p menu )
 {
 	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"),
-	                              wIconCreatePixMap(extend_image3[iconSize]), LEVEL0_50,
+	                              CreateToolbarIconFromResource("extend.png"), LEVEL0_50,
 	                              IC_STICKY|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_MODIFY, NULL );
-	/** @logcmd @showrefby modify=n cmodify.c Log Modify command */
+	/** @logcmd @showrefby `modify=n` `cmodify.c` — Log Modify command */
 	log_modify = LogFindIndex( "modify" );
 	modPopupM = MenuRegister( "Modify Context Menu" );
 	wMenuPushCreate(modPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"),

@@ -58,7 +58,6 @@ URI2File(char *encodedFileName, unsigned resultLen, char *resultBuffer)
 	char *currentSource = encodedFileName;
 	char *currentDest = resultBuffer;
 
-	currentSource = encodedFileName;
 	while (*currentSource
 	       && ((unsigned)(currentDest - resultBuffer) < resultLen - 1)) {
 		if (*currentSource == '/') {

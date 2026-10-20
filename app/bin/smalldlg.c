@@ -23,39 +23,42 @@
 
 #include "common.h"
 #include "custom.h"
-#include "draw.h"
 #include "fileio.h"
+#include <form.h>
+#include "icons.h"
 #include "misc.h"
 #include "paths.h"
-#include "param.h"
 #include "smalldlg.h"
 
-#ifdef WINDOWS
-#include <FreeImage.h>
-#endif
-
-EXPORT wWin_p aboutW;
-static wWin_p tipW;					/**< window handle for tip dialog */
+EXPORT wControl_p aboutW;
+static wControl_p tipW;					/**< window handle for tip dialog */
 
 static long showTipAtStart = 1;		/**< flag for visibility */
 
 static dynArr_t tips_da;			/**< dynamic array for all tips */
 #define tips(N) DYNARR_N( char *, tips_da, N )
 
-static char * tipLabels[] = { N_("Show tips at start"), NULL };
-static paramTextData_t tipTextData = { 40, 10 };
+static paramTextData_t tipTextData = { 1, 1 };
 
+static paramGroup_t tipPG;
 static paramData_t tipPLs[] = {
 #define I_TIPTEXT		(1)
-#define tipT			((wText_p)tipPLs[I_TIPTEXT].control)
-	{   PD_MESSAGE, N_("Did you know..."), NULL, 0, NULL, NULL, BM_LARGE },
-	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &tipTextData, NULL, BO_READONLY|BT_TOP|BT_CHARUNITS },
-	{   PD_BUTTON, ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, N_("Previous Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },
-	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
-	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER }
+#define tipT			(tipPLs[I_TIPTEXT].control)
+	{   PD_MESSAGE, NULL, "mess1", .group=&tipPG },
+	{   PD_TEXT, NULL, "text", 0, &tipTextData, .group=&tipPG },
+	{   PD_BUTTON, ShowTip, "prev", 0, NULL, NULL, 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP), .group=&tipPG },
+#define I_TIPPREV (2)
+	{   PD_BUTTON, ShowTip, "next", 0, NULL, NULL, 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP), .group=&tipPG },
+#define I_TIPNEXT (3)
+	{   PD_TOGGLE, &showTipAtStart, "showatstart", .group=&tipPG }
 };
 
-static paramGroup_t tipPG = { "tip", 0, tipPLs, COUNT( tipPLs ) };
+static paramGroup_t tipPG = { "tip", PGO_FULLDIALOGFROMBUILDER, tipPLs, COUNT( tipPLs ) };
+
+#define PREVIOUSBUTTON ((tipPLs[I_TIPPREV].control))
+#define NEXTBUTTON (tipPLs[I_TIPNEXT].control)
+
+#define MAX_TIP_LENGTH 4096
 
 /**
  * Create and initialize the tip of the day window. The dialog box is created and the list of tips is loaded
@@ -65,14 +68,15 @@ static paramGroup_t tipPG = { "tip", 0, tipPLs, COUNT( tipPLs ) };
 static void CreateTipW( void )
 {
 	FILE * tipF;
-	char buff[4096];
+	char buff[MAX_TIP_LENGTH];
 	char *filename;
 	char * cp;
 
-	tipW = ParamCreateDialog( &tipPG, MakeWindowTitle(_("Tip of the Day")), NULL,
-	                          NULL, ParamCancel_Current, FALSE, NULL,
-	                          F_RESIZE|F_CENTER|PD_F_ALT_CANCELLABEL,
-	                          NULL );
+	tipW = FormCreateDialog(&tipPG, MakeWindowTitle(_("Tip of the Day")),
+	                        NULL, FormOk_Null,
+	                        NULL, NULL,
+	                        FALSE,
+	                        F_CENTER, NULL );
 
 	/* open the tip file */
 	MakeFullpath(&filename, libDir, sTipF, NULL);
@@ -82,9 +86,9 @@ static void CreateTipW( void )
 	if (tipF == NULL) {
 		DYNARR_APPEND( char *, tips_da, 1 );
 		tips(0) = N_("No tips are available");
-		/*	TODO: enable buttons only if tips are available
-				wControlActive( prev, FALSE );
-				wControlActive( next, FALSE ); */
+
+		wControlActive( PREVIOUSBUTTON, FALSE );
+		wControlActive( NEXTBUTTON, FALSE );
 	} else {
 		/* read all the tips from the file */
 		while (fgets( buff, sizeof buff, tipF )) {
@@ -94,10 +98,16 @@ static void CreateTipW( void )
 				continue;
 			}
 
-			/* remove CRs and LFs at end of line */
+			/* remove CRs and LFs at end of line -- a line that's just
+			 * "\n" (blank line, common as a separator between tips)
+			 * makes cp==buff before either check, so the first
+			 * decrement points one byte before the buffer; guard both
+			 * dereferences with a bounds check (SF #784: confirmed via
+			 * AddressSanitizer as a real stack-buffer-underflow, not
+			 * just a theoretical edge case). */
 			cp = buff+strlen(buff)-1;
-			if (*cp=='\n') { cp--; }
-			if (*cp=='\r') { cp--; }
+			if (cp >= buff && *cp=='\n') { cp--; }
+			if (cp >= buff && *cp=='\r') { cp--; }
 
 			/* get next line if the line was empty */
 			if (cp < buff) {
@@ -113,7 +123,7 @@ static void CreateTipW( void )
 
 				/* read a line */
 				if (!fgets( cp, (int)((sizeof buff) - (cp-buff)), tipF )) {
-					return;
+					break;
 				}
 
 				/* lines starting with hash sign are ignored (comments) */
@@ -131,7 +141,14 @@ static void CreateTipW( void )
 			/* allocate memory for the tip and store pointer in dynamic array */
 			DYNARR_APPEND( char *, tips_da, 10 );
 			tips(tips_da.cnt-1) = strdup( buff );
+			if(tips(tips_da.cnt-1) == NULL ) {
+				tips(tips_da.cnt-1) = "";
+			}
 		}
+	}
+
+	if (tipF) {
+		fclose(tipF);
 	}
 	free(filename);
 }
@@ -141,7 +158,7 @@ static void CreateTipW( void )
  * the last tip shown is retrieved from the preferences and the next tip is
  * selected. At the end, the index of the shown tip is saved into the preferences.
  *
- * \param IN flags see definitions in smalldlg.h for possible values
+ * \param[in] flagsVP see definitions in smalldlg.h for possible values
  *
  */
 
@@ -150,14 +167,16 @@ void ShowTip( void * flagsVP )
 	long flags = VP2L(flagsVP);
 	long tipNum;
 
+	wPrefGetInteger("tip", "showatstart", &showTipAtStart, 1);
+
 	if (showTipAtStart || (flags & SHOWTIP_FORCESHOW)) {
 		if (tipW == NULL) {
 			CreateTipW();
 		}
-		ParamLoadControls( &tipPG );
+		FormLoadControls( &tipPG );
 		wTextClear( tipT );
 		/*  initial value is -1 which gets incremented 0 below */
-		wPrefGetInteger( "misc", "tip-number", &tipNum, -1 );
+		wPrefGetInteger( "tip", "number", &tipNum, -1 );
 
 		if( flags & SHOWTIP_PREVTIP ) {
 			if(tipNum == 0 ) {
@@ -175,28 +194,47 @@ void ShowTip( void * flagsVP )
 
 		wTextAppend( tipT, _(tips(tipNum)) );
 
-		wPrefSetInteger( "misc", "tip-number", tipNum );
+		wPrefSetInteger( "tip", "number", tipNum );
 		wShow( tipW );
 	}
 }
 
 /*--------------------------------------------------------------------*/
 
-#include "bitmaps/xtc.image1"
+#define ABOUT_TEXT DESCRIPTION \
+		"\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017" \
+		" by Bob Blackwell, Martin Fischer, Adam Richards and Russell Shilling.\n" \
+		"\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)\n" \
+		"\nSome icons by Yusuke Kamiyamane. " \
+		"Licensed under a Creative Commons Attribution 3.0 License.\n" \
+		"\nContributions by: Robert Heller, Mikko Nissinen, " \
+		"Timothy M. Shead, Daniel Luis Spagnol" \
+		"\nParameter Files by: Ralph Boyd, Dwayne Ward\n" \
+		"\nThe following software is distributed with XTrackCAD\n\n" \
+		"Cornu Algorithm and Implementation by: Raph Levien" \
+		"\n\nuthash, utlist Copyright notice:" \
+		"\nCopyright (c) 2003-2026, Troy D. Hanson https://troydhanson.github.io/uthash/" \
+		"\nAll rights reserved." \
+		"\n\ncJSON: Copyright (c) 2009-2017 Dave Gamble and cJSON contributors" \
+		"\n\nlibzip:  Copyright(C) 1999 - 2019 Dieter Baron and Thomas Klausner\n" \
+		"The authors can be contacted at libzip@nih.at" \
+		"\n\nMiniXML: Copyright (c) 2003-2019 by Michael R Sweet.\n" \
+		"The Mini - XML library is licensed under the Apache License Version 2.0 with an\n" \
+		"exception to allow linking against GPL2 / LGPL2 - only software."
 
-static paramTextData_t aboutTextData = { 70, 10 };
+static paramTextData_t aboutTextData = { 50, 10 };
 
 #define DESCRIPTION N_("XTrackCAD is a CAD (computer-aided design) program for designing model railroad layouts.")
 static paramData_t aboutPLs[] = {
 #define I_ABOUTDRAW				(0)
 	{   PD_BITMAP, NULL, "about", PDO_NOPSHUPD, NULL, NULL, 0 },
 #define I_ABOUTVERSION			(1)
-	{   PD_MESSAGE, NULL, NULL, PDO_DLGNEWCOLUMN, NULL, NULL, BM_LARGE },
+	{   PD_MESSAGE, NULL, "mess1", PDO_DLGNEWCOLUMN, NULL, NULL, BM_LARGE },
 #define I_COPYRIGHT				 (2)
-#define COPYRIGHT_T			((wText_p)aboutPLs[I_COPYRIGHT].control)
-	{   PD_TEXT, NULL, NULL, PDO_DLGRESIZE, &aboutTextData, NULL, BO_READONLY|BT_TOP|BT_CHARUNITS }
+#define COPYRIGHT_T			(aboutPLs[I_COPYRIGHT].control)
+	{   PD_TEXT, NULL, "text", 0, &aboutTextData, NULL, BO_READONLY | BT_TOP | BT_CHARUNITS}
 };
-static paramGroup_t aboutPG = { "about", 0, aboutPLs, COUNT( aboutPLs ) };
+static paramGroup_t aboutPG = { "about", 0l, aboutPLs, COUNT( aboutPLs ) };
 
 /**
  *	Create and show the About window.
@@ -204,51 +242,19 @@ static paramGroup_t aboutPG = { "about", 0, aboutPLs, COUNT( aboutPLs ) };
 
 void CreateAboutW(void *ptr)
 {
-//	char *copyright = sAboutProd;
-
 	if (!aboutW) {
-		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap(xtc_image1);
-		ParamRegister(&aboutPG);
-		aboutW = ParamCreateDialog(&aboutPG, MakeWindowTitle(_("About")), NULL, NULL,
-		                           ParamCancel_Current, FALSE, NULL, F_TOP | F_CENTER| PD_F_ALT_CANCELLABEL, NULL);
-		ParamLoadMessage(&aboutPG, I_ABOUTVERSION, sAboutProd);
-		wTextAppend(COPYRIGHT_T, DESCRIPTION);
-		wTextAppend(COPYRIGHT_T,
-		            "\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017 by Bob Blackwell, Martin Fischer and  Adam Richards.\n");
-		wTextAppend(COPYRIGHT_T,
-		            "\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)\n");
-		wTextAppend(COPYRIGHT_T,
-		            "\nSome icons by Yusuke Kamiyamane. Licensed under a Creative Commons Attribution 3.0 License.\n");
-		wTextAppend(COPYRIGHT_T,
-		            "\nContributions by: Robert Heller, Mikko Nissinen, Timothy M. Shead, Russell Shilling, Daniel Luis Spagnol");
-		wTextAppend(COPYRIGHT_T, "\nParameter Files by: Ralph Boyd, Dwayne Ward\n");
-
-		wTextAppend(COPYRIGHT_T,
-		            "\nThe following software is distributed with XTrackCAD\n\n");
-#ifdef WINDOWS
-		wTextAppend(COPYRIGHT_T, FreeImage_GetCopyrightMessage());
-		wTextAppend(COPYRIGHT_T, "\n\n");
-#endif
-		wTextAppend(COPYRIGHT_T, "Cornu Algorithm and Implementation by: Raph Levien");
-		wTextAppend(COPYRIGHT_T, "\n\nuthash, utlist Copyright notice:");
-		wTextAppend(COPYRIGHT_T,
-		            "\nCopyright (c) 2005-2015, Troy D. Hanson  http://troydhanson.github.com/uthash/");
-		wTextAppend(COPYRIGHT_T, "\nAll rights reserved.");
-
-		wTextAppend(COPYRIGHT_T,
-		            "\n\ncJSON: Copyright (c) 2009-2017 Dave Gamble and cJSON contributors");
-		wTextAppend(COPYRIGHT_T,
-		            "\n\nlibzip:  Copyright(C) 1999 - 2019 Dieter Baron and Thomas Klausner\n" \
-		            "The authors can be contacted at libzip@nih.at");
-
-		wTextAppend(COPYRIGHT_T,
-		            "\n\nMiniXML: Copyright (c) 2003-2019 by Michael R Sweet.\n" \
-		            "The Mini - XML library is licensed under the Apache License Version 2.0 with an\n"
-		            \
-		            "exception to allow linking against GPL2 / LGPL2 - only software.");
+		aboutPLs[I_ABOUTDRAW].winData = CreateSymbolFromResource("xtc.png");
+		FormRegister(&aboutPG);
+		aboutW = FormCreateDialog(&aboutPG, MakeWindowTitle(_("About")),
+		                          NULL, NULL,
+		                          "Close", FormCancel_Current,
+		                          FALSE, F_TOP | F_CENTER, NULL);
+		wMessageSetValue(aboutPLs[I_ABOUTVERSION].control, sAboutProd);
+		wTextAppend(COPYRIGHT_T, ABOUT_TEXT);
 	}
 
 	wShow(aboutW);
+
 }
 
 /*--------------------------------------------------------------------*/
@@ -259,5 +265,4 @@ void CreateAboutW(void *ptr)
 
 void InitSmallDlg( void )
 {
-	ParamRegister( &tipPG );
 }

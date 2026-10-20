@@ -12,7 +12,7 @@ You can print the design to check the dimensions before saving them.
 END
 STEP
 CTURNOUT DESIGNER SHOW Regular Turnout
-#PARAMETER turnoutNew anglemode 0
+#PARAMETER turnout-designer anglemode 0
 MESSAGE
 _________________________________________
 
@@ -24,9 +24,9 @@ Some Turnouts and Sectional track are pre-mounted on roadbed.  For these parts y
 END
 STEP
 #CTURNOUT DESIGNER HIDE Regular Turnout
-PARAMETER turnoutNew cancel
+PARAMETER turnout-designer cancel
 CTURNOUT DESIGNER SHOW Double Slipswitch
-#PARAMETER turnoutNew anglemode 0
+#PARAMETER turnout-designer anglemode 0
 MESSAGE
 _________________________________________
 
@@ -34,9 +34,9 @@ The double slip switch is described by only a few parameters.
 END
 STEP
 #CTURNOUT DESIGNER HIDE Double Slipswitch
-PARAMETER turnoutNew cancel
+PARAMETER turnout-designer cancel
 CTURNOUT DESIGNER SHOW Double Crossover
-#PARAMETER turnoutNew anglemode 0
+#PARAMETER turnout-designer anglemode 0
 MESSAGE
 _________________________________________
 
@@ -44,7 +44,7 @@ The double crossover only needs length and track separation.
 END
 STEP
 #CTURNOUT DESIGNER HIDE Double Crossover
-PARAMETER turnoutNew cancel
+PARAMETER turnout-designer cancel
 MESSAGE
 =========================================
 END

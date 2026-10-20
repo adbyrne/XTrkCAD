@@ -6,7 +6,7 @@ using the **Hillside Division** — a simple two-deck HO layout in a 12×16 ft r
 describe the room geometry, the benchwork plan, and the track layout; and a tool
 that converts them into an XTrkCAD `.xtc` file.
 
-The complete Hillside Division files live in `mcp/tests/fixtures/` on the GTK3V2MAIN branch (`xtrkcad-git-gtk3`):
+The complete Hillside Division files live in `mcp/tests/fixtures/`:
 
 | File | Purpose |
 |------|---------|
@@ -67,6 +67,13 @@ For a 2-level layout the layers are: Floor (0), L1-Main (1) … L1-Benchwork (7)
 L2-Main (8) … L2-Benchwork (14).  The `get_operation_density` tool recognises
 these names automatically — no manual category mapping needed.  Set `levels: 1`
 for a single-deck layout.
+
+**Sub-divisions on the same deck** (e.g. a connecting railroad's own staging
+yard) can use an extra name segment: `L1-CO-Main`, `L1-CO-Passing`,
+`L1-CO-Staging`.  Both `write_plan_view`'s level grouping and
+`get_operation_density`'s category detection match on the leading `Ln-`
+prefix and the trailing category segment respectively, so the middle
+segment (`CO`) is free-form and doesn't need to be registered anywhere.
 
 **Controlling which track-type layers are generated:**
 
@@ -180,7 +187,11 @@ stub in the NW corner.  It splits the north wall benchwork into two sections
 (see `hillside_benchwork.yaml`).
 
 If a door opening falls along a partition the generator automatically cuts a gap
-in the rendered wall.
+in the rendered wall — both in the `.xtc` Floor layer and in `write_plan_view`'s
+SVG plan view, which share the same gap-cutting geometry
+(`partition_door_openings()` in `config.py`). The gap is cut regardless of
+`swing`: even a `swing: none` doorway (no door hardware, just an opening) is
+still a hole in the wall, not a solid one.
 
 ### Restricted areas
 
@@ -432,6 +443,17 @@ write_plan_view("hillside_division.yaml", "hillside_plan_l2.svg", level=2)
 ```
 Pass `level=0` (the default) to draw all decks together on one view.
 
+Pass `xtc_path` to overlay real track geometry (straights, curves, turnouts,
+turntables) from a generated `.xtc`/`.xtce` file on top of the benchwork,
+filtered to the same deck via each track's layer name (`L1-*` → level 1,
+`L2-*` → level 2):
+```
+write_plan_view("hillside_division.yaml", "hillside_plan_l1.svg", level=1,
+                 xtc_path="hillside_division.xtc")
+```
+Without `xtc_path` the plan view shows benchwork only, which is normal when
+no `.xtc` has been generated yet.
+
 **Generate elevation views** (one per wall):
 ```
 write_elevation_view("hillside_division.yaml", "hillside_elev_west.svg",  wall="west")
@@ -530,88 +552,6 @@ pairs) and `not_found` (names that weren't in the file) so you can verify
 the result.  After renaming, `get_operation_density` will auto-categorize
 using the standard suffix rules with no extra arguments.
 
-### Annotating the layout for operations
-
-Once track is placed in XTrkCAD, add text **NOTE** objects to mark stations,
-industries, and reference points.  The annotation tools (`validate_layout`,
-`export_layout_data`, `get_siding_capacities`, `get_station_distances`) read
-these NOTEs to compute mileposts, siding lengths, and car capacities.
-
-#### NOTE prefixes
-
-| Prefix | Example | Purpose |
-|--------|---------|---------|
-| `STATION: <id>` | `STATION: WP` | Mainline station — milepost origin / destination |
-| `STORAGE: <id> <label>` | `STORAGE: WP_COAL Coal trestle` | House track / freight spur — measures car capacity by BFS length |
-| `INDUSTRY: <id>` | `INDUSTRY: KIEL` | Industry spotting area — one threshold slot (12 model in default) |
-| `REFERENCE: MP_ZERO` | `REFERENCE: MP_ZERO` | Milepost datum; required for milepost output |
-| `YARD_TRACK: <yard> <label>` | `YARD_TRACK: WP Caboose` | Individual yard track |
-
-**Passing track capacity** is not annotated with a note — it is derived automatically
-from the layer name (`L{n}-Passing`).  No note is needed on the passing siding itself.
-
-Place each NOTE close to the track it labels.  `STATION:` and `STORAGE:` notes
-snap to the nearest track **endpoint**; `INDUSTRY:` notes project perpendicularly
-onto the nearest track **body** (segment snap), so you can place them anywhere
-along a spur.  Notes more than 12 model inches from any snap target trigger a
-`FAR_SNAP` validation warning.
-
-#### Validating annotations
-
-```
-validate_layout("my_layout.xtc", "my_stations.yaml")
-```
-
-Reports missing notes, mis-placed notes, and cross-checks each annotation
-against the entries in `stations.yaml`.
-
-#### Car spots per industry
-
-Each `INDUSTRY:` note defaults to **one threshold slot** of 12 model inches
-(≈ one car length at HO scale).  This represents the spotting area at the
-industry, not the total spur length — even if the spur is much longer, an
-industry typically occupies only the car spots directly at its loading point.
-
-To override the derived count, add `spots: N` to the industry entry in
-`stations.yaml`:
-
-```yaml
-stations:
-  - id: TIMBER
-    name: Timber Ltd
-    types: [industry]
-    within_limits_of: JC
-    spots: 3          # explicit override — 3 car spots regardless of default slot
-```
-
-If you want to measure the full spur length for car capacity, use a `STORAGE:`
-note instead of (or in addition to) an `INDUSTRY:` note.
-
-#### Multiple industries on one spur
-
-When a single spur (team track or shared industrial lead) serves more than one
-customer, place one `INDUSTRY:` NOTE over each industry's section of the spur
-— directly over the track body, not necessarily at a track endpoint.
-
-The tool projects each NOTE perpendicularly onto the nearest track segment,
-groups notes that share the same spur (BFS component), and sorts them by
-distance from the dead-end (buffer-stop) endpoint.  Each industry gets the
-same default one-slot capacity.  The output order reflects which industry the
-switcher reaches first after clearing the turnout throat.
-
-```
-# Two industries on the same 60-inch spur:
-#   NOTE "INDUSTRY: COAL_A" placed over track at ~5 in from dead-end
-#   NOTE "INDUSTRY: COAL_B" placed over track at ~35 in from dead-end
-#
-# get_siding_capacities output:
-#   COAL_A  length=12 in  max_cars=2  (nearest dead-end → spotted first)
-#   COAL_B  length=12 in  max_cars=2
-```
-
-Set `spots:` in `stations.yaml` for any industry to override the default car
-count with an explicit value.
-
 ---
 
 ## 5. Grid placements
@@ -639,6 +579,101 @@ Valid element types: `yard`, `staging`, `mainline`, `station`, `helix`,
 `siding`, `module`.  Optional parameters after the second `=` are passed to the
 template selector (e.g. `single-ended`, track count, minimum length in feet,
 grade).
+
+---
+
+---
+
+## 6. Track annotations and layout export
+
+Once you have placed track in XTrkCAD, add text NOTE objects to describe the
+operational geography.  The MCP server reads these notes to compute mileposts,
+siding lengths, and industry spur data, then writes them to `layout_data.json`
+for use by dispatcher and timetable tools.
+
+### Annotation note format
+
+All notes use XTrkCAD's built-in text NOTE objects (Insert → Note).  The
+server recognises four prefixes:
+
+| Note text | Meaning |
+|-----------|---------|
+| `REFERENCE: MP_ZERO mp_scale=N` | Milepost origin — place at the first decision point (first switch south of the originating yard). `mp_scale` is the number of layout inches per milepost unit; defaults to 12.0 if omitted. |
+| `STATION: <id> [!TERM] [!SWB] [@ref]` | Station stop. `!TERM` marks a terminus (no through exit; `milepost_exit` is null). `!SWB` marks a switchback (train enters, shoves to the far end, exits back out the same switch). `@ref` links to a named REFERENCE: point to resolve the exit milepost when the station's own NOTE can't reach the exit switch via Dijkstra (e.g. `STATION: MC !SWB @MC_EXIT`). |
+| `INDUSTRY: <id> <name> [@sta]` | Industry spur — place the note on or near the spur track. The first token is the short ID used in reports; the remaining tokens before any `@` are the display name. An optional `@STA` token names the station whose yard limits contain this industry (omit for on-line spurs directly off the mainline). |
+| `YARD_TRACK: <yard_id> <label>` | Individual yard track within a yard area. |
+
+**Examples for the Hillside Division:**
+
+```
+REFERENCE: MP_ZERO mp_scale=8
+STATION: SOUTH
+STATION: NORTH !TERM
+INDUSTRY: FREIGHT Freight House @SOUTH
+```
+
+Place each NOTE close to the track it describes — the server snaps each note
+to the nearest track endpoint (or segment for YARD_TRACK) to measure distances.
+
+### Export tools
+
+| Tool | What it does |
+|------|-------------|
+| `validate_layout(path)` | Check that every STATION: note snaps close to a track and that REFERENCE: MP_ZERO exists.  Returns error/warning counts and a list of issues. |
+| `export_layout_data(path, output_path="")` | Compute mileposts, siding lengths, and industry spur data; write `layout_data.json`. |
+
+Both tools derive all metadata from the `.xtc` notes — no separate YAML file
+is needed.  Pass an optional `stations_yaml` argument to override note-derived
+values (legacy path, for backwards compatibility).
+
+### layout_data.json structure
+
+```json
+{
+  "generated": "2026-06-14T12:00:00+00:00",
+  "layout": "Hillside Division",
+  "scale": "HO",
+  "mp_scale": 8.0,
+  "stations": [
+    {
+      "station_id": "SOUTH",
+      "milepost_entry": 0.0,
+      "milepost_exit": 8.0,
+      "siding_length_ft": null,
+      "siding_length_cars": null,
+      "house_track_ft": 174.2,
+      "house_track_cars": 3,
+      "main_length_ft": null,
+      "main_length_cars": null,
+      "switchback": false,
+      "terminus": false
+    }
+  ],
+  "industries": [
+    {
+      "industry_id": "FREIGHT",
+      "name": "Freight House",
+      "connected_station": "SOUTH",
+      "branch_milepost": 2.1,
+      "car_spots": 3
+    }
+  ],
+  "segments": [
+    { "from_station": "SOUTH", "to_station": "NORTH", "length_ft": 696.8 }
+  ],
+  "yard_tracks": [],
+  "warnings": []
+}
+```
+
+Key fields:
+- **`mp_scale`** — layout inches per milepost unit; use this to convert milepost
+  differences to prototype feet: `Δmp × mp_scale × (scale_ratio / 12)`.
+- **`milepost_exit`** — null for terminus stations and for stations where exit
+  geometry cannot be computed.
+- **`connected_station`** — null for on-line industries (directly off the
+  mainline); the parent station id for industries within a yard's limits.
+- **`car_spots`** — derived from spur track length measurement (Fugate formula).
 
 ---
 

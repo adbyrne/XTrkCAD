@@ -51,24 +51,17 @@ extern long drawTunnel;
 extern long drawEndPtV;
 extern long drawUnconnectedEndPt;
 extern long centerDrawMode;
-extern wDrawColor selectedColor;
-extern wDrawColor normalColor;
+
 extern BOOL_T useCurrentLayer;
 extern unsigned int curTrackLayer;
 extern coOrd descriptionOff;
 extern DIST_T roadbedWidth;
 extern DIST_T roadbedLineWidth;
 extern long drawElevations;
-extern wDrawColor elevColorIgnore;
-extern wDrawColor elevColorDefined;
-extern wDrawColor exceptionColor;
 #define TIEDRAWMODE_NONE		(0)
 #define TIEDRAWMODE_OUTLINE		(1)
 #define TIEDRAWMODE_SOLID		(2)
 extern long tieDrawMode;
-extern wDrawColor tieColor;
-extern wDrawColor bridgeColor;
-extern wDrawColor roadbedColor;
 extern TRKINX_T max_index;
 
 typedef signed char * PATHPTR_T;
@@ -291,6 +284,17 @@ void CheckTrackLength( track_cp );
 track_p NewTrack( wIndex_t, TRKTYP_T, EPINX_T, CSIZE_T );
 void DescribeTrack( track_cp, char *, CSIZE_T );
 void ActivateTrack( track_cp );
+/** Find which endpoint of \p trk is connected to \p me, the reverse lookup
+ * of GetTrkEndTrk() -- given "I am \p me and I'm connected to \p trk
+ * somewhere," find where. Scans all of \p trk's endpoints linearly;
+ * \p trk must be non-NULL (dereferenced unconditionally, no NULL check).
+ *
+ * \param[in] trk the track to search, must be non-NULL
+ * \param[in] me the track \p trk should be connected to
+ * \return the endpoint index on \p trk connected to \p me, or -1 if \p trk
+ *     has no endpoint connected to \p me (e.g. they aren't actually
+ *     connected)
+ */
 EPINX_T GetEndPtConnectedToMe( track_p, track_p );
 EPINX_T GetNearestEndPtConnectedToMe( track_p, track_p, coOrd);
 void SetEndPts( track_p, EPINX_T );
@@ -338,7 +342,7 @@ wBool_t IsAngleClose( ANGLE_T, ANGLE_T );
 wBool_t IsDistClose( DIST_T, DIST_T );
 wBool_t IsWidthClose( DIST_T, DIST_T );
 wBool_t IsColorClose( wDrawColor, wDrawColor );
-wBool_t CheckRegressionResult( long regressionVersion, char * sFileName,
+wBool_t CheckRegressionResult( long regressionVersion, const char * sFileName,
                                wBool_t bQuiet );
 
 void MoveTrack( track_p, coOrd );
@@ -478,7 +482,7 @@ void DrawEndElev( drawCmd_p, track_p, EPINX_T, wDrawColor );
 DIST_T EndPtDescriptionDistance( coOrd, track_p, EPINX_T, coOrd *,
                                  BOOL_T show_hidden, BOOL_T * hidden );
 STATUS_T EndPtDescriptionMove( track_p, EPINX_T, wAction_t, coOrd );
-void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
+void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, const char * );
 void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
 int GetTrkEndElevMode( track_p, EPINX_T );
 int GetTrkEndElevUnmaskedMode( track_p, EPINX_T );
@@ -507,18 +511,40 @@ extern wIndex_t describeCmdInx;
 extern BOOL_T inDescribeCmd;
 extern BOOL_T descUndoStarted;
 extern char * descTitle;
-typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST, DESC_BOXED } descType;
+typedef enum {
+	DESC_NULL,
+	DESC_POS,	/**< X,Y entry pair on one row */
+	/** X,Y,Z entry triple on one row; Z is stored at valueP2.
+	 * Z can be made read-only (DESC_Z_RO) or hidden (DESC_Z_IGNORE), and
+	 * stays editable when X,Y are DESC_RO.
+	 * \warning No track type uses this yet, so the code path (including
+	 * the DESC_CHANGE3 refresh step) has never been run.
+	 * \todo Candidate for an X,Y,Z tab order per end point in the
+	 * Bezier/Cornu/Compound Describe dialogs. Field indices then shift,
+	 * and the demo scripts address Describe fields by index. */
+	DESC_POS3D,
+	DESC_FLOAT,
+	DESC_ANGLE,
+	DESC_LONG,
+	DESC_COLOR,
+	DESC_DIM,
+	DESC_PIVOT,
+	DESC_LAYER,
+	DESC_STRING,
+	DESC_TEXT,
+	DESC_LIST,
+	DESC_EDITABLELIST,
+	DESC_BOXED
+} descType;
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)
 #define DESC_NOREDRAW	(1<<2)
+#define DESC_CHANGE3    (1<<3)	/**< DESC_POS3D only: refresh Z control */
 #define DESC_CHANGE2    (1<<4)
+#define DESC_Z_RO       (1<<5)	/**< DESC_POS3D only: Z read-only */
+#define DESC_Z_IGNORE   (1<<6)	/**< DESC_POS3D only: Z hidden */
 #define DESC_CHANGE		(1<<8)
 typedef enum { DESC_PIVOT_FIRST, DESC_PIVOT_MID, DESC_PIVOT_SECOND, DESC_PIVOT_NONE } descPivot_t;
-#define DESC_PIVOT_1
-typedef struct {
-	coOrd pos;
-	POS_T ang;
-} descEndPt_t;
 typedef struct {
 	descType type;
 	char * label;
@@ -527,13 +553,16 @@ typedef struct {
 	int mode;
 	wControl_p control0;
 	wControl_p control1;
-	wWinPix_t posy;
+	wControl_p control2;	/**< DESC_POS3D only: Z control */
+	void * valueP2;		/**< DESC_POS3D only: Z value */
 } descData_t, * descData_p;
 typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
 void DoDescribe( char *, track_p, descData_p, descUpdate_t );
 void DescribeDone( void * );
 BOOL_T UpdateDescStraight( int, int, int, int, int, descData_p, long );
 STATUS_T CmdDescribe(wAction_t,coOrd);
+void ClearDescribe( void );
+void ClearSelect( void );
 
 
 /* compound.c */
@@ -565,7 +594,7 @@ void UpdateAllElevations( void );
 DIST_T GetElevation( track_p );
 void ClrTrkElev( track_p );
 void SetTrkElevModes( BOOL_T, track_p, EPINX_T, track_p, EPINX_T );
-void UpdateTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
+void UpdateTrkEndElev( track_p, EPINX_T, int, DIST_T, const char * );
 void DrawTrackElev( track_p, drawCmd_p, BOOL_T );
 
 /* cdraw.c */
@@ -590,13 +619,14 @@ void MenuMode( void * moveVP );
 /* chotbar.c */
 extern long showFlexTrack;
 extern long hotBarLabels;
-extern long carHotbarModeInx;
+extern wIndex_t carHotbarModeInx;
 extern DIST_T curBarScale;
 void InitHotBar( void );
 void HideHotBar( void );
-void LayoutHotBar ( void *);
+void LayoutHotBar ( const void *redraw);
 typedef enum { HB_SELECT, HB_DRAW, HB_LISTTITLE, HB_BARTITLE, HB_FULLTITLE } hotBarProc_e;
 typedef char * (*hotBarProc_t)( hotBarProc_e, void *, drawCmd_p, coOrd * );
+void AddToContextMenu(char* contentsLabel, BOOL_T isFixed);
 void AddHotBarElement( char *, coOrd, coOrd, BOOL_T, BOOL_T, DIST_T, void *,
                        hotBarProc_t );
 void HotBarCancel( void );

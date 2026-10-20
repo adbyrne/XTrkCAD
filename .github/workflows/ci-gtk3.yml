@@ -1,155 +1,487 @@
-name: CI (GTK3V2MAIN)
+name: CI
 on:
   push:
     branches:
-      - GTK3V2MAIN
+      - main
+      - test/**
+  pull_request:
+    branches:
+      - main
+  # Lets hg-sync-default.yml start CI on the branches it pushes.
+  workflow_dispatch:
+
+# Every runner is pinned: ubuntu-24.04(-arm), macos-26, windows-2025, never a
+# -latest label, so image updates can't change results under us. The
+# compilers that gate a build are pinned too: the Ubuntu image fixes GCC,
+# Clang, cppcheck and clang-tidy; .github/actions/select-xcode fixes Xcode
+# (AppleClang); .github/actions/msys2-pin-gcc fixes MinGW GCC. Homebrew and
+# the rest of MSYS2 can't be pinned and still roll.
+#
+# Shared pieces, so nothing here is a hand-kept copy of another file:
+#   - gtk3-toolchain.yml: the toolchain-sensitive build/test jobs. Called
+#     here with the pinned runners, and by ci-gtk3-preview.yml with the next
+#     images (Ubuntu 26.04, Xcode 27, Windows on ARM). Move a pin forward
+#     once its preview is clean.
+#   - gtk3-qa-reports.yml: the report-only analysis jobs, also used by
+#     release.yml for the published HTML reports.
+#   - .github/actions/: apt-deps, select-xcode, msys2-pin-gcc, setup-doxygen.
+#   - tools/: cppcheck-gate.sh, astyle-check.sh.
 
 jobs:
-  mcp-tests:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7
-      - name: Run MCP tests
-        working-directory: mcp
-        run: uv run --extra dev pytest -q
-
   doxygen:
-    runs-on: ubuntu-latest
+    # Doxygen is pinned (.github/actions/setup-doxygen; official prebuilt Linux binary,
+    # not the apt package) rather than left to whatever Ubuntu's repo
+    # resolves to -- avoids the kind of silent tool drift astyle hit in SF
+    # #638. Bumped 2026-07-17 from 1.9.8 to 1.15.0 (matches what Ubuntu
+    # 26.04 ships) after confirming identical warning output on the current
+    # tree between both versions.
+    #
+    # docs/doxygen/Doxyfile.in was ported from Hg on 2026-07-16 to close a
+    # git/Hg divergence (git's copy predated an upstream 2026-05-07 tightening
+    # -- SF rev 6446/6432 -- and had separately drifted onto a different
+    # Doxygen-version template). WARN_AS_ERROR is deliberately kept at NO
+    # here even though Hg now sets FAIL_ON_WARNINGS: flipping it needs the
+    # remaining pre-existing @param/return-type doc gaps triaged or
+    # suppressed first (see .claude/doxygen-triage-plan.md; down to 402 as
+    # of 2026-07-17, from an original 930).
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev doxygen graphviz
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: graphviz
+      - uses: ./.github/actions/setup-doxygen
       - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
+        run: |
+          doxygen --version
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_USE_DOXYGEN=ON -DXTRKCAD_TESTING=OFF
       - name: Build docs
         run: cmake --build build --target docs-doxygen
 
-  c-tests-linux:
-    runs-on: ubuntu-latest
+  help-links-check:
+    # Gating. Verifies every runtime wHelp() topic actually resolves -- two
+    # independent families, both audited while chasing a dev's "cmdTurnoutHotBar.html
+    # not found" report:
+    #
+    #   - Command-context help (F1): app/wlib/gtk3lib/help.c's DoHelpMenu()
+    #     (SHOWHELPFORCOMMAND case) opens GetCurCommandName(), which only ever
+    #     returns a helpKey registered via AddMenuButton() (menu.c's
+    #     AddMenuButton -> AddCommand wrapper chain -- AddToolbarButton's
+    #     helpStr, by contrast, is tooltip text only, not reachable here).
+    #     SF #729, 5 broken links found and fixed.
+    #
+    #   - Per-dialog Help button: app/wlib/gtk3lib/dialog.c's GTK_RESPONSE_HELP
+    #     handler opens GetDialogHelpTopic(dialog->name) (SF #730,
+    #     app/bin/paramwrapper.c) -- dialog->name itself is deliberately never
+    #     renamed to fix a broken link (it also keys window-position prefs and
+    #     every field-level tooltip via app/wlib/gtk3lib/tooltip.c's
+    #     "<dialog>-<field>" lookup), so GetDialogHelpTopic() redirects through
+    #     a small alias table instead. 70 of 71 dialogs had no matching page
+    #     when #730 was filed -- fixed in verified batches, tracked on the
+    #     ticket, not all at once.
+    #
+    # Both checked by the single source of truth app/doc/check_help_links.py
+    # (also run as the HelpLinksCheck ctest when Doxygen+Python3 are found
+    # locally -- see app/doc/CMakeLists.txt) rather than duplicating the
+    # extraction logic here. Its own file header has the full extraction
+    # details, including the multi-line-AddMenuButton() extraction bug SF #729
+    # found in this job's first-draft version (a naive `grep -E` misses any
+    # call whose args span multiple lines -- cmdStructureHotBar was invisible
+    # to it for exactly that reason).
+    #
+    # This is a *different* Doxygen run than the doxygen job above: that one
+    # builds the internal API docs (docs/doxygen/Doxyfile.in, gated by
+    # XTRKCAD_USE_DOXYGEN); this job builds the User Guide the app actually
+    # ships and wHelp() points at (app/doc/Doxyfile.in, the help-html
+    # target -- builds automatically whenever Doxygen is found, no flag
+    # needed). Confirmed empirically 2026-08-25 that the two targets' INPUT
+    # sets don't overlap at all -- app/doc/*.dox (where every \page cmd...
+    # topic lives) isn't in the internal-docs job's INPUT.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
-      - name: Install dependencies
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: graphviz
+      - uses: ./.github/actions/setup-doxygen
+      - name: Configure
         run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+          doxygen --version
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF
+      - name: Build User Guide (help-html)
+        run: cmake --build build --target help-html
+      - name: Verify every wHelp() topic has a matching page
+        run: python3 app/doc/check_help_links.py . build/app/doc/html
+
+  toolchain:
+    # c-tests-linux, c-tests-linux-clang, c-tests-arm64, regression-gtk3,
+    # c-tests-sanitizers, cppcheck (the gate), c-tests-macos and
+    # c-tests-windows, on the pinned runners (the workflow's defaults).
+    uses: ./.github/workflows/gtk3-toolchain.yml
+
+  regression-gtk3-standalone:
+    # Companion to regression-gtk3 (gtk3-toolchain.yml): runs the ~47 individual per-demo
+    # tests (label "regression", excluding "regression-ci") that job
+    # deliberately skips. These exercise each demo standalone in its own
+    # fresh process, which is a meaningfully different code path from
+    # RegressionSuite's single warm process -- several real bugs (GTK3
+    # issues #21, #24) only ever manifested cold/standalone and passed
+    # RegressionSuite fine, so this job exists to actually catch that class
+    # going forward rather than relying on someone happening to run these
+    # locally. Self-contained (own checkout/build) matching every other job
+    # in this file, even though it duplicates the build regression-gtk3
+    # already does -- keeps each job simple and independently rerunnable,
+    # at the cost of some redundant build time.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Standalone per-demo regression tests
+        run: ctest --test-dir build -L "^regression$" -LE "regression-ci" --output-on-failure -VV
+
+  c-tests-debian:
+    # Debian 12/13 containers on amd64 and arm64 -- the arm64 entries are
+    # Raspberry Pi OS Bookworm/Trixie on a Pi 3/4/5. Catches older-toolchain
+    # breakage (Bookworm: GCC 12, CMake 3.25, GTK 3.24.38) before merge
+    # rather than in release.yml's package-linux-debian afterwards.
+    name: c-tests-debian (${{ matrix.debian }}, ${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        debian: [bookworm, trixie]
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container: debian:${{ matrix.debian }}
+    timeout-minutes: 20
+    steps:
+      - name: Install git (required by actions/checkout)
+        run: apt-get update -q && apt-get install -y git
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
       - name: Configure
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
       - name: Build
         run: cmake --build build
       - name: Test
-        run: ctest --test-dir build --output-on-failure
+        # See c-tests-linux: regression-gtk3 covers the GTK3 issue #26 suite.
+        run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
 
-  c-tests-sanitizers:
-    runs-on: ubuntu-latest
+  regression-gtk3-sanitizers:
+    # Closes the gap SF #682 documented: c-tests-sanitizers (gtk3-toolchain.yml) excludes the
+    # demo-playback regression suite (-LE regression), and regression-gtk3
+    # (also gtk3-toolchain.yml) isn't sanitizer-instrumented, so the two were never combined in
+    # CI -- only by a human happening to run them together locally, which is
+    # exactly how SF #675, #677-#680 were found (see docs/doxygen/advanced.md's
+    # "Static tools and a live sanitizer run catch different classes of bug").
+    # Scoped to RegressionSuite only (label regression-ci), not the ~47
+    # per-demo standalone tests regression-gtk3-standalone runs -- that's the
+    # combination that actually found those bugs, and doubling to standalone
+    # would multiply per-demo cold-start overhead under ASan instrumentation
+    # for unproven additional benefit; can be revisited if that job's own
+    # cold-start code path ever needs sanitizer coverage too.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build clang libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: clang
       - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON -DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang
       - name: Build
         run: cmake --build build
-      - name: Test
+      - name: Regression suite
         env:
           ASAN_OPTIONS: "abort_on_error=1:detect_leaks=1"
           UBSAN_OPTIONS: "abort_on_error=1:print_stacktrace=1"
-        # PreferenceTest requires a GTK3 display and triggers GTK3 internal
-        # allocations that ASAN flags as leaks. It is covered by c-tests-linux.
-        run: ctest --test-dir build --output-on-failure -E PreferenceTest
+        run: ctest --test-dir build -L regression-ci --output-on-failure -VV
 
   c-tests-valgrind:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin valgrind
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: valgrind
       - name: Configure
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
       - name: Build
         run: cmake --build build
       - name: Test under Valgrind
-        # PreferenceTest requires a GTK3 display; GTK3 internals also trigger
-        # many Valgrind false-positives. It is covered by c-tests-linux.
+        # PreferenceTest and MRUListTest (SF #794) both require a GTK3 display;
+        # GTK3 internals also trigger many Valgrind false-positives. Both are
+        # covered by c-tests-linux, which runs under xvfb-run.
+        # -LE regression: see c-tests-linux; the GTK3 issue #26 suite has its
+        # own job (regression-gtk3), not Valgrind-instrumented.
         run: |
           ctest --test-dir build --output-on-failure \
-            -E PreferenceTest \
+            -E "PreferenceTest|MRUListTest" \
+            -LE regression \
             -T memcheck \
-            --overwrite MemoryCheckCommand=$(which valgrind) \
+            --overwrite "MemoryCheckCommand=$(which valgrind)" \
             --overwrite "MemoryCheckCommandOptions=--error-exitcode=1 --track-origins=yes --leak-check=full"
 
-  cppcheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install cppcheck
-        run: sudo apt-get update -q && sudo apt-get install -y cppcheck
-      - name: Run cppcheck
-        run: |
-          cppcheck \
-            --error-exitcode=1 \
-            --force \
-            --suppress=missingInclude \
-            --suppress=missingIncludeSystem \
-            -I app/bin -I app/bin/include -I app/wlib/include \
-            app/bin/*.c app/dynstring/*.c
+  qa:
+    # coverage, cppcheck-deep, clang-tidy, codespell and compiler-warnings,
+    # as plain-text PR artifacts. Never fails the run.
+    uses: ./.github/workflows/gtk3-qa-reports.yml
 
-  c-tests-macos:
-    runs-on: macos-latest
+  docs-drift-check:
+    # Non-blocking reminder, not a gate. Doxygen's own build-time gate (the doxygen job
+    # above) catches broken doc *syntax* -- it can't catch doc *content* that's gone
+    # stale because the CI/CMake behavior it describes changed underneath it. That
+    # exact gap bit twice in one session 2026-07-31: a devguide caveat about a known
+    # regression-test false-failure (gtk3issues #21) was added to docs/doxygen/mainpage.md
+    # in the same PR as the CI fix it explains (PR #67), then a second, separate gap
+    # (the Linux quickstart's plain `ctest` silently picking up the same false-failure
+    # class) was only caught by a follow-up human question, not any automation -- see
+    # bug-tracker.md's Action Queue item 17 and PR #68. This job just flags -- via a
+    # step-summary comment, not a failing check -- when a PR touches CI workflows or
+    # CMake build files without touching docs/doxygen/, so a reviewer gets nudged to
+    # ask "does this need a devguide update?" instead of relying on catching it by eye.
+    # Deliberately a path-based heuristic, not a semantic check: it can't tell a
+    # docs-irrelevant change (e.g. a timeout bump) from one that actually needs a
+    # devguide update, so false positives are expected and fine -- it's a prompt for a
+    # human judgment call, not a verdict.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check for CI/CMake changes without a matching docs update
+        run: |
+          CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD)
+          CI_CMAKE_CHANGED=$(echo "$CHANGED" | grep -E '^(\.github/workflows/|CMakeLists\.txt$|.*\.cmake$)' || true)
+          DOCS_CHANGED=$(echo "$CHANGED" | grep -E '^docs/doxygen/' || true)
+          if [ -n "$CI_CMAKE_CHANGED" ] && [ -z "$DOCS_CHANGED" ]; then
+            {
+              echo "### :memo: Devguide reminder"
+              echo
+              echo "This PR changes CI workflow or CMake build files but not \`docs/doxygen/\`:"
+              echo
+              echo '```'
+              echo "$CI_CMAKE_CHANGED"
+              echo '```'
+              echo
+              echo "If this change affects behavior the devguide describes (build/test steps,"
+              echo "CI gates, CMake options), please update \`docs/doxygen/mainpage.md\`/"
+              echo "\`advanced.md\` too. If not, this is just a heuristic nudge -- ignore it."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  astyle-check:
+    # Gating: fails if any tracked app/bin, app/wlib, app/help, or app/tools file is not
+    # conformant with app/lib/astylerc (the last two added SF #701/#729-730 follow-up,
+    # bug-tracker.md Action Queue item 22; confirmed 0 findings before widening). astyle's
+    # --dry-run always exits 0, so the gate parses its output for "Formatted" lines rather
+    # than relying on the exit code.
+    #
+    # Vendored-code exclusion list (quality-plan-gtk3v2main-part2.md Phase 8
+    # — encoded in tools/astyle-check.sh, shared by all three astyle jobs and local runs):
+    #   - app/wlib/gtk3lib/wrapbox/eggwrapbox.c and testwrapbox.c: upstream
+    #     GTK "eggwrapbox" widget, vendored verbatim. Both excluded via
+    #     --exclude=wrapbox (matches the directory; verified empirically that
+    #     astyle's --exclude matches full path components, not substrings, so
+    #     this can't accidentally match an unrelated file).
+    #   - app/tools/halibut/: vendored doc-processing tool. Deleted (SF #219);
+    #     kept documented here in case a reviewer wonders why it's absent.
+    #   - app/tools/dirent.c/dirent.h: vendored public-domain Win32 dirent
+    #     shim (Kevlin Henney, 1997/2003), excluded via --exclude=dirent.c/
+    #     --exclude=dirent.h now that app/tools is in this job's scope.
+    #   - app/bin/uthash.h: vendored (Troy D. Hanson). Upstream SF r7368+
+    #     replaced it with an unformatted newer release (and dropped the
+    #     gtk3lib copy); excluded via --exclude=uthash.h rather than
+    #     reformatting it away from Hg.
+    #   - unittest/ dirs: excluded separately (see quality-plan-gtk3v2main.md
+    #     Phase 0) — some unittest sources are deliberately non-conformant.
+    #
+    # astyle is built from source and pinned (ASTYLE_VERSION in tools/astyle-check.sh) rather than
+    # installed via apt: the apt-resolved version drifts silently whenever
+    # the distro package updates, which is exactly what caused the drift in
+    # SF #638 (2026-07-12) — an older/different astyle version produced
+    # different continuation-line indentation for the same input. A later
+    # comment on that bug asked for CI to pin 3.6.x specifically; building
+    # from source lets every job (this one, astyle-check-macos,
+    # astyle-check-windows) run the identical version regardless of what
+    # each platform's package manager happens to ship.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check formatting (dry-run)
+        run: tools/astyle-check.sh --build
+
+  astyle-check-macos:
+    # Report-only, NOT gating: verifies that astyle built from source on
+    # macOS agrees with the pinned Linux astyle-check gate above for the
+    # same source tree. Added 2026-07-13 after an SF reviewer found
+    # historical cross-changeset indentation drift on cjoin.c and asked
+    # whether astyle is platform-dependent. Originally used `brew install
+    # astyle`, but Homebrew's formula isn't version-pinned; switched
+    # 2026-07-14 to build the same ASTYLE_VERSION from source as the Linux
+    # gate (see astyle-check's comment — SF #638 asked for 3.6.x to be
+    # pinned everywhere) so this job now isolates compiler/OS differences
+    # rather than astyle-version differences. Kept report-only since a
+    # disagreement here would still point to a toolchain quirk unrelated to
+    # the PR's actual content.
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/select-xcode
+      - name: Compare formatting output (non-fatal)
+        run: tools/astyle-check.sh --build --warn-only macOS
+
+  astyle-check-windows:
+    # Report-only, NOT gating — see astyle-check-macos above for rationale.
+    # Uses MSYS2 (matching c-tests-windows' MINGW64 toolchain) rather than a
+    # native Win32 astyle build, since that's the toolchain actually used to
+    # build this project on Windows. Originally installed
+    # mingw-w64-x86_64-astyle via pacman; switched 2026-07-14 to build the
+    # same pinned ASTYLE_VERSION from source (see astyle-check's comment)
+    # so all three astyle jobs run the identical version.
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: mingw-w64-x86_64-gcc make
+      - uses: ./.github/actions/msys2-pin-gcc
+      - name: Compare formatting output (non-fatal)
+        run: tools/astyle-check.sh --build --warn-only Windows/MSYS2
+
+  fuzz-getargs:
+    # Gating, bounded-time regression check (not continuous fuzzing
+    # infrastructure) for GetArgs() (getargs.c), the format-string parser
+    # used throughout the .xtc/.xtr/.xtp file readers to pull typed fields
+    # out of untrusted file lines. Reuses the c-tests-sanitizers job's
+    # clang+ASan/UBSan toolchain, plus libFuzzer (-fsanitize=fuzzer).
+    #
+    # Deliberately covers only the format codes verified safe by an
+    # extended local fuzzing run (60M+ executions, 0 crashes) -- see
+    # fuzz_getargs.c's file comment for why one format code is excluded.
+    # Including it here would make this job permanently red on a known,
+    # already-tracked issue instead of being a useful gate against new
+    # regressions.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: clang
+      - name: Configure and build fuzz_getargs
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=OFF -DXTRKCAD_FUZZ=ON -DCMAKE_C_COMPILER=clang
+          cmake --build build --target fuzz_getargs
+      - name: Run fuzz_getargs (bounded time budget)
+        run: ./build/app/bin/fuzz/fuzz_getargs -max_total_time=120
+
+  compiler-warnings-macos:
+    # Report-only: captures -Wall -Wextra output on macOS/clang as an artifact.
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/select-xcode
       - name: Install dependencies
         run: brew install ninja gtk+3 cmocka libzip librsvg
-      - name: Configure
+      - name: Configure with -Wall -Wextra
         run: |
           GTK_PREFIX=$(brew --prefix gtk+3)
-          export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          export PKG_CONFIG_PATH
           GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
             -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
-            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS"
-      - name: Build
-        run: cmake --build build
-      - name: Test
-        run: ctest --test-dir build --output-on-failure
-
-  c-tests-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-      - name: Cache vcpkg packages
-        uses: actions/cache@v5
-        id: vcpkg-cache
-        with:
-          path: C:\vcpkg\installed
-          key: vcpkg-x64-windows-cmocka-zlib-libzip-freeimage-v1
-      - name: Install dependencies
-        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
-        run: vcpkg install cmocka:x64-windows zlib:x64-windows libzip:x64-windows freeimage:x64-windows
-      - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_PREFIX_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows"
-      - name: Build
+            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
+            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON \
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
+      - name: Build (warnings captured, non-fatal)
+        run: cmake --build build 2>&1 | tee build/warnings.txt || true
+      - name: Summarise warnings
         run: |
-          cmake --build build 2>&1 | Tee-Object -FilePath build/build-log.txt
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v5
+          COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
+          echo "Total warnings: $COUNT"
+          echo ""
+          echo "=== By warning flag ==="
+          grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true
+          echo ""
+          echo "=== By file (top 20) ==="
+          grep ': warning:' build/warnings.txt | grep -oE '^[^:]+' | sed 's|.*/||' | sort | uniq -c | sort -rn | head -20 || true
+      - name: Upload warning log
+        uses: actions/upload-artifact@v7
         with:
-          name: windows-build-log
-          path: build/build-log.txt
-      - name: Test
-        run: ctest --test-dir build --output-on-failure
+          name: compiler-warnings-gtk3-macos
+          path: build/warnings.txt
+
+  compiler-warnings-windows:
+    # Report-only: captures -Wall -Wextra output on Windows/MinGW64 as an artifact.
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-gtk3
+            mingw-w64-x86_64-zlib
+            mingw-w64-x86_64-libzip
+            mingw-w64-x86_64-mxml
+            mingw-w64-x86_64-librsvg
+            mingw-w64-x86_64-cmocka
+      - uses: ./.github/actions/msys2-pin-gcc
+      - name: Configure with -Wall -Wextra
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_USE_GETTEXT=OFF \
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
+      - name: Build (warnings captured, non-fatal)
+        run: cmake --build build --parallel 2>&1 | tee build/warnings.txt || true
+      - name: Summarise warnings
+        run: |
+          COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
+          echo "Total warnings: $COUNT"
+          echo ""
+          echo "=== By warning flag ==="
+          grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true
+          echo ""
+          echo "=== By file (top 20) ==="
+          grep ': warning:' build/warnings.txt | grep -oE '^[^:]+' | sed 's|.*/||' | sort | uniq -c | sort -rn | head -20 || true
+      - name: Upload warning log
+        uses: actions/upload-artifact@v7
+        with:
+          name: compiler-warnings-gtk3-windows
+          path: build/warnings.txt

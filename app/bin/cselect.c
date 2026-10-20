@@ -32,20 +32,14 @@
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
-#include "track.h"
+#include "icons.h"
+#include "form.h"
 #include "cjoin.h"
-#include "draw.h"
 #include "misc.h"
 #include "common-ui.h"
 #include "ctrain.h"
 
-
-#include "bitmaps/bmendpt.xbm"
-#include "bitmaps/bma0.xbm"
-#include "bitmaps/bma45.xbm"
-#include "bitmaps/bma90.xbm"
-#include "bitmaps/bma135.xbm"
+static int log_cselect = -1;
 
 #define SETMOVEMODE "MOVEMODE"
 
@@ -289,11 +283,8 @@ static void SelectedTrackCountChange( void )
 {
 	static long oldCount = 0;
 	if (selectedTrackCount != oldCount) {
-		if (oldCount == 0) {
-			/* going non-0 */
-			EnableCommands();
-		} else if (selectedTrackCount == 0) {
-			/* going 0 */
+		if (oldCount == 0 || selectedTrackCount == 0) {
+			/* going non-0, or going 0 */
 			EnableCommands();
 		}
 		oldCount = selectedTrackCount;
@@ -306,11 +297,11 @@ static void DrawTrackAndEndPts(
         wDrawColor color )
 {
 	EPINX_T ep, ep2;
-	track_p trk2;
 
 	DrawTrack( trk, &mainD, color );
 	for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-		if ((trk2=GetTrkEndTrk(trk,ep)) != NULL) {
+		track_p trk2=GetTrkEndTrk(trk,ep);
+		if (trk2 != NULL) {
 			CHECK( !IsTrackDeleted(trk) );
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
 			DrawEndPt( &mainD, trk2, ep2,
@@ -407,6 +398,11 @@ static void RedrawSelectedTracksBoundary()
 }
 
 
+EXPORT void SetAllTrackSelectCB( void * context )
+{
+	SetAllTrackSelect( (BOOL_T)VP2L(context) );
+}
+
 EXPORT void SetAllTrackSelect( BOOL_T select )
 {
 	track_p trk;
@@ -480,14 +476,13 @@ EXPORT void OrphanedTrackSelect( void *ptr )
 {
 	track_p trk;
 	EPINX_T ep;
-	int cnt ;
 
 	trk = NULL;
 
 	while( TrackIterate( &trk ) ) {
-		cnt = 0;
 		if( GetLayerVisible( GetTrkLayer( trk ) && !GetLayerModule(GetTrkLayer(trk))
 		                     && !GetLayerFrozen(GetTrkLayer(trk)))) {
+			int cnt = 0;
 			for( ep = 0; ep < GetTrkEndPtCnt( trk ); ep++ ) {
 				if( GetTrkEndTrk( trk, ep ) ) {
 					cnt++;
@@ -567,7 +562,6 @@ static void SelectConnectedTracks(
 	EPINX_T ep;
 	DYNARR_RESET( track_p, tlist_da );
 	TlistAppend( trk );
-	InfoCount( 0 );
 	if (!display_only) {
 		wDrawDelayUpdate( mainD.d, FALSE );
 	}
@@ -605,13 +599,10 @@ static void SelectConnectedTracks(
 		if (display_only && !GetLayerFrozen(GetTrkLayer(trk))) {
 			DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
 		} else if (!GetTrkSelected(trk)) {
-			if (GetLayerModule(GetTrkLayer(trk))) {
-				continue;
-			} else if (GetLayerFrozen(GetTrkLayer(trk))) {
+			if (GetLayerModule(GetTrkLayer(trk)) || GetLayerFrozen(GetTrkLayer(trk))) {
 				continue;
 			} else {
 				SelectOneTrack( trk, TRUE );
-				InfoCount( inx+1 );
 			}
 		}
 	}
@@ -619,7 +610,6 @@ static void SelectConnectedTracks(
 		RedrawSelectedTracksBoundary();
 		wDrawDelayUpdate( mainD.d, TRUE );
 		wFlush();
-		InfoCount( trackCount );
 	}
 }
 
@@ -631,7 +621,7 @@ static int DoModuleTracks( int moduleLayer, doModuleTrackCallBack_t doit,
 	trk = NULL;
 	int cnt = 0;
 	while ( TrackIterate( &trk ) ) {
-		if (GetTrkLayer(trk) == moduleLayer) {
+		if ((int)GetTrkLayer(trk) == moduleLayer) {
 			doit( trk, val );
 			cnt++;
 		}
@@ -751,6 +741,11 @@ static void SelectLineType( void* widthVP )
 
 static BOOL_T doingDouble;
 
+EXPORT void SelectDeleteCB( void * context )
+{
+	SelectDelete();
+}
+
 EXPORT int SelectDelete( void )
 {
 	if (GetCurrentCommand() != selectCmdInx ) {
@@ -807,7 +802,6 @@ BOOL_T flipHiddenDoSelectRecount;
 static BOOL_T FlipHidden( track_p trk, BOOL_T unused )
 {
 	EPINX_T i;
-	track_p trk2;
 
 	DrawTrackAndEndPts( trk, wDrawColorWhite );
 	/*UndrawNewTrack( trk );
@@ -829,11 +823,13 @@ static BOOL_T FlipHidden( track_p trk, BOOL_T unused )
 	}
 	/*DrawNewTrack( trk );*/
 	DrawTrackAndEndPts( trk, wDrawColorBlack );
-	for (i=0; i<GetTrkEndPtCnt(trk); i++)
-		if ((trk2=GetTrkEndTrk(trk,i)) != NULL) {
+	for (i=0; i<GetTrkEndPtCnt(trk); i++) {
+		track_p trk2=GetTrkEndTrk(trk,i);
+		if (trk2 != NULL) {
 			UndoModify( trk2 );
 			/*DrawNewTrack( trk2 );*/
 		}
+	}
 	return TRUE;
 }
 
@@ -1043,13 +1039,13 @@ EXPORT void ClearElevations( void * unused )
 static DIST_T elevDelta;
 static BOOL_T AddElevation( track_p trk, BOOL_T unused )
 {
-	track_p trk1;
 	EPINX_T ep, ep1;
-	int mode;
+	int elevMode;
 	DIST_T elev;
 
 	for ( ep=0; ep<GetTrkEndPtCnt(trk); ep++ ) {
-		if ((trk1=GetTrkEndTrk(trk,ep))) {
+		track_p trk1=GetTrkEndTrk(trk,ep);
+		if (trk1) {
 			ep1 = GetEndPtConnectedToMe( trk1, trk );
 			if (ep1 >= 0) {
 				if (GetTrkSelected(trk1) && GetTrkIndex(trk1)<GetTrkIndex(trk)) {
@@ -1059,9 +1055,9 @@ static BOOL_T AddElevation( track_p trk, BOOL_T unused )
 		}
 		if (EndPtIsDefinedElev(trk,ep)) {
 			DrawEndPt2( &mainD, trk, ep, wDrawColorWhite );
-			mode = GetTrkEndElevUnmaskedMode(trk,ep);
+			elevMode = GetTrkEndElevUnmaskedMode(trk,ep);
 			elev = GetTrkEndElevHeight(trk,ep);
-			SetTrkEndElev( trk, ep, mode, elev+elevDelta, NULL );
+			SetTrkEndElev( trk, ep, elevMode, elev+elevDelta, NULL );
 			ClrTrkElev( trk );
 			DrawEndPt2( &mainD, trk, ep, wDrawColorBlack );
 		}
@@ -1110,11 +1106,10 @@ EXPORT void WriteSelectedTracksToTempSegs( void )
 static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color )
 {
 	wIndex_t inx;
-	track_p trk;
 	coOrd lo, hi;
 	/*wDrawDelayUpdate( d->d, TRUE );*/
 	for (inx=0; inx<tlist_da.cnt; inx++) {
-		trk = Tlist(inx);
+		track_p trk = Tlist(inx);
 		if (d != &mapD) {
 			GetBoundingBox( trk, &hi, &lo );
 			if ( OFF_D( d->orig, d->size, lo, hi ) ) {
@@ -1214,13 +1209,12 @@ static int movedCnt;
 static void AccumulateTracks( void )
 {
 	wIndex_t inx;
-	track_p trk;
 	coOrd lo, hi;
 
 	/*wDrawDelayUpdate( moveD.d, TRUE );*/
 	movedCnt =0;
 	for ( inx = 0; inx<tlist_da.cnt; inx++ ) {
-		trk = Tlist(inx);
+		track_p trk = Tlist(inx);
 		if (trk) {
 			GetBoundingBox( trk, &hi, &lo );
 			if (lo.x <= moveD_hi.x && hi.x >= moveD_lo.x &&
@@ -1232,7 +1226,6 @@ static void AccumulateTracks( void )
 			movedCnt++;
 		}
 	}
-	InfoCount( movedCnt );
 	/*wDrawDelayUpdate( moveD.d, FALSE );*/
 }
 
@@ -1259,9 +1252,8 @@ static void AddEndCornus()
 
 static void RemoveEndCornus()
 {
-	track_p tc;
 	for (int i=0; i<auto_select_da.cnt; i++) {
-		tc = DYNARR_N(track_p,auto_select_da,i);
+		track_p tc = DYNARR_N(track_p,auto_select_da,i);
 		SelectOneTrack( tc, FALSE );
 		RemoveSelectedTrack(tc);
 	}
@@ -1278,7 +1270,6 @@ static void GetMovedTracks( BOOL_T undraw )
 	DYNARR_RESET( trkSeg_p, tempSegs_da );
 	moveOrig = mainD.orig;
 	movedCnt = 0;
-	InfoCount(0);
 	wSetCursor( mainD.d, defaultCursor );
 	moveD_hi = moveD_lo = mainD.orig;
 	moveD_hi.x += mainD.size.x;
@@ -1291,8 +1282,6 @@ static void GetMovedTracks( BOOL_T undraw )
 
 static void SetMoveD( BOOL_T moveB, coOrd orig, ANGLE_T angle )
 {
-	int inx;
-
 	moveOrig.x = orig.x;
 	moveOrig.y = orig.y;
 	moveAngle = angle;
@@ -1316,7 +1305,7 @@ static void SetMoveD( BOOL_T moveB, coOrd orig, ANGLE_T angle )
 		moveD_hi = mainD.orig;
 		Rotate( &moveD_hi, orig, -angle );
 		moveD_lo = moveD_hi;
-		for (inx=0; inx<3; inx++) {
+		for (int inx=0; inx<3; inx++) {
 			Rotate( &corner[inx], orig, -angle );
 			if (corner[inx].x < moveD_lo.x) {
 				moveD_lo.x = corner[inx].x;
@@ -1341,6 +1330,8 @@ static void DrawMovedTracks( void )
 	int inx;
 	track_p trk;
 	dynArr_t cornu_segs;
+	// cppcheck-suppress unreadVariable -- DYNARR_INIT's .max/.cnt are reset again
+	// by DYNARR_RESET below before any read; its .ptr=NULL is not dead
 	DYNARR_INIT( trkSeg_t, cornu_segs );
 
 	DrawSegsDA( &tempD, NULL, moveOrig, moveAngle, &tempSegs_da, 0.0, selectedColor,
@@ -1351,11 +1342,11 @@ static void DrawMovedTracks( void )
 		if (QueryTrack(trk,Q_IS_CORNU)) {
 			DYNARR_RESET(trkSeg_t,cornu_segs);
 			coOrd pos[2];
-			DIST_T radius[2];
-			ANGLE_T angle[2];
 			coOrd center[2];
 			trackParams_t trackParams;
 			if (GetTrackParams(PARAMS_CORNU, trk, zero, &trackParams)) {
+				DIST_T radius[2];
+				ANGLE_T angle[2];
 				for (int i=0; i<2; i++) {
 					pos[i] = trackParams.cornuEnd[i];
 					center[i] = trackParams.cornuCenter[i];
@@ -1426,7 +1417,8 @@ static void MoveTracks(
 			RotateTrack( trk, orig, angle );
 		}
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+			trk1 = GetTrkEndTrk(trk,ep);
+			if (trk1 != NULL &&
 			    !GetTrkSelected(trk1)) {
 				ep1 = GetEndPtConnectedToMe( trk1, trk );
 				DisconnectTracks( trk, ep, trk1, ep1 );
@@ -1445,7 +1437,8 @@ static void MoveTracks(
 		}
 		for (int i=0; i<2; i++) {
 			track_p te;
-			if ((te = GetTrkEndTrk(trk,i)) && !GetTrkSelected(te)) {
+			te = GetTrkEndTrk(trk,i);
+			if (te && !GetTrkSelected(te)) {
 				fixed_end = TRUE;
 			}
 		}
@@ -1457,7 +1450,8 @@ static void MoveTracks(
 				RotateTrack( trk, orig, angle );
 			}
 			for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-				if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+				trk1 = GetTrkEndTrk(trk,ep);
+				if (trk1 != NULL &&
 				    !GetTrkSelected(trk1)) {
 					ep1 = GetEndPtConnectedToMe( trk1, trk );
 					DisconnectTracks( trk, ep, trk1, ep1 );
@@ -1466,7 +1460,8 @@ static void MoveTracks(
 			}
 		} else {
 			for (int i=0; i<2; i++) {
-				if ((trk1 = GetTrkEndTrk(trk,i)) && GetTrkSelected(trk1)) {
+				trk1 = GetTrkEndTrk(trk,i);
+				if (trk1 && GetTrkSelected(trk1)) {
 					ep1 = GetEndPtConnectedToMe( trk1, trk );
 					DisconnectTracks(trk,i,trk1,ep1);
 					GetTrackParams(PARAMS_CORNU,trk1,GetTrkEndPos(trk1,ep1),&trackParms);
@@ -1520,8 +1515,6 @@ static void MoveTracks(
 				}
 			}
 		}
-
-		InfoCount( inx );
 	}
 	RemoveEndCornus();
 	ClrAllTrkBits(TB_UNDRAWN);
@@ -1530,7 +1523,7 @@ static void MoveTracks(
 	if (undo) {
 		UndoEnd();
 	}
-	InfoCount( trackCount );
+
 }
 
 void MoveToJoin(
@@ -1593,7 +1586,8 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 		track_p ts = Tlist(inx);
 		for (int i=0; i<GetTrkEndPtCnt(ts); i++) { //All EndPoints
 			track_p ct;
-			if ((ct = GetTrkEndTrk(ts,i))!=NULL) {
+			ct = GetTrkEndTrk(ts,i);
+			if (ct!=NULL) {
 				if (GetTrkSelected(ct) || QueryTrack(ts,Q_IS_CORNU)) {
 					continue;    // Another selected track or Cornu - ignore
 				}
@@ -1609,7 +1603,8 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 			coOrd pos2;
 			pos2 = pos1;
 			track_p tt;
-			if ((tt=OnTrackIgnore(&pos2,FALSE,TRUE,ts))!=NULL) {
+			tt=OnTrackIgnore(&pos2,FALSE,TRUE,ts);
+			if (tt!=NULL) {
 				if (GetTrkGauge(ts) != GetTrkGauge(tt)) {
 					continue;    //Ignore if different gauges
 				}
@@ -1660,7 +1655,7 @@ void DrawHighlightLayer(int layer)
 		if (!GetTrkSelected(ts)) {
 			continue;
 		}
-		if (GetTrkLayer(ts) != layer) {
+		if ((int)GetTrkLayer(ts) != layer) {
 			continue;
 		}
 		coOrd hi,lo;
@@ -2002,7 +1997,6 @@ static STATUS_T CmdRotate(
 	static BOOL_T direction_set;
 	static track_p trk;
 	ANGLE_T angle1;
-	coOrd pos1;
 	static int state;
 
 	static EPINX_T ep1;
@@ -2065,7 +2059,6 @@ static STATUS_T CmdRotate(
 			/*DrawLine( &mainD, base, orig, 0, wDrawColorBlack );
 			DrawMovedTracks(FALSE, orig, angle);*/
 		} else {
-			pos1 = pos;
 			drawnAngle = FALSE;
 			onTrackInSplit = TRUE;
 			trk = OnTrack( &pos, TRUE, FALSE );
@@ -2119,7 +2112,7 @@ static STATUS_T CmdRotate(
 			return C_CONTINUE;
 		}
 		if ( rotateAlignState == 2 ) {
-			pos1 = pos;
+			coOrd pos1 = pos;
 			onTrackInSplit = TRUE;
 			trk = OnTrack( &pos, TRUE, FALSE );
 			onTrackInSplit = FALSE;
@@ -2302,9 +2295,9 @@ static STATUS_T CmdRotate(
 			break;
 		}
 		if ( rotateAlignState != 2 ) {
-			DIST_T width = tempD.scale*0.15;
 			DrawLine( &tempD, base, orig, 0, wDrawColorBlue );
 			if (drawnAngle) {
+				DIST_T width = tempD.scale*0.15;
 				DrawLine( &tempD, orig_base, orig, (wDrawWidth)width/2, wDrawColorBlue );
 				ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig,
 				                                    base));
@@ -2349,6 +2342,10 @@ static STATUS_T CmdRotate(
 		DrawMovedTracks();
 		break;
 
+	default:
+		if ( log_cselect < 0 ) { log_cselect = LogFindIndex( "cselect" ); }
+		LOG( log_cselect, 1, ( "unexpected action %d in CmdRotate\n", action ) )
+		break;
 	}
 	return C_CONTINUE;
 }
@@ -2398,7 +2395,7 @@ static track_p SelectTrackByIndex(TRKINX_T ti, char * message )
 EXPORT void SelectByIndex( void* string)
 {
 	char result[STR_LONG_SIZE] = "";
-	char * message;
+	char * trkMsg;
 	SetAllTrackSelect(FALSE);
 	char * cp = (char *)string;
 	cp = strtok(cp,",");
@@ -2407,12 +2404,12 @@ EXPORT void SelectByIndex( void* string)
 	while (cp) {
 		long ti = strtol(cp,&cp,0);
 		if (ti>0) {
-			message = MyMalloc(STR_LONG_SIZE);
-			trk = SelectTrackByIndex(ti, message);
-			if (!trk || message[0]) {
+			trkMsg = MyMalloc(STR_LONG_SIZE);
+			trk = SelectTrackByIndex(ti, trkMsg);
+			if (!trk || trkMsg[0]) {
 				size_t len = strlen(result);
-				snprintf(result+len,(sizeof(result) - len),"I:%ld %s", ti, message);
-				MyFree(message);
+				snprintf(result+len,(sizeof(result) - len),"I:%ld %s", ti, trkMsg);
+				MyFree(trkMsg);
 			}
 		}
 		cp = strtok(NULL,",");
@@ -2498,7 +2495,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 	BOOL_T hidden_t, hidden;
 	coOrd dpos = pos;
 //		coOrd cpos;
-	int mode = -1;
+	int foundMode = -1;
 	while ( TrackIterate( &trk1 ) ) {
 		if ( !GetLayerVisible(GetTrkLayer(trk1)) ) {
 			continue;
@@ -2516,7 +2513,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 					dd = d;
 					trk = trk1;
 					ep = ep1;
-					mode = 0;
+					foundMode = 0;
 					hidden = FALSE;
 //						cpos= dpos;
 				}
@@ -2541,7 +2538,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 1;
+			foundMode = 1;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2550,7 +2547,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 2;
+			foundMode = 2;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2559,7 +2556,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 3;
+			foundMode = 3;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2568,7 +2565,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 4;
+			foundMode = 4;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2577,7 +2574,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 5;
+			foundMode = 5;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2586,7 +2583,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			dd = d;
 			trk = trk1;
 			ep = -1;
-			mode = 6;
+			foundMode = 6;
 			hidden = hidden_t;
 //				cpos = dpos;
 		}
@@ -2600,14 +2597,15 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
 			*ep_o = ep;
 		}
 		if (mode_o) {
-			*mode_o = mode;
+			*mode_o = foundMode;
 		}
 		if (hidden_o) {
 			*hidden_o = hidden;
 		}
 		return trk;
 	} else {  // Return other track for description (not near to description but nearest to track)
-		if ((trk1 = OnTrack(&pos1, FALSE, FALSE))==NULL) {
+		trk1 = OnTrack(&pos1, FALSE, FALSE);
+		if (trk1==NULL) {
 			return NULL;
 		}
 		if (!QueryTrack( trk1, Q_HAS_DESC )) {
@@ -2641,7 +2639,7 @@ STATUS_T CmdMoveDescription(
 {
 	static EPINX_T ep;
 	static BOOL_T hidden;
-	static int mode;
+	static int descMode;
 	BOOL_T bChanged;
 
 	moveDescMode = VP2L(
@@ -2653,22 +2651,23 @@ STATUS_T CmdMoveDescription(
 		moveDescTrk = NULL;
 		moveDescPos = zero;
 		hidden = FALSE;
-		mode = -1;
+		descMode = -1;
 		if ( labelWhen < 2 || mainD.scale > labelScale ||
 		     (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
 			ErrorMessage( MSG_DESC_NOT_VISIBLE );
 			return C_ERROR;
 		}
 		SetAllTrackSelect( FALSE );
-	/* falls through */
+		__attribute__((fallthrough));
 	case wActionMove:
 		if ( labelWhen < 2 || mainD.scale > labelScale ) {
 			return C_CONTINUE;
 		}
-		mode = moveDescMode
-		       -1;   // -1 means everything, 0 means elevations only, 1 means descriptions only
-		if ((moveDescTrk=FindTrackDescription(pos,&ep,&mode,TRUE,&hidden))!=NULL) {
-			if (mode==0) {
+		descMode = moveDescMode
+		           -1;   // -1 means everything, 0 means elevations only, 1 means descriptions only
+		moveDescTrk=FindTrackDescription(pos,&ep,&descMode,TRUE,&hidden);
+		if (moveDescTrk!=NULL) {
+			if (descMode==0) {
 				InfoMessage(_("Elevation description"));
 			} else {
 				if (moveDescMode == 1) {
@@ -2693,7 +2692,7 @@ STATUS_T CmdMoveDescription(
 		if (!moveDescTrk) {
 			return C_CONTINUE;
 		}
-		if (mode == 0) {
+		if (descMode == 0) {
 			return C_CONTINUE;
 		}
 		bChanged = FALSE;
@@ -2727,8 +2726,8 @@ STATUS_T CmdMoveDescription(
 			ErrorMessage( MSG_DESC_NOT_VISIBLE );
 			return C_ERROR;
 		}
-		mode = moveDescMode-1;
-		moveDescTrk = FindTrackDescription(pos,&ep,&mode,TRUE,&hidden);
+		descMode = moveDescMode-1;
+		moveDescTrk = FindTrackDescription(pos,&ep,&descMode,TRUE,&hidden);
 		if (moveDescTrk == NULL ) {
 			return C_CONTINUE;
 		}
@@ -2740,7 +2739,7 @@ STATUS_T CmdMoveDescription(
 		if (ep == -1 ) {
 			DrawTrack( moveDescTrk, &mainD, wDrawColorWhite );
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 		if (moveDescTrk == NULL ) {
 			return C_CONTINUE;
@@ -2749,7 +2748,7 @@ STATUS_T CmdMoveDescription(
 		UndoModify( moveDescTrk );
 		ClrTrkBits( moveDescTrk, TB_HIDEDESC );
 		hidden = FALSE;
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_UP:
 		if ( labelWhen < 2 || mainD.scale > labelScale ) {
 			return C_CONTINUE;
@@ -2758,7 +2757,7 @@ STATUS_T CmdMoveDescription(
 			return C_CONTINUE;
 		}
 //		int rc = C_CONTINUE;
-		switch (mode) {
+		switch (descMode) {
 		case 0:
 			EndPtDescriptionMove( moveDescTrk, ep, action, pos );
 			break;
@@ -2780,6 +2779,11 @@ STATUS_T CmdMoveDescription(
 		case 6:
 			JointDescriptionMove( moveDescTrk, action, pos);
 			break;
+		default:
+			if ( log_cselect < 0 ) { log_cselect = LogFindIndex( "cselect" ); }
+			LOG( log_cselect, 1, ( "unexpected descMode %d in CmdMoveDescription\n",
+			                       descMode ) )
+			break;
 		}
 		hidden = FALSE;
 		if ( action == C_UP ) {
@@ -2793,7 +2797,7 @@ STATUS_T CmdMoveDescription(
 			return C_CONTINUE;
 		}
 		if ( moveDescTrk ) {
-			if (mode==0) {
+			if (descMode==0) {
 				DrawEndPt2( &tempD, moveDescTrk, ep, drawColorPreviewSelected );
 			} else {
 				if (hidden) {
@@ -2805,7 +2809,7 @@ STATUS_T CmdMoveDescription(
 		}
 		break;
 	case C_CMDMENU:
-		if (moveDescTrk != NULL && mode !=0) {
+		if (moveDescTrk != NULL && descMode !=0) {
 			if ( GetLayerFrozen( GetTrkLayer( moveDescTrk ) ) ) {
 				moveDescTrk = NULL;
 				break;
@@ -2865,7 +2869,8 @@ static void FlipTracks(
 			DrawTrack( trk, &mapD, wDrawColorWhite );
 		}
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+			trk1 = GetTrkEndTrk(trk,ep);
+			if (trk1 != NULL &&
 			    !GetTrkSelected(trk1)) {
 				ep1 = GetEndPtConnectedToMe( trk1, trk );
 				DisconnectTracks( trk, ep, trk1, ep1 );
@@ -2886,7 +2891,6 @@ static void FlipTracks(
 	}
 	wSetCursor( mainD.d, defaultCursor );
 	UndoEnd();
-	InfoCount( trackCount );
 }
 
 
@@ -2955,7 +2959,6 @@ static BOOL_T SelectArea(
 	static coOrd base, size, lo, hi;
 	static BOOL_T add;
 	static BOOL_T subtract;
-	int cnt;
 
 	track_p trk;
 
@@ -2998,7 +3001,7 @@ static BOOL_T SelectArea(
 			state = 0;
 			add = (action == C_UP);
 			subtract = (action == C_RUP);
-			cnt = 0;
+			int cnt = 0;
 			trk = NULL;
 			if (add && (selectMode == 0)) {
 				SetAllTrackSelect( FALSE );    //Remove all tracks first
@@ -3083,7 +3086,7 @@ static BOOL_T SelectArea(
 					}
 				} else {
 					if (add) {
-						if (selectMode == 0 && add) {
+						if (selectMode == 0) {
 							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
 						}
 						if (!GetTrkSelected(trk)) {
@@ -3103,6 +3106,10 @@ static BOOL_T SelectArea(
 		}
 		break;
 
+	default:
+		if ( log_cselect < 0 ) { log_cselect = LogFindIndex( "cselect" ); }
+		LOG( log_cselect, 1, ( "unexpected action %d in SelectArea\n", action ) )
+		break;
 	}
 	return FALSE;
 }
@@ -3114,7 +3121,8 @@ static STATUS_T SelectTrack(
 	track_p trk;
 	char msg[STR_SIZE];
 
-	if (((trk = OnTrack( &pos, FALSE, FALSE )) == NULL)
+	trk = OnTrack( &pos, FALSE, FALSE );
+	if ((trk == NULL)
 	    && selectZero) {   //If option set and !ctrl or unset and ctrl
 		SetAllTrackSelect( FALSE );							//Unselect all
 		return C_CONTINUE;
@@ -3146,9 +3154,8 @@ static STATUS_T SelectTrack(
 	}
 	if (MyGetKeyState() & WKEY_SHIFT) {						//All track up to
 		SelectConnectedTracks( trk, FALSE );
-	} else if ((MyGetKeyState() & WKEY_CTRL) && (selectMode==0)) {
-		SelectOneTrack( trk, !GetTrkSelected(trk) );
-	} else if (!(MyGetKeyState() & WKEY_CTRL) && (selectMode==1)) {
+	} else if (((MyGetKeyState() & WKEY_CTRL) && (selectMode==0))
+	           || (!(MyGetKeyState() & WKEY_CTRL) && (selectMode==1))) {
 		SelectOneTrack( trk, !GetTrkSelected(trk) );
 	} else {
 		SetAllTrackSelect( FALSE );							//Just this Track
@@ -3162,7 +3169,8 @@ static STATUS_T SelectTrack(
 static STATUS_T Activate( coOrd pos)
 {
 	track_p trk;
-	if ((trk = OnTrack( &pos, TRUE, FALSE )) == NULL) {
+	trk = OnTrack( &pos, TRUE, FALSE );
+	if (trk == NULL) {
 		return C_CONTINUE;
 	}
 	if (GetLayerModule(GetTrkLayer(trk))) {
@@ -3201,7 +3209,7 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select,
                         track_p not_this)
 {
 	track_p ts = NULL;
-	coOrd origin,max = {0.0, 0.0};
+	coOrd origin,boxMax = {0.0, 0.0};
 	BOOL_T first = TRUE;
 	while ( TrackIterate( &ts ) ) {
 		if ( !GetLayerVisible( GetTrkLayer( ts))) {
@@ -3221,7 +3229,7 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select,
 		GetBoundingBox(ts, &hi, &lo);
 		if (first) {
 			origin = lo;
-			max = hi;
+			boxMax = hi;
 			first = FALSE;
 		} else {
 			if (lo.x <origin.x) {
@@ -3230,18 +3238,18 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select,
 			if (lo.y <origin.y) {
 				origin.y = lo.y;
 			}
-			if (hi.x >max.x) {
-				max.x = hi.x;
+			if (hi.x >boxMax.x) {
+				boxMax.x = hi.x;
 			}
-			if (hi.y >max.y) {
-				max.y = hi.y;
+			if (hi.y >boxMax.y) {
+				boxMax.y = hi.y;
 			}
 		}
 	}
 	if (!first) {
 		coOrd size;
-		size.x = max.x-origin.x;
-		size.y = max.y-origin.y;
+		size.x = boxMax.x-origin.x;
+		size.y = boxMax.y-origin.y;
 		origin.x -= 5*tempD.scale/tempD.dpi;
 		origin.y -= 5*tempD.scale/tempD.dpi;
 		size.x += 10*tempD.scale/tempD.dpi;
@@ -3287,6 +3295,23 @@ static void CallPushModify(void * unused)
 	return;
 }
 
+/** Track currently under the cursor while Select is the active command
+ * (set on every wActionMove, not just C_DOWN) -- see ClearSelect(). */
+static track_p trk = NULL;
+
+/**
+ * Reset the Select command's cursor-tracking state. \c trk is set on every
+ * mouse move over a track and is otherwise never cleared, so after a file
+ * load it can point at a track ClearTracks() already freed; the post-load
+ * redraw (LoadTracks -> Reset -> DoRedraw -> CmdSelect's \c C_REDRAW) then
+ * draws that stale track. Same problem and fix as ClearDescribe() (SF #785).
+ * Called from ClearTracks().
+ */
+EXPORT void ClearSelect(void)
+{
+	trk = NULL;
+}
+
 static STATUS_T CmdSelect(
         wAction_t action,
         coOrd pos )
@@ -3298,7 +3323,6 @@ static STATUS_T CmdSelect(
 
 
 	STATUS_T rc=C_CONTINUE;
-	static track_p trk = NULL;
 //	typedef enum {NOSHOW,SHOWMOVE,SHOWROTATE,SHOWMODIFY,SHOWACTIVATE} showType;
 //	static showType showMode;
 
@@ -3354,7 +3378,8 @@ static STATUS_T CmdSelect(
 			}
 		}
 		if (selectedTrackCount>0) {
-			if ((ht = IsInsideABox(pos)) != NULL) {
+			ht = IsInsideABox(pos);
+			if (ht != NULL) {
 				if ((MyGetKeyState()&WKEY_SHIFT)) {
 					CreateMoveAnchor(pos);
 //					showMode = SHOWMOVE;
@@ -3424,7 +3449,7 @@ static STATUS_T CmdSelect(
 			SelectDelete();
 			break;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_RMOVE:
 	case C_MOVE:
 		if (doingDouble) {
@@ -3654,7 +3679,8 @@ static STATUS_T CmdSelect(
 		}
 		switch (mode) {
 		case AREA:
-			if ((ht = OnTrack(&pos,FALSE,FALSE))!=NULL) {
+			ht = OnTrack(&pos,FALSE,FALSE);
+			if (ht!=NULL) {
 				if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
 				    QueryTrack( ht, Q_IS_CORNU ) ||
 				    (QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT ))) {
@@ -3683,8 +3709,8 @@ static STATUS_T CmdSelect(
 		if (selectedTrackCount <= 0) {
 			wMenuPopupShow( selectPopup1M );
 		} else {
-			track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
-			SetUpMenu2(pos,trk);
+			track_p menuTrk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
+			SetUpMenu2(pos,menuTrk);
 			wMenuPopupShow( selectPopup2M );
 		}
 		return C_CONTINUE;
@@ -3709,7 +3735,8 @@ static STATUS_T CmdSelect(
 			PanMenuEnter(I2VP('o'));
 		}
 		if ((action>>8) == '?') {
-			if((moveDescTrk = OnTrack(&pos,FALSE,FALSE)) != NULL) {
+			moveDescTrk = OnTrack(&pos,FALSE,FALSE);
+			if(moveDescTrk != NULL) {
 				moveDescPos = pos;
 			}
 			CallPushDescribe(I2VP(0));
@@ -3742,19 +3769,6 @@ static STATUS_T CmdSelect(
 	return C_CONTINUE;
 }
 
-
-#include "bitmaps/select.image3"
-#include "bitmaps/delete.image3"
-#include "bitmaps/tunnel.image3"
-#include "bitmaps/ties.image3"
-#include "bitmaps/bridge.image3"
-#include "bitmaps/roadbed.image3"
-#include "bitmaps/move.image3"
-#include "bitmaps/rotate.image3"
-#include "bitmaps/reflect.image3"
-#include "bitmaps/description.image3"
-
-
 static void SetMoveMode( char * line )
 {
 	long tmp = atol( line );
@@ -3783,8 +3797,9 @@ static void moveDescription( void * unused )
 EXPORT void InitCmdSelect( wMenu_p menu )
 {
 	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"),
-	                              wIconCreatePixMap(select_image3[iconSize]),
-	                              LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS,
+	                              CreateToolbarIconFromResource("select.png"),
+	                              LEVEL0, IC_TOGGLE |
+	                              IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS,
 	                              ACCL_SELECT, NULL );
 }
 
@@ -3793,16 +3808,16 @@ EXPORT void InitCmdSelect2( wMenu_p menu )
 {
 
 
-	endpt_bm = wDrawBitMapCreate( mainD.d, bmendpt_width, bmendpt_width, 7, 7,
-	                              bmendpt_bits );
-	angle_bm[0] = wDrawBitMapCreate( mainD.d, bma90_width, bma90_width, 7, 7,
-	                                 bma90_bits );
-	angle_bm[1] = wDrawBitMapCreate( mainD.d, bma135_width, bma135_width, 7, 7,
-	                                 bma135_bits );
-	angle_bm[2] = wDrawBitMapCreate( mainD.d, bma0_width, bma0_width, 7, 7,
-	                                 bma0_bits );
-	angle_bm[3] = wDrawBitMapCreate( mainD.d, bma45_width, bma45_width, 7, 7,
-	                                 bma45_bits );
+	endpt_bm = wDrawBitMapCreate( mainD.d,  7, 7, XTRKCAD_SYMBOLS_PATH,
+	                              "bmendpt.png");
+	angle_bm[0] = wDrawBitMapCreate( mainD.d,  7, 7, XTRKCAD_SYMBOLS_PATH,
+	                                 "bma90.png");
+	angle_bm[1] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH,
+	                                 "bma135.png");
+	angle_bm[2] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH,
+	                                 "bma0.png");
+	angle_bm[3] = wDrawBitMapCreate( mainD.d, 7, 7, XTRKCAD_SYMBOLS_PATH,
+	                                 "bma45.png");
 	AddPlaybackProc( SETMOVEMODE, (playbackProc_p)SetMoveMode, NULL );
 	wPrefGetInteger( "draw", "movemode", &moveMode, MAXMOVEMODE );
 	if (moveMode > MAXMOVEMODE || moveMode < 0) {
@@ -3831,7 +3846,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu )
 	                I2VP( 3));
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,
-	                (wMenuCallBack_p) SetAllTrackSelect, I2VP( 1));
+	                SetAllTrackSelectCB, I2VP( 1));
 	wMenuPushCreate(selectPopup1M, "",_("Select Current Layer"), 0,
 	                SelectCurrentLayer, I2VP( 0));
 	AddIndexMenu( selectPopup1M, SelectByIndex);
@@ -3852,7 +3867,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu )
 	wMenuSeparatorCreate( selectPopup2M );
 	AddIndexMenu( selectPopup2M, SelectByIndex);
 	wMenuPushCreate(selectPopup2M, "", _("Deselect All"), 0,
-	                (wMenuCallBack_p) SetAllTrackSelect, I2VP( 0));
+	                SetAllTrackSelectCB, I2VP( 0));
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Properties -'?'"), 0, CallPushDescribe,
 	                I2VP(0));
@@ -3914,36 +3929,36 @@ EXPORT void InitCmdSelect2( wMenu_p menu )
 EXPORT void InitCmdDelete( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( delete_image3[iconSize] );
+	icon = CreateToolbarIconFromResource( "delete.png");
 	AddToolbarButton( "cmdDelete", icon, IC_SELECTED,
-	                  (wButtonCallBack_p)SelectDelete, 0 );
+	                  SelectDeleteCB, 0 );
 }
 
 EXPORT void InitCmdTies( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( ties_image3[iconSize] );
+	icon = CreateToolbarIconFromResource("ties.png");
 	AddToolbarButton( "cmdTies", icon, IC_SELECTED|IC_POPUP, SelectTies, NULL );
 }
 
 EXPORT void InitCmdTunnel( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( tunnel_image3[iconSize] );
+	icon = CreateToolbarIconFromResource( "tunnel.png");
 	AddToolbarButton( "cmdTunnel", icon, IC_SELECTED|IC_POPUP, SelectTunnel, NULL );
 }
 
 EXPORT void InitCmdBridge( void)
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( bridge_image3[iconSize] );
+	icon = CreateToolbarIconFromResource( "bridge.png");
 	AddToolbarButton( "cmdBridge", icon, IC_SELECTED|IC_POPUP, SelectBridge, NULL );
 }
 
 EXPORT void InitCmdRoadbed( void)
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( roadbed_image3[iconSize] );
+	icon = CreateToolbarIconFromResource( "roadbed.png");
 	AddToolbarButton( "cmdRoadbed", icon, IC_SELECTED|IC_POPUP, SelectRoadbed,
 	                  NULL );
 }
@@ -3952,7 +3967,7 @@ EXPORT void InitCmdRoadbed( void)
 EXPORT void InitCmdMoveDescription( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"),
-	               wIconCreatePixMap(description_image3[iconSize]),
+	               CreateToolbarIconFromResource("description.png"),
 	               LEVEL0, IC_STICKY|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, I2VP( 0 ));
 }
 
@@ -3960,12 +3975,12 @@ EXPORT void InitCmdMoveDescription( wMenu_p menu )
 EXPORT void InitCmdMove( wMenu_p menu )
 {
 	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", _("Move"),
-	                            wIconCreatePixMap(move_image3[iconSize]),
+	                            CreateToolbarIconFromResource("move.png"),
 	                            LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVE, NULL );
 	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"),
-	                              wIconCreatePixMap(rotate_image3[iconSize]),
+	                              CreateToolbarIconFromResource("rotate.png"),
 	                              LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_ROTATE, NULL );
 	flipCmdInx = AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"),
-	                            wIconCreatePixMap(reflect_image3[iconSize]),
+	                            CreateToolbarIconFromResource("reflect.png"),
 	                            LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_FLIP, NULL );
 }

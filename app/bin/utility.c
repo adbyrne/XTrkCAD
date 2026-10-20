@@ -193,9 +193,6 @@ double FindAngle( coOrd p0, coOrd p1 )
 
 BOOL_T PointOnCircle( coOrd * resP, coOrd center, double radius, double angle )
 {
-	double r;
-	r = sin(D2R(angle));
-	r = radius * r;
 	resP->x = center.x + (POS_T)(radius * sin(D2R(angle)));
 	resP->y = center.y + (POS_T)(radius * cos(D2R(angle)));
 	return 1;
@@ -291,7 +288,7 @@ BOOL_T FindArcAndLineIntersections(coOrd *intersection1, coOrd *intersection2,
 	la = point1.y - point2.y;
 	lb = point2.x - point1.x;
 	lc = (point1.x-c.x)*(point2.y-c.y) - (point2.x-c.x)*(point1.y
-	                -c.y);  //Move by c(x,y)
+	        -c.y);  //Move by c(x,y)
 
 	double x0 = -la*lc/(la*la+lb*lb), y0 = -lb*lc/(la*la+lb*lb);
 
@@ -467,13 +464,13 @@ EPINX_T PickLineEndPt( coOrd p0, double a0, coOrd p1 )
 double LineDistance( coOrd *p, coOrd p0, coOrd p1 )
 {
 	double d, a;
-	coOrd pp, zero;
-	zero.x = zero.y = (POS_T)0.0;
+	coOrd pp;
+	coOrd origin = { 0.0, 0.0 };
 	d = FindDistance( p0, p1 );
 	a = FindAngle( p0, p1 );
 	pp.x = p->x-p0.x;
 	pp.y = p->y-p0.y;
-	Rotate( &pp, zero, -a );
+	Rotate( &pp, origin, -a );
 	if (pp.y < 0.0-EPSILON) {
 		d = FindDistance( p0, *p );
 		*p = p0;
@@ -526,9 +523,9 @@ coOrd MidPtCoOrd(coOrd p0, coOrd p1)
 
 coOrd AddCoOrd( coOrd p0, coOrd p1, double a )
 {
-	coOrd res, zero;
-	zero.x = zero.y = (POS_T)0.0;
-	Rotate(&p1, zero, a );
+	coOrd res;
+	coOrd origin = { 0.0, 0.0 };
+	Rotate(&p1, origin, a );
 	res.x = p0.x + p1.x;
 	res.y = p0.y + p1.y;
 	return res;
@@ -584,6 +581,15 @@ static BOOL_T IntersectLine( POS_T *fx0, POS_T *fy0, POS_T x1, POS_T y1,
 /*
  * intersectBox - find point on box boundary ([0,0],[size]) where
  *                line from p0 (interior) to p1 (exterior) intersects
+ *
+ * When p1 lies in a diagonal sector (x1!=0 && y1!=0) the line may exit
+ * through either the horizontal or the vertical edge, or exactly through
+ * the shared corner.  The two edge formulas are algebraically equivalent
+ * at the corner but round differently, so a corner exit would otherwise
+ * resolve to a sub-EPSILON-different point depending on which formula ran
+ * (i.e. on the calling line's approach direction).  Snap the solved
+ * coordinate to the exact corner when it lands within EPSILON of it, so
+ * the result is deterministic.
  */
 static void IntersectBox( coOrd *p1, coOrd p0, coOrd size, int x1, int y1 )
 {
@@ -594,10 +600,23 @@ static void IntersectBox( coOrd *p1, coOrd p0, coOrd size, int x1, int y1 )
 	if ( y1!=0 &&
 	     IntersectLine( &p1->x, &p1->y, p0.x, p0.y, size.x,
 	                    (y1==-1?(POS_T)0.0:size.y) )) {
+		if ( x1!=0 ) {
+			POS_T xb = (x1==-1?(POS_T)0.0:size.x);
+			if ( fabs(p1->x - xb) < EPSILON ) {
+				p1->x = xb;
+			}
+		}
 		return;
-	} else if ( x1!=0 &&
-	            IntersectLine( &p1->y, &p1->x, p0.y, p0.x, size.y,
-	                           (x1==-1?(POS_T)0.0:size.x) )) {
+	}
+	if ( x1!=0 &&
+	     IntersectLine( &p1->y, &p1->x, p0.y, p0.x, size.y,
+	                    (x1==-1?(POS_T)0.0:size.x) )) {
+		if ( y1!=0 ) {
+			POS_T yb = (y1==-1?(POS_T)0.0:size.y);
+			if ( fabs(p1->y - yb) < EPSILON ) {
+				p1->y = yb;
+			}
+		}
 		return;
 	}
 	printf("      intersectBox bogus\n" );

@@ -26,14 +26,17 @@
 #include "cstraigh.h"
 #include "custom.h"
 #include "fileio.h"
-#include "param.h"
+#include "icons.h"
+#include "form.h"
 #include "track.h"
+
+static int log_dease = -1;
 
 EXPORT DIST_T easementVal = 0.0;
 EXPORT DIST_T easeR = 0.0;
 EXPORT DIST_T easeL = 0.0;
 
-static wButton_p easementB;
+static wControl_p easementB;
 
 static DIST_T easeX = 0.0;
 
@@ -57,11 +60,11 @@ static wIcon_p ecornu_bm;
  *
  */
 
-static wWin_p easementW;
+static wControl_p easementW;
 
 static void EasementSel( long );
-static void SetEasement( DIST_T, void * );
-static void EasementOk( void );
+static void SetEasement( DIST_T, const void * );
+static void EasementOk( void const * arg );
 
 static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), N_("Cornu"), NULL };
 static paramFloatRange_t r0n1_100 = { -1.0, 100.0, 60 };
@@ -69,6 +72,10 @@ static paramFloatRange_t r0_100 = { 0.0, 100.0, 60 };
 static paramFloatRange_t r0_200 = { 0.0, 200.0, 60 };
 static paramFloatRange_t r0_10 = { 0.0, 10.0, 60 };
 static long easeM;
+/** TRUE while SetEasement() loads the radio group: setting it from code
+ * fires its "toggled" signal, which must not be taken as a user choice
+ * (that would replace a typed value by the preset). */
+static wBool_t easeLoading = FALSE;
 static paramData_t easementPLs[] = {
 #define I_EASEVAL		(0)
 	{	PD_FLOAT, &easementVal, "val", PDO_NOPSHUPD, &r0n1_100, N_("Value") },
@@ -76,14 +83,14 @@ static paramData_t easementPLs[] = {
 	{	PD_FLOAT, &easeX, "x", PDO_DIM|PDO_DLGHORZ, &r0_10, N_("X"), BO_READONLY },
 	{	PD_FLOAT, &easeL, "l", PDO_DIM|PDO_DLGHORZ, &r0_100, N_("L"), BO_READONLY },
 #define I_EASESEL		(4)
-	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORZ|BC_NONE }
+	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORIZONTAL }
 };
-static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, COUNT( easementPLs ) };
+static paramGroup_t easementPG = { "easement", PGO_RECORD|PGO_FULLDIALOGFROMBUILDER, easementPLs, COUNT( easementPLs ) };
 
 
 static void SetEasement(
         DIST_T val,
-        void * update )
+        const void * update )
 /*
  * Set transition-curve parameters (R and L).
  */
@@ -151,23 +158,25 @@ static void SetEasement(
 	easeR = (floor(easeR*100.0))/100.0;
 	easementVal = val;
 	if (easementW && wWinIsVisible(easementW)) {
-		ParamLoadControls( &easementPG );
+		easeLoading = TRUE;
+		FormLoadControls( &easementPG );
 		if (update) {
 			easeM = selVal;
-			ParamLoadControl( &easementPG, I_EASESEL );
+			FormLoadSingleControl( &easementPG, I_EASESEL );
 		}
+		easeLoading = FALSE;
 	}
 	/*ParamChange( &easeValPD );*/
 
 	if (easementB) {
-		wButtonSetLabel( easementB, (char*)bm );
+		wButtonSetIcon( easementB, bm );
 	}
 }
 
 
-static void EasementOk( void )
+static void EasementOk( void const * arg )
 {
-	ParamLoadData( &easementPG );
+	FormLoadControls( &easementPG );
 	SetEasement( easementVal, I2VP(FALSE) );
 	wHide( easementW );
 }
@@ -212,15 +221,24 @@ static void EasementDlgUpdate(
 {
 	switch (inx) {
 	case I_EASEVAL:
-		SetEasement( *(FLOAT_T*)valueP, I2VP(1) );
+		// a typed value keeps the radio group as it is; only a click on a
+		// radio button applies a preset
+		SetEasement( *(FLOAT_T*)valueP, I2VP(FALSE) );
 		break;
 	case I_EASESEL:
-		EasementSel( *(long*)valueP );
+		if ( !easeLoading ) {
+			EasementSel( *(long*)valueP );
+		}
+		break;
+	default:
+		if ( log_dease < 0 ) { log_dease = LogFindIndex( "dease" ); }
+		LOG( log_dease, 1, ( "unexpected inx %d in EasementDlgUpdate\n", inx ) )
 		break;
 	}
 }
 
 
+#ifdef TODO_UNUSED
 static void LayoutEasementW(
         paramData_t * pd,
         int inx,
@@ -233,14 +251,16 @@ static void LayoutEasementW(
 		                wControlGetPosY(easementPLs[0].control) );
 	}
 }
+#endif
 
 
 static void DoEasement( void * unused )
 {
 	if (easementW == NULL) {
-		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")),
-		                               _("Ok"), (paramActionOkProc)EasementOk, ParamCancel_Null,
-		                               TRUE, LayoutEasementW, 0, EasementDlgUpdate );
+		easementW = FormCreateDialog( &easementPG, MakeWindowTitle(N_("Easement")),
+		                              _("Ok"), EasementOk,
+		                              NULL, NULL,
+		                              TRUE, 0, EasementDlgUpdate );
 		SetEasement( easementVal, I2VP(TRUE) );
 	}
 	wShow( easementW );
@@ -259,30 +279,19 @@ static void EasementChange( long changes )
 	}
 }
 
-
-#include "bitmaps/ease-none.image3"
-#include "bitmaps/ease-sharp.image3"
-#include "bitmaps/ease-gt-sharp.image3"
-#include "bitmaps/ease-lt-sharp.image3"
-#include "bitmaps/ease-normal.image3"
-#include "bitmaps/ease-broad.image3"
-#include "bitmaps/ease-gt-broad.image3"
-#include "bitmaps/ease-lt-broad.image3"
-#include "bitmaps/ease-cornu.image3"
-
 EXPORT addButtonCallBack_t EasementInit( void )
 {
-	ParamRegister( &easementPG );
+	FormRegister( &easementPG );
 
-	enone_bm = wIconCreatePixMap( ease_none_image3[iconSize] );
-	eltsharp_bm = wIconCreatePixMap( ease_lt_sharp_image3[iconSize] );
-	esharp_bm = wIconCreatePixMap( ease_sharp_image3[iconSize] );
-	egtsharp_bm = wIconCreatePixMap( ease_gt_sharp_image3[iconSize] );
-	enormal_bm = wIconCreatePixMap( ease_normal_image3[iconSize] );
-	eltbroad_bm = wIconCreatePixMap( ease_lt_broad_image3[iconSize] );
-	ebroad_bm = wIconCreatePixMap( ease_broad_image3[iconSize] );
-	egtbroad_bm = wIconCreatePixMap( ease_gt_broad_image3[iconSize] );
-	ecornu_bm = wIconCreatePixMap( ease_cornu_image3[iconSize] );
+	enone_bm = CreateToolbarIconFromResource( "ease-none.png");
+	eltsharp_bm = CreateToolbarIconFromResource( "ease-lt-sharp.png");
+	esharp_bm = CreateToolbarIconFromResource( "ease-sharp.png");
+	egtsharp_bm = CreateToolbarIconFromResource( "ease-gt-sharp.png");
+	enormal_bm = CreateToolbarIconFromResource( "ease-normal.png");
+	eltbroad_bm = CreateToolbarIconFromResource( "ease-lt-broad.png");
+	ebroad_bm = CreateToolbarIconFromResource( "ease-broad.png");
+	egtbroad_bm = CreateToolbarIconFromResource( "ease-gt-broad.png");
+	ecornu_bm = CreateToolbarIconFromResource( "ease-cornu.png");
 	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, DoEasementRedir,
 	                              NULL );
 

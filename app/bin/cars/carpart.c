@@ -3,23 +3,23 @@
  * \brief  Manage purchasable car parts
  */
 
- /*  XTrackCad - Model Railroad CAD
-  *  Copyright (C) 2005, 2025 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrackCad - Model Railroad CAD
+ *  Copyright (C) 2005, 2025 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include "common.h"
 #include "fileio.h"
@@ -30,7 +30,8 @@
 #include "tabstring.h"
 
 static int Cmp_partparent(void* key, void* elem);
-static carPartParent_p CarPartParentNew(char* manufP, int manufL, char* protoP, int protoL, SCALEINX_T scale);
+static carPartParent_p CarPartParentNew(char* manufP, int manufL, char* protoP,
+                                        int protoL, SCALEINX_T scale);
 static void CarPartParentDelete(carPartParent_p parentP);
 static void CarPartUnlink(carPart_p partP);
 
@@ -41,6 +42,7 @@ dynArr_t carPartParent_da;
 dynArr_t roadnameMap_da;
 #define roadnameMap(N) DYNARR_N(roadnameMap_p, roadnameMap_da, N)
 BOOL_T roadnameMapChanged;
+BOOL_T carPartListChanged;
 
 typedef struct {
 	tabString_t manuf;
@@ -50,8 +52,8 @@ typedef struct {
 
 
 int Cmp_part(
-	void* key,
-	void* elem)
+        void* key,
+        void* elem)
 {
 	carPart_p cmp_key = key;
 	carPart_p part_elem = elem;
@@ -86,15 +88,14 @@ int Cmp_part(
 	}
 	if (cmp_key->paramFileIndex > part_elem->paramFileIndex) {
 		return -1;
-	}
-	else {
+	} else {
 		return 1;
 	}
 }
 
 static int Cmp_partparent(
-	void* key,
-	void* elem)
+        void* key,
+        void* elem)
 {
 	cmp_partparent_t* cmp_key = key;
 	carPartParent_p part_elem = elem;
@@ -127,8 +128,8 @@ int Cmp_roadnameMap(void* key,void* elem)
 }
 
 roadnameMap_p LoadRoadnameList(
-	tabString_p roadnameTab,
-	tabString_p repmarkTab)
+        tabString_p roadnameTab,
+        tabString_p repmarkTab)
 {
 	cmp_key_t cmp_key;
 	roadnameMap_p roadnameMapP;
@@ -137,21 +138,22 @@ roadnameMap_p LoadRoadnameList(
 	if (roadnameTab->len == 0) {
 		return NULL;
 	}
-	if (TabStringCmp("undecorated", roadnameTab) == 0) {
+	/* the label may also arrive translated, from older custom files */
+	if (TabStringCmp("undecorated", roadnameTab) == 0 ||
+	    TabStringCmp(_("Undecorated"), roadnameTab) == 0) {
 		return NULL;
 	}
 
 	cmp_key.name = roadnameTab->ptr;
 	cmp_key.len = roadnameTab->len;
 	roadnameMapP = LookupListElem(&roadnameMap_da, &cmp_key, Cmp_roadnameMap,
-		sizeof(roadnameMap_t));
+	                              sizeof(roadnameMap_t));
 	if (roadnameMapP->roadname == NULL) {
 		roadnameMapP->roadname = TabStringDup(roadnameTab);
 		roadnameMapP->repmark = TabStringDup(repmarkTab);
 		roadnameMapChanged = TRUE;
-	}
-	else if (repmarkTab->len > 0 &&
-		(roadnameMapP->repmark == NULL || roadnameMapP->repmark[0] == '\0')) {
+	} else if (repmarkTab->len > 0 &&
+	           (roadnameMapP->repmark == NULL || roadnameMapP->repmark[0] == '\0')) {
 		roadnameMapP->repmark = TabStringDup(repmarkTab);
 		roadnameMapChanged = TRUE;
 	}
@@ -159,11 +161,11 @@ roadnameMap_p LoadRoadnameList(
 }
 
 static carPartParent_p CarPartParentNew(
-	char* manufP,
-	int manufL,
-	char* protoP,
-	int protoL,
-	SCALEINX_T scale)
+        char* manufP,
+        int manufL,
+        char* protoP,
+        int protoL,
+        SCALEINX_T scale)
 {
 	carPartParent_p parentP;
 	cmp_partparent_t cmp_key;
@@ -173,7 +175,7 @@ static carPartParent_p CarPartParentNew(
 	cmp_key.proto.len = protoL;
 	cmp_key.scale = scale;
 	parentP = (carPartParent_p)LookupListElem(&carPartParent_da, &cmp_key,
-		Cmp_partparent, sizeof * parentP);
+	          Cmp_partparent, sizeof * parentP);
 	if (parentP->manuf == NULL) {
 		parentP->manuf = (char*)MyMalloc(manufL + 1);
 		memcpy(parentP->manuf, manufP, manufL);
@@ -187,16 +189,17 @@ static carPartParent_p CarPartParentNew(
 }
 
 static void CarPartParentDelete(
-	carPartParent_p parentP)
+        carPartParent_p parentP)
 {
 	RemoveListElem(&carPartParent_da, parentP);
+	DYNARR_FREE(carPart_p, parentP->parts_da);
 	MyFree(parentP->manuf);
 	MyFree(parentP->proto);
 	MyFree(parentP);
 }
 
 static void CarPartUnlink(
-	carPart_p partP)
+        carPart_p partP)
 {
 	carPartParent_p parentP = partP->parent;
 	RemoveListElem(&parentP->parts_da, partP);
@@ -206,23 +209,23 @@ static void CarPartUnlink(
 }
 
 carPart_p CarPartFind(
-	char* manufP,
-	int manufL,
-	char* partnoP,
-	int partnoL,
-	SCALEINX_T scale)
+        char* manufP,
+        int manufL,
+        char* partnoP,
+        int partnoL,
+        SCALEINX_T scale)
 {
 	for (wIndex_t inx1 = 0; inx1 < carPartParent_da.cnt; inx1++) {
 		carPartParent_p parentP;
 		parentP = carPartParent(inx1);
 		if (manufL == (int)strlen(parentP->manuf) &&
-			strncasecmp(manufP, parentP->manuf, manufL) == 0 &&
-			scale == parentP->scale) {
+		    strncasecmp(manufP, parentP->manuf, manufL) == 0 &&
+		    scale == parentP->scale) {
 			for (wIndex_t inx2 = 0; inx2 < parentP->parts_da.cnt; inx2++) {
 				carPart_p partP;
 				partP = carPart(parentP, inx2);
 				if (partnoL == partP->partnoL &&
-					strncasecmp(partnoP, partP->partnoP, partnoL) == 0) {
+				    strncasecmp(partnoP, partP->partnoP, partnoL) == 0) {
 					return partP;
 				}
 			}
@@ -232,23 +235,23 @@ carPart_p CarPartFind(
 }
 
 carPart_p CarPartNew(
-	carPart_p partP,
-	int paramFileIndex,
-	SCALEINX_T scaleInx,
-	char* title,
-	long options,
-	long type,
-	const carDim_p dim,
-	wDrawColor color)
+        carPart_p partP,
+        int paramFileIndex,
+        SCALEINX_T scaleInx,
+        char* title,
+        long options,
+        long type,
+        const carDim_p dim,
+        wDrawColor color)
 {
 	carPartParent_p parentP;
 	carPart_t cmp_key;
 	tabString_t tabs[7];
 
 	TabStringExtract(title, 7, tabs);
-	if (TabStringCmp("Undecorated", &tabs[T_MANUF]) == 0 ||
-		TabStringCmp("Custom", &tabs[T_MANUF]) == 0 ||
-		tabs[T_PART].len == 0) {
+	if (TabStringCmp("Unknown", &tabs[T_MANUF]) == 0 ||
+	    TabStringCmp("Custom", &tabs[T_MANUF]) == 0 ||
+	    tabs[T_PART].len == 0) {
 		return NULL;
 	}
 	if (tabs[T_PROTO].len == 0) {
@@ -256,48 +259,80 @@ carPart_p CarPartNew(
 	}
 	if (partP == NULL) {
 		partP = CarPartFind(tabs[T_MANUF].ptr, tabs[T_MANUF].len, tabs[T_PART].ptr,
-			tabs[T_PART].len, scaleInx);
+		                    tabs[T_PART].len, scaleInx);
 		if (partP != NULL &&
-			partP->paramFileIndex == PARAM_CUSTOM &&
-			paramFileIndex != PARAM_CUSTOM) {
+		    partP->paramFileIndex == PARAM_CUSTOM &&
+		    paramFileIndex != PARAM_CUSTOM) {
 			return partP;
 		}
 		LOG(log_carPart, 2, ("new car part: %s (%d) at %d\n", title, paramFileIndex,
-			lookupListIndex))
-	}
-	if (partP != NULL) {
-		CarPartUnlink(partP);
-		if (partP->title != NULL) {
-			MyFree(partP->title);
-		}
-		LOG(log_carPart, 2, ("upd car part: %s (%d)\n", title, paramFileIndex))
+		                     lookupListIndex))
 	}
 	LoadRoadnameList(&tabs[T_ROADNAME], &tabs[T_REPMARK]);
 	parentP = CarPartParentNew(tabs[T_MANUF].ptr, tabs[T_MANUF].len,
-		tabs[T_PROTO].ptr, tabs[T_PROTO].len, scaleInx);
-	cmp_key.title = title;
-	cmp_key.parent = parentP;
+	                           tabs[T_PROTO].ptr, tabs[T_PROTO].len, scaleInx);
 	cmp_key.paramFileIndex = paramFileIndex;
-	cmp_key.options = options;
-	cmp_key.type = type;
-	cmp_key.dim = *dim;
-	cmp_key.color = color;
 	cmp_key.partnoP = tabs[T_PART].ptr;
 	cmp_key.partnoL = tabs[T_PART].len;
-	partP = (carPart_p)LookupListElem(&parentP->parts_da, &cmp_key, Cmp_part,
-		sizeof * partP);
+
+	/* Editing an existing part (partP != NULL, e.g. from CarDlgUpdPart) used
+	 * to unconditionally CarPartUnlink() then re-look-up/insert into
+	 * parentP->parts_da -- but since the entry was *just* removed from that
+	 * same array, the lookup could never find it again, so every edit
+	 * silently allocated a brand-new struct and left the original orphaned
+	 * (stale data shown to anything still holding that pointer, e.g. a
+	 * still-open custom-management list -- and leaked, since nothing freed
+	 * it). Mirror CarProtoNew's update semantics: when nothing about the
+	 * sort key actually changed (same parent, same part number), mutate the
+	 * existing struct in place so any pointer held elsewhere keeps
+	 * referring to the record that was just edited. Only unlink+relocate
+	 * when the part is genuinely moving to a different manufacturer/
+	 * prototype/scale or part number. */
+	if (partP != NULL && !(partP->parent == parentP &&
+	                       Cmp_part(&cmp_key, partP) == 0)) {
+		if (partP->parent == parentP) {
+			/* Same manufacturer/prototype/scale, only the sort key (partno
+			 * or paramFileIndex) changed -- remove from the array directly
+			 * rather than through CarPartUnlink(), which would delete
+			 * parentP itself if this was its last part, leaving the
+			 * parentP we reuse below dangling (use-after-free). */
+			RemoveListElem(&parentP->parts_da, partP);
+		} else {
+			CarPartUnlink(partP);
+		}
+		if (partP->title != NULL) {
+			MyFree(partP->title);
+		}
+		MyFree(partP);
+		partP = NULL;
+		LOG(log_carPart, 2, ("upd car part (moved): %s (%d)\n", title, paramFileIndex))
+	} else if (partP != NULL) {
+		LOG(log_carPart, 2, ("upd car part: %s (%d)\n", title, paramFileIndex))
+	}
+
+	if (partP == NULL) {
+		cmp_key.parent = parentP;
+		partP = (carPart_p)LookupListElem(&parentP->parts_da, &cmp_key, Cmp_part,
+		                                  sizeof * partP);
+	}
 	if (partP->title != NULL) {
 		MyFree(partP->title);
 	}
-	*partP = cmp_key;
+	partP->parent = parentP;
+	partP->paramFileIndex = paramFileIndex;
+	partP->options = options;
+	partP->type = type;
+	partP->dim = *dim;
+	partP->color = color;
 	sprintf(message, "\t\t%s", tabs[2].ptr);
 	partP->title = MyStrdup(message);
 	partP->partnoP = partP->title + 2 + tabs[2].len + 1;;
 	partP->partnoL = tabs[T_PART].len;
+	carPartListChanged = TRUE;
 	return partP;
 }
 
-static void CarPartDelete(carPart_p partP)
+void CarPartDelete(carPart_p partP)
 {
 	if (partP == NULL) {
 		return;
@@ -315,7 +350,7 @@ static void CarPartDelete(carPart_p partP)
 * are linked from CarPartParents, again DYNARRs. Thes parents are created
 * from part definition and only contain manufacturer and type information.
 *
-* \param [IN] fileIndex parameter file
+* \param[in] fileIndex parameter file
 */
 
 void DeleteCarPart(int fileIndex)
@@ -335,7 +370,7 @@ void DeleteCarPart(int fileIndex)
 
 		// Check if parent still exists (might have been deleted)
 		if (inxParent < carPartParent_da.cnt &&
-			carPartParent(inxParent) == parentP) {
+		    carPartParent(inxParent) == parentP) {
 			inxParent++;
 		}
 		// If parent was deleted, don't increment (next parent shifted down)
@@ -354,61 +389,64 @@ static BOOL_T CarPartRead(char* line)
 	long longCenterOffset;
 
 	if (!GetArgs(line + 8, "s9qllff0lffl",
-		scale, &title, &options, &type, &dim.carLength, &dim.carWidth,
-		&longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb)) {
+	             scale, &title, &options, &type, &dim.carLength, &dim.carWidth,
+	             &longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb)) {
 		return FALSE;
 	}
-	dim.truckCenterOffset = longCenterOffset / 1000.0;
+	/* truck-center-offset is car-only (spec §3/§4); ignore whatever is in
+	 * this reserved slot rather than treating it as a real part value. */
+	dim.truckCenterOffset = 0.0;
 	CarPartNew(NULL, curParamFileIndex, LookupScale(scale), title, options, type,
-		&dim, wDrawFindColor(rgb));
+	           &dim, wDrawFindColor(rgb));
 	MyFree(title);
 	return TRUE;
 }
 
 
 BOOL_T CarPartWrite(
-	FILE* f,
-	carPart_p partP)
+        FILE* f,
+        carPart_p partP)
 {
 	BOOL_T rc = TRUE;
 	const carPartParent_p parentP = partP->parent;
 	tabString_t tabs[7];
-	long longCenterOffset = (long)(partP->dim.truckCenterOffset * 1000);
 
 	SetCLocale();
 
 	TabStringExtract(partP->title, 7, tabs);
 	sprintf(message, "%s\t%s\t%.*s\t%.*s\t%.*s\t%.*s\t%.*s",
-		parentP->manuf, parentP->proto,
-		tabs[T_DESC].len, tabs[T_DESC].ptr,
-		tabs[T_PART].len, tabs[T_PART].ptr,
-		tabs[T_ROADNAME].len, tabs[T_ROADNAME].ptr,
-		tabs[T_REPMARK].len, tabs[T_REPMARK].ptr,
-		tabs[T_NUMBER].len, tabs[T_NUMBER].ptr);
+	        parentP->manuf, parentP->proto,
+	        tabs[T_DESC].len, tabs[T_DESC].ptr,
+	        tabs[T_PART].len, tabs[T_PART].ptr,
+	        tabs[T_ROADNAME].len, tabs[T_ROADNAME].ptr,
+	        tabs[T_REPMARK].len, tabs[T_REPMARK].ptr,
+	        tabs[T_NUMBER].len, tabs[T_NUMBER].ptr);
 	rc &= fprintf(f, "CARPART %s \"%s\"", GetScaleName(partP->parent->scale),
-		PutTitle(message)) > 0;
-	rc &= fprintf(f, " %ld %ld %0.3f %0.3f 0 %ld %0.3f %0.3f %ld\n",
-		partP->options, partP->type, partP->dim.carLength, partP->dim.carWidth,
-		longCenterOffset,
-		partP->dim.truckCenter, partP->dim.coupledLength, wDrawGetRGB(partP->color)) > 0;
+	              PutTitle(message)) > 0;
+	/* truck-center-offset is car-only (spec §3/§4); the second reserved "0"
+	 * is a fixed placeholder here, never partP->dim.truckCenterOffset. */
+	rc &= fprintf(f, " %ld %ld %0.3f %0.3f 0 0 %0.3f %0.3f %ld\n",
+	              partP->options & ~CAR_DESC_IS_LOCO, partP->type, partP->dim.carLength,
+	              partP->dim.carWidth,
+	              partP->dim.truckCenter, partP->dim.coupledLength,
+	              wDrawGetRGB(partP->color)) > 0;
 
 	SetUserLocale();
 
 	return rc;
 }
 
-BOOL_T CarDescCustomSave(	FILE* f)
+BOOL_T CarDescCustomSave( FILE* f)
 {
 	int parentX;
 	int partX;
-	carPart_p partP;
 	BOOL_T rc = TRUE;
 
 	for (parentX = 0; parentX < carPartParent_da.cnt; parentX++) {
 		carPartParent_p parentP;
 		parentP = carPartParent(parentX);
 		for (partX = 0; partX < parentP->parts_da.cnt; partX++) {
-			partP = carPart(parentP, partX);
+			carPart_p partP = carPart(parentP, partX);
 			if (partP->paramFileIndex == PARAM_CUSTOM) {
 				rc &= CarPartWrite(f, partP);
 			}
@@ -426,8 +464,7 @@ BOOL_T CarDescCustomSave(	FILE* f)
  * \return the compatibility state of the the
  */
 enum paramFileState
-GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex) 
-{
+GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex) {
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
 
 	if (!IsParamValid(paramFileIndex))
@@ -456,7 +493,7 @@ GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 }
 
 BOOL_T CheckAvail(
-	carPartParent_p parentP)
+        carPartParent_p parentP)
 {
 	for (wIndex_t inx = 0; inx < parentP->parts_da.cnt; inx++) {
 		carPart_p partP;
@@ -497,7 +534,7 @@ int CarPartCustMgmProc(int cmd, void * data )
 		if ( tabs[T_REPMARK].len == 0 ) {
 			rd_inx = T_ROADNAME;
 		}
-		sprintf( message, "\t%s\t%s\t%.*s\t%s%s%.*s%s%.*s%s%.*s",
+		sprintf( message, "%s\t%s\t%.*s\t%s%s%.*s%s%.*s%s%.*s",
 		         partP->parent->manuf,
 		         GetScaleName(partP->parent->scale),
 		         tabs[T_PART].len, tabs[T_PART].ptr,
@@ -506,6 +543,9 @@ int CarPartCustMgmProc(int cmd, void * data )
 		         tabs[rd_inx].len?", ":"", tabs[rd_inx].len, tabs[rd_inx].ptr,
 		         tabs[T_NUMBER].len?" ":"", tabs[T_NUMBER].len, tabs[T_NUMBER].ptr );
 		return TRUE;
+	default:
+		LOG( log_carPart, 1, ( "unexpected cmd %d in CarPartCustMgmProc\n", cmd ) )
+		break;
 	}
 	return FALSE;
 }
@@ -513,6 +553,6 @@ int CarPartCustMgmProc(int cmd, void * data )
 void
 InitCarPart(void)
 {
-		AddParam( "CARPART ", CarPartRead);
-		log_carPart = LogFindIndex("carPart");
+	AddParam( "CARPART ", CarPartRead);
+	log_carPart = LogFindIndex("carPart");
 }

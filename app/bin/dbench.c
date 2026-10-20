@@ -20,7 +20,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "common.h"
 
@@ -37,45 +37,33 @@
 
 static char *benchTypeS[] = { "", N_(" L-Girder"), N_(" T-Girder") };
 
-#include "bitmaps/bo_edge.image1"
-#include "bitmaps/bo_flat.image1"
-#include "bitmaps/bo_ll.image1"
-#include "bitmaps/bo_lr.image1"
-#include "bitmaps/bo_lld.image1"
-#include "bitmaps/bo_lrd.image1"
-#include "bitmaps/bo_llu.image1"
-#include "bitmaps/bo_lru.image1"
-#include "bitmaps/bo_lli.image1"
-#include "bitmaps/bo_lri.image1"
-#include "bitmaps/bo_t.image1"
-#include "bitmaps/bo_tr.image1"
-#include "bitmaps/bo_tl.image1"
-#include "bitmaps/bo_ti.image1"
 
 typedef struct {
 	char * name;
-	wIconBitMap_t image1;
+	// cppcheck-suppress unusedStructMember
+	char** xpm;
+	// cppcheck-suppress unusedStructMember
 	wIcon_p icon;
 } orientData_t;
 static orientData_t rectOrientD[] = {
-	{ N_("On Edge"), bo_edge_image1 },
-	{ N_("Flat"), bo_flat_image1 }
+	{ N_("On Edge"), "bo_edge.png" },
+	{ N_("Flat"), "bo_flat.png" }
 };
 static orientData_t lgirderOrientD[] = {
-	{ N_("Left"), bo_ll_image1 },
-	{ N_("Right"), bo_lr_image1 },
-	{ N_("Left-Down"), bo_lld_image1 },
-	{ N_("Right-Down"), bo_lrd_image1 },
-	{ N_("Left-Up"), bo_llu_image1 },
-	{ N_("Right-Up"), bo_lru_image1 },
-	{ N_("Left-Inverted"), bo_lli_image1 },
-	{ N_("Right-Inverted"), bo_lri_image1 }
+	{ N_("Left"), "bo_ll.png" },
+	{ N_("Right"), "bo_lr.png" },
+	{ N_("Left-Down"), "bo_lld.png" },
+	{ N_("Right-Down"), "bo_lrd.png" },
+	{ N_("Left-Up"), "bo_llu.png" },
+	{ N_("Right-Up"), "bo_lru.png" },
+	{ N_("Left-Inverted"), "bo_lli.png" },
+	{ N_("Right-Inverted"), "bo_lri.png" }
 };
 static orientData_t tgirderOrientD[] = {
-	{ N_("Normal"), bo_t_image1 },
-	{ N_("Right"), bo_tr_image1 },
-	{ N_("Left"), bo_tl_image1 },
-	{ N_("Inverted"), bo_ti_image1 }
+	{ N_("Normal"), "bo_t.png" },
+	{ N_("Right"), "bo_tr.png" },
+	{ N_("Left"), "bo_tl.png" },
+	{ N_("Inverted"), "bo_ti.png" }
 };
 
 static struct {
@@ -91,27 +79,27 @@ static BOOL_T lgirderNarrow[]		= {	 1,	 1,	 0,	 0,	 0,	 0,	 1,	 1 };
 
 EXPORT void BenchUpdateOrientationList(
         long benchData,
-        wList_p list )
+        wControl_p list )
 {
 	long type;
 	orientData_t *op;
 	int cnt;
 
 	type = (benchData>>24)&0xff;
-	wListClear( list );
+	wComboBoxClear( list );
 	op = orientD[type].data;
 	for (cnt=orientD[type].cnt-1; cnt>=0; cnt--,op++) {
 #ifdef WINDOWS
 		if (op->icon == NULL) {
-			op->icon = wIconCreatePixMap( op->image1 );
+			op->icon = wIconCreatePixBufFromResource( XTRKCAD_SYMBOLS_PATH, op->xpm);
 		}
-		wListAddValue( list, NULL, op->icon, op );
+		wComboBoxAddValue( list, op->icon, op );
 #else
 		/* gtk_combo_find is upset if we try to put anything other that a label on a list */
-		wListAddValue( list, _(op->name), NULL, op );
+		wComboBoxAddValue( list, _(op->name), op );
 #endif
 	}
-	wListSetIndex( list, 0 );
+	wComboBoxSetIndex( list, 0 );
 }
 
 typedef struct {
@@ -154,7 +142,7 @@ static void AddBenchTypes(
 }
 
 
-EXPORT void BenchLoadLists( wList_p choiceL, wList_p orientL )
+EXPORT void BenchLoadLists( wControl_p choiceL, wControl_p orientL )
 {
 	int inx;
 	long height;
@@ -162,8 +150,8 @@ EXPORT void BenchLoadLists( wList_p choiceL, wList_p orientL )
 	benchType_p bt;
 	char * cp;
 
-	wListClear( choiceL );
-	wListClear( orientL );
+	wComboBoxClear( choiceL );
+	wComboBoxClear( orientL );
 	if ( benchType_da.cnt <= 0 ) {
 		Reset();
 		return;
@@ -180,11 +168,11 @@ EXPORT void BenchLoadLists( wList_p choiceL, wList_p orientL )
 			} else {
 				sprintf( cp, "%ldmm x %ldmm", height*25, bt->width*25 );
 			}
-			wListAddValue( choiceL, message, NULL, I2VP(benchData) );
+			wComboBoxAddValue( choiceL, message, I2VP(benchData) );
 		}
 	}
 	BenchUpdateOrientationList( benchType(0).type<<24, orientL );
-	wListSetIndex( choiceL, 0 );
+	wComboBoxSetIndex( choiceL, 0 );
 }
 
 
@@ -242,10 +230,8 @@ EXPORT void DrawBench(
 {
 	long orient;
 	coOrd pp[4];
-	ANGLE_T a;
-	DIST_T width, thickness=0.75;
+	DIST_T width;
 	long type;
-	long oldOptions;
 	long lwidth;
 
 	orient = benchData&0xFF;
@@ -256,6 +242,7 @@ EXPORT void DrawBench(
 	if ( lwidth <= 3 ) {
 		DrawLine( d, p0, p1, (wDrawWidth)lwidth, color1 );
 	} else {
+		ANGLE_T a;
 		width /= 2.0;
 		a = FindAngle( p0, p1 );
 		Translate( &pp[0], p0, a+90, width );
@@ -269,7 +256,8 @@ EXPORT void DrawBench(
 		        d->funcs == &tempSegDrawFuncs ) {
 			DrawPoly( d, 4, pp, NULL, color2, 0, DRAW_CLOSED );
 			if ( color1 != color2 && type != B_RECT ) {
-				oldOptions = d->options;
+				DIST_T thickness=0.75;
+				long oldOptions = d->options;
 				if ( type == B_LGRIDER || orient == 1 || orient == 2 ) {
 					if ( type == B_LGRIDER && lgirderFlangeDashed[orient] ) {
 						d->options |= DC_DASH;
@@ -391,7 +379,7 @@ EXPORT void CountBench(
 	bp->length = length;
 foundBenchEnum:
 	PrintBenchLine( message, bp );
-	size_t width = strlen(message);
+	int width = (int)strlen(message);
 	if ( width > enumerateMaxDescLen) {
 		enumerateMaxDescLen = (int)width;
 	}
@@ -404,9 +392,12 @@ static int Cmp_benchEnum(
 	benchEnum_p bp1 = (benchEnum_p)p1;
 	benchEnum_p bp2 = (benchEnum_p)p2;
 	long diff;
-	if ( ( diff = bp1->type-bp2->type ) != 0 ) { return (int)diff; }
-	if ( ( diff = bp1->width-bp2->width ) != 0 ) { return (int)diff; }
-	if ( ( diff = bp1->height-bp2->height ) != 0 ) { return (int)diff; }
+	diff = bp1->type-bp2->type;
+	if ( diff != 0 ) { return (int)diff; }
+	diff = bp1->width-bp2->width;
+	if ( diff != 0 ) { return (int)diff; }
+	diff = bp1->height-bp2->height;
+	if ( diff != 0 ) { return (int)diff; }
 	return 0;
 }
 

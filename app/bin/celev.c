@@ -24,20 +24,24 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "param.h"
+#include "icons.h"
 #include "track.h"
 #include "ccurve.h"
+#include "include/form.h"
 
-static wWin_p elevW;
+static int log_celev = -1;
+
+static wControl_p elevW;
 
 static long elevModeV;
 static char elevStationV[STR_SIZE];
 static DIST_T elevHeightV = 0.0;
 
-static DIST_T elevOldValue;
 static track_p elevTrk;
 static EPINX_T elevEp;
 static BOOL_T elevUndo = FALSE;
+
+#define DlgSepTop 12
 
 static char * elevModeLabels[] = { N_("None"), N_("Defined"), N_("Hidden"),
                                    N_("Computed"), N_("Grade"), N_("Station"), N_("Ignore"), NULL
@@ -54,9 +58,9 @@ static paramData_t elevationPLs[] = {
 #define I_GRADE			(3)
 	{ PD_MESSAGE, NULL, "grade", 0, I2VP(80) },
 #define I_STATION			(4)
-	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, I2VP(200), NULL, 0, 0, sizeof(elevStationV)}
+	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, I2VP(20), NULL, 0, 0, sizeof(elevStationV)}
 };
-static paramGroup_t elevationPG = { "elev", 0, elevationPLs, COUNT( elevationPLs ) };
+static paramGroup_t elevationPG = { "elev", PGO_FULLDIALOGFROMBUILDER, elevationPLs, COUNT( elevationPLs ) };
 
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
@@ -119,7 +123,7 @@ static void CreateSplitAnchor(coOrd pos, track_p t)
 
 
 #if 0
-void static CreateMoveAnchor(coOrd pos)
+static void CreateMoveAnchor(coOrd pos)
 {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,
@@ -132,6 +136,7 @@ void static CreateMoveAnchor(coOrd pos)
 }
 #endif
 
+#ifdef TODO_UNUSED
 static void LayoutElevW(
         paramData_t * pd,
         int inx,
@@ -143,7 +148,7 @@ static void LayoutElevW(
 	switch ( inx ) {
 	case I_HEIGHT:
 		h = wControlGetHeight( elevationPLs[I_MODE].control )/(COUNT(
-		                        elevModeLabels )-1);
+		                elevModeLabels )-1);
 #ifndef WINDOWS
 		h += 3;
 #endif
@@ -156,13 +161,14 @@ static void LayoutElevW(
 		break;
 	}
 }
+#endif
 
 
 static int GetElevMode( void )
 {
 	int mode;
 	int newMode;
-	static int modeMap[7] = { ELEV_NONE, ELEV_DEF|ELEV_VISIBLE, ELEV_DEF, ELEV_COMP|ELEV_VISIBLE, ELEV_GRADE|ELEV_VISIBLE, ELEV_STATION|ELEV_VISIBLE, ELEV_IGNORE };
+	static const int modeMap[7] = { ELEV_NONE, ELEV_DEF|ELEV_VISIBLE, ELEV_DEF, ELEV_COMP|ELEV_VISIBLE, ELEV_GRADE|ELEV_VISIBLE, ELEV_STATION|ELEV_VISIBLE, ELEV_IGNORE };
 	mode = (int)elevModeV;
 	if (mode<0||mode>=7) {
 		return -1;
@@ -176,32 +182,36 @@ static int GetElevMode( void )
 static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 {
 	int oldMode, newMode;
-	DIST_T elevNewValue, elevOldValue, diff;
+	DIST_T elevNewValue;
 
 	if ( inx == 0 ) {
 		long mode = *(long*)valueP;
 		if ( mode < 0 || mode >= 7 ) {
 			return;
 		}
-		ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
-		ParamControlActive( &elevationPG, I_STATION, FALSE );
+		FormControlActive( &elevationPG, I_HEIGHT, FALSE );
+		FormControlActive( &elevationPG, I_STATION, FALSE );
 		switch ( mode ) {
 		case 0:
 			break;
 		case 1:
 		case 2:
-			ParamControlActive( &elevationPG, I_HEIGHT, TRUE );
+			FormControlActive( &elevationPG, I_HEIGHT, TRUE );
 			break;
 		case 3:
 		case 4:
 			break;
 		case 5:
-			ParamControlActive( &elevationPG, I_STATION, TRUE );
+			FormControlActive( &elevationPG, I_STATION, TRUE );
+			break;
+		default:
+			if ( log_celev < 0 ) { log_celev = LogFindIndex( "celev" ); }
+			LOG( log_celev, 1, ( "unexpected mode %d in DoElevUpdate\n", mode ) )
 			break;
 		}
 		elevModeV = mode;
 	}
-	ParamLoadData( &elevationPG );
+	FormFetchData( &elevationPG );
 	newMode = GetElevMode();
 	if (newMode == -1) {
 		return;
@@ -216,8 +226,8 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 	}
 	if (oldMode == newMode) {
 		if ((newMode&ELEV_MASK) == ELEV_DEF) {
-			elevOldValue = GetTrkEndElevHeight( elevTrk, elevEp );
-			diff = fabs( elevOldValue-elevNewValue );
+			DIST_T elevOldValue = GetTrkEndElevHeight( elevTrk, elevEp );
+			DIST_T diff = fabs( elevOldValue-elevNewValue );
 			if ( diff < 0.02 ) {
 				return;
 			}
@@ -255,25 +265,23 @@ static void DoElevHilight( void * junk )
 static void ElevSelect( track_p trk, EPINX_T ep )
 {
 	int mode;
-	DIST_T elevX, grade, elev, dist;
+	DIST_T elevX, grade;
 	long radio;
 	BOOL_T gradeOk = TRUE;
 	track_p trk1;
-	EPINX_T ep1;
 
 	DoElevUpdate( NULL, 1, NULL );
-	elevOldValue = 0.0;
 	elevHeightV = 0.0;
 	elevStationV[0] = 0;
 	elevTrk = trk;
 	elevEp = ep;
 	mode = GetTrkEndElevUnmaskedMode( trk, ep );
-	ParamLoadControls( &elevationPG );
-	ParamControlActive( &elevationPG, I_MODE, TRUE );
-	ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
-	ParamControlActive( &elevationPG, I_STATION, FALSE );
-	ParamLoadMessage( &elevationPG, I_COMPUTED, "" );
-	ParamLoadMessage( &elevationPG, I_GRADE, "" );
+	FormLoadControls( &elevationPG );
+	FormControlActive( &elevationPG, I_MODE, TRUE );
+	FormControlActive( &elevationPG, I_HEIGHT, FALSE );
+	FormControlActive( &elevationPG, I_STATION, FALSE );
+	FormLoadMessage( &elevationPG, I_COMPUTED, "" );
+	FormLoadMessage( &elevationPG, I_GRADE, "" );
 	switch (mode & ELEV_MASK) {
 	case ELEV_NONE:
 		radio = 0;
@@ -285,9 +293,8 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 			radio = 2;
 		}
 		elevHeightV = GetTrkEndElevHeight(trk,ep);
-		elevOldValue = elevHeightV;
-		ParamLoadControl( &elevationPG, I_HEIGHT );
-		ParamControlActive( &elevationPG, I_HEIGHT, TRUE );
+		FormLoadSingleControl( &elevationPG, I_HEIGHT );
+		FormControlActive( &elevationPG, I_HEIGHT, TRUE );
 		break;
 	case ELEV_COMP:
 		radio = 3;
@@ -298,8 +305,8 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	case ELEV_STATION:
 		radio = 5;
 		strcpy( elevStationV, GetTrkEndElevStation(trk,ep) );
-		ParamLoadControl( &elevationPG, I_STATION );
-		ParamControlActive( &elevationPG, I_STATION, TRUE );
+		FormLoadSingleControl( &elevationPG, I_STATION );
+		FormControlActive( &elevationPG, I_STATION, TRUE );
 		break;
 	case ELEV_IGNORE:
 		radio = 6;
@@ -308,17 +315,18 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 		radio = 0;
 	}
 	elevModeV = radio;
-	ParamLoadControl( &elevationPG, I_MODE );
+	FormLoadSingleControl( &elevationPG, I_MODE );
 	gradeOk = ComputeElev( trk, ep, FALSE, &elevX, &grade, TRUE );
 	sprintf( message, "%0.2f%s", round(PutDim( elevX )*100.0)/100.0,
 	         (units==UNITS_METRIC?"cm":"\"") );
-	ParamLoadMessage( &elevationPG, I_COMPUTED, message );
+	FormLoadMessage( &elevationPG, I_COMPUTED, message );
 	if (gradeOk) {
 		sprintf( message, "%0.1f%%", fabs(round(grade*1000.0)/10.0) );
 	} else {
 		if ( EndPtIsDefinedElev(trk,ep) ) {
-			elev = GetElevation(trk);
-			dist = GetTrkLength(trk,ep,-1);
+			EPINX_T ep1;
+			DIST_T elev = GetElevation(trk);
+			DIST_T dist = GetTrkLength(trk,ep,-1);
 			if (dist>0.1) {
 				sprintf( message, "%0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
 			} else {
@@ -338,23 +346,23 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 			strcpy( message, _("Undefined") );
 		}
 	}
-	ParamLoadMessage( &elevationPG, I_GRADE, message );
+	FormLoadMessage( &elevationPG, I_GRADE, message );
 	if ( (mode&ELEV_MASK)!=ELEV_DEF ) {
 		elevHeightV = elevX;
-		ParamLoadControl( &elevationPG, I_HEIGHT );
+		FormLoadSingleControl( &elevationPG, I_HEIGHT );
 	}
 	wShow(elevW);
 }
 
 static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height)
 {
-	DIST_T elev0, elev1, dist0, dist1;
+	DIST_T elev0, elev1;
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
 		if ( GetTrkLength( trk, 0, 1 ) < 0.1 ) {
 			return FALSE;
 		}
-		dist0 = FindDistance(pos,GetTrkEndPos(trk,0));
-		dist1 = FindDistance(pos,GetTrkEndPos(trk,1));
+		DIST_T dist0 = FindDistance(pos,GetTrkEndPos(trk,0));
+		DIST_T dist1 = FindDistance(pos,GetTrkEndPos(trk,1));
 		ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
 		ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
 		if (dist1+dist0 <= 0.1) {
@@ -375,30 +383,29 @@ static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height)
 static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
-	EPINX_T ep0;
 //	int oldTrackCount;
 
 	switch (action) {
 	case C_START:
 		if ( elevW == NULL ) {
-			elevW = ParamCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")),
-			                           NULL, NULL,
-			                           ParamCancel_Reset,
-			                           TRUE, LayoutElevW,
-			                           PD_F_ALT_CANCELLABEL,
-			                           DoElevUpdate );
+			elevW = FormCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")),
+			                          NULL, NULL,
+			                          NULL, FormCancel_Reset,
+			                          TRUE,
+			                          PD_F_ALT_CANCELLABEL,
+			                          DoElevUpdate );
 		}
 		elevModeV = 0;
 		elevHeightV = 0.0;
 		elevStationV[0] = 0;
-		ParamLoadControls( &elevationPG );
-		ParamGroupRecord( &elevationPG );
+		FormLoadControls( &elevationPG );
+		FormGroupRecord( &elevationPG );
 		//wShow( elevW );
-		ParamControlActive( &elevationPG, I_MODE, FALSE );
-		ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
-		ParamControlActive( &elevationPG, I_STATION, FALSE );
-		ParamLoadMessage( &elevationPG, I_COMPUTED, "" );
-		ParamLoadMessage( &elevationPG, I_GRADE, "" );
+		FormControlActive( &elevationPG, I_MODE, FALSE );
+		FormControlActive( &elevationPG, I_HEIGHT, FALSE );
+		FormControlActive( &elevationPG, I_STATION, FALSE );
+		FormLoadMessage( &elevationPG, I_COMPUTED, "" );
+		FormLoadMessage( &elevationPG, I_GRADE, "" );
 		InfoMessage(
 		        _("Click on end, +Shift to split, +Ctrl to move description, +Alt to show elevation") );
 		elevTrk = NULL;
@@ -415,7 +422,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		}
 //		BOOL_T xing = FALSE;
 		coOrd p0 = pos, p2=pos;
-		if ((trk0 = OnTrack2(&p0,FALSE, TRUE, FALSE, NULL)) != NULL) {
+		trk0 = OnTrack2(&p0,FALSE, TRUE, FALSE, NULL);
+		if (trk0 != NULL) {
 			EPINX_T ep0 = 0;
 //			EPINX_T ep1 = 1;
 			DIST_T elev0, elev1;
@@ -429,7 +437,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			if (((MyGetKeyState()&WKEY_ALT))) {   //Add square with Alt
-				if ((trk1 = OnTrack2(&p2,FALSE, TRUE, FALSE, trk0)) != NULL) {
+				trk1 = OnTrack2(&p2,FALSE, TRUE, FALSE, trk0);
+				if (trk1 != NULL) {
 					if (IsClose(FindDistance(p0,p2))) {
 						if (GetEndPtConnectedToMe(trk0,
 						                          trk1) == -1) {	//Not simply connected to each other!!!
@@ -451,7 +460,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 					}
 				}
 			}
-			if ((ep0 = PickEndPoint( p0, trk0 )) != -1)  {
+			ep0 = PickEndPoint( p0, trk0 );
+			if (ep0 != -1)  {
 				if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
 				    && !(QueryTrack(trk0,Q_IS_TURNOUT))) {
 					InfoMessage( _("Click to split here - elevation %0.3f"), PutDim(elev0));
@@ -480,16 +490,17 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			elevTrk = NULL;
 			return C_CONTINUE;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_LCLICK:
 		;
 		p0= pos;
-		if ((trk0 = OnTrack( &p0, TRUE, TRUE )) == NULL) {
+		trk0 = OnTrack( &p0, TRUE, TRUE );
+		if (trk0 == NULL) {
 			wHide(elevW);
 			elevTrk = NULL;
 			InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
 		} else {
-			ep0 = PickEndPoint( p0, trk0 );
+			EPINX_T ep0 = PickEndPoint( p0, trk0 );
 			if ( (MyGetKeyState()&WKEY_SHIFT) ) {
 				UndoStart( _("Split track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 //				oldTrackCount = trackCount;
@@ -515,8 +526,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		InfoMessage( "" );
 		return C_TERMINATE;
 	case C_CANCEL:
-		elevTrk = NULL;
 		DoElevUpdate( NULL, 1, NULL );
+		elevTrk = NULL;
 		wHide( elevW );
 		InfoMessage( "" );
 		return C_TERMINATE;
@@ -531,20 +542,21 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		}
 		CmdMoveDescription( action, pos );
 		return C_CONTINUE;
+	default:
+		if ( log_celev < 0 ) { log_celev = LogFindIndex( "celev" ); }
+		LOG( log_celev, 1, ( "unexpected action %d in CmdElevation\n", action ) )
+		break;
 	}
 	return C_CONTINUE;
 }
 
 
-
-
-#include "bitmaps/elevation.image3"
-
 EXPORT void InitCmdElevation( wMenu_p menu )
 {
-	ParamRegister( &elevationPG );
+	FormRegister( &elevationPG );
 	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"),
-	               wIconCreatePixMap(elevation_image3[iconSize]), LEVEL0_50,
-	               IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, ACCL_ELEVATION, NULL );
+	               CreateToolbarIconFromResource("elevation.png"), LEVEL0_50,
+	               IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE|IC_TOGGLE,
+	               ACCL_ELEVATION, NULL );
 }
 

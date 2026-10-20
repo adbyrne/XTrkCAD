@@ -15,9 +15,9 @@
 
 /**
  * strscpy - Copy a C-string into a sized buffer
- * @dest: Where to copy the string to
- * @src: Where to copy the string from
- * @count: Size of destination buffer
+ * \param dest Where to copy the string to
+ * \param src Where to copy the string from
+ * \param count Size of destination buffer
  *
  * Copy the string, or as much of it as fits, into the dest buffer.  The
  * behavior is undefined if the string buffers overlap.  The destination
@@ -74,11 +74,11 @@ strscat(char* dest, const char* src, size_t count)
 {
 	long sptr = 0;
 	long dptr = strlen(dest);
-	count -= dptr;
 
-	if (count <= 0) {
+	if ((size_t)dptr >= count) {
 		return -E2BIG;
 	}
+	count -= dptr;
 
 	while (count) {
 		char c;

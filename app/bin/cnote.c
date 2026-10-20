@@ -24,19 +24,19 @@
 #include "dynstring.h"
 #include "fileio.h"
 #include "misc.h"
-#include "param.h"
+#include "form.h"
 #include "include/utf8convert.h"
 
 static char * mainText = NULL;
-static wWin_p noteW;
+static wControl_p noteW;
 
 static paramTextData_t noteTextData = { 300, 150 };
 static paramData_t notePLs[] = {
 #define I_NOTETEXT		(0)
-#define noteT			((wText_p)notePLs[I_NOTETEXT].control)
-	{	PD_TEXT, NULL, "text", PDO_DLGRESIZE, &noteTextData }
+#define noteT			(notePLs[I_NOTETEXT].control)
+	{	PD_TEXT, NULL, "text", 0, &noteTextData }
 };
-static paramGroup_t notePG = { "note", 0, notePLs, COUNT( notePLs ) };
+static paramGroup_t notePG = { "note", PGO_FULLDIALOGFROMBUILDER, notePLs, COUNT( notePLs ) };
 
 
 void ClearNote(void)
@@ -64,9 +64,10 @@ static void NoteOk(void * unused)
 void DoNote(void * unused)
 {
 	if (noteW == NULL) {
-		noteW = ParamCreateDialog(&notePG, MakeWindowTitle(_("Note")), _("Ok"), NoteOk,
-		                          ParamCancel_Current, FALSE, NULL,
-		                          F_NOTTRANSIENT|F_RESIZE, NULL);
+		noteW = FormCreateDialog(&notePG, MakeWindowTitle(_("Note")),
+		                         _("Ok"), NoteOk,
+		                         _("Cancel"), FormCancel_Current,
+		                         FALSE, F_NOTTRANSIENT|F_RESIZE, NULL);
 	}
 
 	wTextClear(noteT);
@@ -88,7 +89,7 @@ void DoNote(void * unused)
 BOOL_T WriteMainNote(FILE* f)
 {
 	BOOL_T rc = TRUE;
-	char *noteText = mainText;
+	const char *noteText = mainText;
 
 	if (noteText && *noteText) {
 #ifdef UTFCONVERT
@@ -147,5 +148,5 @@ BOOL_T ReadMainNote(char *line)
 
 void InitCmdNote()
 {
-	ParamRegister(&notePG);
+	FormRegister(&notePG);
 }

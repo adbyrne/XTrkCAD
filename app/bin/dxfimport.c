@@ -35,7 +35,6 @@
 // #include "layout.h"
 // #include "manifest.h"
 #include "misc.h"
-#include "param.h"
 // #include "include/paramfile.h"
 // #include "include/paramfilelist.h"
 #include "paths.h"
@@ -45,6 +44,7 @@
 #include "dynstring.h"
 #include "common-ui.h"
 // #include "ctrain.h"
+#include "form.h"
 
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
@@ -66,30 +66,32 @@ static int ImportDxf(int cnt, char** fileName, void* data);
 static void ProcessDxfFile(char** filePath, char* fileName,
                            BOOL_T complain);
 
-static int importDxfTrack = 0;
-static int importDxfXti = 0;
+static long importDxfTrack = 0;
+static long importDxfXti = 0;
 
 static char* importDxfTrackLabels[] = { N_("Layer 0 Track"), NULL };
 static char* importDxfXtiLabels[] = { N_("No Import"), N_("Import XTI"), N_("Import Module"), NULL };
 
 static paramData_t importDxfPLs[] = {
 	/*0*/ { PD_TOGGLE, &importDxfTrack, "track", PDO_NOPREF, &importDxfTrackLabels, NULL, BC_NOBORDER },
-	/*1*/ { PD_RADIO, &importDxfXti, "xti", PDO_NOPREF, &importDxfXtiLabels, NULL, BC_NONE }
+	/*1*/ { PD_RADIO, &importDxfXti, "xti", PDO_NOPREF, &importDxfXtiLabels, NULL }
 };
 static paramGroup_t importDxfPG = { "importDxf", 0, importDxfPLs, COUNT(importDxfPLs) };
-static wWin_p importDxfW;
+static wControl_p importDxfW;
 
 /* Called from File menu */
 EXPORT void DoImportDxf(void* unused)
 {
 	if (!importDxfW) {
-		ParamRegister(&importDxfPG);
-		importDxfW = ParamCreateDialog(&importDxfPG, MakeWindowTitle(_("Import Dxf")),
-		                               _("Ok"), ImportDxfFileSel, ParamCancel_Current,
-		                               TRUE, NULL, 0, NULL);
+		FormRegister(&importDxfPG);
+		importDxfW = FormCreateDialog( &importDxfPG,
+		                               MakeWindowTitle(_("Import Dxf")),
+		                               _("Ok"), ImportDxfFileSel,
+		                               NULL, FormCancel_Current,
+		                               TRUE, 0, NULL);
 		// blockD.dpi = mainD.dpi;
 	}
-	ParamLoadControls(&importDxfPG);
+	FormLoadControls(&importDxfPG);
 	wShow(importDxfW);
 }
 
@@ -195,7 +197,7 @@ static bool ReadDxfPair(FILE* dxfFile)
 }
 
 // Get the line type code from the DXF text
-static wDrawLineType_e dxfLineType(char dxfValue[50])
+static wDrawLineType_e dxfLineType(const char dxfValue[50])
 {
 	wDrawLineType_e lineType = wDrawLineSolid;
 
@@ -243,7 +245,7 @@ char** DxfOutput;				// Track Output lines
 
 // Allocate memory for a line of output and assign to output
 // Reallocate array space if needed
-static BOOL_T dxfAddOutput(char tmp[])
+static BOOL_T dxfAddOutput(const char tmp[])
 {
 	size_t len = strlen(tmp) + 1;
 	char* outpt = MyMalloc(len * sizeof(char));
@@ -351,14 +353,14 @@ static void ProcessDxfFile(
 	struct sLayer layer[MAX_DXF_LAYER];
 
 
-	int layerCount = 0;
+	int dxfLayerCount = 0;
 	int entityCount = 0;
 
 	char dxfLayer[50];
 
 	int color = 0;
 	int colorRGB = -1;
-	wDrawLineType_e lineType;
+	int lineType;
 	double thick = 0.0;
 	double radius = 0.0;
 	double startAngle = 0.0;
@@ -368,7 +370,7 @@ static void ProcessDxfFile(
 	double y1 = 0.0;
 	double x2 = 0.0;
 	double y2 = 0.0;
-	int layerIdx = 0;
+	int layerIdx;
 	int visibility = 2;
 
 	double vrt_x[20];
@@ -402,8 +404,7 @@ static void ProcessDxfFile(
 	eSection = eNone;
 
 	count = 0;
-	while (dxfFile
-	       && ReadDxfPair(dxfFile)) {
+	while (ReadDxfPair(dxfFile)) {
 		count += 2;
 		// BOOL_T old_skip = skip;
 		// skip = FALSE;
@@ -421,17 +422,17 @@ static void ProcessDxfFile(
 
 				// Write the layer data into a list
 				if (inLayers) {
-					if (layerCount < MAX_DXF_LAYER) {
-						layer[layerCount].line = count;
+					if (dxfLayerCount < MAX_DXF_LAYER) {
+						layer[dxfLayerCount].line = count;
 						size_t len = strlen(dxfGroup);
-						layer[layerCount].name = MyMalloc((len + 1) * sizeof(char));
-						strncpy(layer[layerCount].name, dxfGroup, len);
-						layer[layerCount].color = (colorRGB >= 0 ? colorRGB : (color == 7 ? 0 :
-						                           (color > 0 && color < 256 ? color : 0)));
-						layer[layerCount].lineType = lineType;
-						layer[layerCount].thick = thick;
+						layer[dxfLayerCount].name = MyMalloc((len + 1) * sizeof(char));
+						strncpy(layer[dxfLayerCount].name, dxfGroup, len);
+						layer[dxfLayerCount].color = (colorRGB >= 0 ? colorRGB : (color == 7 ? 0 :
+						                              (color > 0 && color < 256 ? color : 0)));
+						layer[dxfLayerCount].lineType = lineType;
+						layer[dxfLayerCount].thick = thick;
 
-						layerCount++;
+						dxfLayerCount++;
 					} else {
 						NoticeMessage(MSG_TOO_MANY_LAYERS, _("Ok"), NULL, fileName, MAX_DXF_LAYER);
 						return;
@@ -445,7 +446,7 @@ static void ProcessDxfFile(
 					layerIdx = curLayer;
 
 					if (color < 0 || lineType < 0 || thick < 0) {
-						for (int i = 0; i < layerCount; i++) {
+						for (int i = 0; i < dxfLayerCount; i++) {
 							if (strncmp(dxfLayer, layer[i].name, sizeof dxfLayer) == 0) {
 								if (color < 0) {
 									color = layer[i].color;
@@ -801,10 +802,8 @@ static void ProcessDxfFile(
 	dxfAddOutput(tmp);
 
 	// Find and fix connected end points
-	int i;
-	int j;
-	for (i = 0; i < DxfEndPtCount; i++)
-		for (j = 0; j < DxfEndPtCount; j++) {
+	for (int i = 0; i < DxfEndPtCount; i++)
+		for (int j = 0; j < DxfEndPtCount; j++) {
 
 			if ((i != j) && (DxfEndPt[i].entity != DxfEndPt[j].entity)) {
 				double a = NormalizeAngle(180.0 + DxfEndPt[i].angle - DxfEndPt[j].angle +
@@ -826,16 +825,20 @@ static void ProcessDxfFile(
 			}
 		}
 
-	if (dxfFile) {
-		fclose(dxfFile);
-		dxfFile = NULL;
-	}
+	fclose(dxfFile);
+	dxfFile = NULL;
 
 	// Change the extension to create the XTI file
+	MakeFullpath(&pathName, workingDir, nameOfFile, NULL);
+
 	MakeFullpath(pathName, workingDir, nameOfFile, NULL);
 
 	char* p = strstr(pathName[0], ".dxf");
 	if (p != NULL) {
+		// ".dxf" and ".xti" are both exactly 4 chars, so this in-place
+		// replacement preserves whatever followed ".dxf" (including its
+		// NUL terminator) unchanged.
+		// NOLINTNEXTLINE(bugprone-not-null-terminated-result)
 		memcpy(p, ".xti", 4);
 	}
 
@@ -850,9 +853,7 @@ static void ProcessDxfFile(
 	for (int i = 0; i < DxfOutputCount; i++) {
 		fprintf(xtiFile, "%s\n", DxfOutput[i]);
 	}
-	if (xtiFile) {
-		fclose(xtiFile);
-	}
+	fclose(xtiFile);
 
 
 	// Clean up
@@ -863,7 +864,7 @@ static void ProcessDxfFile(
 	}
 	MyFree(DxfOutput);
 
-	for (int i = 0; i < layerCount; i++) {
+	for (int i = 0; i < dxfLayerCount; i++) {
 		MyFree(layer[i].name);
 	}
 
@@ -872,26 +873,26 @@ static void ProcessDxfFile(
 	if (importDxfXti >= 1) {
 
 		int saveLayer = curLayer;
-		int layer = 0;
+		int xtiLayer = 0;
 
 		if (importDxfXti == 2) {
-			layer = FindUnusedLayer(0);
-			if (layer == -1) {
+			xtiLayer = FindUnusedLayer(0);
+			if (xtiLayer == -1) {
 				NoticeMessage(MSG_NO_EMPTY_LAYER, _("Ok"), NULL, fileName, 0);
 				return;
 			}
 			char LayerName[80];
 			LayerName[0] = '\0';
 			sprintf(LayerName, _("Module - %s"), fileName);
-			SetCurrLayer(layer, NULL, 0, NULL, NULL);
-			SetLayerName(layer, LayerName);
+			SetCurrLayer(xtiLayer, NULL, 0, NULL, NULL);
+			SetLayerName(xtiLayer, LayerName);
 		}
 
 		ParamSetInReadTracks(TRUE);
 		BOOL_T ret = ReadTrackFile(pathName[0], fileName, FALSE, TRUE, TRUE);
 
 		if (ret) {
-			if (importDxfXti == 2) { SetLayerModule(layer, TRUE); }
+			if (importDxfXti == 2) { SetLayerModule(xtiLayer, TRUE); }
 			useCurrentLayer = FALSE;
 		}
 		SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);

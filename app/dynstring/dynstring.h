@@ -26,8 +26,7 @@
 
 #include <stddef.h>
 
-struct DynString
-{
+struct DynString {
 	char *s;
 	size_t size;		// length of the string
 	size_t b_size;		//  length of the buffer containing the string
@@ -40,20 +39,20 @@ typedef struct DynString DynString;
 // define highest bit depending on 32 or 64 bit compile
 
 #if defined(__LP64__) || defined(_WIN64) || (defined(__x86_64__) &&  !defined(__ILP32__) ) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
-    #define STR_FREEABLE (1ULL << 63)
+#define STR_FREEABLE (1ULL << 63)
 #else
-    #define STR_FREEABLE (1ULL << 31)
+#define STR_FREEABLE (1ULL << 31)
 #endif
 
-size_t DynStringSize(DynString * s);
+size_t DynStringSize(const DynString * s);
 
 DynString * DynStringMalloc(DynString *s, size_t size);
 void DynStringClear(DynString *s);
 void DynStringRealloc(DynString * s);
 void DynStringResize(DynString * s, size_t size);
 void DynStringFree(DynString * s);
-DynString * DynStringDupStr(DynString *s2, DynString * s);
-void DynStringCpyStr(DynString * dest, DynString * src);
+DynString * DynStringDupStr(DynString *s2, const DynString * s);
+void DynStringCpyStr(DynString * dest, const DynString * src);
 char * DynStringToCStr(DynString * s);
 void DynStringNCatCStr(DynString * s, size_t len, const char * str);
 void DynStringCatCStr(DynString * s, const char * str);

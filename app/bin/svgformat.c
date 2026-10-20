@@ -20,6 +20,9 @@
 *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+// _USE_MATH_DEFINES is mandated by the Windows CRT to expose M_PI etc. from
+// math.h; the reserved-identifier naming isn't ours to change.
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <stdarg.h>
@@ -33,7 +36,7 @@
 #include "common.h"
 
 #define SVGDPIFACTOR 90.0					/**< the assumed resolution of the svg, 90 is what Inkscape uses */
-#define ROUND2PIXEL( value ) ((int)floor(value * SVGDPIFACTOR + 0.5))
+#define ROUND2PIXEL( value ) ((int)floor((value) * SVGDPIFACTOR + 0.5))
 
 typedef struct sCssStyle {
 	DynString name;
@@ -101,7 +104,7 @@ CompareStyle(sCssStyle *a, sCssStyle *b)
  */
 
 static char *
-SvgAddStyleToCache(DynString *styleDef)
+SvgAddStyleToCache(const DynString *styleDef)
 {
 	sCssStyle *style;
 	sCssStyle *result;
@@ -152,6 +155,7 @@ SvgDestroyStyleCache(void)
  * \param colorRGB	RGB value
  * \param width     line width
  * \param fill		true to fill
+ * \param lineStyle line style
  */
 
 static void
@@ -209,8 +213,8 @@ SvgAddRealUnit(mxml_node_t *node, char *name, double value)
 * A fictional value for the resolution is assumed. As final
 * rendering is done by the client, this is not really relevant.
 *
-* \PARAM [in, out]	node	the XML node
-* \PARAM [in]		name	name of attribute
+* \param [in, out]	node	the XML node
+* \param [in]		name	name of attribute
 * \param [in]		value	size
 */
 
@@ -258,7 +262,7 @@ SvgLineCommand(SVGParent *svg, double x0,
  * \param 		   x1	   The first x value.
  * \param 		   y1	   The first y value.
  * \param 		   color   The color.
- * \param 		   fill		Specifies the fill options.
+ * \param 		   lineStyle	Specifies the line style.
  */
 
 void
@@ -292,7 +296,7 @@ SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1,
  */
 
 void
-SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color,
+SvgPolyLineCommand(SVGParent *svg, int cnt, const double *points, int color,
                    double width, bool fill, unsigned lineStyle)
 {
 	mxml_node_t *xmlData;
@@ -306,8 +310,8 @@ SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color,
 	for (int i = 0; i < cnt; i++) {
 		DynStringPrintf(&pos,
 		                "%d,%d ",
-		                (int)floor(points[i * 2] * SVGDPIFACTOR + 0.5),
-		                (int)floor(points[ i * 2 + 1] * SVGDPIFACTOR + 0.5));
+		                (int)floor(points[(ptrdiff_t)i * 2] * SVGDPIFACTOR + 0.5),
+		                (int)floor(points[(ptrdiff_t)i * 2 + 1] * SVGDPIFACTOR + 0.5));
 
 		DynStringCatStr(&pointList, &pos);
 		DynStringClear(&pos);
@@ -465,9 +469,8 @@ SvgTextCommand(SVGParent *svg, double x,
 void
 SvgAddTitle(SVGParent *svg, char *title)
 {
-	mxml_node_t *titleNode;
 	if (title) {
-		titleNode = mxmlNewElement(MXML_NO_PARENT, "title");
+		mxml_node_t *titleNode = mxmlNewElement(MXML_NO_PARENT, "title");
 		mxmlNewText(titleNode, false, title);
 
 		mxmlAdd(svg, MXML_ADD_BEFORE, MXML_ADD_TO_PARENT, titleNode);
@@ -583,7 +586,7 @@ SvgPrologue(SVGDocument *parent, char *id, int layerCount, double x0, double y0,
  * Add formatting to the resulting document by adding whitespace
  *
  * \param  node to be formatted
- * \param  see minixml docu, position in XML tag
+ * \param  where minixml docu, position in XML tag
  *
  * \returns Null if it no character to add, else a pointer to the additional chars.
  */
@@ -658,7 +661,7 @@ whitespace_cb(mxml_node_t *node, int where)
  */
 
 bool
-SvgSaveFile(SVGDocument *svg, char *filename)
+SvgSaveFile(SVGDocument *svg, const char *filename)
 {
 	FILE *svgF;
 

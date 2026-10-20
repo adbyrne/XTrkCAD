@@ -24,10 +24,11 @@
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
+#include "dynstring.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
-#include "param.h"
-#include "cselect.h"
+#include "form.h"
 #include "include/paramfile.h"
 #include "track.h"
 #include "tbezier.h"
@@ -41,6 +42,7 @@ EXPORT dynArr_t structureInfo_da;
 
 static wIndex_t pierListInx;
 EXPORT turnoutInfo_t * curStructure = NULL;
+/** @logcmd @showrefby `Structure=n` `cstruct.c` */
 static int log_structure = 0;
 
 static wMenu_p structPopupM;
@@ -58,7 +60,7 @@ static drawCmd_t structureD = {
 static wIndex_t structureHotBarCmdInx;
 static wIndex_t structureInx;
 static long hideStructureWindow;
-static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x,
+static void RedrawStructure( wControl_p d, void * context, wWinPix_t x,
                              wWinPix_t y );
 
 static wWinPix_t structureListWidths[] = { 80, 80, 220 };
@@ -68,35 +70,30 @@ static const char * hideLabels[] = { N_("Hide"), NULL };
 static paramDrawData_t structureDrawData = { 490, 200, RedrawStructure, NULL, &structureD };
 static paramData_t structurePLs[] = {
 #define I_LIST	(0)
-#define structureListL	((wList_p)structurePLs[I_LIST].control)
-	{	PD_LIST, &structureInx, "list", PDO_NOPREF|PDO_DLGRESIZEW, &listData, NULL, BL_DUP },
+#define structureListL	(structurePLs[I_LIST].control)
+	{	PD_LIST, &structureInx, "list", PDO_NOPREF, &listData, NULL, BL_DUP },
 #define I_DRAW	(1)
-	{	PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_DLGRESIZE, &structureDrawData, NULL, 0 },
+	{	PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT, &structureDrawData, NULL, 0 },
 #define I_HIDE	(2)
 	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER },
 #define I_MSGSCALE		(3)
-	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
+	{	PD_MESSAGE, NULL, "mess1", 0, I2VP(80)},
 #define I_MSGWIDTH		(4)
-	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
+	{	PD_MESSAGE, NULL, "mess2", 0, I2VP(80) },
 #define I_MSGHEIGHT		(5)
-	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) }
+	{	PD_MESSAGE, NULL, "mess3", 0, I2VP(80) }
 };
-static paramGroup_t structurePG = { "structure", 0, structurePLs, COUNT( structurePLs ) };
+static paramGroup_t structurePG = { "structure", PGO_FULLDIALOGFROMBUILDER, structurePLs, COUNT( structurePLs ) };
 
-
-
 /****************************************
  *
  * STRUCTURE LIST MANAGEMENT
  *
  */
 
-
-
-
 EXPORT turnoutInfo_t * CreateNewStructure(
-        char * scale,
-        char * title,
+        const char * scale,
+        const char * title,
         wIndex_t segCnt,
         trkSeg_p segData,
         BOOL_T updateList )
@@ -151,9 +148,9 @@ EXPORT turnoutInfo_t * CreateNewStructure(
 
 /**
  * Delete a structure definition from memory.
- * \TODO Find a better way to handle Custom Structures (see CreateNewStructure)
+ * \todo Find a better way to handle Custom Structures (see CreateNewStructure)
  *
- * \param [IN] structure the structure to be deleted
+ * \param[in] structure the structure to be deleted
  */
 
 BOOL_T
@@ -253,7 +250,7 @@ GetStructureCompatibility(int paramFileIndex, SCALEINX_T scaleIndex) {
 
 	for (i = 0; i < structureInfo_da.cnt; i++)
 	{
-		turnoutInfo_t *to = structureInfo(i);
+		const turnoutInfo_t *to = structureInfo(i);
 		if (to->paramFileIndex == paramFileIndex) {
 			SCALE_FIT_T fit = CompatibleScale(FIT_STRUCTURE,to->scaleInx,scaleIndex);
 			if (fit == FIT_EXACT) {
@@ -277,7 +274,6 @@ static BOOL_T ReadStructureParam(
 	char *title;
 	turnoutInfo_t * to;
 	char * cp;
-	static dynArr_t pierInfo_da;
 #define pierInfo(N) DYNARR_N( pierInfo_t, pierInfo_da, N )
 
 	if ( !GetArgs( firstLine+10, "s9q", scale, &title ) ) {
@@ -292,6 +288,7 @@ static BOOL_T ReadStructureParam(
 	}
 	if (tempSpecial[0] != '\0') {
 		if (strncmp( tempSpecial, PIER, strlen(PIER) ) == 0) {
+			static dynArr_t pierInfo_da;
 			DYNARR_RESET( pierInfo_t, pierInfo_da );
 			to->special = TOpierInfo;
 			cp = tempSpecial+strlen(PIER);
@@ -319,7 +316,7 @@ static BOOL_T ReadStructureParam(
 }
 
 
-EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wList_p list,
+EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wControl_p list,
                                   coOrd * maxDim )
 {
 	wIndex_t inx;
@@ -329,8 +326,7 @@ EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wList_p list,
 		to = structureInfo(inx);
 		if ( IsParamValid(to->paramFileIndex) &&
 		     to->segCnt > 0 &&
-		     (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx, scale )) &&
-		     to->segCnt != 0 ) {
+		     (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx, scale )) ) {
 			if (to1 == NULL) {
 				to1 = to;
 			}
@@ -355,7 +351,7 @@ EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wList_p list,
 	return to1;
 }
 
-
+
 /****************************************
  *
  * GENERIC FUNCTIONS
@@ -390,7 +386,7 @@ static void DrawStructure(
 		d->options |= DC_CENTER;
 		break;
 	case DRAWLINEPHANTOM:
-		d->options |= DC_CENTER;
+		d->options |= DC_PHANTOM;
 		break;
 	}
 	DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
@@ -435,7 +431,6 @@ static BOOL_T QueryStructure( track_p trk, int query )
 {
 	switch ( query ) {
 	case Q_HAS_DESC:
-		return TRUE;
 	case Q_IS_STRUCTURE:
 		return TRUE;
 	default:
@@ -448,8 +443,8 @@ static wBool_t CompareStruct( track_cp trk1, track_cp trk2 )
 {
 	struct extraDataCompound_t *xx1 = GET_EXTRA_DATA( trk1, T_STRUCTURE,
 	                                  extraDataCompound_t );
-	struct extraDataCompound_t *xx2 = GET_EXTRA_DATA( trk2, T_STRUCTURE,
-	                                  extraDataCompound_t );
+	const struct extraDataCompound_t *xx2 = GET_EXTRA_DATA( trk2, T_STRUCTURE,
+	                                        extraDataCompound_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
 	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
@@ -502,25 +497,22 @@ static trackCmd_t structureCmds = {
 };
 
 static paramData_t pierPLs[] = {
-	{	PD_DROPLIST, &pierListInx, "inx", 0, I2VP(50), N_("Pier Number") }
+	{	PD_COMBOLIST, &pierListInx, "inx", 0, I2VP(50), N_("Pier Number") }
 };
-static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, COUNT( pierPLs ) };
-#define pierL ((wList_p)pierPLs[0].control)
+static paramGroup_t pierPG = { "pier", 0, pierPLs, COUNT( pierPLs ) };
+#define pierL (pierPLs[0].control)
 
 static void ShowPierL( void )
 {
-	int inx;
-	wIndex_t currInx;
 	wControl_p controls[2];
-	char * labels[1];
 
 	if ( curStructure->special==TOpierInfo && curStructure->u.pierInfo.cnt > 1) {
 		if (pierL == NULL) {
-			ParamCreateControls( &pierPG, NULL );
+			FormCreateControls( &pierPG );
 		}
-		currInx = wListGetIndex( pierL );
+		wIndex_t currInx = wListGetIndex( pierL );
 		wListClear( pierL );
-		for (inx=0; inx<curStructure->u.pierInfo.cnt; inx++) {
+		for (int inx=0; inx<curStructure->u.pierInfo.cnt; inx++) {
 			wListAddValue( pierL, curStructure->u.pierInfo.info[inx].name, NULL, NULL );
 		}
 		if ( currInx < 0 ) {
@@ -530,16 +522,16 @@ static void ShowPierL( void )
 			currInx = curStructure->u.pierInfo.cnt-1;
 		}
 		wListSetIndex( pierL, currInx );
+		char * labels[1];
 		controls[0] = (wControl_p)pierL;
 		controls[1] = NULL;
 		labels[0] = N_("Pier Number");
-		InfoSubstituteControls( controls, labels );
+		InfoSubstituteControls(pierPG.nameStr, controls, labels);
 	} else {
-		InfoSubstituteControls( NULL, NULL );
+		InfoDefaultControls();
 	}
 }
 
-
 /*****************************************
  *
  *	 Structure Dialog
@@ -548,7 +540,7 @@ static void ShowPierL( void )
 
 static void NewStructure();
 static coOrd maxStructureDim;
-static wWin_p structureW;
+static wControl_p structureW;
 
 
 static void RescaleStructure( void )
@@ -574,7 +566,7 @@ static void RescaleStructure( void )
 
 static void structureChange( long changes )
 {
-	static char * lastScaleName = NULL;
+	static const char * lastScaleName = NULL;
 	if (structureW == NULL) {
 		return;
 	}
@@ -609,9 +601,11 @@ static void structureChange( long changes )
 
 
 
-static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x,
+static void RedrawStructure( wControl_p d, void * context, wWinPix_t x,
                              wWinPix_t y )
 {
+	DynString output;
+
 	RescaleStructure();
 	LOG( log_structure, 2, ( "SelStructure(%s)\n",
 	                         (curStructure?curStructure->title:"<NULL>") ) )
@@ -619,44 +613,49 @@ static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x,
 	if (curStructure == NULL) {
 		return;
 	}
+
+
 	structureD.orig.x = -0.10*structureD.scale + curStructure->orig.x;
 	structureD.orig.y = (curStructure->size.y + curStructure->orig.y) -
 	                    structureD.size.y + trackGauge;
 	DrawSegs( &structureD, zero, 0.0, curStructure->segs, curStructure->segCnt,
 	          0.0, wDrawColorBlack );
-	sprintf( message, _("Scale %d:1"), (int)structureD.scale );
-	ParamLoadMessage( &structurePG, I_MSGSCALE, message );
-	sprintf( message, _("Width %s"), FormatDistance(curStructure->size.x) );
-	ParamLoadMessage( &structurePG, I_MSGWIDTH, message );
-	sprintf( message, _("Height %s"), FormatDistance(curStructure->size.y) );
-	ParamLoadMessage( &structurePG, I_MSGHEIGHT, message );
+
+	DynStringMalloc(&output, 16);
+	DynStringPrintf( &output, _("%d:1"), (int)structureD.scale );
+	FormLoadMessage(&structurePG, I_MSGSCALE, DynStringToCStr(&output));
+	DynStringPrintf(&output, _("%s"), FormatDistance(curStructure->size.x) );
+	FormLoadMessage( &structurePG, I_MSGWIDTH, DynStringToCStr(&output));
+	DynStringPrintf(&output, _("%s"), FormatDistance(curStructure->size.y) );
+	FormLoadMessage( &structurePG, I_MSGHEIGHT, DynStringToCStr(&output));
+	DynStringFree(&output);
 }
 
 
-static void StructureDlgUpdate(
+static wBool_t StructureDlgUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP )
 {
 	turnoutInfo_t * to;
-	if ( inx != I_LIST ) { return; }
-	to = (turnoutInfo_t*)wListGetItemContext( (wList_p)pg->paramPtr[inx].control,
-	                (wIndex_t)*(long*)valueP );
+	if ( inx != I_LIST ) { return(0); }
+	to = (turnoutInfo_t*)wListGetItemContext( pg->paramPtr[inx].control,
+	        (wIndex_t)*(long*)valueP );
 	NewStructure();
 	curStructure = to;
 	ShowPierL();
 	RedrawStructure( structureD.d, NULL, 0, 0 );
+
+	return(0);
 }
 
 
-static void DoStructOk( void )
+static void DoStructOk( void const * arg )
 {
 	NewStructure();
 	Reset();
 }
 
-
-
 /****************************************
  *
  * GRAPHICS COMMANDS
@@ -838,7 +837,6 @@ EXPORT STATUS_T CmdStructureAction(
 
 	ANGLE_T angle;
 	static BOOL_T validAngle;
-	static ANGLE_T baseAngle;
 	static coOrd origPos;
 	static ANGLE_T origAngle;
 	static coOrd rot0, rot1;
@@ -928,6 +926,7 @@ EXPORT STATUS_T CmdStructureAction(
 		rot1 = pos;
 		if ( FindDistance( rot0, rot1 ) > (6.0/BASE_DPI)*mainD.scale ) {
 			angle = FindAngle( rot0, rot1 );
+			static ANGLE_T baseAngle;
 			if (!validAngle) {
 				baseAngle = angle;
 				validAngle = TRUE;
@@ -983,8 +982,8 @@ EXPORT STATUS_T CmdStructureAction(
 	case C_CANCEL:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		Dst.state = 0;
-		InfoSubstituteControls( NULL, NULL );
-		//HotBarCancel();
+		InfoDefaultControls();
+		HotBarCancel();
 		/*wHide( newTurn.reg.win );*/
 		return C_TERMINATE;
 
@@ -992,11 +991,11 @@ EXPORT STATUS_T CmdStructureAction(
 		if ((action>>8) != ' ') {
 			return C_CONTINUE;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_OK:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		NewStructure();
-		InfoSubstituteControls( NULL, NULL );
+		InfoDefaultControls();
 		return C_TERMINATE;
 
 	case C_FINISH:
@@ -1026,14 +1025,15 @@ static STATUS_T CmdStructure(
 
 	case C_START:
 		if (structureW == NULL) {
-			structureW = ParamCreateDialog( &structurePG, MakeWindowTitle(_("Structure")),
-			                                _("Close"), (paramActionOkProc)DoStructOk,
-			                                ParamCancel_Null, TRUE, NULL,
-			                                F_RESIZE,
-			                                StructureDlgUpdate );
+			structureW = FormCreateDialog( &structurePG, MakeWindowTitle(_("Structure")),
+			                               NULL, DoStructOk,
+			                               NULL, NULL,
+			                               TRUE,
+			                               0l,
+			                               StructureDlgUpdate );
 			RegisterChangeNotification( structureChange );
 		}
-		ParamDialogOkActive( &structurePG, TRUE );
+		FormDialogOkActive( &structurePG, TRUE );
 		structureIndex = wListGetIndex( structureListL );
 		structurePtr = curStructure;
 		wShow( structureW );
@@ -1048,8 +1048,8 @@ static STATUS_T CmdStructure(
 			RedrawStructure( structureD.d, NULL, 0, 0 );
 		}
 		InfoMessage( _("Select Structure and then drag to place"));
-		ParamLoadControls( &structurePG );
-		ParamGroupRecord( &structurePG );
+		FormLoadControls( &structurePG );
+		FormGroupRecord( &structurePG );
 		SetAllTrackSelect( FALSE );
 		return CmdStructureAction( action, pos );
 
@@ -1066,9 +1066,9 @@ static STATUS_T CmdStructure(
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RDOWN, pos );
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_RDOWN:
-		ParamDialogOkActive( &structurePG, TRUE );
+		FormDialogOkActive( &structurePG, TRUE );
 		if (hideStructureWindow) {
 			wHide( structureW );
 		}
@@ -1077,7 +1077,7 @@ static STATUS_T CmdStructure(
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RMOVE, pos );
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_RMOVE:
 		return CmdStructureAction( action, pos );
 	case C_RUP:
@@ -1091,14 +1091,13 @@ static STATUS_T CmdStructure(
 		InfoMessage(
 		        _("Left drag to move, right drag to rotate, or press Return or click Ok to finalize") );
 		return CmdStructureAction( action, pos );
-		return C_CONTINUE;
 
 	case C_LCLICK:
 		CmdStructureAction( action, pos );
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		wHide( structureW );
+		//wHide( structureW );
 		return C_TERMINATE;
 
 	case C_REDRAW:
@@ -1152,9 +1151,8 @@ static char * CmdStructureHotBarProc(
 EXPORT void AddHotBarStructures( void )
 {
 	wIndex_t inx;
-	turnoutInfo_t * to;
 	for ( inx=0; inx < structureInfo_da.cnt; inx ++ ) {
-		to = structureInfo(inx);
+		turnoutInfo_t * to = structureInfo(inx);
 		if ( !( IsParamValid(to->paramFileIndex) &&
 		        to->segCnt > 0 &&
 		        (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx,
@@ -1187,8 +1185,8 @@ static STATUS_T CmdStructureHotBar(
 		if ( listIndex >= 0 ) {
 			structureInx = listIndex;
 		}
-		ParamLoadControls( &structurePG );
-		ParamGroupRecord( &structurePG );
+		FormLoadControls( &structurePG );
+		FormGroupRecord( &structurePG );
 		return CmdStructureAction( action, pos );
 
 	case wActionMove:
@@ -1227,30 +1225,28 @@ static STATUS_T CmdStructureHotBar(
 		if ((action>>8) != ' ') {
 			return C_CONTINUE;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_OK:
 		CmdStructureAction( action, pos );
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		HotBarCancel();
-	/* falls through */
+		__attribute__((fallthrough));
 	default:
 		return CmdStructureAction( action, pos );
 	}
 }
 
-#include "bitmaps/building.image3"
-
 EXPORT void InitCmdStruct( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdStructure, "cmdStructure", _("Structure"),
-	               wIconCreatePixMap(building_image3[iconSize]), LEVEL0_50,
+	               CreateToolbarIconFromResource("building.png"), LEVEL0_50,
 	               IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
 	structureHotBarCmdInx = AddMenuButton( menu, CmdStructureHotBar,
 	                                       "cmdStructureHotBar", "", NULL, LEVEL0_50,
 	                                       IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, 0, NULL );
-	ParamRegister( &structurePG );
+	FormRegister( &structurePG );
 	if ( structPopupM == NULL ) {
 		structPopupM = MenuRegister( "Structure Rotate" );
 		AddRotateMenu( structPopupM, StructRotate );
@@ -1263,5 +1259,5 @@ EXPORT void InitTrkStruct( void )
 
 	log_structure = LogFindIndex( "Structure" );
 	AddParam( "STRUCTURE ", ReadStructureParam);
-	ParamRegister( &pierPG );
+	FormRegister( &pierPG );
 }

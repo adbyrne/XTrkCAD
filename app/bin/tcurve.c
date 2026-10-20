@@ -26,7 +26,7 @@
 #include "cundo.h"
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "common-ui.h"
 
@@ -41,7 +41,9 @@ typedef struct extraDataCurve_t {
 	coOrd descriptionOff;
 } extraDataCurve_t;
 
+/** @logcmd @showrefby `curve=n` `tcurve.c` */
 static int log_curve = 0;
+/** @logcmd @showrefby `curveSegs=n` `tcurve.c` */
 static int log_curveSegs = 0;
 
 static DIST_T GetLengthCurve( track_p );
@@ -55,7 +57,8 @@ static DIST_T GetLengthCurve( track_p );
 static void GetCurveAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
 	CHECK( trk != NULL );
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
+	const struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE,
+	                                    extraDataCurve_t);
 	if (xx->circle != TRUE) {
 		*a0 = NormalizeAngle( GetTrkEndAngle(trk,0) + 90 );
 		*a1 = NormalizeAngle(
@@ -78,7 +81,8 @@ static void SetCurveAngles( track_p p, ANGLE_T a0, ANGLE_T a1,
 	SetTrkEndPoint( p, 1, pos1, NormalizeAngle(a0+a1+90.0) );
 }
 
-static void ComputeCurveBoundingBox( track_p trk, struct extraDataCurve_t * xx )
+static void ComputeCurveBoundingBox( track_p trk,
+                                     const struct extraDataCurve_t * xx )
 {
 	coOrd p = xx->pos;
 	DIST_T r = xx->radius;
@@ -132,14 +136,15 @@ static void AdjustCurveEndPt( track_p t, EPINX_T inx, ANGLE_T a )
 
 static void GetTrkCurveCenter( track_p t, coOrd *p, DIST_T *r )
 {
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
+	const struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE,
+	                                    extraDataCurve_t);
 	*p = xx->pos;
 	*r = xx->radius;
 }
 
 BOOL_T IsCurveCircle( track_p t )
 {
-	struct extraDataCurve_t *xx;
+	const struct extraDataCurve_t *xx;
 	if ( GetTrkType(t) != T_CURVE ) {
 		return FALSE;
 	}
@@ -148,9 +153,43 @@ BOOL_T IsCurveCircle( track_p t )
 }
 
 
+/**
+ * A curve track's radius, with no side effects -- 0.0 for anything that
+ * isn't a T_CURVE (same "wrong type -> harmless default" convention as
+ * IsCurveCircle() above, not an error). Added for the Reports feature's
+ * Curve Stats compute pass (SF #217 phase 2): the more general
+ * GetTrackParams(PARAMS_CORNU, trk, pos, &params) route (reading
+ * params.arcR) was the originally-planned accessor, but reading the real
+ * implementation (GetParamsCurve()) found two problems that rule it out
+ * for a background report scan -- (1) GetTrackParams() itself CHECK(FALSE)s
+ * if the track type has no getTrackParams handler at all, so calling it on
+ * an arbitrary TRK_ITERATE object would need the same
+ * GetTrkType(trk)==T_CURVE guard this function already does internally, and
+ * (2) GetParamsCurve() calls ErrorMessage() (a real GUI popup) when
+ * easeR > 0.0 (an easement minimum-radius setting) and the curve's own
+ * radius is below it -- exactly the kind of "every curve" scan a Curve
+ * Stats report needs to do, which would spam that popup once per
+ * undersized curve. This is the same direct field read GetTrkCurveCenter()
+ * (this file, static) already does internally, exposed instead of routed
+ * back through GetTrackParams().
+ *
+ * \param[in] t the track
+ * \return the curve's radius, or 0.0 if `t` isn't a T_CURVE
+ */
+DIST_T GetCurveRadius( track_p t )
+{
+	const struct extraDataCurve_t *xx;
+	if ( GetTrkType(t) != T_CURVE ) {
+		return 0.0;
+	}
+	xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
+	return xx->radius;
+}
+
+
 BOOL_T GetCurveMiddle( track_p trk, coOrd * pos )
 {
-	struct extraDataCurve_t *xx;
+	const struct extraDataCurve_t *xx;
 	ANGLE_T a0, a1;
 	if ( GetTrkType(trk) != T_CURVE ) {
 		return FALSE;
@@ -176,8 +215,7 @@ DIST_T CurveDescriptionDistance(
 {
 	coOrd pd;
 //	coOrd p0,p1;
-	FLOAT_T ratio;
-	ANGLE_T a, a0, a1;
+	ANGLE_T a0, a1;
 	if (hidden) { *hidden = FALSE; }
 	if ( (GetTrkType( trk ) != T_CURVE )
 	     || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) && !show_hidden)) {
@@ -194,6 +232,8 @@ DIST_T CurveDescriptionDistance(
 //		p0 = pd;
 //		p1 = pd;
 	} else {
+		FLOAT_T ratio;
+		ANGLE_T a;
 		GetCurveAngles( &a0, &a1, trk );
 		ratio = offset.x;
 		if (!IsCurveCircle( trk )) {
@@ -222,12 +262,9 @@ static void DrawCurveDescription(
         drawCmd_p d,
         wDrawColor color )
 {
-	wFont_p fp;
-	coOrd pos, p0, p1;
-	DIST_T elev0, elev1, dist, grade=0, sep=0;
-	BOOL_T elevValid;
-	ANGLE_T a, a0, a1;
-	FLOAT_T ratio;
+	coOrd p0, p1;
+	DIST_T elev0, elev1, dist;
+	ANGLE_T a0, a1;
 
 	if (layoutLabels == 0) {
 		return;
@@ -238,6 +275,10 @@ static void DrawCurveDescription(
 
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	if ( xx->helixTurns > 0 ) {
+		coOrd pos;
+		DIST_T grade=0, sep=0;
+		BOOL_T elevValid;
+		wFont_p fp;
 		pos = xx->pos;
 		pos.x += xx->descriptionOff.x;
 		pos.y += xx->descriptionOff.y;
@@ -279,6 +320,8 @@ static void DrawCurveDescription(
 		Translate( &p0, xx->pos, 0.0, dist );
 		Translate( &p1, xx->pos, 180.0, dist );
 		DrawLine( d, p0, p1, 0, color );
+		FLOAT_T ratio;
+		ANGLE_T a;
 		GetCurveAngles( &a0, &a1, trk );
 		ratio = xx->descriptionOff.x;   // 1.0 to - 1.0
 		if (! IsCurveCircle( trk )) {
@@ -327,8 +370,7 @@ STATUS_T CurveDescriptionMove(
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 //	static coOrd p0,p1;
 //	wDrawColor color;
-	ANGLE_T a, a0, a1;
-	DIST_T d;
+	ANGLE_T a0, a1;
 
 //	p0 = xx->pos;
 
@@ -338,6 +380,8 @@ STATUS_T CurveDescriptionMove(
 		xx->descriptionOff.y = (pos.y-xx->pos.y);
 //		p1 = pos;
 	} else {
+		ANGLE_T a;
+		DIST_T d;
 //		p1 = pos;
 		GetCurveAngles( &a0, &a1, trk );
 		if ( a1 < 1 ) { a1 = 1.0; }
@@ -582,7 +626,6 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 	ANGLE_T a0, a1;
 	DIST_T d;
 	int fix0, fix1;
-	FLOAT_T turns;
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 
 	GetCurveAngles( &a0, &a1, trk );
@@ -590,7 +633,7 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 	if (xx->helixTurns > 0) {
 		d += (xx->helixTurns-(xx->circle?1:0)) * xx->radius * 2.0 * M_PI;
 		sprintf( str,
-		         _("Helix Track(%d): Layer=%d Radius=%s Turns=%ld Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
+		         _("Helix Track(%d): Layer=%u Radius=%s Turns=%ld Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
 		         GetTrkIndex(trk),
 		         GetTrkLayer(trk)+1,
 		         FormatDistance(xx->radius),
@@ -601,7 +644,7 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 		         GetTrkEndPosXY(trk,1), GetTrkEndAngle(trk,1) );
 	} else {
 		sprintf( str,
-		         _("Curved Track(%d): Layer=%d Radius=%s Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
+		         _("Curved Track(%d): Layer=%u Radius=%s Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
 		         GetTrkIndex(trk),
 		         GetTrkLayer(trk)+1,
 		         FormatDistance(xx->radius),
@@ -638,7 +681,7 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 		crvData.grade = 0.0;
 	}
 	if ( xx->helixTurns > 0 ) {
-		turns = crvData.length/(2*M_PI*crvData.radius);
+		FLOAT_T turns = crvData.length/(2*M_PI*crvData.radius);
 		crvData.separation = fabs(crvData.elev[0]-crvData.elev[1])/turns;
 		crvDesc[SE].mode |= DESC_CHANGE;
 	}
@@ -680,13 +723,13 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 		if ( !xx->circle ) {
 			crvDesc[SE].mode = DESC_RO;
 		}
-		DoDescribe( _("Helix Track"), trk, crvDesc, UpdateCurve );
+		DoDescribe( N_("Helix Track"), trk, crvDesc, UpdateCurve );
 	} else if ( xx->circle ) {
 		crvDesc[TU].mode |= DESC_IGNORE;
-		DoDescribe( _("Circle Track"), trk, crvDesc, UpdateCurve );
+		DoDescribe( N_("Circle Track"), trk, crvDesc, UpdateCurve );
 	} else {
 		crvDesc[TU].mode |= DESC_IGNORE;
-		DoDescribe( _("Curved Track"), trk, crvDesc, UpdateCurve );
+		DoDescribe( N_("Curved Track"), trk, crvDesc, UpdateCurve );
 	}
 }
 
@@ -694,7 +737,8 @@ static DIST_T DistanceCurve( track_p t, coOrd * p )
 {
 	ANGLE_T a0, a1;
 	DIST_T d;
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
+	const struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE,
+	                                    extraDataCurve_t);
 	GetCurveAngles( &a0, &a1, t );
 	if ( xx->helixTurns > 0 ) {
 		a0 = 0.0;
@@ -709,7 +753,8 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 	ANGLE_T a0, a1;
 //	track_p tt = t;
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
+	const struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE,
+	                                    extraDataCurve_t);
 
 	GetCurveAngles( &a0, &a1, t );
 //	if (xx->circle) {
@@ -742,7 +787,6 @@ EXPORT void DrawCurvedTies(
         wDrawColor color )
 {
 	DIST_T len;
-	ANGLE_T ang, dang;
 	coOrd pos;
 	int cnt;
 
@@ -756,6 +800,7 @@ EXPORT void DrawCurvedTies(
 		cnt++;
 	}
 	if ( cnt != 0 ) {
+		ANGLE_T ang, dang;
 		dang = (360.0*(len)/cnt)/(2*M_PI*r);
 		for ( ang=a0+dang/2; cnt; cnt--,ang+=dang ) {
 			PointOnCircle( &pos, p, r, ang );
@@ -776,8 +821,7 @@ EXPORT void DrawCurvedTrack(
         wDrawColor color,
         long options )
 {
-	DIST_T trackGauge = GetTrkGauge(trk);
-	tieData_t td;
+	DIST_T trkGauge = GetTrkGauge(trk);
 	wDrawWidth width=0;
 	trkSeg_p segPtr;
 	long bridge = 0, roadbed = 0;
@@ -817,12 +861,12 @@ EXPORT void DrawCurvedTrack(
 
 	// Draw a solid background
 	if(bridge|roadbed) {
-		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
+		wDrawWidth width3 = (wDrawWidth)round(trkGauge * 3 * d->dpi / d->scale);
 		DrawArc( d, p, r, a0, a1, 0, width3, bridge?bridgeColor:roadbedColor );
 	}
 
 	if ( DoDrawTies( d, trk ) ) {
-		td = GetTrkTieData( trk );
+		tieData_t td = GetTrkTieData( trk );
 		DrawCurvedTies( d, td, p, r, a0, a1, color );
 	}
 	if (color == wDrawColorBlack) {
@@ -839,14 +883,14 @@ EXPORT void DrawCurvedTrack(
 		DrawArc( d, p, r, a0, a1, iDrawCenter, width, color );
 	} else {
 		if ( hasTrackCenterline(d)) {
-			long options = d->options;
+			long savedDrawOptions = d->options;
 			d->options |= DC_DASH;
 			DrawArc( d, p, r, a0, a1, 0, 0, color );
-			d->options = options;
+			d->options = savedDrawOptions;
 		}
-		DrawArc( d, p, r+trackGauge/2.0, a0, a1, 0, width, color );
-		DrawArc( d, p, r-trackGauge/2.0, a0, a1, iDrawCenter, width, color );
-		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge
+		DrawArc( d, p, r+trkGauge/2.0, a0, a1, 0, width, color );
+		DrawArc( d, p, r-trkGauge/2.0, a0, a1, iDrawCenter, width, color );
+		if ( (d->options&DC_PRINT) && roadbedWidth > trkGauge
 		     && DrawTwoRails( d, 1 ) ) {
 			wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
 			if ( options&DTS_RIGHT ) {
@@ -863,8 +907,8 @@ EXPORT void DrawCurvedTrack(
 			width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 		}
 
-		DrawArc( d, p, r+(trackGauge*1.5), a0, a1, 0, width2, color );
-		DrawArc( d, p, r-(trackGauge*1.5), a0, a1, 0, width2, color );
+		DrawArc( d, p, r+(trkGauge*1.5), a0, a1, 0, width2, color );
+		DrawArc( d, p, r-(trkGauge*1.5), a0, a1, 0, width2, color );
 	}
 
 }
@@ -876,7 +920,8 @@ static void DeleteCurve( track_p t )
 
 static BOOL_T WriteCurve( track_p t, FILE * f )
 {
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
+	const struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE,
+	                                    extraDataCurve_t);
 	int bits;
 	long options;
 	BOOL_T rc = TRUE;
@@ -889,7 +934,7 @@ static BOOL_T WriteCurve( track_p t, FILE * f )
 	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
 	       (GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f,
-	              "CURVE %d %d %ld 0 0 %s %d %0.6f %0.6f 0 %0.6f %ld %0.6f %0.6f\n",
+	              "CURVE %d %u %ld 0 0 %s %d %0.6f %0.6f 0 %0.6f %ld %0.6f %0.6f\n",
 	              GetTrkIndex(t), GetTrkLayer(t), (long)options,
 	              GetTrkScaleName(t), bits, xx->pos.x, xx->pos.y, xx->radius,
 	              xx->helixTurns, xx->descriptionOff.x, xx->descriptionOff.y )>0;
@@ -913,7 +958,7 @@ static BOOL_T ReadCurve( char * line )
 	long options;
 	char * cp = NULL;
 	long helixTurns = 0;
-	coOrd descriptionOff = { 0.0, 0.0 };
+	coOrd savedDescOff = { 0.0, 0.0 };
 
 	if (!GetArgs( line+6, paramVersion<3?"dXZs9dpYfc":paramVersion<9
 	              ?"dLl00s9dpYfc":"dLl00s9dpffc",
@@ -921,7 +966,7 @@ static BOOL_T ReadCurve( char * line )
 		return FALSE;
 	}
 	if (cp) {
-		if ( !GetArgs( cp, "lp", &helixTurns, &descriptionOff ) ) {
+		if ( !GetArgs( cp, "lp", &helixTurns, &savedDescOff ) ) {
 			return FALSE;
 		}
 	}
@@ -931,7 +976,7 @@ static BOOL_T ReadCurve( char * line )
 	t = NewTrack( index, T_CURVE, 0, sizeof *xx );
 	xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
 	xx->helixTurns = helixTurns;
-	xx->descriptionOff = descriptionOff;
+	xx->descriptionOff = savedDescOff;
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(t, visible!=0);
 		SetTrkNoTies(t, FALSE);
@@ -1045,12 +1090,11 @@ static BOOL_T SplitCurve( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 static BOOL_T TraverseCurve( traverseTrack_p trvTrk, DIST_T * distR )
 {
 	track_p trk = trvTrk->trk;
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
-	ANGLE_T a, a0, a1, a2, a3;
+	const struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE,
+	                                    extraDataCurve_t);
+	ANGLE_T a, a0, a1, a2;
 	DIST_T arcDist;
 	DIST_T circum;
-	DIST_T dist;
-	long turns;
 	if ( xx->circle ) {
 		return FALSE;
 	}
@@ -1073,7 +1117,8 @@ static BOOL_T TraverseCurve( traverseTrack_p trvTrk, DIST_T * distR )
 		arcDist = NormalizeAngle(a0+a1-a2)/360.0*circum;
 	}
 	if ( xx->helixTurns > 0 ) {
-		turns = xx->helixTurns;
+		long turns = xx->helixTurns;
+		DIST_T dist;
 		if ( NormalizeAngle(a2-a0) > a1 ) {
 			turns -= 1;
 		}
@@ -1099,7 +1144,7 @@ static BOOL_T TraverseCurve( traverseTrack_p trvTrk, DIST_T * distR )
 				        trvTrk->length, trvTrk->dist );
 				trvTrk->dist = trvTrk->length;
 			}
-			a3 = trvTrk->dist/circum*360.0;
+			ANGLE_T a3 = trvTrk->dist/circum*360.0;
 			if ( a>270 || a<90 ) {
 				a3 = (a0+a1-a3);
 			} else {
@@ -1149,16 +1194,15 @@ static BOOL_T TraverseCurve( traverseTrack_p trvTrk, DIST_T * distR )
 
 static BOOL_T EnumerateCurve( track_p trk )
 {
-	struct extraDataCurve_t *xx;
 	ANGLE_T a0, a1;
-	DIST_T d;
 	if (trk != NULL) {
-		xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
+		struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
+		DIST_T d;
 		GetCurveAngles( &a0, &a1, trk );
 		d = (xx->radius + (GetTrkGauge(trk)/2.0))* 2.0 * M_PI * a1 / 360.0;
 		if (xx->helixTurns > 0) {
 			d += (xx->helixTurns-(xx->circle?1:0)) * (xx->radius+(GetTrkGauge(
-			                        trk)/2.0)) * 2.0 * M_PI;
+			                trk)/2.0)) * 2.0 * M_PI;
 		}
 		ScaleLengthIncrement( GetTrkScale(trk), d );
 		return TRUE;
@@ -1174,7 +1218,8 @@ static BOOL_T TrimCurve( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos,
 	ANGLE_T a, aa;
 	ANGLE_T a0, a1;
 	coOrd pos, center;
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
+	const struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE,
+	                                    extraDataCurve_t);
 	if (xx->helixTurns>0) {
 		ErrorMessage( MSG_CANT_TRIM_HELIX );
 		return FALSE;
@@ -1215,8 +1260,10 @@ static BOOL_T MergeCurve(
 	     IsCurveCircle(trk1) ) {
 		return FALSE;
 	}
-	struct extraDataCurve_t *xx0 = GET_EXTRA_DATA(trk0, T_CURVE, extraDataCurve_t);
-	struct extraDataCurve_t *xx1 = GET_EXTRA_DATA(trk1, T_CURVE, extraDataCurve_t);
+	const struct extraDataCurve_t *xx0 = GET_EXTRA_DATA(trk0, T_CURVE,
+	                                     extraDataCurve_t);
+	const struct extraDataCurve_t *xx1 = GET_EXTRA_DATA(trk1, T_CURVE,
+	                                     extraDataCurve_t);
 	if ( xx0->helixTurns > 0 ||
 	     xx1->helixTurns > 0 ) {
 		return FALSE;
@@ -1278,9 +1325,8 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 	static easementData_t jointD;
 	static BOOL_T valid;
 
-	ANGLE_T a, aa1, aa2;
+	ANGLE_T a;
 	DIST_T r, d;
-	track_p trk1;
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 
 	switch ( action ) {
@@ -1308,7 +1354,7 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 		tempSegs(0).u.c.a0 = arcA0;
 		tempSegs(0).u.c.a1 = arcA1;
 		InfoMessage( _("Drag to change angle or create tangent") );
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 		if (xx->helixTurns>0) {
 			return C_CONTINUE;
@@ -1323,8 +1369,8 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 				              FormatDistance( arcRadius ), FormatDistance( easeR ) );
 				return C_CONTINUE;
 			}
-			aa1 = 90.0-R2D( asin( arcRadius/r ) );
-			aa2 = NormalizeAngle( a + (ep==0?aa1:-aa1) );
+			ANGLE_T aa1 = 90.0-R2D( asin( arcRadius/r ) );
+			ANGLE_T aa2 = NormalizeAngle( a + (ep==0?aa1:-aa1) );
 			PointOnCircle( &tangentOrig, arcPos, arcRadius, aa2 );
 			if (ComputeJoint( ep==0?-arcRadius:+arcRadius, 0, &jointD ) == E_ERROR) {
 				return C_CONTINUE;
@@ -1392,7 +1438,7 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 		}
 		if (valid) {
 			if (arcTangent) {
-				trk1 = NewStraightTrack( tangentOrig, tangentEnd );
+				track_p trk1 = NewStraightTrack( tangentOrig, tangentEnd );
 				CopyAttributes( trk, trk1 );
 				/*UndrawNewTrack( trk );*/
 				AdjustCurveEndPt( trk, ep, angle );
@@ -1561,8 +1607,8 @@ static BOOL_T MakeParallelCurve(
         coOrd * p1R,
         BOOL_T track)
 {
-	struct extraDataCurve_t * xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
-	struct extraDataCurve_t * xx1;
+	const struct extraDataCurve_t * xx = GET_EXTRA_DATA(trk, T_CURVE,
+	                                     extraDataCurve_t);
 	DIST_T rad;
 	ANGLE_T a0, a1;
 
@@ -1575,6 +1621,7 @@ static BOOL_T MakeParallelCurve(
 	}
 	GetCurveAngles( &a0, &a1, trk );
 	if ( newTrkR ) {
+		struct extraDataCurve_t * xx1;
 		if (track) {
 			*newTrkR = NewCurvedTrack( xx->pos, rad, a0, a1, 0 );
 			xx1 = GET_EXTRA_DATA(*newTrkR, T_CURVE, extraDataCurve_t);
@@ -1616,10 +1663,10 @@ static BOOL_T MakeParallelCurve(
 
 static wBool_t CompareCurve( track_cp trk1, track_cp trk2 )
 {
-	struct extraDataCurve_t * ed1 = GET_EXTRA_DATA( trk1, T_CURVE,
-	                                extraDataCurve_t );
-	struct extraDataCurve_t * ed2 = GET_EXTRA_DATA( trk2, T_CURVE,
-	                                extraDataCurve_t );
+	const struct extraDataCurve_t * ed1 = GET_EXTRA_DATA( trk1, T_CURVE,
+	                                      extraDataCurve_t );
+	const struct extraDataCurve_t * ed2 = GET_EXTRA_DATA( trk2, T_CURVE,
+	                                      extraDataCurve_t );
 	char * cp = message+strlen(message);
 	REGRESS_CHECK_POS( "POS", ed1, ed2, pos )
 	REGRESS_CHECK_DIST( "RADIUS", ed1, ed2, radius )
@@ -1847,7 +1894,7 @@ EXPORT void PlotCurve(
         DIST_T desired_r)   //Target one radius if close
 {
 	DIST_T d0, d2, r;
-	ANGLE_T angle, a0, a1, a2;
+	ANGLE_T angle, a0, a1;
 	coOrd posx;
 
 	switch ( mode ) {
@@ -1870,6 +1917,7 @@ EXPORT void PlotCurve(
 			curveData->type = curveTypeNone;
 		} else {
 			BOOL_T found = FALSE;
+			ANGLE_T a2;
 			if (a1<180.0) {
 				a2 = NormalizeAngle( angle + 90.0 );
 				if (desired_r > 0.0) {
@@ -1987,6 +2035,9 @@ EXPORT void PlotCurve(
 		Translate(&curveData->pos2,curveData->curvePos,FindAngle(curveData->curvePos,
 		                pos2),curveData->curveRadius);
 		curveData->type = curveTypeCurve;
+		break;
+	default:
+		LOG( log_curve, 1, ( "unexpected mode %d in PlotCurve\n", mode ) )
 		break;
 	}
 }

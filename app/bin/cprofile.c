@@ -24,10 +24,12 @@
 #include "cselect.h"
 #include "cundo.h"
 #include "layout.h"
-#include "param.h"
+#include "icons.h"
+#include "misc.h"
 #include "shrtpath.h"
 #include "track.h"
 #include "common-ui.h"
+#include "include/form.h"
 
 
 /*
@@ -104,6 +106,7 @@ static track_p profilePopupTrk;
 static EPINX_T profilePopupEp;
 static wMenuToggle_p profilePopupToggles[3];
 
+/** @logcmd @showrefby `profile=n` `cprofile.c` */
 static int log_profile = 0;
 
 #define LABELH (labelH*fontSize/screenProfileFontSize)
@@ -220,15 +223,16 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 
 	// Draw horizontal grid and y scale
 	for (inx=prof.minC; inx<=prof.maxC; inx+=prof.incrC) {
-		coOrd textsize;
+		coOrd gridTextsize;
 		// grid line
 		pt.y = pb.y = GetDim(inx);
 		DrawLine(D, pb, pt, 0, snapGridColor);
 		// scale
 		sprintf(message, "%d", inx);
 		DrawTextSize(&mainD, message, wStandardFont(F_HELV, FALSE, FALSE),
-		             screenProfileFontSize, FALSE, &textsize);
-		pl.x = ((-3.0/mainD.dpi) - textsize.y*0.5 - textsize.x) / prof.scaleX*D->scale;
+		             screenProfileFontSize, FALSE, &gridTextsize);
+		pl.x = ((-3.0/mainD.dpi) - gridTextsize.y*0.5 - gridTextsize.x) /
+		       prof.scaleX*D->scale;
 		pl.y = pb.y-LABELH/2/prof.scaleY*D->scale;
 
 		DrawString(D, pl, 0.0, message, fp, fontSize*D->scale, borderColor);
@@ -284,11 +288,10 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 	pt = points(0);
 	DrawLine(D, pb, pt, lw, snapGridColor);
 	DrawArc(D, pt, 0.05, 0, 360, TRUE, 2, wDrawColorGrey40);
-	if (units==UNITS_ENGLISH) {
-		sprintf(message, "%0.1f", PutDim(profElem(0).elev)+0.05);
-	} else {
-		sprintf(message, "%0.1f", PutDim(profElem(0).elev)+0.05);
-	}
+	// PutDim() already converts units==UNITS_METRIC internally, so this value is
+	// correct either way; unlike its siblings below (dist labels), it doesn't append
+	// a unit suffix ("ft"/"m"/"cm") -- possibly an unfinished feature, not fixed here.
+	sprintf(message, "%0.1f", PutDim(profElem(0).elev)+0.05);
 	if (printVert) {
 		pl.x = pt.x + LABELH/2.0/prof.scaleX*D->scale;
 		pl.y = pt.y + 2.0/mainD.dpi/prof.scaleY*D->scale + GetDim(prof.incrC) / 16;;
@@ -436,7 +439,7 @@ static void RedrawProfileW( wDraw_p d, void * context, wWinPix_t x,
 	coOrd size;
 	int divC;
 	DIST_T maxE, rngE;
-	profElem_t *p;
+	const profElem_t *p;
 	wFont_p fp;
 	POS_T w;
 	coOrd textsize;
@@ -592,26 +595,27 @@ static drawCmd_t printProfileD = {
  * landscape.
  * \todo Rework the layout of the printout
  *
- * \param junk IN
+ * \param pageNr IN
+ * \param data IN
  * \return
  */
 
-static void DoProfilePrint(void * junk)
+static wBool_t RenderProfilePage(int pageNr, void * data)
 {
 	coOrd size, p[4];
-	int copies;
 	WDOUBLE_T w, h, screenRatio, printRatio, titleH;
 	wFont_p fp;
 	coOrd screenSize;
 	coOrd textsize;
 	double topMargin, rightMargin, bottomMargin, leftMargin;
 
-	if (!wPrintDocStart(_("Profile"), 1, &copies)) {
-		return;
+	if (pageNr != 0) {
+		return FALSE;
 	}
+
 	printProfileD.d = wPrintPageStart();
 	if (printProfileD.d == NULL) {
-		return;
+		return FALSE;
 	}
 	printProfileD.dpi = wDrawGetDPI(printProfileD.d);
 	wPrintGetPageSize(&w, &h);
@@ -650,7 +654,7 @@ static void DoProfilePrint(void * junk)
 	}
 	size.y -= titleH+(printVert?PBT*2:PBT)+PBB(printProfileFontSize);
 	size.x -= 4.0/mainD.dpi+PBL(printProfileFontSize)+(printVert?PBR(
-	                        printProfileFontSize)/4.0:PBR(printProfileFontSize));
+	                  printProfileFontSize)/4.0:PBR(printProfileFontSize));
 	printRatio = size.y/size.x;
 	if (printRatio < screenRatio) {
 		printProfileD.scale = screenSize.y/size.y;
@@ -678,7 +682,18 @@ static void DoProfilePrint(void * junk)
 	DrawPoly( &printProfileD, 4, p, NULL, drawColorBlack, 0, DRAW_CLOSED );
 
 	DrawProfile(&printProfileD, printProfileFontSize, printVert);
-	wPrintPageEnd(printProfileD.d);
+	return wPrintPageEnd(printProfileD.d);
+}
+
+static void DoProfilePrint(void * junk)
+{
+	int copies;
+
+	if (!wPrintDocStart(_("Profile"), 1, &copies)) {
+		return;
+	}
+	wPrintDocSetPages(1, RenderProfilePage, NULL);
+	wPrintDocRun();
 	wPrintDocEnd();
 }
 
@@ -688,7 +703,7 @@ static void DoProfilePrint(void * junk)
  *
  **************************************************************************/
 
-static wWin_p profileW;
+static wControl_p profileW;
 
 static BOOL_T profileUndo = FALSE;
 static void DoProfileChange(void *junk);
@@ -696,30 +711,26 @@ static void DoProfileReset(void *junk);
 static void DoProfileDone(void * junk);
 static void DoProfileClear(void * junk);
 static void DoProfilePrint(void * junk);
+static void DoProfileCancel(paramGroup_cp pg);
 static void DoProfileChangeMode(void * junk);
 static void SelProfileW(wIndex_t, coOrd);
 static void CloseProfileWindow(paramGroup_p pg, int event, void *data);
 
 static paramDrawData_t profileDrawData = { 300, 150, RedrawProfileW, SelProfileW, &screenProfileD };
 static paramData_t profilePLs[] = {
-	{	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &profileDrawData },
+	{	PD_DRAW, NULL, "canvas", 0, &profileDrawData },
 #define I_PROFILEMSG			(1)
-	{	PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, I2VP(300) },
+	{	PD_MESSAGE, NULL, "message", PDO_DLGIGNOREX, I2VP(300) },
 #define I_CHANGEBUTTON 2
-	{	PD_BUTTON, DoProfileChange, "change", PDO_DLGCMDBUTTON, NULL, N_("Change") },
+	{	PD_BUTTON, DoProfileChange, "change", PDO_DLGCMDBUTTON, NULL},
 #define I_RESETBUTTON 3
-	{	PD_BUTTON, DoProfileReset, "reset", PDO_DLGCMDBUTTON, NULL, N_("Reset") },
+	{	PD_BUTTON, DoProfileReset, "reset", PDO_DLGCMDBUTTON, NULL},
 #define I_CLEARBUTTON 4
-	{	PD_BUTTON, DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL, N_("Clear") },
+	{	PD_BUTTON, DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL},
 #define I_PRINTBUTTON 5
-	{	PD_BUTTON, DoProfilePrint, "print", 0, NULL, N_("Print") }
+	{	PD_BUTTON, DoProfilePrint, "print", 0, NULL}
 };
-static paramGroup_t profilePG = { "profile", 0, profilePLs, COUNT( profilePLs ) };
-
-#define CHANGEBUTTON  ((wButton_p)profilePLs[I_CHANGEBUTTON].control)
-#define RESETBUTTON  ((wButton_p)profilePLs[I_RESETBUTTON].control)
-#define CLEARBUTTON  ((wButton_p)profilePLs[I_CLEARBUTTON].control)
-#define PRINTBUTTON  ((wButton_p)profilePLs[I_PRINTBUTTON].control)
+static paramGroup_t profilePG = { "profile", PGO_FULLDIALOGFROMBUILDER, profilePLs, COUNT( profilePLs ) };
 
 static void SelProfileW(
         wIndex_t action,
@@ -754,7 +765,7 @@ static void SelProfileW(
 			inx = profElem_da.cnt-1;
 		}
 		sprintf(message, _("Elev = %0.1f"), round(PutDim(elev)*10.0)/10.0);
-		ParamLoadMessage(&profilePG, I_PROFILEMSG, message);
+		FormLoadMessage(&profilePG, I_PROFILEMSG, message);
 		oldElev = elev;
 		RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
 		break;
@@ -782,11 +793,17 @@ static void SelProfileW(
 			        round(fabs((profElem(inx+1).elev-elev) / (profElem(inx+1).dist-profElem(
 			                                inx).dist)) * 1000.0)/10.0);
 		}
-		ParamLoadMessage(&profilePG, I_PROFILEMSG, message);
+		FormLoadMessage(&profilePG, I_PROFILEMSG, message);
 		oldElev = elev;
 		profElem(inx).elev = oldElev;
 		RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
-		wPause(500l);
+		/* Pacing pause so a human can watch the elevation-drag update --
+		 * skipped under bRunTests (-T), same reasoning as the sibling
+		 * wPause(bRunTests ? 0 : 1000) in macro.c's PlaybackMain(). This one
+		 * fires on every C_MOVE during dmprof.xtr's scripted elevation drag,
+		 * so left unconditional it was 500ms * however many drag steps the
+		 * demo scripts, unconditionally padding every -T run. */
+		wPause(bRunTests ? 0 : 500l);
 		break;
 	case C_UP:
 		if (profileUndo == FALSE) {
@@ -799,7 +816,7 @@ static void SelProfileW(
 		}
 		profElem(inx).elev = oldElev;
 		RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
-		ParamLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
+		FormLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
 		inx = -1;
 		break;
 	default:
@@ -887,6 +904,19 @@ static void DoProfileDone(void * junk)
 }
 
 
+/*
+ * Cancel button. FormCancel_Undo is a no-op under FORMCANCEL_NEWUNDO, so
+ * the button did nothing and the window stayed up. End the command the
+ * same way the window-manager close does (CloseProfileWindow): Reset()
+ * drives CmdProfile(C_CANCEL), which hides profileW and clears
+ * TB_PROFILEPATH.
+ */
+static void DoProfileCancel(paramGroup_cp pg)
+{
+	Reset();
+}
+
+
 static void DoProfileClear(void * junk)
 {
 	ResetChanges();
@@ -964,8 +994,10 @@ static int ProfileShortestPathFunc(
 		} else {
 			EPINX_T epN;
 			epN = GetEndPtConnectedToMe(trkN, trk);
+			// NOLINTNEXTLINE(bugprone-branch-clone) -- SF #703: rare edge case (a turnout with two endpoints already connected, hit again via a third); Martin Fischer investigated and found no simple way to trigger via the UI, closed wont-fix
 			if (trkN == pathStartTrk && epN == pathStartEp) {
 				pathMatch = 1;
+				// NOLINTNEXTLINE(bugprone-branch-clone) -- SF #703: same rare edge case as above
 			} else if (trkN == pathEndTrk && epN == pathEndEp) {
 				pathMatch = 2;
 			} else if (trkN == pathStartTrk && trkN == pathEndTrk) {
@@ -991,11 +1023,9 @@ static int ProfileShortestPathFunc(
 		break;
 
 	case SPTC_IGNNXTTRK:
-		if (EndPtIsIgnoredElev(trk,ep)) {
-			rc0 = 1;
-		} else if ((GetTrkBits(trk)&TB_PROFILEPATH)!=0) {
-			rc0 = 1;
-		} else if ((!EndPtIsDefinedElev(trk,ep)) && GetTrkEndTrk(trk,ep)==NULL) {
+		if (EndPtIsIgnoredElev(trk,ep)
+		    || (GetTrkBits(trk)&TB_PROFILEPATH)!=0
+		    || ((!EndPtIsDefinedElev(trk,ep)) && GetTrkEndTrk(trk,ep)==NULL)) {
 			rc0 = 1;
 		} else {
 			rc0 = 0;
@@ -1444,13 +1474,15 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 			             screenProfileFontSize, FALSE, &textsize);
 			labelH = textsize.y;
 			labelW = textsize.x;
-			profileW = ParamCreateDialog(&profilePG, MakeWindowTitle(_("Profile")), NULL,
-			                             NULL, ParamCancel_Undo, TRUE, NULL, F_RESIZE, CloseProfileWindow);
+			profileW = FormCreateDialog(&profilePG, MakeWindowTitle(_("Profile")),
+			                            NULL, DoProfileDone,
+			                            NULL, DoProfileCancel,
+			                            TRUE, F_RESIZE, CloseProfileWindow);
 		}
-		ParamLoadControls(&profilePG);
-		ParamGroupRecord(&profilePG);
+		FormLoadControls(&profilePG);
+		FormGroupRecord(&profilePG);
 		wShow(profileW);
-		ParamLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
+		FormLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
 		DYNARR_RESET( profElem_t, profElem_da );
 		DYNARR_RESET( station_t, station_da );
 		RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
@@ -1463,7 +1495,8 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 		return C_CONTINUE;
 	case C_LCLICK:
 		InfoMessage("");
-		if ((trk0 = OnTrack(&pos, TRUE, TRUE)) != NULL) {
+		trk0 = OnTrack(&pos, TRUE, TRUE);
+		if (trk0 != NULL) {
 			EPINX_T ep0;
 			ep0 = PickEndPoint(pos, trk0);
 			if (ep0 >= 0) {
@@ -1472,7 +1505,8 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 		}
 		return C_CONTINUE;
 	case C_CMDMENU:
-		if ((profilePopupTrk = OnTrack(&pos, TRUE, TRUE)) != NULL) {
+		profilePopupTrk = OnTrack(&pos, TRUE, TRUE);
+		if (profilePopupTrk != NULL) {
 			profilePopupEp = PickEndPoint(pos, profilePopupTrk);
 			if (profilePopupEp >= 0) {
 				int mode;
@@ -1495,6 +1529,7 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 		return C_CONTINUE;
 	case C_OK:
 		DoProfileDone(NULL);
+		wHide(profileW);
 		return C_TERMINATE;
 	case C_CANCEL:
 		wHide(profileW);
@@ -1505,6 +1540,9 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 			HilightProfileElevations(wWinIsVisible(profileW));
 		}
 		return C_CONTINUE;
+	default:
+		LOG( log_profile, 1, ( "unexpected action %d in CmdProfile\n", action ) )
+		break;
 	}
 	return C_CONTINUE;
 }
@@ -1517,16 +1555,14 @@ static void ProfileChange(long changes)
 	}
 }
 
-#include "bitmaps/profile.image3"
-
 EXPORT void InitCmdProfile(wMenu_p menu)
 {
 	log_profile = LogFindIndex("profile");
-	ParamRegister(&profilePG);
+	FormRegister(&profilePG);
 
 	AddMenuButton(menu, CmdProfile, "cmdProfile", _("Profile"),
-	              wIconCreatePixMap(profile_image3[iconSize]), LEVEL0_50,
-	              IC_LCLICK|IC_CMDMENU|IC_POPUP3,
+	              CreateToolbarIconFromResource("profile.png"), LEVEL0_50,
+	              IC_LCLICK|IC_CMDMENU|IC_POPUP3|IC_TOGGLE,
 	              ACCL_PROFILE, NULL);
 	profilePopupM = MenuRegister("Profile Mode");
 	profilePopupToggles[0] = wMenuToggleCreate(profilePopupM, "", _("Define"), 0,

@@ -27,7 +27,7 @@
 
 /*****************************************************************************
  * Safe Create Dir
- * \param IN dir The directory path to create
+ * \param[in] dir The directory path to create
  *
  * \return TRUE if ok
  *
@@ -52,7 +52,7 @@ BOOL_T SafeCreateDir(const char *dir)
 /************************************************
  * DeleteDirectory empties and removes a directory recursively
  *
- * \param IN dir_path The Directory to empty and remove
+ * \param[in] dir_path The Directory to empty and remove
  *
  * \return TRUE if ok
  *
@@ -81,7 +81,8 @@ BOOL_T DeleteDirectory(const char *dir_path)
 	}
 
 	// if not possible to read the directory for this user
-	if ((dir = opendir(dir_path)) == NULL) {
+	dir = opendir(dir_path);
+	if (dir == NULL) {
 		NoticeMessage(MSG_DIR_OPEN_FAIL,
 		              _("Continue"), NULL, dir_path);
 		return FALSE;

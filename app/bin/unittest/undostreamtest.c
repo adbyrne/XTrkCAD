@@ -27,6 +27,9 @@ dynArr_t logTable_da;
 /* lprintf expands to LogPrintf (misc.h:302) */
 void LogPrintf(const char *fmt, ...) { (void)fmt; }
 
+/* InitUndoStream() calls this; the stream primitives under test don't. */
+int LogFindIndex(const char *name) { (void)name; return 0; }
+
 void *MyMalloc(size_t n)
 {
 	void *p = malloc(n);

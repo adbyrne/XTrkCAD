@@ -2,24 +2,21 @@ name: Hg sync (default)
 
 # Daily mirror of SourceForge Hg `default` into git `main`.
 #
-# git `main` is a pure mirror of Hg `default` (xtrkcad-verify-sync PASS), so
-# each run:
+# git `main` is Hg `default` (the GTK3 line since SF r7748) plus git-only
+# files that upstream diffs don't touch (.github/, mcp/, tools/, ...; see
+# .claude/sync-exceptions-main.txt), so each run:
 #   1. clones Hg `default` anonymously over SF's read-only URL;
 #   2. diffs from the last Hg node already synced (the newest `Hg-Node:`
 #      commit trailer on `main`, else SEED_NODE) to the current tip;
 #   3. applies that diff to a fresh test/upstream-default-* branch, commits
-#      it with a new `Hg-Node:` trailer, pushes, and runs ci.yml on it;
-#   4. if CI passes, fast-forwards `main` to the test branch, runs ci.yml on
+#      it with a new `Hg-Node:` trailer, pushes, and runs ci-gtk3.yml on it;
+#   4. if CI passes, fast-forwards `main` to the test branch, runs ci-gtk3.yml on
 #      `main`, and deletes the test branch together with its runs.
 # A patch that won't apply, a failed CI run, or a `main` that moved in the
 # meantime stops the run and opens (or reuses) a GitHub issue instead.
 #
 # Pushes made with GITHUB_TOKEN never trigger push-event workflows, so CI is
 # started with an explicit workflow_dispatch (which GITHUB_TOKEN may send).
-#
-# GTK3V2MAIN is not handled here: git GTK3V2MAIN carries held git-only work,
-# so it can't simply mirror Hg yet. It's still synced by the local
-# xtrkcad-sf-sync script.
 
 on:
   schedule:
@@ -63,7 +60,7 @@ env:
   # Hg `default` node that git `main` was verified byte-identical to
   # (xtrkcad-verify-sync PASS, 2026-10-05). Only used until the first sync
   # commit carries an `Hg-Node:` trailer.
-  SEED_NODE: 8ec70fc79f47b4a51f5966128c70c8c4f38df59a
+  SEED_NODE: f9954725de52f3937c5216d4c36c76ceedd69186
   GH_TOKEN: ${{ github.token }}
   DRY_RUN: ${{ inputs.dry_run || false }}
   PROMOTE: ${{ github.event_name == 'schedule' || inputs.promote }}
@@ -73,7 +70,7 @@ env:
 jobs:
   sync:
     runs-on: ubuntu-24.04
-    # Waits for ci.yml twice (test branch, then main); cppcheck alone can
+    # Waits for ci-gtk3.yml twice (test branch, then main); cppcheck alone can
     # take ~40 minutes.
     timeout-minutes: 240
     steps:
@@ -221,20 +218,20 @@ jobs:
           . "$RUNNER_TEMP/helpers.sh"
 
           git push -q origin "$BRANCH"
-          gh workflow run ci.yml --ref "$BRANCH"
+          gh workflow run ci-gtk3.yml --ref "$BRANCH"
           run_id=""
           for _ in $(seq 1 30); do
             sleep 10
-            run_id=$(gh run list --workflow ci.yml --branch "$BRANCH" --event workflow_dispatch \
+            run_id=$(gh run list --workflow ci-gtk3.yml --branch "$BRANCH" --event workflow_dispatch \
               -L 1 --json databaseId --jq '.[0].databaseId // empty')
             [ -n "$run_id" ] && break
           done
           [ -n "$run_id" ] || fail_with_issue "Hg sync (default): CI never started for ${TIP:0:12}" \
-            "Dispatched ci.yml on \`$BRANCH\`, but no run appeared within 5 minutes."
+            "Dispatched ci-gtk3.yml on \`$BRANCH\`, but no run appeared within 5 minutes."
           echo "CI run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/$run_id"
           if ! gh run watch "$run_id" --exit-status --interval 60 > /dev/null; then
             fail_with_issue "Hg sync (default): CI failed for upstream ${TIP:0:12}" \
-              "ci.yml failed on \`$BRANCH\` (run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/$run_id). \`$GIT_BRANCH\` was left unchanged; the test branch is kept for inspection."
+              "ci-gtk3.yml failed on \`$BRANCH\` (run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/$run_id). \`$GIT_BRANCH\` was left unchanged; the test branch is kept for inspection."
           fi
 
       - name: Fast-forward the target branch and run its CI
@@ -252,7 +249,7 @@ jobs:
             "\`$GIT_BRANCH\` gained commits while CI ran, so \`$BRANCH\` can't be fast-forwarded onto it. Rebase or merge the test branch by hand."
           git push -q origin "HEAD:refs/heads/$GIT_BRANCH"
           echo "$GIT_BRANCH fast-forwarded to $(git rev-parse --short HEAD) (Hg ${TIP:0:12})."
-          gh workflow run ci.yml --ref "$GIT_BRANCH"
+          gh workflow run ci-gtk3.yml --ref "$GIT_BRANCH"
 
           # The test branch's content now lives on main; drop it and its runs.
           gh run list --branch "$BRANCH" -L 100 --json databaseId --jq '.[].databaseId' |

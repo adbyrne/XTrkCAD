@@ -85,7 +85,7 @@ void DxfFormatPosition(DynString *result, int type, double value)
 * Build and format the line style definition
 *
 * \param result OUT buffer for result
-* \param type IN line style
+* \param style IN line style
 */
 
 void DxfLineStyle(DynString *result, int style)
@@ -94,6 +94,11 @@ void DxfLineStyle(DynString *result, int style)
 	switch ( style ) {
 	case 1: s = "DASHEDTINY"; break;
 	case 2: s = "DOTTINY"; break;
+	default:
+		// dxfformat.c is deliberately decoupled from common.h/misc.h (used by the
+		// standalone dxfformattest unit target), so no LOG()/LogFindIndex() here --
+		// any other style value keeps the CONTINUOUS default set above.
+		break;
 	}
 	DynStringPrintf(result, DXF_INDENT "6\n%s\n", s);
 }
@@ -103,7 +108,6 @@ void DxfLineStyle(DynString *result, int style)
 * to the basic layer name. The result is appended to the existing result buffer.
 *
 * \param output OUT buffer for result
-* \param basename IN base part of  name
 * \param layer IN layer number
 */
 
@@ -156,8 +160,8 @@ DxfAppendInteger(DynString *output, int type, int value)
 /**
 * Build and format the line style definition. The result is appended to the existing result buffer.
 *
-* \param result OUT buffer for result
-* \param type IN line style 0 CONTINUOUS, 1 DASHED or 2 DOT
+* \param output OUT buffer for result
+* \param style IN line style 0 CONTINUOUS, 1 DASHED or 2 DOT
 */
 
 static void
@@ -276,7 +280,7 @@ DxfTextCommand(DynString *result, int layer, double x,
  * definition of the measurement system (metric or English) vie the $MEASUREMENT variable
  * and the units i.e. inches for English and mm for metric.
  *
- * \PARAM result OUT buffer for the completed command
+ * \param result OUT buffer for the completed command
  */
 
 void
@@ -307,8 +311,8 @@ DxfUnits(DynString *result)
 * Define a size of dimensions. The default values are taken from
 * static array dxfDimensionDefaults
 *
-* \PARAM result OUT the completed command is appended to this buffer
-* \PARAM dimension IN dimension variable to set
+* \param result OUT the completed command is appended to this buffer
+* \param dimension IN dimension variable to set
 */
 
 void

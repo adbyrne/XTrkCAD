@@ -27,6 +27,7 @@
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
+#include "icons.h"
 #include "layout.h"
 #include "paths.h"
 #include "include/paramfile.h"
@@ -40,6 +41,7 @@ dynArr_t paramFileInfo_da;
 int curParamFileIndex = PARAM_DEMO;
 
 static int log_params;
+/** @logcmd @showrefby `paramupdate=n` `paramfilelist.c` */
 static int log_paramupdate;
 
 static char * customPath;
@@ -70,7 +72,7 @@ ReadParamError(char *file)
 	                _("The parameter file: %s could not be found and was probably deleted or moved. "
 	                  "The file is removed from the active parameter file list."),
 	                file);
-	wNoticeEx(NT_ERROR, DynStringToCStr(&error_msg), "OK", NULL);
+	wNoticeWithIcon(NT_ERROR, DynStringToCStr(&error_msg), "OK", NULL);
 	DynStringFree(&error_msg);
 }
 
@@ -146,7 +148,7 @@ static BOOL_T UpdateParamFiles(void)
 					if ( cp ) {
 						LOG1( log_paramupdate, ( "ParmUpdate:  Upd CONTENTS %s (was %s) -> %s\n",
 						                         newContents,
-						                         cp?cp:"<>", fileNameP ) );
+						                         cp, fileNameP ) );
 					} else {
 						LOG1( log_paramupdate, ( "ParmUpdate:  New CONTENTS %s\n", newContents ) );
 					}
@@ -160,7 +162,7 @@ static BOOL_T UpdateParamFiles(void)
 					for (int fileNo = 1; ; fileNo++) {
 						char fileNoS[4+10+1];
 						sprintf(fileNoS, "File%d", fileNo);
-						char * prevContents = wPrefGetString("Parameter File Names", fileNoS);
+						const char * prevContents = wPrefGetString("Parameter File Names", fileNoS);
 						if (prevContents == NULL || *prevContents == '\0') {
 							// End of list
 							break;
@@ -242,7 +244,8 @@ void LoadParamFileList(void)
 		// Rewire to the latest system level
 #define SHAREPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad" PATH_SEPARATOR "params" PATH_SEPARATOR)
 #define SHAREBETAPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad-beta" PATH_SEPARATOR "params" PATH_SEPARATOR)
-		if ((share= strstr(fileName,SHAREPARAMS))) {
+		share= strstr(fileName,SHAREPARAMS);
+		if (share) {
 			share += strlen(SHAREPARAMS);
 		}
 #ifndef WINDOWS
@@ -443,7 +446,7 @@ static void ReadCustom(void)
  * Open the custom file where user-defined turnouts, cars and such are stored
  */
 
-FILE * OpenCustom(char *mode)
+FILE * OpenCustom(const char *mode)
 {
 	FILE * ret = NULL;
 
@@ -490,8 +493,8 @@ addButtonCallBack_t ParamFilesInit(void)
  */
 BOOL_T ParamFileListInit(void)
 {
-	/** @logcmd @showrefby params=n paramfilelist.c Log ReadParams
-	 * (including scale file (xtq), custom file (*.cus) and other params (xtp))
+	/** @logcmd @showrefby `params=n` `paramfilelist.c` — parameter-file loading, including the
+	 * scale file (`.xtq`), custom file (`.cus`), and other `.xtp` files
 	 */
 	log_params = LogFindIndex("params");
 	log_paramupdate = LogFindIndex("paramupdate");
@@ -553,10 +556,15 @@ UnloadParamFile(wIndex_t fileIndex)
 
 	MyFree(paramFileI->name);
 	MyFree(paramFileI->contents);
+	paramFileI->name = NULL;
+	paramFileI->contents = NULL;
 
 	paramFileI->valid = FALSE;
 
 	for (int i = 0; i < paramFileInfo_da.cnt; i++) {
+		if (!paramFileInfo(i).valid) {
+			continue;
+		}
 		LOG1(log_params, ("UnloadParamFiles: = %s: %d\n", paramFileInfo(i).contents,
 		                  paramFileInfo(i).trackState))
 	}

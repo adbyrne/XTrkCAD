@@ -1,0 +1,10 @@
+VERSION 2 5.3.0Dev
+TITLE1 Double-Ended Staging [STUB]
+SCALE HO
+ROOMSIZE 240 x 120
+
+# Stub placeholder — geometry replaced in Phase G
+# connection_point: throat-a at E1 (0,0 facing 180), throat-b at E2 (72,0 facing 0)
+STRAIGHT 1 0 0 0 0 HO 0
+	E 0.0 0.0 180.0
+	E 72.0 0.0 0.0

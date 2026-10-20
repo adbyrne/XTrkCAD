@@ -163,13 +163,15 @@ edits). Open the PR with an explicit `--base GTK3V2MAIN`.
 code (held features) that an upstream API change can break even though Hg itself compiles fine.
 Confirmed 2026-10-05: upstream removed `PDO_DLGRESIZE`, Hg built and tested clean, and the git
 test branch failed CI because Layer Groups, Notes, and Reports dialogs still used the flag.
-Before pushing the test branch, build it locally in a scratch build dir, and run the astyle gate
-with the same `--exclude` list as `ci-gtk3.yml`'s `astyle-check`:
+It happened again 2026-10-18, when upstream removed `F_BLOCK` and five git-only dialogs still
+used it. Before pushing the test branch, build it locally in a scratch build dir, and run
+`tools/astyle-check.sh`, the same script as `ci-gtk3.yml`'s `astyle-check` gate:
 
 ```sh
 cmake -B <scratch>/build-git -S xtrkcad-git-gtk3 -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
 cmake --build <scratch>/build-git -- -k 0
 ctest --test-dir <scratch>/build-git -LE regression
+(cd xtrkcad-git-gtk3 && tools/astyle-check.sh)
 ```
 
 ### 2 — Fix any compile errors
@@ -356,7 +358,7 @@ cmake -B build -S xtrkcad-hg -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING
 cmake --build build
 
 # GTK3V2MAIN branch (GTK3)
-cmake -B build-gtk3v2main -S xtrkcad-hg-gtk3v2main -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+cmake -B build-gtk3v2main -S xtrkcad-hg-gtk3v2main -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_APPEND_SRC_HASH=ON
 cmake --build build-gtk3v2main
 ```
 
@@ -364,6 +366,14 @@ Useful CMake options:
 - `-DXTRKCAD_TESTING=ON` — build unit tests (auto-enabled when CMocka is found)
 - `-DXTRKCAD_USE_DOXYGEN=ON` — generate Doxygen internals docs
 - `-DXTRKCAD_CREATE_SVG=1` — SVG export (requires MiniXML; found automatically)
+- `-DXTRKCAD_APPEND_SRC_HASH=ON` — GTK3V2MAIN only: also give untagged dev builds'
+  *filenames/install paths* (binary name, work/prefs dir, packages) their own short
+  VCS hash, instead of each new dev build overwriting the previous one in place.
+  (The internal/compiled-in version string always carries the hash regardless of
+  this flag — see the Version section's "dev-build hash suffix" note.) Defaults
+  OFF (matches the historic single-overwriting dev install) except under CI,
+  where it defaults ON automatically. Always pass it explicitly for local
+  GTK3V2MAIN builds, as shown above.
 
 ## Tests
 
@@ -468,6 +478,46 @@ Current development version: **5.3.2Dev** (`ProgramVersion.cmake`) on `default`/
 tracked independently from the GTK2 default branch's 5.3.x line. To cut a release:
 `git tag v5.4.0 && git push origin v5.4.0` — GitHub Actions (`release.yml`) automatically
 builds packages and creates a draft GitHub Release.
+
+**GTK3V2MAIN dev-build hash suffix:** `ProgramVersion.cmake` (SF #712) produces two version
+strings on every build that is *not* the exact commit a `v<version>` tag points at. Detected
+automatically at configure time from either a git or an Hg checkout (this file's own build
+applies either way). A tagged release build drops the suffix from both and keeps the plain
+three-part version — there is no distinction between the two on a release.
+
+- `XTRKCAD_VERSION` — always gets a fourth, dot-separated short-VCS-hash component (e.g.
+  `5.4.0.8b67f185`). Compiled into the binary (`xtrkcad-config.h`'s `XTRKCAD_VERSION` macro) and
+  used for internal, non-filesystem values: the About/`--version` string and misc.c's
+  stored-preference "is this a new build since last run" check.
+- `XTRKCAD_FILE_VERSION` — only gets the hash suffix when the `XTRKCAD_APPEND_SRC_HASH` CMake
+  option (see Build section above) is on. Used everywhere the version becomes part of a
+  filename or path: `XTRKCAD_BIN` (installed binary name — this is what disambiguates successive
+  dev builds of the same nominal version installed side by side, on top of #673's per-version
+  package/binary naming), the runtime work/prefs directory (`custom.c`'s `sProdNameLower`), and
+  every CPack/packaging filename, install directory, and bundle-identity field under
+  `distribution/`.
+
+The option surprised a developer expecting every historic dev build to overwrite the same
+plain-named install rather than accumulate new ones — hence the option defaulting OFF (so a
+local build's filename/install path stays fixed across commits, and each new build just
+overwrites the last, matching that historic expectation) except under CI (GitHub Actions'
+built-in `CI` env var), where it defaults ON so concurrent jobs and artifacts never collide.
+Always pass `-DXTRKCAD_APPEND_SRC_HASH=ON` for a local GTK3V2MAIN dev build that should also get
+disambiguated filenames/installs (see Build section above for the flag). After tagging a
+release, bump `XTRKCAD_RELEASE_VERSION` (and `XTRKCAD_VERSION_MODIFIER`, if used) for the next
+dev cycle — every subsequent untagged build picks up the hash again automatically (in
+`XTRKCAD_VERSION` always, in `XTRKCAD_FILE_VERSION` only when the option is on), no further
+manual step needed.
+
+**To build one specific past commit:** `git checkout <hash>` (or `hg update -r <hash>`) in the
+source tree, then explicitly reconfigure — `cmake -B build-gtk3v2main -S xtrkcad-hg-gtk3v2main`
+— before `cmake --build`. Don't rely on `cmake --build` alone to notice the checkout: CMake only
+re-runs its configure step automatically when a file it tracks (`CMakeLists.txt`,
+`ProgramVersion.cmake`) actually changed on disk, so switching commits that don't touch those
+files leaves the *previous* commit's hash silently baked into both `XTRKCAD_VERSION` and
+`XTRKCAD_FILE_VERSION` (confirmed empirically: a `cmake --build`-only rebuild reused the stale
+hash from the prior configure). Add `-DXTRKCAD_APPEND_SRC_HASH=ON` too if this build should get
+its own filename/install path instead of overwriting your regular dev build.
 
 ## File Formats
 

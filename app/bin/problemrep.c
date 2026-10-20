@@ -28,7 +28,6 @@
 
 #ifdef WINDOWS
 #include <Windows.h>
-#include <FreeImage.h>
 #define CONFIG_DELIMITER '='
 #else
 #define strnicmp strncasecmp
@@ -96,22 +95,19 @@ CreateTempDirectory()
 void
 SaveSystemInfo(char* dir)
 {
-	FILE* fh;
 	char* fileName=NULL;
 
 	MakeFullpath(&fileName, dir, "versions.txt", NULL);
 
 	if (fileName) {
+		FILE* fh;
 		fh = fopen(fileName, "w");
 
 		fprintf(fh, "XTrackCAD: %s\n", VERSION);
 		fprintf(fh, "OS: %s\n", wGetOSVersion());
-#ifdef WINDOWS
-		fprintf(fh, "FreeImage: %s\n", FreeImage_GetVersion());
-#else
+
 		// get gtk version
 		fprintf(fh, "GTK Version: %s", wGetPlatformVersion() );
-#endif // WINDOWS
 
 		fclose(fh);
 	}
@@ -122,7 +118,7 @@ SaveSystemInfo(char* dir)
  * Replace the directory name in a configuration file line. Assumption is that
  * the name of the directory starts after the '=' (Windows) or ':' (UNIX)
  *
- * \para  result	pointer to DynString for result, DynString is cleared if
+ * \param result	pointer to DynString for result, DynString is cleared if
  *					directory was not found
  * \param in		line from configuration file
  * \param dir		directory name to look for
@@ -257,7 +253,7 @@ PickupConfigFile(char *srcfile, char* destdir)
 			char* section;
 			char* name;
 			char* value;
-			size_t totalLength;
+
 
 			if(getline(&lineptr, &linelen, fhRead)==-1) {
 				continue;
@@ -265,21 +261,28 @@ PickupConfigFile(char *srcfile, char* destdir)
 
 			wPrefTokenize(lineptr, &section, &name, &value);
 			if (name && value) {
+				size_t totalLength;
 				FilterConfigLine(&configLine, name, value);
 
 				// calculate maximum possible length of resulting line
 				totalLength = (section ? strlen(section) : 0) +
-				              (name ? strlen(name) : 0) +
-				              (value ? strlen(value) : 0) + DELIMITER_COUNT;
+				              strlen(name) +
+				              strlen(value) + DELIMITER_COUNT;
 
 				// increase buffer size by 256  byte if too small
 				if (totalLength > linelen) {
 					size_t newLen = ((totalLength + 256) & (~0xff));
-					lineptr = realloc(lineptr, newLen);
-					if (!lineptr) {
+					char *newLineptr = realloc(lineptr, newLen);
+					if (!newLineptr) {
+						// AbortProg() can return (user may choose to save
+						// and continue) -- keep the original lineptr valid
+						// and skip this line rather than fall through to
+						// use a NULL/undersized buffer below.
 						AbortProg("!lineptr", __FILE__, __LINE__,
 						          "Can't realloc memory");
+						continue;
 					}
+					lineptr = newLineptr;
 					linelen = newLen;
 				}
 				value = DynStringToCStr(&configLine);
@@ -336,7 +339,7 @@ FilterLayoutNote(FILE* out, char* work)
 {
 	DynString result;
 	bool isDocument = false;
-	char* token;
+	const char* token;
 
 	DynStringMalloc(&result, FILENAME_MAX);
 
@@ -571,7 +574,7 @@ ZipProblemData(const char* src)
 	char* dest = MyStrdup(GetLayoutFullPath());
 	char* out;
 	char *filename = strrchr(dest, PATH_SEPARATOR[0]) + 1;
-	struct tm* currentTime;
+	const struct tm* currentTime;
 	time_t clock;
 	char timestamp[80];
 
@@ -594,7 +597,7 @@ ProblemDataCollect()
 	char* tempDirectory;
 	char* subdirectory = NULL;
 	bool ret;
-	char *filename = GetLayoutFullPath();
+	const char *filename = GetLayoutFullPath();
 
 	if(*filename == '\0') {
 		ProblemrepUpdateW(_("No layout design loaded! Operation is cancelled.\n"));
@@ -631,8 +634,16 @@ ProblemDataCollect()
 	mkdir(subdirectory, 0700);
 
 	for (int i = 0; i < GetParamFileCount(); i++) {
+		if (!IsParamFileValid(i)) {
+			// Unloaded file: name/contents were freed, skip rather than
+			// touch a dangling pointer (GTK3 issue #5).
+			continue;
+		}
 		char* file = GetParamFileName(i);
 
+		// Truthy strncmp() is intentional: non-zero means "not a prefix
+		// match", i.e. file is outside the app lib dir (local/custom).
+		// NOLINTNEXTLINE(bugprone-suspicious-string-compare)
 		if (strncmp(file, wGetAppLibDir(), strlen(wGetAppLibDir()))) {
 			char* destfile;
 			ProblemrepUpdateW(_("Get local parameter file %s\n"), file);

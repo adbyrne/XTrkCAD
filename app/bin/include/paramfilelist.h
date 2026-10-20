@@ -18,7 +18,7 @@ typedef paramFileInfo_t * paramFileInfo_p;
 #define paramFileInfo(N) DYNARR_N( paramFileInfo_t, paramFileInfo_da, N )
 
 char *GetParamFileDir(void);
-void SetParamFileDir(char *fullPath);
+void SetParamFileDir(const char *fullPath);
 void LoadParamFileList(void);
 //BOOL_T ReadDefaultParams(const char * dirName);
 void SaveParamFileList(void);

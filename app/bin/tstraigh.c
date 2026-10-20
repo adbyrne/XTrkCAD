@@ -24,7 +24,7 @@
 #include "cundo.h"
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "common-ui.h"
 
@@ -42,7 +42,7 @@ typedef struct extraDataStraight_t {
 } extraDataStraight_t;
 
 
-/** @logcmd @showrefby straight=n tstraigh.c */
+/** @logcmd @showrefby `straight=n` `tstraigh.c` — straight-track draw endpoints (`DrawStraight`) */
 static int log_straight = 0;
 
 /****************************************
@@ -107,7 +107,6 @@ EXPORT BOOL_T UpdateDescStraight(
         descData_p desc,
         long pivot )
 {
-	coOrd mid;
 	if ( inx == e0 || inx == e1 ) {
 		*(DIST_T*)desc[ln].valueP = FindDistance( *(coOrd*)desc[e0].valueP,
 		                            *(coOrd*)desc[e1].valueP );
@@ -139,7 +138,8 @@ EXPORT BOOL_T UpdateDescStraight(
 			           *(ANGLE_T*)desc[an].valueP+180.0, *(DIST_T*)desc[ln].valueP );
 			desc[e0].mode |= DESC_CHANGE;
 			break;
-		case DESC_PIVOT_MID:
+		case DESC_PIVOT_MID: {
+			coOrd mid;
 			mid.x = (((coOrd*)desc[e0].valueP)->x+((coOrd*)desc[e1].valueP)->x)/2.0;
 			mid.y = (((coOrd*)desc[e0].valueP)->y+((coOrd*)desc[e1].valueP)->y)/2.0;
 			Translate( (coOrd*)desc[e0].valueP, mid, *(ANGLE_T*)desc[an].valueP+180.0,
@@ -149,6 +149,7 @@ EXPORT BOOL_T UpdateDescStraight(
 			desc[e0].mode |= DESC_CHANGE;
 			desc[e1].mode |= DESC_CHANGE;
 			break;
+		}
 		default:
 			break;
 		}
@@ -209,7 +210,7 @@ static void DescribeStraight( track_p trk, char * str, CSIZE_T len )
 {
 	int fix0, fix1;
 	sprintf( str,
-	         _("Straight Track(%d): Layer=%d Length=%s EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
+	         _("Straight Track(%d): Layer=%u Length=%s EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
 	         GetTrkIndex(trk),
 	         GetTrkLayer(trk)+1,
 	         FormatDistance(FindDistance( GetTrkEndPos(trk,0), GetTrkEndPos(trk,1) )),
@@ -242,7 +243,7 @@ static void DescribeStraight( track_p trk, char * str, CSIZE_T len )
 	                fix0?DESC_PIVOT_FIRST:
 	                fix1?DESC_PIVOT_SECOND:
 	                DESC_PIVOT_MID;
-	DoDescribe( _("Straight Track"), trk, strDesc, UpdateStraight );
+	DoDescribe( N_("Straight Track"), trk, strDesc, UpdateStraight );
 }
 
 static DIST_T DistanceStraight( track_p t, coOrd * p )
@@ -380,7 +381,7 @@ EXPORT void DrawStraightTies(
         wDrawColor color )
 {
 	DIST_T tieOff0=0.0, tieOff1=0.0;
-	DIST_T len, dlen;
+	DIST_T len;
 	coOrd pos;
 	int cnt;
 	ANGLE_T angle;
@@ -397,7 +398,7 @@ EXPORT void DrawStraightTies(
 		cnt++;
 	}
 	if ( cnt != 0 ) {
-		dlen = FindDistance( p0, p1 )/cnt;
+		DIST_T dlen = FindDistance( p0, p1 )/cnt;
 //		double endsize = FindDistance( p0, p1 )-cnt*dlen-td->width;
 		for ( len=dlen/2; cnt; cnt--,len+=dlen ) {
 			Translate( &pos, p0, angle, len );
@@ -419,8 +420,7 @@ EXPORT void DrawStraightTrack(
         long options )
 {
 	coOrd pp0, pp1;
-	DIST_T trackGauge = GetTrkGauge(trk);
-	tieData_t td;
+	DIST_T trkGauge = GetTrkGauge(trk);
 	long bridge = 0, roadbed = 0;
 	if ( trk ) {
 		bridge = GetTrkBridge(trk);
@@ -461,12 +461,12 @@ EXPORT void DrawStraightTrack(
 
 	// Draw solid background
 	if(bridge|roadbed) {
-		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
+		wDrawWidth width3 = (wDrawWidth)round(trkGauge * 3 * d->dpi / d->scale);
 		DrawLine(d,p0,p1,width3,bridge?bridgeColor:roadbedColor);
 	}
 
 	if ( DoDrawTies( d, trk ) ) {
-		td = GetTrkTieData( trk );
+		tieData_t td = GetTrkTieData( trk );
 		DrawStraightTies( d, td, p0, p1, color );
 	}
 	if ( color == wDrawColorBlack ) {
@@ -476,20 +476,20 @@ EXPORT void DrawStraightTrack(
 		DrawLine( d, p0, p1, width, color );
 	} else {
 		if ( hasTrackCenterline(d)) {
-			long options = d->options;
+			long savedDrawOptions = d->options;
 			d->options |= DC_DASH;
 			DrawLine( d, p0, p1, 0, color );
-			d->options = options;
+			d->options = savedDrawOptions;
 		}
-		Translate( &pp0, p0, angle+90, trackGauge/2.0 );
-		Translate( &pp1, p1, angle+90, trackGauge/2.0 );
+		Translate( &pp0, p0, angle+90, trkGauge/2.0 );
+		Translate( &pp1, p1, angle+90, trkGauge/2.0 );
 		DrawLine( d, pp0, pp1, width, color );
 
-		Translate( &pp0, p0, angle-90, trackGauge/2.0 );
-		Translate( &pp1, p1, angle-90, trackGauge/2.0 );
+		Translate( &pp0, p0, angle-90, trkGauge/2.0 );
+		Translate( &pp1, p1, angle-90, trkGauge/2.0 );
 		DrawLine( d, pp0, pp1, width, color );
 
-		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && DrawTwoRails(d,1) ) {
+		if ( (d->options&DC_PRINT) && roadbedWidth > trkGauge && DrawTwoRails(d,1) ) {
 			wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
 			if ( options&DTS_RIGHT ) {
 				Translate( &pp0, p0, angle+90, roadbedWidth/2.0 );
@@ -510,12 +510,12 @@ EXPORT void DrawStraightTrack(
 			width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 		}
 
-		Translate( &pp0, p0, angle-90, trackGauge*1.5 );
-		Translate( &pp1, p1, angle-90, trackGauge*1.5 );
+		Translate( &pp0, p0, angle-90, trkGauge*1.5 );
+		Translate( &pp1, p1, angle-90, trkGauge*1.5 );
 		DrawLine( d, pp0, pp1, width2, color );
 
-		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
-		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
+		Translate( &pp0, p0, angle+90, trkGauge*1.5 );
+		Translate( &pp1, p1, angle+90, trkGauge*1.5 );
 		DrawLine( d, pp0, pp1, width2, color);
 	}
 }
@@ -529,8 +529,8 @@ static BOOL_T WriteStraight( track_p t, FILE * f )
 {
 	int bits;
 	long options;
-	struct extraDataStraight_t *xx = GET_EXTRA_DATA(t, T_STRAIGHT,
-	                                 extraDataStraight_t);
+	const struct extraDataStraight_t *xx = GET_EXTRA_DATA(t, T_STRAIGHT,
+	                                       extraDataStraight_t);
 	BOOL_T rc = TRUE;
 
 	options = GetTrkWidth(t) & 0x0F;
@@ -541,7 +541,7 @@ static BOOL_T WriteStraight( track_p t, FILE * f )
 	}
 	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
 	       (GetTrkRoadbed(t)?1<<4:0);
-	rc &= fprintf(f, "STRAIGHT %d %d %ld 0 0 %s %d %0.6f %0.6f\n",
+	rc &= fprintf(f, "STRAIGHT %d %u %ld 0 0 %s %d %0.6f %0.6f\n",
 	              GetTrkIndex(t), GetTrkLayer(t), options,
 	              GetTrkScaleName(t), bits, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
@@ -560,14 +560,14 @@ static BOOL_T ReadStraight( char * line )
 	long options;
 	struct extraDataStraight_t *xx;
 	char * cp = NULL;
-	coOrd descriptionOff = { 0.0, 0.0 };
+	coOrd savedDescOff = { 0.0, 0.0 };
 
 	if ( !GetArgs( line+8, paramVersion<3?"dXZs9dc":"dLl00s9dc", &index, &layer,
 	               &options, scale, &visible, &cp ) ) {
 		return FALSE;
 	}
 	if (cp) {
-		if (!GetArgs(cp,"p",&descriptionOff)) {
+		if (!GetArgs(cp,"p",&savedDescOff)) {
 			return FALSE;
 		}
 	}
@@ -576,7 +576,7 @@ static BOOL_T ReadStraight( char * line )
 	}
 	trk = NewTrack( index, T_STRAIGHT, 0, sizeof *xx );
 	xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
-	xx->descriptionOff = descriptionOff;
+	xx->descriptionOff = savedDescOff;
 	SetTrkScale( trk, LookupScale(scale) );
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(trk, visible!=0);
@@ -638,8 +638,8 @@ static BOOL_T SplitStraight( track_p trk, coOrd pos, EPINX_T ep,
 {
 	track_p trk1;
 
-	trk1 = NewStraightTrack( 1-ep?GetTrkEndPos(trk,ep):pos,
-	                         1-ep?pos:GetTrkEndPos(trk,ep) );
+	trk1 = NewStraightTrack( (1-ep)?GetTrkEndPos(trk,ep):pos,
+	                         (1-ep)?pos:GetTrkEndPos(trk,ep) );
 	DIST_T height;
 	int opt;
 	GetTrkEndElev(trk,ep,&opt,&height);
@@ -689,9 +689,8 @@ static BOOL_T TraverseStraight( traverseTrack_p trvTrk, DIST_T * distR )
 
 static BOOL_T EnumerateStraight( track_p trk )
 {
-	DIST_T d;
 	if (trk != NULL) {
-		d = FindDistance( GetTrkEndPos( trk, 0 ), GetTrkEndPos( trk, 1 ) );
+		DIST_T d = FindDistance( GetTrkEndPos( trk, 0 ), GetTrkEndPos( trk, 1 ) );
 		ScaleLengthIncrement( GetTrkScale(trk), d );
 		return TRUE;
 	}
@@ -732,7 +731,7 @@ BOOL_T ExtendStraightToJoin(
 	track_p trk0x, trk1x, trk2;
 	EPINX_T ep0x=-1, ep1x=-1;
 	coOrd pos0, pos1;
-	ANGLE_T a0, a1, aa;
+	ANGLE_T a0, a1;
 
 	a0 = GetTrkEndAngle( trk0, ep0 );
 	a1 = GetTrkEndAngle( trk1, ep1 );
@@ -750,7 +749,7 @@ BOOL_T ExtendStraightToJoin(
 
 	if ( GetTrkType(trk0) != T_STRAIGHT &&
 	     GetTrkType(trk1) != T_STRAIGHT ) {
-		aa = FindAngle( pos0, pos1 );
+		ANGLE_T aa = FindAngle( pos0, pos1 );
 		aa = NormalizeAngle( aa-a0+connectAngle/2.0);
 		if (aa > connectAngle) {
 			return FALSE;
@@ -833,7 +832,7 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, 1-ep );
 		InfoMessage( _("Drag to change track length") );
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 		d = FindDistance( tempSegs(0).u.l.pos[0], pos );
 		valid = TRUE;
@@ -1167,4 +1166,5 @@ track_p NewStraightTrack( coOrd p0, coOrd p1 )
 void InitTrkStraight( void )
 {
 	T_STRAIGHT = InitObject( &straightCmds );
+	log_straight = LogFindIndex( "straight" );
 }

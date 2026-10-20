@@ -24,7 +24,8 @@
 #include "cselect.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "param.h"
+#include "icons.h"
+#include "form.h"
 #include "track.h"
 #include "layout.h"
 #include "common-ui.h"
@@ -84,7 +85,8 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		BOOL_T found = FALSE;
 		Dl.trk = NULL;
 		if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
-			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
+			t = OnTrack(&p, FALSE, TRUE);
+			if (t != NULL) {
 				EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 				if (ep != -1) {
 					if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
@@ -118,7 +120,8 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		if (!Dl.down) {
 			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 				p = pos;
-				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
+				t = OnTrack(&p, FALSE, TRUE);
+				if (t != NULL) {
 					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
 						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 						if (ep != -1) {
@@ -132,7 +135,6 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			}
 			if (!found && SnapPos( &pos )) {
 				CreateEndAnchor(pos,FALSE);
-				found = TRUE;
 			}
 			return C_CONTINUE;
 		}
@@ -145,7 +147,6 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			} else { pos = Dl.pos0; }
 		} else if (SnapPos( &pos )) {
 			CreateEndAnchor(pos,FALSE);
-			found = TRUE;
 		}
 
 		InfoMessage( _("Straight Track Length=%s Angle=%0.3f"),
@@ -166,7 +167,8 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 				Translate( &pos, Dl.pos0, angle, FindDistance( Dl.pos0, pos ));
 			} else { pos = Dl.pos0; }
 		} else { SnapPos( &pos ); }
-		if ((dist=FindDistance( Dl.pos0, pos )) <= minLength) {
+		dist=FindDistance( Dl.pos0, pos );
+		if (dist <= minLength) {
 			ErrorMessage( MSG_TRK_TOO_SHORT, "Straight ", PutDim(fabs(minLength-dist)) );
 			return C_TERMINATE;
 		}
@@ -196,12 +198,9 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 	}
 }
 
-
-#include "bitmaps/straight.image3"
-
 void InitCmdStraight( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdStraight, "cmdStraight", _("Straight Track"),
-	               wIconCreatePixMap(straight_image3[iconSize]), LEVEL0_50,
+	               CreateToolbarIconFromResource("straight.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_STRAIGHT, NULL );
 }

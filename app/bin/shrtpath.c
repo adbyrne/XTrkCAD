@@ -23,6 +23,7 @@
 #include "shrtpath.h"
 #include "track.h"
 
+/** @logcmd @showrefby `shortPath=n` `shrtpath.c` */
 EXPORT int log_shortPath;
 static int log_shortPathInitted;
 
@@ -70,13 +71,12 @@ static int DoShortPathFunc( shortestPathFunc_p func, char * title, SPTF_CMD cmd,
 
 static void DumpPaths( int pinx )
 {
-	pathNode_p pPath;
 	trackep_p pTrackep;
 	int tinx;
 
 	lprintf("    Current = %d\n", pinx );
 	for (pinx=0; pinx<pathNode_da.cnt; pinx++) {
-		pPath = &pathNode(pinx);
+		pathNode_p pPath = &pathNode(pinx);
 		lprintf( "      %3d: S%c T%d:%d D%0.3f T%d:%d",
 		         pinx,
 		         pPath->state==Unknown?'U':pPath->state==Working?'W':pPath->state==Final?'F':'?',
@@ -188,8 +188,9 @@ static BOOL_T AddPath(
 			goto skipNode;
 		}
 		if ( epCnt > 2 ) {
-			if ( (epN=DoShortPathFunc( func, "MATCHANY", SPTC_MATCHANY, trk, ep1, -1, dist,
-			                           data )) >= 0 ) {
+			epN=DoShortPathFunc( func, "MATCHANY", SPTC_MATCHANY, trk, ep1, -1, dist,
+			                     data );
+			if ( epN >= 0 ) {
 				/* special match */
 				/*dist += GetTrkLength( trk, ep1, epN );*/
 				AddTrackToNode( trk, ep1, epN, dist );
@@ -242,10 +243,8 @@ int FindShortestPath(
         void * data )
 {
 	int inxCurr = 0;
-	pathNode_p pCurr;
 	pathNode_p pNext;
-	int pinx=0;
-	DIST_T minDist;
+	int pinx;
 	int rc = 0;
 	EPINX_T ep2, epCnt, ep3;
 	static dynArr_t ep_da;
@@ -276,7 +275,7 @@ int FindShortestPath(
 
 	while (1) {
 		/* select next final node */
-		minDist = 0.0;
+		DIST_T minDist = 0.0;
 		inxCurr = -1;
 		for (pinx=0; pinx<pathNode_da.cnt; pinx++) {
 			pNext = &pathNode(pinx);
@@ -290,7 +289,7 @@ int FindShortestPath(
 			break;
 		}
 		if (log_shortPath>=4) { DumpPaths(inxCurr); }
-		pCurr = &pathNode(inxCurr);
+		pathNode_p pCurr = &pathNode(inxCurr);
 		pCurr->state = Final;
 		if ( pCurr->contTrk == NULL ) {
 			if ( !DoShortPathFunc( func, "VALID", SPTC_VALID,
@@ -308,7 +307,7 @@ int FindShortestPath(
 		} else {
 			epCnt = GetTrkEndPtCnt(pCurr->contTrk);
 			DYNARR_SET( pathNode_p, ep_da, epCnt );
-			memset( &ep(0), 0, epCnt * sizeof pNext );
+			memset( &ep(0), 0, epCnt * sizeof(pathNode_p) );
 			if ( (GetTrkBits(pCurr->contTrk) & TB_SHRTPATH) ) {
 				for ( pinx=0; pinx<pathNode_da.cnt; pinx++ ) {
 					pNext = &pathNode(pinx);

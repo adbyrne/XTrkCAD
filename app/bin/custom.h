@@ -54,6 +54,7 @@ extern char * sRecordFilePattern;
 extern char * sNoteFilePattern;
 extern char * sLogFilePattern;
 extern char * sPartsListFilePattern;
+extern char * sReportsFilePattern;
 
 extern char * sVersion;
 extern int iParamVersion;
@@ -123,7 +124,7 @@ void InitCmdAboveBelow( void );
 //void InitCmdEnumerate( void );
 void InitCmdEasement( void );
 
-char * MakeWindowTitle( char * );
+char * MakeWindowTitle( const char * );
 addButtonCallBack_t EasementInit( void );
 
 void InitLayers( int cmdGroup );

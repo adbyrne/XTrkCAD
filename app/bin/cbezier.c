@@ -52,12 +52,13 @@
 #include "cjoin.h"
 #include "common.h"
 #include "track.h"
-#include "wcolors.h"
-#include "param.h"
+#include "form.h"
 #include "fileio.h"
 #include "layout.h"
 #include "cundo.h"
 #include "compound.h"
+
+static int log_cbezier = -1;
 
 
 
@@ -190,15 +191,15 @@ double BezError(coOrd pos[4], coOrd center, coOrd start_point, double start,
 
 double DistanceToLineSegment(coOrd p, coOrd l1, coOrd l2)
 {
-	double A = p.x - l1.x;
-	double B = p.y - l1.y;
 	double C = l2.x - l1.x;
 	double D = l2.y - l1.y;
 
-	double dot = A * C + B * D;
 	double len_sq = C * C + D * D;
 	double param = -1;
 	if (len_sq != 0) { //non 0 length line
+		double A = p.x - l1.x;
+		double B = p.y - l1.y;
+		double dot = A * C + B * D;
 		param = dot / len_sq;
 	}
 
@@ -363,34 +364,28 @@ EXPORT enum BezierType AnalyseCurve(coOrd inpos[4], double *Rfx, double *Rfy,
 EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
                              wDrawColor color, LWIDTH_T lineWidth)
 {
-	double t_s = 0.0, t_e = 1.0;
+	double t_s = 0.0;
 	double errorThreshold = 0.05;
 	bCurveData_t prev_arc = {0}; /* sentinel: .end==0.0 means no arc found yet */
 	bCurveData_t arc;
 	DYNARR_RESET( trkSeg_t, *segs ); // wipe out
-	BOOL_T safety;
-	int col = 0;
 
 	double prev_e = 0.0;
 	// we do a binary search to find the "good `t` closest to no-longer-good"
 	do {
-		safety=FALSE;
+		BOOL_T safety=FALSE;
 		// step 1: start with the maximum possible arc length
-		t_e = 1.0;
-		// points:
-		coOrd start_point, mid_point, end_point;
+		double t_e = 1.0;
 		// booleans:
-		BOOL_T curr_good = FALSE, prev_good = FALSE, done = FALSE;
-		// numbers:
-		double t_m, step = 0;
+		BOOL_T curr_good = FALSE, done;
 		// step 2: find the best possible arc
 		do {						// !done
-			prev_good = curr_good;   //remember last time
-			t_m = (t_s + t_e)/2;
-			step++;
-			start_point = getPoint(pos, t_s); //Start of arc
-			mid_point = getPoint(pos, t_m);  //Middle of trial arc
-			end_point = getPoint(pos, t_e);  //End of trial Arc
+			BOOL_T prev_good = curr_good;   //remember last time
+			double t_m = (t_s + t_e)/2;
+			// points:
+			coOrd start_point = getPoint(pos, t_s); //Start of arc
+			coOrd mid_point = getPoint(pos, t_m);  //Middle of trial arc
+			coOrd end_point = getPoint(pos, t_e);  //End of trial Arc
 
 			PlotCurve( crvCmdFromChord, start_point, end_point, mid_point,
 			           &(arc.curveData), FALSE, 0.0 );  //Find Arc through three points
@@ -429,16 +424,14 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 							if (arc.curveData.type != curveTypeStraight) {
 								coOrd d;
 								d.x = arc.curveData.curvePos.x + fabs(arc.curveData.curveRadius) * cos(D2R(
-								                        arc.curveData.a1));
+								                arc.curveData.a1));
 								d.y = arc.curveData.curvePos.y + fabs(arc.curveData.curveRadius) * sin(D2R(
-								                        arc.curveData.a1));
+								                arc.curveData.a1));
 
 								arc.curveData.a1 += FindAngle(d, getPoint(pos,1.0));
-								t_e = 1.0;
 							}
 						}
 						prev_arc = arc;
-						done = TRUE;
 						break;
 					}
 					// if not, move it up by half the iteration distance or to end
@@ -487,7 +480,6 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 		}
 		addSegBezier(segs, &curveSeg);		//Add to array of segs used
 		t_s = prev_e;
-		col++;
 	} while(prev_e < 1.0);
 
 	return TRUE;
@@ -610,7 +602,6 @@ EXPORT STATUS_T AdjustBezCurve(
 	static coOrd pos0, /* pos3,*/ p;
 	enum BezierType b;
 	DIST_T dd;
-	EPINX_T ep;
 	double fx, fy, cusp;
 //	int controlArm = -1;
 
@@ -635,7 +626,6 @@ EXPORT STATUS_T AdjustBezCurve(
 
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if (Da.state != PICK_POINT) { return C_CONTINUE; }
 		if (Da.state != PICK_POINT) { return C_CONTINUE; }
 		for (int i=0; i<4; i++) {
 			if (i==0 && Da.trk[0]) { continue; }
@@ -703,16 +693,15 @@ EXPORT STATUS_T AdjustBezCurve(
 			b = AnalyseCurve(Da.pos,&fx,&fy,&cusp);
 			if (b==ENDS) {
 				wBeep();
-				InfoMessage(_("Bezier Curve Invalid has identical end points Change End Point"),
-				            b==CUSP?"Cusp":"Loop");
+				InfoMessage(
+				        _("Bezier Curve Invalid has identical end points Change End Point"));
 			} else if ( b == CUSP || b == LOOP) {
 				wBeep();
 				InfoMessage(_("Bezier Curve Invalid has %s Change End Point"),
 				            b==CUSP?"Cusp":"Loop");
 			} else if ( b == COINCIDENT ) {
 				wBeep();
-				InfoMessage(_("Bezier Curve Invalid has three co-incident points"),
-				            b==CUSP?"Cusp":"Loop");
+				InfoMessage(_("Bezier Curve Invalid has three co-incident points"));
 			} else if ( b == LINE ) {
 				InfoMessage(_("Bezier is Straight Line"));
 			} else
@@ -730,15 +719,14 @@ EXPORT STATUS_T AdjustBezCurve(
 	case C_UP:
 		if (Da.state != POINT_PICKED) { return C_CONTINUE; }
 		//Take last pos and decide if it should be snapped to a track because SHIFT is held (pos0 and pos3)
-		ep = 0;
 		BOOL_T found = FALSE;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		p = pos;
 		if (track && (Da.selectPoint == 0 || Da.selectPoint == 3)) {  //EPs
 			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {   //Snap Track
-				if ((t = OnTrackIgnore(&p, FALSE, TRUE,
-				                       Da.selectTrack)) != NULL) { //Snap to endPoint
-					ep = PickUnconnectedEndPointSilent(p, t);
+				t = OnTrackIgnore(&p, FALSE, TRUE, Da.selectTrack);
+				if (t != NULL) { //Snap to endPoint
+					EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 					if (ep != -1) {
 						Da.trk[Da.selectPoint/3] = t;
 						Da.ep[Da.selectPoint/3] = ep;
@@ -768,16 +756,15 @@ EXPORT STATUS_T AdjustBezCurve(
 			b = AnalyseCurve(Da.pos,&fx,&fy,&cusp);
 			if (b==ENDS) {
 				wBeep();
-				InfoMessage(_("Bezier curve invalid has identical end points Change End Point"),
-				            b==CUSP?"Cusp":"Loop");
+				InfoMessage(
+				        _("Bezier curve invalid has identical end points Change End Point"));
 			} else if ( b == CUSP || b == LOOP) {
 				wBeep();
 				InfoMessage(_("Bezier curve invalid has %s Change End Point"),
 				            b==CUSP?"Cusp":"Loop");
 			} else if ( b == COINCIDENT ) {
 				wBeep();
-				InfoMessage(_("Bezier curve invalid has three co-incident points"),
-				            b==CUSP?"Cusp":"Loop");
+				InfoMessage(_("Bezier curve invalid has three co-incident points"));
 			} else if ( b == LINE) {
 				InfoMessage(_("Bezier curve is straight line"));
 			}
@@ -932,7 +919,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG)
 		if ((action>>8) != 32) {
 			return C_CONTINUE;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_OK:
 		if (Da.state != PICK_POINT) {										//Too early - abandon
 			InfoMessage(_("No changes made"));
@@ -964,6 +951,11 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG)
 	case C_REDRAW:
 		return AdjustBezCurve(C_REDRAW, pos, Da.track, xx->segsColor, xx->segsLineWidth,
 		                      InfoMessage);
+	default:
+		if ( log_cbezier < 0 ) { log_cbezier = LogFindIndex( "cbezier" ); }
+		LOG( log_cbezier, 1, ( "unexpected action&0xFF %d in AdjustBezCurve\n",
+		                       action&0xFF ) )
+		break;
 	}
 
 	return C_CONTINUE;
@@ -1096,17 +1088,16 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			coOrd p = pos;
 //			BOOL_T found = FALSE;
 			int end = Da.state==POS_1?0:1;
-			EPINX_T ep;
 			if (Da.track) {
 				if (lock) {
 					pos = movePos;
-					if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
-						ep = PickUnconnectedEndPointSilent(p, t);
+					t = OnTrack(&p, FALSE, TRUE);
+					if (t != NULL) {
+						EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 						if (ep != -1) {
 							if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
 								wBeep();
 								InfoMessage(_("Track is different gauge"));
-								ep = -1;
 								t = NULL;
 							} else {
 								Da.trk[end] = t;
@@ -1155,7 +1146,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		if ( Da.state != POS_1 && Da.state != POS_2) { return C_CONTINUE; }  //Don't snap CPs
 		if (Da.track)  {
 			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
-				if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL) {
+				t = OnTrack(&pos, FALSE, TRUE);
+				if (t != NULL) {
 					EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 					if (ep != -1) {
 						lock = TRUE;
@@ -1169,7 +1161,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			}
 		} else {
 			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
-				if ((t = OnTrack(&pos,FALSE, FALSE)) != NULL) {
+				t = OnTrack(&pos,FALSE, FALSE);
+				if (t != NULL) {
 					CreateEndAnchor(pos,TRUE);
 					lock = TRUE;
 					movePos = pos;
@@ -1182,7 +1175,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			movePos = pos;
 		}
 		if (anchors_da.cnt)	{ return C_CONTINUE; }
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_MOVE:
 		if (Da.state == POS_1) {
 			InfoMessage( _("Place 1st endpoint of Bezier - snap to %s"),
@@ -1245,7 +1238,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		if (Da.state != PICK_POINT || (action>>8) != ' ') { //Space is same as Enter.
 			return C_CONTINUE;
 		}
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_OK:
 		if (Da.state != PICK_POINT) { return C_CONTINUE; }
 		return AdjustBezCurve( C_OK, pos, Da.track, lineColor, lineWidth, InfoMessage);

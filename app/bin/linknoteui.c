@@ -1,5 +1,5 @@
 /** \file linknoteui.c
- * View for the text note
+ * View for the link note
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,7 +24,7 @@
 #include "dynstring.h"
 #include "misc.h"
 #include "note.h"
-#include "param.h"
+#include "form.h"
 #include "include/stringxtc.h"
 #include "track.h"
 #include "validator.h"
@@ -46,26 +46,27 @@ static void NoteLinkOpen(char *url );
 static paramFloatRange_t noRangeCheck = { 0.0, 0.0, 80, PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW };
 static paramData_t linkNotePLs[] = {
 #define I_ORIGX (0)
-	/*0*/ { PD_FLOAT, &linkNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position X") },
+	/*0*/ { PD_FLOAT, &linkNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck },
 #define I_ORIGY (1)
-	/*1*/ { PD_FLOAT, &linkNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position Y") },
+	/*1*/ { PD_FLOAT, &linkNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck },
 #define I_LAYER (2)
-	/*2*/ { PD_DROPLIST, &linkNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
+	/*2*/ { PD_COMBOLIST, &linkNoteData.layer, "layer", PDO_NOPREF, I2VP(150), NULL, 0 },
 #define I_TITLE (3)
-	/*3*/ { PD_STRING, &linkNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Title"), 0, 0, sizeof(linkNoteData.title ) },
+	/*3*/ { PD_STRING, &linkNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(20), NULL, 0, 0, sizeof(linkNoteData.title ) },
 #define I_URL (4)
-	/*4*/ { PD_STRING, &linkNoteData.url, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("URL"), 0, 0, sizeof(linkNoteData.url ) },
+	/*4*/ { PD_STRING, &linkNoteData.url, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(40), NULL, 0, 0, sizeof(linkNoteData.url ) },
 #define I_OPEN (5)
-	/*5*/{ PD_BUTTON, NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
+	/*5*/{ PD_BUTTON, NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL},
 };
 
-static paramGroup_t linkNotePG = { "linkNote", 0, linkNotePLs, COUNT( linkNotePLs ) };
-static wWin_p linkNoteW;
+static paramGroup_t linkNotePG = { "linkNote", PGO_FULLDIALOGFROMBUILDER, linkNotePLs, COUNT( linkNotePLs ) };
+static wControl_p linkNoteW;
 
 BOOL_T
 IsLinkNote(track_p trk)
 {
-	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+	const struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE,
+	                                    extraDataNote_t );
 
 	return(xx->op == OP_NOTELINK);
 }
@@ -91,7 +92,7 @@ static void NoteLinkOpen(char *url)
 	wOpenFileExternal(url);
 }
 
-static void
+static wBool_t
 LinkDlgUpdate(
         paramGroup_p pg,
         int inx,
@@ -103,18 +104,20 @@ LinkDlgUpdate(
 			printf( "URL %s is invalid\n", linkNoteData.url );
 			paramData_p p = &linkNotePLs[I_URL];
 			p->bInvalid = TRUE;
-			wWinPix_t h = wControlGetHeight(p->control);
-			wControlSetBalloon( p->control, 0, -h*3/4, "URL is invalid" );
-			ParamHilite( p->group->win, p->control, TRUE );
+			wTooltipSetText( p->control, "URL is invalid" );
+			wControlHilite( p->control, TRUE );
+			return(FALSE);
 		}
 		break;
 	case I_ORIGX:
 	case I_ORIGY:
 		// TODO: Redraw bitmap at new location
-		break;
+		__attribute__((fallthrough));
 	default:
 		break;
 	}
+
+	return(TRUE);
 }
 
 
@@ -160,21 +163,20 @@ CreateEditLinkDialog(char *title)
 
 	// create the dialog if necessary
 	if (!linkNoteW) {
-		ParamRegister(&linkNotePG);
-		linkNoteW = ParamCreateDialog(&linkNotePG,
-		                              "",
-		                              _("Done"), LinkEditOK,
-		                              ParamCancel_Current, TRUE, NULL,
-		                              F_BLOCK,
-		                              LinkDlgUpdate);
+		FormRegister(&linkNotePG);
+		linkNoteW = FormCreateDialog(&linkNotePG,"",
+		                             _("Done"), LinkEditOK,
+		                             _("Cancel"), FormCancel_Current,
+		                             TRUE, F_MODAL,
+		                             LinkDlgUpdate);
 	}
 
 	wWinSetTitle(linkNotePG.win, MakeWindowTitle(title));
 
 	int noteLayer = linkNoteData.layer;
-	FillLayerList((wList_p)linkNotePLs[I_LAYER].control);
+	FillLayerList(linkNotePLs[I_LAYER].control);
 	linkNoteData.layer = noteLayer;
-	ParamLoadControls(&linkNotePG);
+	FormLoadControls(&linkNotePG);
 	descTitle = title;
 
 	// and show the dialog
@@ -234,7 +236,7 @@ void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
  * Take a new note track element and initialize it. It will be
  * initialized with defaults and can then be edited by the user.
  *
- * \param the newly created trk
+ * \param pos position of the newly created note
  */
 
 void NewLinkNoteUI( coOrd pos )

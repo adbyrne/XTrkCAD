@@ -34,10 +34,11 @@
 #define SEARCHDELIMITER " \t\n\r/"
 #define LDISTANCELIMIT (2)
 
-static char *stopwords = {
+static char *stopwords[] = {
 	"scale",
 };
 
+/** @logcmd @showrefby `params=n` `partcatalog.c` */
 static int log_params;
 
 /**
@@ -131,7 +132,7 @@ CountCatalogEntries(Catalog *catalog)
 /**
  * Empty a catalog. All data nodes including their allocated memory are freed. On
  *
- * \param listHeader IN the list
+ * \param catalog IN the list
  */
 
 EXPORT void
@@ -171,7 +172,7 @@ CatalogDiscard(Catalog *catalog)
  */
 
 static int
-CompareEntries(CatalogEntry *a, CatalogEntry *b)
+CompareEntries(const CatalogEntry *a, const CatalogEntry *b)
 {
 	return XtcStricmp(a->contents, b->contents);
 }
@@ -239,10 +240,12 @@ IsExistingContents(Catalog *catalog, const char *contents, BOOL_T silent)
  * \param entry existing entry to be updated
  * \param path filename to add
  * \param contents contents description
+ * \param tag entry tag
  */
 
 EXPORT void
-UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents, char *tag)
+UpdateCatalogEntry(CatalogEntry *entry, const char *path, const char *contents,
+                   const char *tag)
 {
 	if (!entry->contents) {
 		MyFree(entry->contents);
@@ -322,14 +325,14 @@ GetNextParameterFile(DIR *dir, const char *dirName, char **fileName)
  */
 
 bool
-FilterKeyword(char *word)
+FilterKeyword(const char *word)
 {
 	if (strlen(word) == 1 && strpbrk(word, PUNCTUATION)) {
 		return (true);
 	}
 
-	for (int i = 0; i < sizeof(stopwords) / sizeof(char *); i++) {
-		if (!XtcStricmp(word, stopwords+i)) {
+	for (int i = 0; i < (int)(sizeof(stopwords) / sizeof(stopwords[0])); i++) {
+		if (!XtcStricmp(word, stopwords[i])) {
 			return (true);
 		}
 	}
@@ -401,7 +404,7 @@ CreateKeywordIndex(ParameterLib *library)
 	wordListPtr = wordList;
 
 	DL_FOREACH(listOfEntries, curParamFile) {
-		char *word;
+		const char *word;
 		char *content = strdup(curParamFile->contents);
 
 		word = strtok(content, SEARCHDELIMITER);
@@ -486,7 +489,7 @@ FindWord(IndexEntry *index, int length, char *search, IndexEntry **entries)
 			DL_FOREACH(index, current) {
 				size_t ldist = levenshtein(search, current->keyWord);
 				LOG1(log_params, ("Distance of: <%s> is %d\n", current->keyWord, ldist));
-				if (ldist == maxdistance) {
+				if (ldist == (size_t)maxdistance) {
 					if (current->references->cnt > maxProbability) {
 						if (!result) {
 							result = MyMalloc(sizeof(IndexEntry));
@@ -508,8 +511,7 @@ FindWord(IndexEntry *index, int length, char *search, IndexEntry **entries)
 /**
  * Create and initialize the data structure for the track library
  *
- * \param trackLibrary OUT the newly allocated track library
- * \return TRUE on success
+ * \return the newly allocated track library
  */
 
 ParameterLib *
@@ -545,7 +547,7 @@ DestroyLibrary(ParameterLib *library)
 /**
  * Scan directory and add all parameter files found to the catalog
  *
- * \param trackLib IN the catalog
+ * \param paramLib IN the catalog
  * \param directory IN directory to scan
  * \return number of files found
  */
@@ -568,7 +570,8 @@ CreateCatalogFromDir(ParameterLib *paramLib, char *directory)
 			char *scale = GetParameterFileScale(fileName);
 
 
-			if ((existingEntry = IsExistingContents(catalog, contents, FALSE))) {
+			existingEntry = IsExistingContents(catalog, contents, FALSE);
+			if (existingEntry) {
 				UpdateCatalogEntry(existingEntry, fileName, contents, scale);
 			} else {
 				CatalogEntry *newEntry;
@@ -832,7 +835,7 @@ unsigned countWords(char *str)
  *
  * \param library IN the library
  * \param searchExpression	IN keyword to search for
- * \param resultEntries IN list header for result list
+ * \param results IN list header for result list
  * \return number of found entries
  */
 
@@ -888,12 +891,13 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 				// if first keyword -> initialize result set
 				for (int j = 0; j < entries->references->cnt; j++) {
 					CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
-					CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
+					const CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *,
+					                                 *(entries->references), j);
 					newEntry->contents = MyStrdup(foundEntry->contents);
 					newEntry->tag = MyStrdup(foundEntry->tag);
 					newEntry->files = foundEntry->files;
-					for (unsigned int i=0; i<newEntry->files; i++) {
-						newEntry->fullFileName[i] = MyStrdup(foundEntry->fullFileName[i]);
+					for (unsigned int fileIdx=0; fileIdx<newEntry->files; fileIdx++) {
+						newEntry->fullFileName[fileIdx] = MyStrdup(foundEntry->fullFileName[fileIdx]);
 					}
 
 					DL_APPEND(results->subCatalog.head, newEntry);
@@ -906,7 +910,8 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 				DL_FOREACH_SAFE(results->subCatalog.head, current, temp) {
 					int found = 0;
 					for (int j = 0; j < entries->references->cnt; j++) {
-						CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
+						const CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *,
+						                                 *(entries->references), j);
 
 						if (strcmp(foundEntry->contents,current->contents)==0) {
 							found = TRUE;
@@ -917,8 +922,8 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 						DL_DELETE(results->subCatalog.head, current);
 						MyFree(current->contents);
 						MyFree(current->tag);
-						for (unsigned int i=0; i<current->files; i++) {
-							MyFree(current->fullFileName[i]);
+						for (unsigned int fileIdx=0; fileIdx<current->files; fileIdx++) {
+							MyFree(current->fullFileName[fileIdx]);
 						}
 						MyFree(current);
 					}
@@ -971,7 +976,7 @@ SearchDiscardResult(SearchResult *res)
  */
 
 char *
-GetParameterFileContent(char *file)
+GetParameterFileContent(const char *file)
 {
 	FILE *fh;
 	char *result = NULL;
@@ -1008,11 +1013,11 @@ GetParameterFileContent(char *file)
  * Get the first scale values from a parameter file. Returned strings have to be MyFreed after use
  *
  * \param file IN xtpfile
- * \param array of one of three char results (Track, Structure and Car)
+ * \return array of one of three char results (Track, Structure and Car)
  */
 
 char *
-GetParameterFileScale(char *file)
+GetParameterFileScale(const char *file)
 {
 	FILE *fh;
 	char *scale = NULL;
@@ -1021,7 +1026,7 @@ GetParameterFileScale(char *file)
 	fh = fopen(file, "rt");
 	if (fh) {
 		bool found = FALSE, found_Turnout = FALSE, found_Structure = FALSE,
-		     found_Car = FALSE;
+		                                           found_Car = FALSE;
 
 		while (!found) {
 			char buffer[512];
@@ -1082,14 +1087,14 @@ GetParameterFileScale(char *file)
 
 #ifdef MEMWATCH
 /** this is used to test for memory leaks. It should show no leaks from functions in this source file */
-RunMemoryTest(char *directory)
+void RunMemoryTest(char *directory)
 {
 	ParameterLib *library;
-	SearchResult *results;
 
 	mwInit();
 	library = InitLibrary();
 	if (library) {
+		SearchResult *results;
 		CreateCatalogFromDir(library, directory);
 		CreateLibraryIndex(library);
 		results = MyMalloc(sizeof(SearchResult));

@@ -23,9 +23,11 @@
 #include "cundo.h"
 #include "drawgeom.h"
 #include "fileio.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "common-ui.h"
+
+static int log_drawgeom = -1;
 
 static long drawGeomCurveMode;
 
@@ -39,7 +41,7 @@ static dynArr_t select_da;
 #define point_selected(N) DYNARR_N( wBool_t, select_da, N)
 #define anchors(N) DYNARR_N( trkSeg_t, anchors_da, N)
 
-static void EndPoly( drawContext_t * context, int cnt, wBool_t open)
+static void EndPoly( const drawContext_t * context, int cnt, wBool_t open)
 {
 	trkSeg_p segPtr;
 	track_p trk;
@@ -79,7 +81,6 @@ static void EndPoly( drawContext_t * context, int cnt, wBool_t open)
 
 static void DrawGeomOk( BOOL_T started )
 {
-	track_p trk;
 	int inx;
 
 	if (tempSegs_da.cnt <= 0) {
@@ -89,7 +90,7 @@ static void DrawGeomOk( BOOL_T started )
 		UndoStart( _("Create Lines"), "newDraw" );
 	}
 	for ( inx=0; inx<tempSegs_da.cnt; inx++ ) {
-		trk = MakeDrawFromSeg( zero, 0.0, &tempSegs(inx) );
+		track_p trk = MakeDrawFromSeg( zero, 0.0, &tempSegs(inx) );
 		DrawNewTrack( trk );
 	}
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
@@ -150,7 +151,7 @@ static void CreateSquareAnchor(coOrd p)
 	                        anchors(i+3).u.l.pos[0].y = p.y+d/2;
 }
 
-BOOL_T FindTempNear(drawContext_t *context, coOrd *p)
+BOOL_T FindTempNear(const drawContext_t *context, coOrd *p)
 {
 	if (context->State == 2) {
 		if ((context->Op >= OP_CURVE1) && (context->Op <= OP_CURVE4)) {
@@ -251,7 +252,6 @@ STATUS_T DrawGeomMouse(
 		case OP_LINE:
 		case OP_BENCH:
 		case OP_TBLEDGE:
-			a1 = FindAngle(pos0,pos1);
 			Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,
 			          context->length);
 			lastPos = pos1 = tempSegs(0).u.l.pos[1];
@@ -300,11 +300,7 @@ STATUS_T DrawGeomMouse(
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		DYNARR_RESET( trkSeg_t, anchors_da );
 		locked = FALSE;
-		if (!magneticSnap) {
-			InfoMessage(_("+Alt for Magnetic Snap"));
-		} else {
-			InfoMessage(_("+Alt to inhibit Magnetic Snap"));
-		}
+
 		wSetCursor(mainD.d,defaultCursor);
 		movePos = zero;
 		context->UndoStarted = FALSE;
@@ -342,13 +338,9 @@ STATUS_T DrawGeomMouse(
 				if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap ) {
 					coOrd p = pos;
 					track_p t;
-					if (((t=OnTrack(&p,FALSE,FALSE))!=NULL) && (IsClose(FindDistance(p,pos))) ) {
-						if (context->Op == OP_DIMLINE ) {
-							CreateEndAnchor(p,FALSE);
-							// wSetCursor(mainD.d,wCursorNone);
-							movePos = p;
-							locked = TRUE;
-						} else if (!IsTrack(t)) {
+					t=OnTrack(&p,FALSE,FALSE);
+					if ((t!=NULL) && (IsClose(FindDistance(p,pos))) ) {
+						if (context->Op == OP_DIMLINE || !IsTrack(t)) {
 							CreateEndAnchor(p,FALSE);
 							// wSetCursor(mainD.d,wCursorNone);
 							movePos = p;
@@ -431,6 +423,11 @@ STATUS_T DrawGeomMouse(
 				tempSegs(0).type = SEG_BENCH;
 				tempSegs(0).color = benchColor;
 				break;
+			default:
+				if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+				LOG( log_drawgeom, 1, ( "unexpected context->Op %d in DrawGeomMouse\n",
+				                        context->Op ) )
+				break;
 			}
 			tempSegs(0).lineWidth = lineWidth;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
@@ -460,6 +457,11 @@ STATUS_T DrawGeomMouse(
 				case OP_CURVE2: drawGeomCurveMode = crvCmdFromTangent; break;
 				case OP_CURVE3: drawGeomCurveMode = crvCmdFromCenter; break;
 				case OP_CURVE4: drawGeomCurveMode = crvCmdFromChord; break;
+				default:
+					if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+					LOG( log_drawgeom, 1, ( "unexpected context->Op %d in DrawGeomMouse\n",
+					                        context->Op ) )
+					break;
 				}
 				CreateCurve( C_START, pos, FALSE, lineColor, lineWidth, drawGeomCurveMode,
 				             &anchors_da, context->message );
@@ -489,7 +491,7 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_FILLBOX:
 			lineWidth = 0;
-		/* falls through */
+			__attribute__((fallthrough));
 		case OP_BOX:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 4 );
 			for ( inx=0; inx<4; inx++ ) {
@@ -542,6 +544,11 @@ STATUS_T DrawGeomMouse(
 			segCnt = tempSegs_da.cnt;
 			context->message(_("+Alt - reverse Magnetic Snap or +Ctrl - lock to 90 deg"));
 			break;
+		default:
+			if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+			LOG( log_drawgeom, 1, ( "unexpected context->Op %d in DrawGeomMouse\n",
+			                        context->Op ) )
+			break;
 		}
 		return C_CONTINUE;
 
@@ -549,7 +556,7 @@ STATUS_T DrawGeomMouse(
 	case wActionLDrag:
 		DYNARR_RESET(trkSeg_t, anchors_da );
 		coOrd p = pos1 = pos;
-		BOOL_T locked = FALSE, poslocked = FALSE;
+		BOOL_T dragLocked = FALSE, poslocked = FALSE;
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
 		    (context->Op == OP_CURVE2 && context->State == 0) ||
 		    (context->Op == OP_CURVE4 && context->State != 1) ||
@@ -586,15 +593,15 @@ STATUS_T DrawGeomMouse(
 			    WKEY_CTRL) {  //If +Ctrl, snap to table edge end
 				p = pos;
 				if (OnTableEdgeEndPt( NULL, &p )) {
-					locked = TRUE;
+					dragLocked = TRUE;
 					pos1 = p;
 				}
 			}
-		/* falls through */
+			__attribute__((fallthrough));
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
-			if (!locked
+			if (!dragLocked
 			    && ((MyGetKeyState() & WKEY_CTRL) ==
 			        WKEY_CTRL )) { //If not found already +Ctl = Right Angle
 				//Snap to Right-Angle from previous or from 0
@@ -631,7 +638,7 @@ STATUS_T DrawGeomMouse(
 		case OP_FILLPOLY:
 		case OP_POLYLINE:
 			if ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL ) {
-				coOrd last_point = zero;
+				coOrd last_point;
 				ANGLE_T last_angle;
 //				ANGLE_T initial_angle;
 				if (tempSegs_da.cnt == 1) {
@@ -755,7 +762,7 @@ STATUS_T DrawGeomMouse(
 		case OP_CIRCLE2:
 		case OP_FILLCIRCLE2:
 			tempSegs(0).u.c.center = pos1;
-			if (context->State == 1 && locked) { CreateEndAnchor(pos1, FALSE); }
+			if (context->State == 1 && dragLocked) { CreateEndAnchor(pos1, FALSE); }
 			else { wSetCursor(mainD.d,defaultCursor); }
 			tempSegs(0).u.c.radius = FindDistance( pos0, pos1 );
 			context->message( _("Radius = %s"),
@@ -776,9 +783,14 @@ STATUS_T DrawGeomMouse(
 			                                   tempSegs(1).u.l.pos[1].x = tempSegs(2).u.l.pos[0].x = pos1.x;
 			tempSegs(1).u.l.pos[1].y = tempSegs(2).u.l.pos[0].y =
 			                                   tempSegs(2).u.l.pos[1].y = tempSegs(3).u.l.pos[0].y = pos1.y;
-			if (locked) { CreateEndAnchor(pos1,FALSE); }
+			if (dragLocked) { CreateEndAnchor(pos1,FALSE); }
 			context->message( _("Width = %s, Height = %s"),
 			                  FormatDistance(fabs(pos1.x - pos0.x)), FormatDistance(fabs(pos1.y - pos0.y)) );
+			break;
+		default:
+			if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+			LOG( log_drawgeom, 1, ( "unexpected context->Op %d in DrawGeomMouse\n",
+			                        context->Op ) )
 			break;
 		}
 		wSetCursor(mainD.d,wCursorNone);
@@ -792,14 +804,13 @@ STATUS_T DrawGeomMouse(
 		wSetCursor(mainD.d,defaultCursor);
 		if ((context->Op == OP_POLY) || (context->Op == OP_POLYLINE)
 		    || (context->Op == OP_FILLPOLY )
-		    || (context->Op == OP_BOX) || (context->Op == OP_FILLBOX) ) {
+		    || (context->Op == OP_BOX) || (context->Op == OP_FILLBOX)
+		    || (context->Op>=OP_FILLCIRCLE1 && context->Op<=OP_FILLCIRCLE3)
+		    || (context->Op>=OP_CIRCLE1 && context->Op<=OP_CIRCLE3) ) {
 			;
 		} else if (context->Op == OP_LINE || context->Op == OP_DIMLINE ||
 		           context->Op == OP_BENCH || context->Op == OP_TBLEDGE ) {
 			tempSegs(0).u.l.pos[1] = pos1;
-		} else if ((context->Op>=OP_FILLCIRCLE1 && context->Op<=OP_FILLCIRCLE3) ||
-		           (context->Op>=OP_CIRCLE1 && context->Op<=OP_CIRCLE3)) {
-			;
 		} else {
 			PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE,
 			           0.0 );
@@ -962,6 +973,11 @@ STATUS_T DrawGeomMouse(
 			context->index = text_inx;
 			segCnt = tempSegs_da.cnt;
 			return C_CONTINUE;
+		default:
+			if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+			LOG( log_drawgeom, 1, ( "unexpected context->Op %d in UnknownFunc\n",
+			                        context->Op ) )
+			break;
 		}
 		context->Started = FALSE;
 		/*CheckOk();*/
@@ -989,8 +1005,8 @@ STATUS_T DrawGeomMouse(
 			    || (context->Op == OP_POLYLINE)) {
 				DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
 				//If last segment wasn't just a point, add another starting on its end
-				if (!IsClose(FindDistance(tempSegs(segCnt-1).u.l.pos[0],
-				                          tempSegs(segCnt-1).u.l.pos[1]))) {
+				if (segCnt > 0 && !IsClose(FindDistance(tempSegs(segCnt-1).u.l.pos[0],
+				                                        tempSegs(segCnt-1).u.l.pos[1]))) {
 					DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
 					segPtr = &DYNARR_LAST( trkSeg_t, tempSegs_da );
 					segPtr->type = SEG_STRLIN;
@@ -1045,9 +1061,6 @@ STATUS_T DrawGeomMouse(
 		return C_CONTINUE;
 
 	case C_CMDMENU:
-
-		return C_CONTINUE;
-
 	default:
 		return C_CONTINUE;
 	}
@@ -1109,9 +1122,9 @@ static void CreateBoxAnchors(int index, pts_t pt[4])
 	coOrd pp;
 	for (int i=0; i<4; i++) {
 		pp.x = (i==3?((((pt[0].pt.x - pt[i].pt.x)/2))+pt[i].pt.x):((
-		                        pt[i+1].pt.x - pt[i].pt.x)/2)+pt[i].pt.x);
+		                pt[i+1].pt.x - pt[i].pt.x)/2)+pt[i].pt.x);
 		pp.y = (i==3?((((pt[0].pt.y - pt[i].pt.y)/2))+pt[i].pt.y):((
-		                        pt[i+1].pt.y - pt[i].pt.y)/2)+pt[i].pt.y);
+		                pt[i+1].pt.y - pt[i].pt.y)/2)+pt[i].pt.y);
 
 		DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 		DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pp,90.0*(i-1)+a,
@@ -1342,7 +1355,6 @@ static STATUS_T DrawGeomPolyModify(
 		polyInx = -1;
 		coOrd p0;
 		double dd;
-		int inx;
 		if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT) {
 			if (selected_count <2 ) {
 				//Wipe out selection(s) if we don't have multiple already (i,e. move with >1 selected)
@@ -1380,7 +1392,7 @@ static STATUS_T DrawGeomPolyModify(
 			return C_CONTINUE; //Not close to any line
 		}
 		polyState = POLYPOINT_SELECTED;
-		inx = polyInx==0?points_da.cnt-1:polyInx-1;
+		int inx = polyInx==0?points_da.cnt-1:polyInx-1;
 		//Find if the point is to be added
 		d = FindDistance( points(inx).pt, pos );
 		dd = FindDistance( points(inx).pt, points(polyInx).pt );
@@ -1437,7 +1449,7 @@ static STATUS_T DrawGeomPolyModify(
 				}
 			}
 		}
-		int last_inx = -1;
+		int last_inx;
 //			int  next_inx = -1;
 		ANGLE_T an1, an0;
 		if (first_inx >=0) {
@@ -1554,13 +1566,12 @@ static STATUS_T DrawGeomPolyModify(
 				diff.y = pos_lock.y - points(first_inx).pt.y;
 				pos.x 	= points(polyInx).pt.x+diff.x;
 				pos.y 	= points(polyInx).pt.y+diff.y;
+				intersect = zero;
 				if (selected_count<2) {
 					if (FindIntersection(&intersect,last_point,last_angle+90.0,next_point,
 					                     last_angle+180.0)) {
 						show_intersect = TRUE;
 					}
-				}
-				if (show_intersect) {
 					d = FindDistance(intersect,pos_lock);
 					if (IsClose(d)) {
 						pos = intersect;
@@ -1606,6 +1617,7 @@ static STATUS_T DrawGeomPolyModify(
 		DYNARR_RESET( trkSeg_t, anchors_da );
 		CreatePolyAnchors(polyInx);  //Show last selection
 		prev_inx = polyInx;
+		first_inx = -1;
 		for (int i=0; i<points_da.cnt; i++) {
 			if (point_selected(i)) {
 				first_inx = i;
@@ -1740,7 +1752,7 @@ static STATUS_T DrawGeomPolyModify(
 		}
 		if (action>>8 != 32 && action>>8 != 13 && action>>8 !=9) { return C_CONTINUE; }
 		if (action>>8 == 9 && (MyGetKeyState() & WKEY_SHIFT) != 0) { return C_TERMINATE; }
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_CONFIRM:
 	case C_OK:
 	case C_FINISH:
@@ -1888,9 +1900,7 @@ STATUS_T DrawGeomOriginMove(
 		if (context->state == MOD_ORIGIN || context->state == MOD_AFTER_ORIG) {
 			context->state = MOD_ORIGIN;
 			DYNARR_RESET(trkSeg_t,anchors_da);
-			if (IsClose(FindDistance(pos,context->rot_center))) {
-				pos = context->rot_center;
-			} else {
+			if (!IsClose(FindDistance(pos,context->rot_center))) {
 				context->rot_center = pos;
 			}
 			CreateOriginAnchor(context->rot_center, TRUE);
@@ -2001,7 +2011,7 @@ STATUS_T DrawGeomModify(
         drawModContext_t * context)
 {
 	ANGLE_T a;
-	coOrd p0, p1, pc, pm;
+	coOrd p0 = zero, p1 = zero, pc, pm;
 	static coOrd start_pos;
 	static wIndex_t segInx;
 //	static EPINX_T segEp;
@@ -2011,9 +2021,8 @@ STATUS_T DrawGeomModify(
 	static BOOL_T corner_mode;
 	static BOOL_T polyMode;
 //	static ANGLE_T original_angle;
-	int inx, inx2;
 //	int inx1;
-	DIST_T d, d1, d2, dd;
+	DIST_T d, d2, dd;
 //	coOrd * newPts = NULL;
 	switch ( action&0xFF ) {
 	case C_START:
@@ -2267,7 +2276,8 @@ STATUS_T DrawGeomModify(
 			context->state = MOD_SELECTED_PT;
 			break;
 		case SEG_POLY:
-		case SEG_FILPOLY:
+		case SEG_FILPOLY: {
+			int inx, inx2;
 			d = 10000;
 			polyInx = 0;
 			wSetCursor(mainD.d,wCursorNone);
@@ -2285,7 +2295,7 @@ STATUS_T DrawGeomModify(
 				}
 			}
 			if (!corner_mode) {
-				d1 = FindDistance( points(inx_line).pt, pos );
+				DIST_T d1 = FindDistance( points(inx_line).pt, pos );
 				d2 = FindDistance( points(inx_line==0?3:inx_line-1).pt, pos );
 				if (d2<d1) {
 					polyInx = inx_line==0?3:inx_line-1;
@@ -2314,6 +2324,7 @@ STATUS_T DrawGeomModify(
 			}
 			context->state = MOD_SELECTED_PT;
 			return C_CONTINUE;
+		}
 		case SEG_TEXT:
 			segInx = -1;
 			return C_ERROR;
@@ -2349,7 +2360,7 @@ STATUS_T DrawGeomModify(
 					locked = TRUE;
 				}
 			}
-		/* falls through */
+			__attribute__((fallthrough));
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
@@ -2374,7 +2385,7 @@ STATUS_T DrawGeomModify(
 			break;
 		}
 		int prior_pnt, next_pnt, orig_pnt;
-		ANGLE_T prior_angle, next_angle, line_angle;
+		ANGLE_T prior_angle, next_angle;
 		switch (tempSegs(0).type) {
 		case SEG_TBLEDGE:
 		case SEG_STRLIN:
@@ -2516,6 +2527,7 @@ STATUS_T DrawGeomModify(
 			wSetCursor(mainD.d,wCursorNone);
 			if (!corner_mode) {
 				/* Constrain movement to be perpendicular */
+				ANGLE_T line_angle;
 				d = FindDistance(start_pos, pos);
 				line_angle = NormalizeAngle(FindAngle(points(inx_line).pt,
 				                                      points(inx_line==3?0:inx_line+1).pt));
@@ -2759,11 +2771,16 @@ STATUS_T DrawGeomModify(
 				tempSegs(0).type = SEG_POLY;
 				context->type = SEG_POLY;
 				break;
+			default:
+				if ( log_drawgeom < 0 ) { log_drawgeom = LogFindIndex( "drawgeom" ); }
+				LOG( log_drawgeom, 1, ( "unexpected action>>8 %d in UnknownFunc\n",
+				                        action>>8 ) )
+				break;
 			}
 		}
 
 		if (action>>8 != 32 && action>>8 != 13) { return C_CONTINUE; }
-	/* falls through */
+		__attribute__((fallthrough));
 	case C_CONFIRM:
 		return C_CONTINUE;
 	/* falls through */

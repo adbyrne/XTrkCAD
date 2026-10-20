@@ -28,7 +28,7 @@
 #include "draw.h"
 #include "fileio.h"
 #include "layout.h"
-#include "param.h"
+#include "form.h"
 #include "track.h"
 #include "cselect.h"
 #include "common-ui.h"
@@ -107,6 +107,7 @@ static dynArr_t scaleDesc_da;
 
 static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx );
 
+/** @logcmd @showrefby `scale=n` `scale.c` */
 static int log_scale = 0;
 
 /**
@@ -155,8 +156,8 @@ static scaleInfo_p GetScaleInfo( SCALEINX_T scaleInx )
  * scale/ gauge combination is stored in a linear list. The index in that list for a given scale and the
  * gauge is returned by this function. Note that there is no error checking on parameters!
  *
- * \param IN scaleInx index into list of scale descriptions
- * \param IN gaugeInx index into list of gauges available for this scale
+ * \param[in] scaleInx index into list of scale descriptions
+ * \param[in] gaugeInx index into list of gauges available for this scale
  * \return  index into master list of scale/gauge combinations
  */
 
@@ -166,12 +167,13 @@ EXPORT SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 	gaugeInfo_p g;
 
 	if ( scaleInx < 0 || scaleInx >= scaleDesc_da.cnt ) {
-		lprintf( "GetScaleInx: bad scaleInx %ld (%d)\n", scaleInx, scaleDesc_da.cnt );
+		lprintf( "GetScaleInx: bad scaleInx %d (scaleDesc_da.cnt: %d)\n", scaleInx,
+		         scaleDesc_da.cnt );
 		return 0;
 	}
 	s = scaleDesc(scaleInx);
 	if ( gaugeInx < 0 || gaugeInx >= s.gauges_da.cnt ) {
-		lprintf( "GetScaleInx: bad gaugeInx %ld (%d)\n", gaugeInx, s.gauges_da.cnt );
+		lprintf( "GetScaleInx: bad gaugeInx %d (%d)\n", gaugeInx, s.gauges_da.cnt );
 		return 0;
 	}
 	g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
@@ -223,7 +225,6 @@ EXPORT void ValidateTieData( tieData_p td )
 EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 {
 	scaleInfo_p s;
-	DIST_T defLength;
 
 	if ( si == SCALE_DEMO ) {
 		return tieData_demo;
@@ -231,11 +232,11 @@ EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 	s = GetScaleInfo(si);
 	if ( !s->tieDataValid ) {
 		sprintf( message, "tiedata-%s", s->scale );
-		defLength = (96.0-54.0)/s->ratio+s->gauge;
+		DIST_T defLength = (96.0-54.0)/s->ratio+s->gauge;
 
-		/** @prefs [tiedata-<SCALE>] length, width, spacing Sets tie drawing data.
+		/** @prefs [tiedata-\<SCALE\>] length, width, spacing Sets tie drawing data.
 		* Example for 6"x8"x6' ties spaced 20" in HOn3 (slash separates 4 lines):
-		* [tiedata-HOn3] \ length=0.83 \ width=0.07 \ spacing=0.23
+		* [tiedata-HOn3] \\ length=0.83 \\ width=0.07 \\ spacing=0.23
 		*/
 		wPrefGetFloat( message, "length", &s->tieData.length, defLength );
 		wPrefGetFloat( message, "width", &s->tieData.width, 16.0/s->ratio );
@@ -270,7 +271,6 @@ SetScaleDescGauge(SCALEINX_T scaleInx)
 EXPORT SCALEINX_T LookupScale( const char * name )
 {
 	wIndex_t scaleInx;
-	DIST_T gauge;
 	LOG( log_scale, 2, ( "  LookupScale(%s)", name ) );
 	if ( strcmp( name, "*" ) == 0 ) {
 		LOG( log_scale, 2, ( " .any = %d\n", SCALE_ANY ) );
@@ -288,7 +288,7 @@ EXPORT SCALEINX_T LookupScale( const char * name )
 		}
 	}
 	if ( isdigit((unsigned char)name[0]) ) {
-		gauge = atof( name );
+		DIST_T gauge = atof( name );
 		for ( scaleInx=0; scaleInx<scaleInfo_da.cnt; scaleInx++ ) {
 			if (scaleInfo(scaleInx).gauge == gauge) {
 				LOG( log_scale, 2, ( " .gauge = %d\n", scaleInx ) );
@@ -471,7 +471,6 @@ SetScale( void )
 
 	SetScaleDescGauge(newScaleInx);
 
-
 	if (!inPlayback) {
 		wPrefSetString( "misc", "scale", curScaleName );
 	}
@@ -551,18 +550,16 @@ EXPORT BOOL_T DoSetScale(
 
 static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx )
 {
-	SCALEINX_T work;
 	SCALEDESCINX_T descInx;
 	scaleDesc_p scaleDescP = NULL;
 	gaugeInfo_p g;
-	char *cp;
+	const char *cp;
 //	DIST_T ratio;
 	char buf[ 80 ];
-	size_t len;
 
 
 	for( descInx = 0; descInx < scaleDesc_da.cnt; descInx++ ) {
-		work = GetScaleInx( descInx, 0 );
+		SCALEINX_T work = GetScaleInx( descInx, 0 );
 		if( scaleInfo(work).ratio == scaleInfo(scaleInx).ratio ) {
 			if( !strncmp( scaleInfo(work).scale, scaleInfo(scaleInx).scale,
 			              strlen(scaleInfo(work).scale))) {
@@ -588,6 +585,7 @@ static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx )
 	} else {
 		/* if yes, is this a new gauge to the scale? */
 		cp = strchr( scaleDescP->scaleDescStr, ' ' );
+		size_t len;
 		if( cp ) {
 			len = cp - scaleDescP->scaleDescStr;
 		} else {
@@ -625,17 +623,20 @@ static BOOL_T AddScale(
 	char scale[40];
 	scaleInfo_p s;
 
-	if ( (rc=sscanf( line, "SCALE %[^,]," SCANF_FLOAT_FORMAT "," SCANF_FLOAT_FORMAT
+	rc=sscanf( line, "SCALE %39[^,]," SCANF_FLOAT_FORMAT ","
+	           SCANF_FLOAT_FORMAT
 	                 "",
-	                 scale, &ratio, &gauge )) != 3) {
+	           scale, &ratio, &gauge );
+	if ( rc != 3) {
 		SyntaxError( "SCALE", rc, 3 );
 		return FALSE;
 	}
 	for (i=0; i<3; i++) {
 		line = GetNextLine();
-		if ( (rc=sscanf( line, "" SCANF_FLOAT_FORMAT "," SCANF_FLOAT_FORMAT ","
-		                 SCANF_FLOAT_FORMAT "",
-		                 &R[i], &X[i], &L[i] )) != 3 ) {
+		rc=sscanf( line, "" SCANF_FLOAT_FORMAT "," SCANF_FLOAT_FORMAT ","
+		           SCANF_FLOAT_FORMAT "",
+		           &R[i], &X[i], &L[i] );
+		if ( rc != 3 ) {
 			SyntaxError( "SCALE easement", rc, 3 );
 			return FALSE;
 		}
@@ -668,8 +669,9 @@ static BOOL_T AddScaleFit(
 	BOOL_T rc;
 	scaleComp_p s;
 
-	if ( (rc=sscanf( line, "SCALEFIT %s %s %s %s",
-	                 type, result, scales, matches )) != 4) {
+	rc=sscanf( line, "SCALEFIT %19s %19s %255s %255s",
+	           type, result, scales, matches );
+	if ( rc != 4) {
 		SyntaxError( "SCALEFIT", rc, 4 );
 		return FALSE;
 	}
@@ -699,8 +701,9 @@ static BOOL_T AddScaleFit(
 	return TRUE;
 }
 
-EXPORT SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1,
-                                       char * scale2)
+EXPORT SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type,
+                                       const char * scale1,
+                                       const char * scale2)
 {
 
 	char * cp, * cq;
@@ -728,7 +731,7 @@ EXPORT SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1,
 				}
 				//Is it the same until the next ','
 				cq=strstr(cp,",");
-				if (cq && (cq-cp == strlen(scale2))) {
+				if (cq && ((size_t)(cq-cp) == strlen(scale2))) {
 					found = TRUE;
 					break;
 				} else { cp=cq; }
@@ -751,7 +754,7 @@ EXPORT SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1,
 				}
 				//Is it the same until the next ','
 				cq=strstr(cp,",");
-				if (cq && (cq-cp == strlen(scale1))) {
+				if (cq && ((size_t)(cq-cp) == strlen(scale1))) {
 					found = TRUE;
 					break;
 				} else { cp=cq; }
@@ -767,15 +770,14 @@ EXPORT void ScaleLengthIncrement(
         SCALEINX_T scale,
         DIST_T length )
 {
-	char * cp;
-	size_t len;
 	if (scaleInfo(scale).length == 0.0) {
+		const char * cp;
 		if (units == UNITS_METRIC) {
 			cp = "999.99m SCALE Flex Track";
 		} else {
 			cp = "999' 11\" SCALE Flex Track";
 		}
-		len = strlen( cp )+1;
+		int len = (int)strlen( cp )+1;
 		if (len > enumerateMaxDescLen) {
 			enumerateMaxDescLen = (int)len;
 		}
@@ -786,8 +788,7 @@ EXPORT void ScaleLengthIncrement(
 EXPORT void ScaleLengthEnd( void )
 {
 	wIndex_t si;
-	size_t count;
-	DIST_T length;
+	int count;
 	char tmp[STR_SIZE];
 	FLOAT_T flexLen;
 	long flexUnit;
@@ -798,9 +799,10 @@ EXPORT void ScaleLengthEnd( void )
 		wPrefGetInteger( tmp, "flex unit", &flexUnit, 0 );
 		wPrefGetFloat( tmp, "flex cost", &flexCost, 0.0 );
 		tmp[0] = '\0';
-		if ((length=scaleInfo(si).length) != 0) {
+		DIST_T length=scaleInfo(si).length;
+		if (length != 0) {
 			sprintf( tmp, "%s %s Flex Track", FormatDistance(length), scaleInfo(si).scale );
-			for (count = strlen(tmp); count<enumerateMaxDescLen; count++) {
+			for (count = (int)strlen(tmp); count<enumerateMaxDescLen; count++) {
 				tmp[count] = ' ';
 			}
 			tmp[enumerateMaxDescLen] = '\0';
@@ -816,20 +818,20 @@ EXPORT void ScaleLengthEnd( void )
 
 
 
-EXPORT void LoadScaleList( wList_p scaleList )
+EXPORT void LoadScaleList( wControl_p scaleList )
 {
 	wIndex_t inx;
 	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1); inx++) {
-		wListAddValue( scaleList, scaleDesc(inx).scaleDescStr, NULL, I2VP(inx) );
+		wComboBoxAddValue( scaleList, scaleDesc(inx).scaleDescStr, I2VP(inx) );
 	}
 }
 
-EXPORT void LoadGaugeList( wList_p gaugeList, SCALEDESCINX_T scale )
+EXPORT void LoadGaugeList( wControl_p gaugeList, SCALEDESCINX_T scale )
 {
 	wListClear( gaugeList );			/* remove old list in case */
 	for ( wIndex_t inx=0; inx<scaleDesc(scale).gauges_da.cnt; inx++ ) {
 		gaugeInfo_p g = &DYNARR_N( gaugeInfo_t, scaleDesc(scale).gauges_da, inx );
-		wListAddValue( gaugeList, g->gaugeStr, NULL, I2VP(g->scaleInx) );
+		wComboBoxAddValue( gaugeList, g->gaugeStr,  I2VP(g->scaleInx) );
 	}
 }
 
@@ -839,7 +841,7 @@ static void ScaleChange( long changes )
 		SetScale();
 	}
 }
-
+
 /*****************************************************************************
  *
  * Change Scale Dlg
@@ -849,49 +851,45 @@ static void ScaleChange( long changes )
 static char rescaleFromScaleStr[20];
 static char rescaleFromGaugeStr[20];
 
-static char * rescaleToggleLabels[] = { N_("Scale"), N_("Ratio"), NULL };
 static long rescaleMode;
 static wIndex_t rescaleFromScaleInx;
 static wIndex_t rescaleFromGaugeInx;
-static SCALEDESCINX_T rescaleToScaleInx;
-static GAUGEINX_T rescaleToGaugeInx;
+static long rescaleToScaleInx;
+static long rescaleToGaugeInx;
 static wIndex_t rescaleToInx;
 static long rescaleNoChangeDim = FALSE;
 static FLOAT_T rescalePercent;
-static char * rescaleChangeDimLabels[] = { N_("Do not resize track"), NULL };
 static paramFloatRange_t r0o001_10000 = { 0.001, 10000.0 };
 static paramData_t rescalePLs[] = {
-#define I_RESCALE_MODE		(0)
-	{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, N_("Rescale by:"), BC_HORZ|BC_NOBORDER },
-#define I_RESCALE_FROM_SCALE		(1)
-	{ PD_STRING, rescaleFromScaleStr, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(100), N_("From:"),0, 0, sizeof(rescaleFromScaleStr)},
-#define I_RESCALE_FROM_GAUGE		(2)
-	{ PD_STRING, rescaleFromGaugeStr, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(100), " / ", 0, 0, sizeof(rescaleFromGaugeStr)},
-#define I_RESCALE_TO_SCALE		   (3)
-	{ PD_DROPLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), N_("To: ") },
-#define I_RESCALE_TO_GAUGE		   (4)
-	{ PD_DROPLIST, &rescaleToGaugeInx, "toG", PDO_NOPREF|PDO_LISTINDEX|PDO_DLGHORZ, NULL, " / " },
-#define I_RESCALE_CHANGE	(5)
-	{ PD_TOGGLE, &rescaleNoChangeDim, "change-dim", 0, &rescaleChangeDimLabels, "", BC_HORZ|BC_NOBORDER },
-#define I_RESCALE_PERCENT	(6)
-	{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, N_("Ratio") },
-	{ PD_MESSAGE, "%", NULL, PDO_DLGHORZ }
+#define I_RESCALE_FROM_SCALE		(0)
+	{ PD_STRING, rescaleFromScaleStr, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(10), NULL,0, 0, sizeof(rescaleFromScaleStr)},
+#define I_RESCALE_FROM_GAUGE		(1)
+	{ PD_STRING, rescaleFromGaugeStr, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(10), NULL, 0, 0, sizeof(rescaleFromGaugeStr)},
+#define I_RESCALE_TO_SCALE		   (2)
+	{ PD_COMBOLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), NULL},
+#define I_RESCALE_TO_GAUGE		   (3)
+	{ PD_COMBOLIST, &rescaleToGaugeInx, "toG", PDO_NOPREF|PDO_LISTINDEX|PDO_DLGHORZ, NULL, NULL },
+#define I_RESCALE_CHANGE	(4)
+	{ PD_TOGGLE, &rescaleNoChangeDim, "change-dim", 0, NULL, "", BC_HORIZONTAL | BC_NOBORDER},
+#define I_RESCALE_PERCENT	(5)
+	{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, NULL},
+#define I_NOTEBOOK 6
+	{ PD_NOTEBOOK, NULL, "notebook"}
 };
-static paramGroup_t rescalePG = { "rescale", 0, rescalePLs, COUNT( rescalePLs ) };
+static paramGroup_t rescalePG = { "rescale", PGO_FULLDIALOGFROMBUILDER, rescalePLs, COUNT( rescalePLs ) };
 
 
 static coOrd rescaleShift;
 static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
 {
-	EPINX_T ep, ep1;
-	track_p trk1;
 	UndrawNewTrack( trk );
 	UndoModify(trk);
 	if ( rescalePercent != 100.0 ) {
-		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+		for (EPINX_T ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
+			track_p trk1 = GetTrkEndTrk(trk,ep);
+			if (trk1 != NULL &&
 			    !GetTrkSelected(trk1)) {
-				ep1 = GetEndPtConnectedToMe( trk1, trk );
+				EPINX_T ep1 = GetEndPtConnectedToMe( trk1, trk );
 				DisconnectTracks( trk, ep, trk1, ep1 );
 			}
 		}
@@ -916,6 +914,8 @@ static void RescaleDlgOk(
 	DIST_T d;
 	FLOAT_T ratio = rescalePercent/100.0;
 	coOrd getboundsLo, getboundsHi;
+
+	rescaleMode = wNoteBookGetActivePage(rescalePLs[I_NOTEBOOK].control);
 
 	UndoStart( _("Rescale Tracks"), "Rescale" );
 	GetSelectedBounds( &getboundsLo, &getboundsHi );
@@ -964,13 +964,13 @@ static void RescaleDlgOk(
 	// rescale the background if it exists and the layout is resized
 	if (HasBackGround() && ratio != 1.0) {
 		coOrd pos = GetLayoutBackGroundPos();
-		double size = GetLayoutBackGroundSize();
+		double bgSize = GetLayoutBackGroundSize();
 		pos.x = ratio * pos.x + rescaleShift.x;
 		pos.y = ratio * pos.y + rescaleShift.y;
 		SetLayoutBackGroundPos(pos);
 
-		size *= ratio;
-		SetLayoutBackGroundSize(size);
+		bgSize *= ratio;
+		SetLayoutBackGroundSize(bgSize);
 	}
 	DoRedraw();
 	wHide( rescalePG.win );
@@ -983,25 +983,13 @@ static void RescaleDlgUpdate(
         void * valueP )
 {
 	switch (inx) {
-	case I_RESCALE_MODE:
-		wControlShow( pg->paramPtr[I_RESCALE_FROM_SCALE].control, rescaleMode==0 );
-		wControlActive( pg->paramPtr[I_RESCALE_FROM_SCALE].control, FALSE );
-		wControlShow( pg->paramPtr[I_RESCALE_TO_SCALE].control, rescaleMode==0 );
-		wControlShow( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, rescaleMode==0 );
-		wControlActive( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, FALSE );
-		wControlShow( pg->paramPtr[I_RESCALE_TO_GAUGE].control, rescaleMode==0 );
-		wControlShow( pg->paramPtr[I_RESCALE_CHANGE].control, rescaleMode==0 );
-		wControlActive( pg->paramPtr[I_RESCALE_PERCENT].control, rescaleMode==1 );
-		if ( rescaleMode!=0 ) {
-			break;
-		}
-	/* falls through */
+
 	case I_RESCALE_TO_SCALE:
-		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control,
-		               *((int *)valueP) );
+		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,
+		              (int)*((long *)valueP) );
 		rescaleToGaugeInx = 0;
-		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
-		ParamLoadControl( pg, I_RESCALE_TO_SCALE );
+		FormLoadSingleControl( pg, I_RESCALE_TO_GAUGE );
+		FormLoadSingleControl( pg, I_RESCALE_TO_SCALE );
 		if ( rescaleFromScaleInx >= 0 ) {
 			rescalePercent = GetScaleRatio(GetScaleInx(rescaleFromScaleInx,0))/
 			                 GetScaleRatio(GetScaleInx(rescaleToScaleInx,0))*100.0;
@@ -1010,21 +998,24 @@ static void RescaleDlgUpdate(
 		}
 		wControlActive( pg->paramPtr[I_RESCALE_CHANGE].control,
 		                (rescaleFromScaleInx != rescaleToScaleInx) );
-		ParamLoadControl( pg, I_RESCALE_PERCENT );
+		FormLoadSingleControl( pg, I_RESCALE_PERCENT );
 		break;
 	case I_RESCALE_TO_GAUGE:
-		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
+		FormLoadSingleControl( pg, I_RESCALE_TO_GAUGE );
 		break;
 	case I_RESCALE_FROM_SCALE:
-		ParamLoadControl( pg, I_RESCALE_FROM_SCALE );
+		FormLoadSingleControl( pg, I_RESCALE_FROM_SCALE );
 		break;
 	case I_RESCALE_FROM_GAUGE:
-		ParamLoadControl( pg, I_RESCALE_FROM_GAUGE );
+		FormLoadSingleControl( pg, I_RESCALE_FROM_GAUGE );
 		break;
 	case I_RESCALE_CHANGE:
-		ParamLoadControl( pg, I_RESCALE_CHANGE );
+		FormLoadSingleControl( pg, I_RESCALE_CHANGE );
 		break;
 	case -1:
+		break;
+	default:
+		LOG( log_scale, 1, ( "unexpected inx %d in RescaleDlgUpdate\n", inx ) )
 		break;
 	}
 	wBool_t bOkActive = TRUE;
@@ -1036,27 +1027,30 @@ static void RescaleDlgUpdate(
 		// Ratio
 		bOkActive = rescalePercent != 100.0;
 	}
-	ParamDialogOkActive( pg, bOkActive );
+	FormDialogOkActive( pg, bOkActive );
 }
 
 /**
  * Get the scale gauge information for the selected track pieces.
  * FIXME: special cases like tracks pieces with different gauges or scale need to be handled
  *
- * \param IN trk track element
- * \param IN unused
+ * \param[in] trk track element
+ * \param[in] unused
  * \return TRUE;
  */
 
 static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T unused )
 {
-	char *scaleName;
+	const char *scaleName;
 	SCALEINX_T scale;
 	SCALEDESCINX_T scaleInx;
 	GAUGEINX_T gaugeInx;
 
 	scale = GetTrkScale( trk );
 	scaleName = GetScaleName( scale );
+	// Truthy strcmp() is intentional: skip only when scaleName is literally
+	// the "*" wildcard/no-scale sentinel.
+	// NOLINTNEXTLINE(bugprone-suspicious-string-compare)
 	if( strcmp( scaleName, "*" )) {
 		GetScaleGauge( scale, &scaleInx, &gaugeInx );
 		// Determine scale
@@ -1089,11 +1083,13 @@ static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T unused )
 EXPORT void DoRescale( void * unused )
 {
 	if ( rescalePG.win == NULL ) {
-		ParamCreateDialog( &rescalePG, MakeWindowTitle(_("Rescale")), _("Ok"),
-		                   RescaleDlgOk, ParamCancel_Current, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
-		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_TO_SCALE].control );
-		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control,
-		               GetLayoutCurScaleDesc() ); /* set correct gauge list here */
+		FormCreateDialog( &rescalePG, NULL,
+		                  _("Ok"), RescaleDlgOk,
+		                  _("Cancel"), FormCancel_Current,
+		                  TRUE, F_MODAL, RescaleDlgUpdate);
+		LoadScaleList(rescalePLs[I_RESCALE_TO_SCALE].control );
+		LoadGaugeList(rescalePLs[I_RESCALE_TO_GAUGE].control,
+		              GetLayoutCurScaleDesc() ); /* set correct gauge list here */
 		rescaleFromScaleInx = GetLayoutCurScale();
 		rescaleToScaleInx = rescaleFromScaleInx;
 		rescalePercent = 100.0;
@@ -1127,9 +1123,12 @@ EXPORT void DoRescale( void * unused )
 	}
 
 	// get To scale and gauge (current)
-	GetScaleGauge( GetLayoutCurScale(), &rescaleToScaleInx, &rescaleToGaugeInx );
+	SCALEDESCINX_T toScaleInx;
+	GAUGEINX_T toGaugeInx;
+	GetScaleGauge( GetLayoutCurScale(), &toScaleInx, &toGaugeInx );
+	rescaleToScaleInx = toScaleInx;
+	rescaleToGaugeInx = toGaugeInx;
 
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_MODE, &rescaleMode );
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_CHANGE, &rescaleMode );
 
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_SCALE, rescaleFromScaleStr );
@@ -1157,6 +1156,6 @@ EXPORT void ScaleInit( void )
 	RegisterChangeNotification( ScaleChange );
 	wPrefGetInteger( "misc", "include same gauge turnouts",
 	                 &includeSameGaugeTurnouts, 1 );
-	ParamRegister( &rescalePG );
+	FormRegister( &rescalePG );
 	log_scale = LogFindIndex( "scale" );
 }

@@ -28,6 +28,7 @@
 #include "cundo.h"
 #include "draw.h"
 #include "fileio.h"
+#include <form.h>
 #include "track.h"
 #include "common-ui.h"
 #include "menu.h"
@@ -52,7 +53,7 @@ static struct {
 	long options;
 	long stickyMask;
 	long acclKey;
-	wMenuPush_p menu[NUM_CMDMENUS];
+	wControl_p menu[NUM_CMDMENUS];
 	void * context;
 } commandList[COMMAND_MAX];
 
@@ -61,6 +62,7 @@ EXPORT int commandCnt = 0;
 
 static wIndex_t curCommand = 0;
 
+/** @logcmd @showrefby `command=n` `command.c` */
 static int log_command;
 
 
@@ -80,33 +82,38 @@ EXPORT const char* GetCurCommandName()
  * Basically track modifications are not available in Train Mode, file
  * operations are always available and train control ops are available in
  * train mode only.
- * The specific logic was developed with the help of Wolfram Alpha:
- * CNF | ((NOT m) OR o OR t) AND(m OR (NOT o) OR t)
  *
  * \param mode		application mode
  * \param options	availability options
  * \return			true for enabled, false if disabled
  */
 
+
+
 EXPORT bool IsCommandEnabled(long mode, long options)
 {
-	/*
-	       	if (((mode == MODE_DESIGN) || (options & IC_MODETRAIN_ONLY) ||
-		     (options & IC_MODETRAIN_TOO)) &&
-		    ((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
-		    (options & IC_MODETRAIN_TOO)) {
-	*/
-	if (
-	        ((mode == MODE_DESIGN) ||
-	         (options & IC_MODETRAIN_ONLY) ||
-	         (options & IC_MODETRAIN_TOO))
-	        &&
-	        ((mode == MODE_TRAIN) ||
-	         !(options & IC_MODETRAIN_ONLY) ||
-	         (options & IC_MODETRAIN_TOO))
-	) {
-		return true;
+	if (options & IC_MODETRAIN_TOO) {
+		return true; // Fast path: always allow when IC_MODETRAIN_TOO is set
 	}
+
+	if (mode == MODE_DESIGN && !(options & IC_MODETRAIN_ONLY)) {
+		return true; // Design mode OK when ONLY flag is NOT set
+	}
+
+	if (mode == MODE_TRAIN && (options & IC_MODETRAIN_ONLY)) {
+		return true; // Train mode OK when ONLY flag IS set
+	}
+	/*
+		if (((mode == MODE_DESIGN) || (options & IC_MODETRAIN_ONLY) ||
+			(options & IC_MODETRAIN_TOO)) &&
+			((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
+			(options & IC_MODETRAIN_TOO)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	*/
 
 	return false;
 }
@@ -120,14 +127,9 @@ EXPORT void EnableCommands(void)
 	    ( "COMMAND enable S%d M%d\n", selectedTrackCount, programMode ))
 	for (inx = 0; inx < commandCnt; inx++) {
 		if (commandList[inx].buttInx) {
-			if ((commandList[inx].options & IC_SELECTED)
-			    && selectedTrackCount <= 0) {
-				enable = FALSE;
-			} else if (IsCommandEnabled(programMode, commandList[inx].options )) {
-				enable = TRUE;
-			} else {
-				enable = FALSE;
-			}
+			enable = !((commandList[inx].options & IC_SELECTED)
+			           && selectedTrackCount <= 0)
+			         && IsCommandEnabled(programMode, commandList[inx].options );
 			if (commandList[inx].enabled != enable) {
 				if (commandList[inx].buttInx >= 0) {
 					ToolbarButtonEnable(commandList[inx].buttInx, enable );
@@ -151,23 +153,38 @@ EXPORT wIndex_t GetCurrentCommand()
 	return curCommand;
 }
 
+EXPORT void SetCurrentCommand(wIndex_t inx)
+{
+	curCommand = inx;
+}
+
 EXPORT void Reset(void)
 {
 	if (recordF) {
 		fprintf(recordF, "RESET\n");
 		fflush(recordF);
 	}
-	LOG(log_command, 2,
-	    ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
-	commandList[curCommand].cmdProc( C_CANCEL, zero);
-	if (commandList[curCommand].buttInx >= 0) {
-		ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
-	}
-	curCommand = (preSelect ? selectCmdInx : describeCmdInx);
-	wSetCursor(mainD.d, preSelect ? defaultCursor : wCursorQuestion);
-	commandContext = commandList[curCommand].context;
-	if (commandList[curCommand].buttInx >= 0) {
-		ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
+
+	// Train Mode is a persistent mode, not a one-shot command - a nested
+	// dialog opened from within it (eg. a car's Properties) must not be
+	// able to cancel it just by closing itself through this generic
+	// reset path. Only an explicit mode exit (CmdTrainExit) may do that,
+	// and it calls CmdTrain(C_CANCEL, ...) directly before invoking
+	// Reset(), so by the time Reset() runs here programMode is already
+	// back to MODE_DESIGN and this guard no longer applies.
+	if (programMode != MODE_TRAIN) {
+		LOG(log_command, 2,
+		    ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
+		commandList[curCommand].cmdProc( C_CANCEL, zero);
+		if (commandList[curCommand].buttInx >= 0) {
+			ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
+		}
+		curCommand = (preSelect ? selectCmdInx : describeCmdInx);
+		wSetCursor(mainD.d, preSelect ? defaultCursor : wCursorQuestion);
+		commandContext = commandList[curCommand].context;
+		if (commandList[curCommand].buttInx >= 0) {
+			ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
+		}
 	}
 
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
@@ -178,11 +195,47 @@ EXPORT void Reset(void)
 	DoRedraw(); // Reset
 	EnableCommands();
 	ResetMouseState();
-	LOG(log_command, 1,
-	    ( "COMMAND RESET %s\n", commandList[curCommand].helpKey ))
-	(void) commandList[curCommand].cmdProc( C_START, zero);
+
+	if (programMode != MODE_TRAIN) {
+		LOG(log_command, 1,
+		    ( "COMMAND RESET %s\n", commandList[curCommand].helpKey ))
+		(void) commandList[curCommand].cmdProc( C_START, zero);
+	}
 }
 
+/**
+ * Disambiguate a click from a drag for commands that opt in via `IC_LCLICK`.
+ *
+ * A `C_DOWN` is always held back (returns FALSE, `time0`/`pos0` recorded);
+ * the decision is made on the next `C_MOVE` or `C_UP`. If a `C_MOVE` arrives
+ * more than `dragTimeout` ms after the down, or more than `dragDistance`
+ * units away from it, it's relabeled to `C_DOWN` and treated as a genuine
+ * drag-start; a `C_UP` that arrives without a promoting `C_MOVE` first is
+ * relabeled to `C_LCLICK` (a plain click).
+ *
+ * This only works correctly when every `C_MOVE`/`C_UP` this function sees
+ * genuinely belongs to the in-progress click -- `time0`/`pos0` are file-
+ * scope statics, not per-command state. During `-T` demo playback, a
+ * spurious real event reaching `DoMouse()` (see `MainLayout()`'s
+ * `!inPlayback` guard on its temp-draw-refresh block) can inject a
+ * `C_MOVE` at an unrelated position mid-click; since `dragDistance` is
+ * usually the tighter of the two promotion checks and playback's own
+ * synthesized `C_MOVE`s intentionally reuse the click's exact position
+ * (distance 0), a *real* stray event landing anywhere else is exactly the
+ * kind of large `distDelta` that wrongly promotes the click to a drag
+ * (GTK3 issue #21 -- confirmed via `-d command=2`, see the `LOG` calls
+ * below).
+ *
+ * \param action IN/OUT the action being dispatched; may be relabeled
+ * \param pos IN/OUT the position; reset to the original down position if
+ *            relabeled to C_DOWN
+ * \param checkLeft IN whether the current command opted into left-click
+ *                  disambiguation (`IC_LCLICK`); if false this is a no-op
+ *                  for left-button actions
+ * \param checkRight IN same as checkLeft, for the right button
+ * \return TRUE if action should be dispatched to the current command as-is
+ *         (possibly relabeled), FALSE if it should be swallowed this round
+ */
 static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
                          BOOL_T checkRight)
 {
@@ -215,6 +268,10 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 			timeDelta = time1 - time0;
 			distDelta = FindDistance(*pos, pos0);
 			if (timeDelta > dragTimeout || distDelta > dragDistance) {
+				LOG(log_command, 2,
+				    ("CheckClick: C_MOVE promoted to C_DOWN (drag) -- timeDelta=%ld/%ld distDelta=%0.3f/%0.3f pos=[%0.3f %0.3f] pos0=[%0.3f %0.3f]\n",
+				     timeDelta, dragTimeout, distDelta, dragDistance, pos->x, pos->y, pos0.x,
+				     pos0.y));
 				time0 = 0;
 				*pos = pos0;
 				*action = C_DOWN;
@@ -231,6 +288,9 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 			time1 = wGetTimer() - adjTimer;
 			timeDelta = time1 - time0;
 			distDelta = FindDistance(*pos, pos0);
+			LOG(log_command, 2,
+			    ("CheckClick: C_UP -> C_LCLICK -- timeDelta=%ld pos=[%0.3f %0.3f]\n",
+			     timeDelta, pos->x, pos->y));
 			time0 = 0;
 			*action = C_LCLICK;
 		}
@@ -268,10 +328,36 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 			*action = C_RCLICK;
 		}
 		break;
+	default:
+		LOG( log_command, 1, ( "unexpected *action %d in CheckClick\n", *action ) )
+		break;
 	}
 	return TRUE;
 }
 
+/**
+ * Dispatch a mouse/key action to the current command's `cmdProc`, applying
+ * a few cross-cutting checks first: `IC_WANT_MOVE`/`IC_WANT_MODKEYS` opt-in,
+ * `CheckClick()`'s click-vs-drag disambiguation for commands that opted
+ * into `IC_LCLICK`, and right-click menu handling. On a "bExit" outcome
+ * (opted out, or the click is still being held back pending drag/click
+ * resolution) the command never sees this call at all -- only a
+ * `TempRedraw()` happens instead.
+ *
+ * `action` may be relabeled by `CheckClick()` before the command sees it:
+ * a `C_DOWN` is always held back initially; a later `C_MOVE` either stays
+ * held back or gets relabeled to `C_DOWN` (drag-start); a `C_UP` without a
+ * promoting `C_MOVE` first gets relabeled to `C_LCLICK` (plain click). See
+ * `CheckClick()`'s doc comment -- this relabeling is exactly what a
+ * spurious, non-scripted `DoMouse()` call during `-T` demo playback can
+ * throw off (GTK3 issue #21).
+ *
+ * \param action IN the action to dispatch (may be relabeled internally,
+ *               see above)
+ * \param pos IN the position associated with the action
+ * \return the current command's own return value, or C_CONTINUE if the
+ *         command was never actually called this round
+ */
 EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
 {
 	wAction_t rc;
@@ -346,8 +432,7 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
 		break;
 	}
 	if ((rc == C_TERMINATE )
-	    && (commandList[curCommand].options & IC_STICKY)
-	    && (commandList[curCommand].stickyMask & stickySet)) {
+	    && IsCurCommandSticky() ) {
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		UpdateAllElevations();
 		if (commandList[curCommand].options & IC_NORESTART) {
@@ -373,6 +458,9 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
 			InfoMessage("");
 			Reset();
 			break;
+		default:
+			LOG( log_command, 1, ( "unexpected rc %d in DoCurCommand\n", rc ) )
+			break;
 		}
 	}
 	return rc;
@@ -383,8 +471,8 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
  */
 EXPORT int ConfirmReset(BOOL_T retry)
 {
-	wAction_t rc;
 	if (curCommand != describeCmdInx) {
+		wAction_t rc;
 		LOG(log_command, 3,
 		    ( "COMMAND CONFIRM %s\n", commandList[curCommand].helpKey ))
 		rc = commandList[curCommand].cmdProc( C_CONFIRM, zero);
@@ -399,11 +487,11 @@ EXPORT int ConfirmReset(BOOL_T retry)
 				                _("Yes"), _("No"), _("Cancel"));
 			else
 				rc =
-				        wNoticeEx( NT_WARNING,
-				                   _(
-				                           "Cancelling the current command will undo the changes\n"
-				                           "you are currently making. Do you want to do the update instead?"),
-				                   _("Yes"), _("No"));
+				        wNoticeWithIcon( NT_WARNING,
+				                         _(
+				                                 "Cancelling the current command will undo the changes\n"
+				                                 "you are currently making. Do you want to do the update instead?"),
+				                         _("Yes"), _("No"));
 			if (rc == 1) {
 				LOG(log_command, 3,
 				    ( "COMMAND OK %s\n", commandList[curCommand].helpKey ))
@@ -496,7 +584,7 @@ EXPORT void DoCommandB(void * data)
 
 	if (commandList[curCommand].buttInx >= 0) {
 		ToolbarUpdateButton(commandList[curCommand].buttInx,
-		                    curCommand, (char *)commandList[curCommand].icon,
+		                    curCommand,commandList[curCommand].icon,
 		                    commandList[curCommand].helpKey, I2VP(curCommand));
 		ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
 	}
@@ -522,6 +610,9 @@ EXPORT void DoCommandB(void * data)
 		}
 		Reset();
 		break;
+	default:
+		LOG( log_command, 1, ( "unexpected rc %d in DoCommandB\n", rc ) )
+		break;
 	}
 	inDoCommandB = FALSE;
 }
@@ -541,7 +632,7 @@ EXPORT BOOL_T CommandEnabled(wIndex_t cmdInx)
 
 EXPORT wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
                            const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
-                           wIndex_t buttInx, long stickyMask, wMenuPush_p cmdMenus[NUM_CMDMENUS],
+                           wIndex_t buttInx, long stickyMask, wControl_p cmdMenus[NUM_CMDMENUS],
                            void * context)
 {
 	CHECK( commandCnt < COMMAND_MAX - 1 );
@@ -572,12 +663,11 @@ EXPORT wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
 
 EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
 {
-	size_t inx;
-	wIndex_t buttInx;
-	size_t len1, len2;
+	int inx;
+	size_t len1;
 	len1 = strlen(line + 8);
 	for (inx = 0; inx < commandCnt; inx++) {
-		len2 = strlen(commandList[inx].helpKey + 3);
+		size_t len2 = strlen(commandList[inx].helpKey + 3);
 		if (len1 == len2
 		    && strncmp(line + 8, commandList[inx].helpKey + 3, len2) == 0) {
 			break;
@@ -587,35 +677,23 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
 		fprintf(stderr, "Unknown playback COMMAND command %d : %s\n", lineNum,
 		        line);
 	} else {
-		buttInx = commandList[inx].buttInx;
+		wIndex_t buttInx = commandList[inx].buttInx;
 		if ((commandList[inx].buttInx) >= 0) {
-			ToolbarButtonPlayback(commandList[inx].buttInx);
+			PlaybackButtonMouse(commandList[inx].buttInx);
 		}
 		if (strcmp(line + 8, "Undo") == 0) {
 			if (buttInx > 0 && playbackTimer == 0) {
-				ToolbarButtonBusy(buttInx, TRUE);
-				wFlush();
-				wPause(500);
-				ToolbarButtonBusy(buttInx, FALSE);
-				wFlush();
+				SimulateButtonClick( ToolbarButtonGetControl(buttInx) );
 			}
 			UndoUndo(NULL);
 		} else if (strcmp(line + 8, "Redo") == 0) {
 			if (buttInx >= 0 && playbackTimer == 0) {
-				ToolbarButtonBusy(buttInx, TRUE);
-				wFlush();
-				wPause(500);
-				ToolbarButtonBusy(buttInx, FALSE);
-				wFlush();
+				SimulateButtonClick( ToolbarButtonGetControl(buttInx) );
 			}
 			UndoRedo(NULL);
 		} else {
 			if (buttInx >= 0 && playbackTimer == 0) {
-				ToolbarButtonBusy(buttInx, TRUE);
-				wFlush();
-				wPause(500);
-				ToolbarButtonBusy(buttInx, FALSE);
-				wFlush();
+				SimulateButtonClick( ToolbarButtonGetControl(buttInx) );
 			}
 			DoCommandB(I2VP(inx));
 		}
@@ -627,9 +705,10 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
 
 EXPORT BOOL_T IsCurCommandSticky(void)
 {
-	if ((commandList[curCommand].options & IC_STICKY) != 0
-	    && (commandList[curCommand].stickyMask & stickySet) != 0) {
-		return TRUE;
+	if ((commandList[curCommand].options & IC_STICKY) != 0) {
+		BOOL_T stickyConfig = commandList[curCommand].stickyMask & stickySet;
+		BOOL_T stickyUser = ToolbarGetButtonSticky(commandList[curCommand].buttInx);
+		return stickyConfig | stickyUser;
 	}
 	return FALSE;
 }
@@ -647,7 +726,16 @@ EXPORT void ResetIfNotSticky(void)
 EXPORT void CommandInit( void )
 {
 	curCommand = describeCmdInx;
+	//Get command options
+
+	wPrefGetInteger("cmdopt", "preselect", &preSelect, preSelect);
+	wPrefGetInteger("cmdopt", "rightclickmode", &rightClickMode,
+	                rightClickMode);
+	wPrefGetInteger("cmdopt", "selectmode", &selectMode, selectMode);
+	wPrefGetInteger("cmdopt", "selectzero", &selectZero, selectZero);
+
 	commandContext = commandList[curCommand].context;
 	log_command = LogFindIndex( "command" );
+
 }
 

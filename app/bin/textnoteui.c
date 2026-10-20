@@ -24,7 +24,7 @@
 #include "dynstring.h"
 #include "misc.h"
 #include "note.h"
-#include "param.h"
+#include "form.h"
 #include "shortentext.h"
 #include "track.h"
 #include "cundo.h"
@@ -39,19 +39,19 @@ static paramTextData_t noteTextData = { 300, 150 };
 static paramFloatRange_t noRangeCheck = { 0.0, 0.0, 80, PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW };
 static paramData_t textNotePLs[] = {
 #define I_ORIGX (0)
-	/*0*/ { PD_FLOAT, &textNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position X") },
+	/*0*/ { PD_FLOAT, &textNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck },
 #define I_ORIGY (1)
-	/*1*/ { PD_FLOAT, &textNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position Y") },
+	/*1*/ { PD_FLOAT, &textNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &noRangeCheck},
 #define I_LAYER (2)
-	/*2*/ { PD_DROPLIST, &textNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
+	/*2*/ { PD_COMBOLIST, &textNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
 #define I_TEXT (3)
 	/*3*/ { PD_TEXT, NULL, "text", PDO_NOPREF, &noteTextData, N_("Note") }
 };
 
-static paramGroup_t textNotePG = { "textNote", 0, textNotePLs, COUNT( textNotePLs ) };
-static wWin_p textNoteW;
+static paramGroup_t textNotePG = { "textNote", PGO_FULLDIALOGFROMBUILDER, textNotePLs, COUNT( textNotePLs ) };
+static wControl_p textNoteW;
 
-#define textEntry	((wText_p)textNotePLs[I_TEXT].control)
+#define textEntry	(textNotePLs[I_TEXT].control)
 
 
 /**
@@ -61,20 +61,21 @@ static wWin_p textNoteW;
  * \param inx IN index into dialog template
  * \param valueP IN unused
  */
-static void
-TextDlgUpdate(
-        paramGroup_p pg,
-        int inx,
-        void * valueP)
+static wBool_t
+TextDlgUpdate(paramGroup_p pg,
+              int inx,
+              void * valueP)
 {
 	switch (inx) {
 	case I_ORIGX:
 	case I_ORIGY:
 		// TODO: Redraw bitmap at new location
-		break;
+		__attribute__((fallthrough));
 	default:
 		break;
 	}
+
+	return(TRUE);
 }
 
 
@@ -120,21 +121,20 @@ TextEditOK(void *junk)
 /**
  * Create the edit dialog for text notes.
  *
- * \param trk IN selected note
  * \param title IN dialog title
+ * \param textData IN note text
  */
 static void
-CreateEditTextNote(char *title, char * textData )
+CreateEditTextNote(char *title, const char * textData )
 {
 	// create the dialog if necessary
 	if (!textNoteW) {
-		ParamRegister(&textNotePG);
-		textNoteW = ParamCreateDialog(&textNotePG,
-		                              "",
-		                              _("Done"), TextEditOK,
-		                              ParamCancel_Current, TRUE, NULL,
-		                              F_BLOCK,
-		                              TextDlgUpdate);
+		FormRegister(&textNotePG);
+		textNoteW = FormCreateDialog(&textNotePG, "",
+		                             _("Done"), TextEditOK,
+		                             _("Cancel"), FormCancel_Current,
+		                             TRUE, F_MODAL,
+		                             TextDlgUpdate);
 	}
 
 	wWinSetTitle(textNotePG.win, MakeWindowTitle(title));
@@ -143,9 +143,9 @@ CreateEditTextNote(char *title, char * textData )
 	wTextAppend(textEntry, textData );
 	wTextSetReadonly(textEntry, FALSE);
 	int noteLayer = textNoteData.layer;
-	FillLayerList((wList_p)textNotePLs[I_LAYER].control);
+	FillLayerList(textNotePLs[I_LAYER].control);
 	textNoteData.layer = noteLayer;
-	ParamLoadControls(&textNotePG);
+	FormLoadControls(&textNotePG);
 	descTitle = title;
 
 	// and show the dialog
@@ -192,12 +192,12 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 /**
  * Show the UI for entering new text notes
  *
- * \param xx Note object data
+ * \param pos Note position
  */
 
 void NewTextNoteUI(coOrd pos )
 {
-	char *tmpPtrText = _("Replace this text with your note");
+	const char *tmpPtrText = _("Replace this text with your note");
 
 	textNoteData.pos = pos;
 	textNoteData.layer = curLayer;

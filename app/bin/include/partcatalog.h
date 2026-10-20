@@ -90,8 +90,9 @@ Catalog *InitCatalog(void);
 void DestroyCatalog(Catalog *catalog);
 CatalogEntry * InsertInOrder(Catalog *catalog, const char *contents,
                              const char *tag);
-void UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents,
-                        char *tag);
+void UpdateCatalogEntry(CatalogEntry *entry, const char *path,
+                        const char *contents,
+                        const char *tag);
 ParameterLib *InitLibrary(void);
 ParameterLib *CreateLibrary(char *directory);
 void DestroyLibrary(ParameterLib *tracklib);
@@ -104,5 +105,5 @@ void SearchDiscardResult(SearchResult *res);
 unsigned CountCatalogEntries(Catalog *catalog);
 void DiscardCatalog(ParameterLib *library);
 EXPORT void CatalogDiscard(Catalog *catalog);
-bool FilterKeyword(char *word);
+bool FilterKeyword(const char *word);
 #endif // !HAVE_TRACKCATALOG_H
