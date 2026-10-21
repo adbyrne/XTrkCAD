@@ -435,6 +435,14 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
+      # The Windows runners' git defaults to core.autocrlf=true, so without
+      # this every file is checked out with CRLF and astyle, told
+      # --lineend=linux by app/lib/astylerc, "formats" all ~300 of them,
+      # hiding any real disagreement with the Linux gate. Runs before
+      # setup-msys2, so it uses the runner's own shell.
+      - name: Check out with LF line endings
+        shell: pwsh
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v7
       - uses: msys2/setup-msys2@v2
         with:
