@@ -34,13 +34,11 @@ The <b>Tip of the Day</b> item displays a useful tip about the operation of <i>X
 
 - <i>Demo Menu</i>
 
-The <b>Demos</b> command (\ref cmdDemo) opens a cascading menu which invokes various demonstrations of <i>XTrackCAD</i> features.
+The <b>Demos</b> command (\subpage cmdDemo) opens a cascading menu which invokes various demonstrations of <i>XTrackCAD</i> features.
 
 The <b>Examples</b> command displays the list of included example programs which you can examine.
 
 The <b>About</b> command displays the <i>XTrackCAD</i> version, license and copyright information.
-
-- \subpage cmdDemo
 
 */
 

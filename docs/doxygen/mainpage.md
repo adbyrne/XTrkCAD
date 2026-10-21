@@ -92,7 +92,7 @@ Four categories, each with a different mechanism:
 - **System/environmental errors** — out-of-memory and similar. Exit as soon as possible rather
   than trying to continue in a state that can't be trusted.
 
-## `GetArgs()` extensibility
+## <tt>%GetArgs()</tt> extensibility
 
 Most track-segment and endpoint records are read with `GetArgs()` (`app/bin/getargs.c`), using a
 format-code string similar to `scanf()`. Two format codes make the on-disk format
@@ -131,6 +131,10 @@ collectively `wControl` (`app/wlib/include/wlib.h`). Most of these notify applic
 events (a button press, text entry) via a callback function pointer supplied when the object is
 created, along with a `void *` context value — see the cast macros above for the common pattern
 of packing a small integer into that context instead of a real pointer.
+
+See the \subpage understanding-layer-groups page for how named, user-managed Layer Groups (SF
+#222) work internally and the two reusable scope patterns (selection vs. filter) every consumer
+of them is built from.
 
 See the \subpage creating-a-report "Creating a New Report" page for how to add a new entry to
 the `Reports` menu (SF #217) -- the shared viewer, the two report shapes, and a step-by-step
