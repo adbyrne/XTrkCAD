@@ -140,7 +140,8 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
   `app/help` and `app/tools` for common misspellings.
 - **`astyle-check-macos`, `astyle-check-windows`** — compare each platform's from-source-built
   astyle output against Linux's, to catch astyle itself behaving differently per OS (not code
-  formatting drift — that's what the gating `astyle-check` job is for).
+  formatting drift — that's what the gating `astyle-check` job is for). The Windows job checks out
+  with `core.autocrlf` off, so astyle sees the same LF line endings as on Linux.
 - **`compiler-warnings`, `compiler-warnings-macos`, `compiler-warnings-windows`** — captures
   `-Wall -Wextra` build output as an artifact on each platform.
 - **`coverage`** — generates an lcov HTML report and uploads it as an artifact.
