@@ -6,6 +6,7 @@ CMakeFiles/
 cmake_install.cmake
 CTestTestfile.cmake
 _CPack_Packages/
+CMakeUserPresets.json
 
 # Generated files
 *.image1

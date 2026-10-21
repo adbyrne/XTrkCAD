@@ -215,9 +215,10 @@ Follows Martin Fischer's *Development Process Specification* (dev guide page
 to SF (`hg push -b <branch>`). Holds the user sets explicitly (e.g. the Layer Groups / JSON Note
 dev-ML review hold) stay in force until the user lifts them.
 
-**Held feature (2026-10-20):** Hg `feature-layergroups-jsonnote-gtk3` (r7754 merges `default`
-r7752; not pushed to SF yet) ↔ git `feature-layergroups-jsonnote`, draft PR #241. It isn't on
-git `main`. Don't merge either side until upstream merges it in Hg.
+**Layer Groups / JSON Note merged (2026-10-21):** Martin approved (dev ML #4489). Git PR #241
+merged into `main`; Hg `feature-layergroups-jsonnote-gtk3` merged into `default` at r7775 and
+closed at r7776, pushed to SF. The dev-review hold on them is lifted. Martin's Development
+Process page reached Hg `default` in r7777 (git PR #248).
 
 ## Build
 
@@ -228,6 +229,12 @@ SVG→PNG; no D-Bus needed). Out-of-source builds are mandatory.
 cmake -B build -S xtrkcad-hg -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_APPEND_SRC_HASH=ON
 cmake --build build
 ```
+
+With CMake 4.0+, `CMakePresets.json` (SF #626) covers the standard configurations:
+`cmake --workflow --preset linux-debug` configures, builds and runs the unit tests in
+`<source>/build/linux-debug/`. It's for in-tree work; the commands above, with their
+out-of-tree `build/` and `-DXTRKCAD_APPEND_SRC_HASH=ON`, stay the way to build here. CI's
+`cmake-presets` job runs that workflow with a pinned CMake 4.0.7.
 
 Useful CMake options:
 - `-DXTRKCAD_TESTING=ON` — build unit tests (auto-enabled when CMocka is found)
@@ -243,8 +250,8 @@ Useful CMake options:
 ## Tests
 
 Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and
-`app/dynstring/unittest/`. Hg `default` has 75 tests, 17 of them outside the `regression` label
-(r7752, `ctest -N`, 2026-10-20). The feature branch has 79: Layer Groups and JSON Note add 4.
+`app/dynstring/unittest/`. Hg `default` has 79 tests, 21 of them outside the `regression` label
+(r7777, `ctest -N`, 2026-10-21; Layer Groups and JSON Note added 4).
 The full run including the regression demo-playback suite takes ~10 minutes; run it in the
 background.
 

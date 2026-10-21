@@ -71,8 +71,8 @@ The shared pieces:
   calls it for plain-text PR artifacts, `release.yml` for the published HTML reports, and
   `ci-gtk3-preview.yml` on the next Ubuntu.
 - **`.github/actions/`** holds composite actions for repeated steps: `apt-deps` (the Linux package
-  list), `select-xcode`, `msys2-pin-gcc` and `setup-doxygen`. Each pinned version is set once, as
-  the action's default.
+  list), `select-xcode`, `msys2-pin-gcc`, `setup-doxygen` and `setup-cmake`. Each pinned version
+  is set once, as the action's default.
 - **`tools/cppcheck-gate.sh`** and **`tools/astyle-check.sh`** hold the two gate commands. Run
   them locally from the repository root.
 
@@ -103,6 +103,11 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
   in `debian:bookworm` and `debian:trixie` containers on amd64 and arm64. The arm64 entries stand
   in for Raspberry Pi OS on a Pi 3/4/5, and Bookworm's older GCC 12, CMake 3.25 and GTK 3.24.38
   catch code that only builds on newer toolchains.
+- **`cmake-presets`** — runs the `linux-debug` workflow preset from `CMakePresets.json`
+  (configure, build, unit tests) with CMake 4.0.7, installed by `setup-cmake` because the presets
+  require CMake 4.0 or newer. Pinning the oldest supported CMake means the file can't quietly start
+  depending on a newer one. The macOS and Windows presets are only checked as far as
+  `cmake --list-presets` parsing the file. See \ref cmake-presets "CMake presets".
 - **`regression-gtk3`** — replays the full demo suite (`RegressionTestAll()`, the `-T` flag) in
   one process via the `RegressionSuite` `ctest` target (see
   \ref advanced-optional-local-checks "Advanced/optional local checks" in the

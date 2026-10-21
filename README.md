@@ -61,7 +61,9 @@ cmake --build build --parallel $(nproc)
 ctest --test-dir build --output-on-failure
 ```
 
-The debug build sets `-DCMAKE_BUILD_TYPE=Debug`. The binary is `xtrkcad-<version>`
+The debug build sets `-DCMAKE_BUILD_TYPE=Debug`. With CMake 4.0 or newer,
+`cmake --workflow --preset linux-debug` does all three steps from `CMakePresets.json`; see
+the developer guide's Building and Testing page for the other presets. The binary is `xtrkcad-<version>`
 (version-qualified so successive dev builds can install side by side — see
 `ProgramVersion.cmake`).
 

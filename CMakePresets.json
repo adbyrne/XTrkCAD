@@ -1,0 +1,293 @@
+{
+  "version": 10,
+  "$comment": [
+    "Standard configure/build/test workflows (SF #626). Presets need CMake 4.0 or newer;",
+    "with an older CMake, configure with plain -D options as shown in the developer guide",
+    "(docs/doxygen/building.md). Personal presets go in CMakeUserPresets.json, which is",
+    "ignored by git and Hg."
+  ],
+  "cmakeMinimumRequired": {
+    "major": 4,
+    "minor": 0,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "XTRKCAD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "linux",
+      "hidden": true,
+      "inherits": "base",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-debug",
+      "displayName": "Linux Debug",
+      "inherits": "linux",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-release",
+      "displayName": "Linux Release",
+      "inherits": "linux",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "linux-clang-debug",
+      "displayName": "Linux Debug (Clang)",
+      "inherits": "linux-debug",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang"
+      }
+    },
+    {
+      "name": "macos-debug",
+      "displayName": "macOS Debug (Homebrew)",
+      "$comment": "Needs HOMEBREW_PREFIX in the environment: run eval \"$(brew shellenv)\" first.",
+      "inherits": "base",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      },
+      "environment": {
+        "PKG_CONFIG_PATH": "$env{HOMEBREW_PREFIX}/opt/gtk+3/lib/pkgconfig:$env{HOMEBREW_PREFIX}/lib/pkgconfig"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "$env{HOMEBREW_PREFIX}/opt/gtk+3;$env{HOMEBREW_PREFIX}",
+        "CMAKE_EXE_LINKER_FLAGS": "-L$env{HOMEBREW_PREFIX}/lib",
+        "XTRKCAD_USE_APPLEHELP": "OFF",
+        "XTRKCAD_USE_BROWSER": "ON"
+      }
+    },
+    {
+      "name": "windows-debug",
+      "displayName": "Windows Debug (MSYS2 MINGW64)",
+      "inherits": "base",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "XTRKCAD_USE_GETTEXT": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "linux-build",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "macos-build",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "windows-build",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux-debug",
+      "inherits": "linux-build",
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release",
+      "inherits": "linux-build",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "linux-clang-debug",
+      "inherits": "linux-build",
+      "configurePreset": "linux-clang-debug"
+    },
+    {
+      "name": "macos-debug",
+      "inherits": "macos-build",
+      "configurePreset": "macos-debug"
+    },
+    {
+      "name": "windows-debug",
+      "inherits": "windows-build",
+      "configurePreset": "windows-debug"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "unit",
+      "hidden": true,
+      "$comment": "Unit tests only: the regression demo-playback suite takes ~10 minutes.",
+      "output": {
+        "outputOnFailure": true
+      },
+      "filter": {
+        "exclude": {
+          "label": "regression"
+        }
+      }
+    },
+    {
+      "name": "all",
+      "hidden": true,
+      "$comment": "Everything, including the regression demos when they're enabled.",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "linux-test",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "macos-test",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "windows-test",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux-debug",
+      "inherits": [
+        "unit",
+        "linux-test"
+      ],
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-debug-all",
+      "inherits": [
+        "all",
+        "linux-test"
+      ],
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release",
+      "inherits": [
+        "unit",
+        "linux-test"
+      ],
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "linux-clang-debug",
+      "inherits": [
+        "unit",
+        "linux-test"
+      ],
+      "configurePreset": "linux-clang-debug"
+    },
+    {
+      "name": "macos-debug",
+      "inherits": [
+        "unit",
+        "macos-test"
+      ],
+      "configurePreset": "macos-debug"
+    },
+    {
+      "name": "windows-debug",
+      "inherits": [
+        "unit",
+        "windows-test"
+      ],
+      "configurePreset": "windows-debug"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "linux-debug",
+      "displayName": "Linux Debug: configure, build, unit tests",
+      "steps": [
+        {"type": "configure", "name": "linux-debug"},
+        {"type": "build", "name": "linux-debug"},
+        {"type": "test", "name": "linux-debug"}
+      ]
+    },
+    {
+      "name": "linux-release",
+      "displayName": "Linux Release: configure, build, unit tests",
+      "steps": [
+        {"type": "configure", "name": "linux-release"},
+        {"type": "build", "name": "linux-release"},
+        {"type": "test", "name": "linux-release"}
+      ]
+    },
+    {
+      "name": "linux-clang-debug",
+      "displayName": "Linux Debug (Clang): configure, build, unit tests",
+      "steps": [
+        {"type": "configure", "name": "linux-clang-debug"},
+        {"type": "build", "name": "linux-clang-debug"},
+        {"type": "test", "name": "linux-clang-debug"}
+      ]
+    },
+    {
+      "name": "macos-debug",
+      "displayName": "macOS Debug: configure, build, unit tests",
+      "steps": [
+        {"type": "configure", "name": "macos-debug"},
+        {"type": "build", "name": "macos-debug"},
+        {"type": "test", "name": "macos-debug"}
+      ]
+    },
+    {
+      "name": "windows-debug",
+      "displayName": "Windows Debug: configure, build, unit tests",
+      "steps": [
+        {"type": "configure", "name": "windows-debug"},
+        {"type": "build", "name": "windows-debug"},
+        {"type": "test", "name": "windows-debug"}
+      ]
+    }
+  ]
+}

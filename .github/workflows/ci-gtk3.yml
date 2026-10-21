@@ -24,7 +24,8 @@ on:
 #     once its preview is clean.
 #   - gtk3-qa-reports.yml: the report-only analysis jobs, also used by
 #     release.yml for the published HTML reports.
-#   - .github/actions/: apt-deps, select-xcode, msys2-pin-gcc, setup-doxygen.
+#   - .github/actions/: apt-deps, select-xcode, msys2-pin-gcc, setup-doxygen,
+#     setup-cmake.
 #   - tools/: cppcheck-gate.sh, astyle-check.sh.
 
 jobs:
@@ -178,6 +179,27 @@ jobs:
         # See c-tests-linux: regression-gtk3 covers the GTK3 issue #26 suite.
         run: xvfb-run ctest --test-dir build --output-on-failure -LE regression
 
+  cmake-presets:
+    # SF #626: runs CMakePresets.json's linux-debug workflow preset (configure,
+    # build, unit tests) with the oldest CMake the presets accept, 4.0, so the
+    # file can't go stale or start depending on a newer CMake without CI
+    # noticing. The other jobs keep their plain -D configure lines, because the
+    # Debian containers' CMake (3.25, 3.31) is too old for presets. The macOS
+    # and Windows presets only get checked here as far as --list-presets
+    # parsing the whole file.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+      - uses: ./.github/actions/setup-cmake
+      - name: List presets
+        run: |
+          cmake --version
+          cmake --list-presets=all
+      - name: Configure, build and unit-test (workflow preset linux-debug)
+        run: xvfb-run cmake --workflow --preset linux-debug
+
   regression-gtk3-sanitizers:
     # Closes the gap SF #682 documented: c-tests-sanitizers (gtk3-toolchain.yml) excludes the
     # demo-playback regression suite (-LE regression), and regression-gtk3
@@ -266,7 +288,7 @@ jobs:
       - name: Check for CI/CMake changes without a matching docs update
         run: |
           CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD)
-          CI_CMAKE_CHANGED=$(echo "$CHANGED" | grep -E '^(\.github/workflows/|CMakeLists\.txt$|.*\.cmake$)' || true)
+          CI_CMAKE_CHANGED=$(echo "$CHANGED" | grep -E '^(\.github/workflows/|CMakeLists\.txt$|CMakePresets\.json$|.*\.cmake$)' || true)
           DOCS_CHANGED=$(echo "$CHANGED" | grep -E '^docs/doxygen/' || true)
           if [ -n "$CI_CMAKE_CHANGED" ] && [ -z "$DOCS_CHANGED" ]; then
             {
