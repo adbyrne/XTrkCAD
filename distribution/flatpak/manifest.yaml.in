@@ -1,6 +1,6 @@
 id: @FLATPAK_DOMAIN@.@FLATPAK_BASE_NAME@
 runtime: org.freedesktop.Platform
-runtime-version: '25.08'
+runtime-version: '26.08'
 sdk: org.freedesktop.Sdk
 command: run-xtrkcad.sh
 
@@ -70,8 +70,8 @@ modules:
     buildsystem: simple
     sources:
       - type: file
-        url: https://files.pythonhosted.org/packages/c6/1c/39e11d3bdafc57434a94e272675484f6a19af788cd3d4e052267940b3800/mercurial-7.2.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl
-        sha256: 7092bdc23934c17bd63e529c3750b72109263d8af976d2e9c97c745d358012e9
+        url: https://files.pythonhosted.org/packages/e1/21/fe7e9230f0e8b43e2c897d38067ea8c6baf1dd54f10775784b019dcf59de/mercurial-7.2.4-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl
+        sha256: d7e8c8028a5d74de926e26b5d073786f3e3178fcc56f5cd075e0da11c014bf2a
     build-commands:
       - pip3 install --no-index --find-links=file://$PWD --prefix=/app mercurial
     cleanup:

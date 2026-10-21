@@ -593,6 +593,13 @@ void SetCurrLayer(wIndex_t inx, const char *name, wIndex_t op,
 
 	if (!layers[curLayer].visible) {
 		FlipLayer(I2VP(inx));
+		/* FlipLayer() never sets the flipped layer's own button (a click
+		 * has already toggled it), but nothing clicked it here -- without
+		 * this the button stays "hidden" and every later click inverts. */
+		if (curLayer < NUM_BUTTONS && !layers[curLayer].button_off &&
+		    layer_btns[curLayer]) {
+			wButtonSetBusy(layer_btns[curLayer], layers[curLayer].visible);
+		}
 	}
 
 	/* Set visible on related layers other than current */
