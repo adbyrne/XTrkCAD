@@ -23,8 +23,11 @@ to report issues and submit suggestions.
   [Bugs](https://sourceforge.net/p/xtrkcad-fork/bugs/) tracker.
 - A **separate feature tracker** shall be used for new feature requests and ideas: the
   [Feature Requests](https://sourceforge.net/p/xtrkcad-fork/feature-requests/) tracker.
+- Development work is tracked in the
+  [Development Issues](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/) tracker, which only
+  signed-in project members can see.
 
-Problems found while a feature is being developed are not filed at all; see
+Problems found while a feature is being developed aren't filed as bug tickets; see
 \ref devproc-issues-during-feature-development "Issues During Feature Development".
 
 # Branching Model {#devproc-branching-model}
