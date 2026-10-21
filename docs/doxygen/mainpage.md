@@ -141,7 +141,7 @@ the `Reports` menu (SF #217) -- the shared viewer, the two report shapes, and a 
 recipe with references into the current `reports.c`/`reports.h` source.
 
 See the \subpage building "Building and Testing" page for local build steps per platform,
-CI details, tool-version pins, and advanced checks (sanitizers, valgrind, the regression
+the CMake presets, CI details, tool-version pins, and advanced checks (sanitizers, valgrind, the regression
 demo-playback suite, debug logging).
 
 See the \subpage development-process page for how Mercurial branches and the SF

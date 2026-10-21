@@ -1,0 +1,27 @@
+name: Install the pinned CMake
+description: >-
+  Installs CMake from Kitware's official prebuilt Linux binary rather than the
+  apt package, which drifts with the runner image (the same reason Doxygen and
+  astyle are pinned). Used by the cmake-presets job, which needs CMake 4.0 or
+  newer. The default here is the one place that CMake version is set.
+inputs:
+  version:
+    description: CMake release, e.g. 4.0.7.
+    default: '4.0.7'
+runs:
+  using: composite
+  steps:
+    - name: Install CMake ${{ inputs.version }}
+      shell: bash
+      env:
+        CMAKE_VERSION: ${{ inputs.version }}
+      run: |
+        ARCH=$(uname -m)
+        PKG="cmake-${CMAKE_VERSION}-linux-${ARCH}"
+        BASE="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}"
+        cd "$RUNNER_TEMP"
+        curl -sSfL -o "${PKG}.tar.gz" "${BASE}/${PKG}.tar.gz"
+        curl -sSfL -o cmake-sha256.txt "${BASE}/cmake-${CMAKE_VERSION}-SHA-256.txt"
+        grep " ${PKG}.tar.gz\$" cmake-sha256.txt | sha256sum -c -
+        tar xzf "${PKG}.tar.gz"
+        echo "$RUNNER_TEMP/${PKG}/bin" >> "$GITHUB_PATH"

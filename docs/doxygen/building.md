@@ -70,6 +70,43 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
 
+# CMake presets {#cmake-presets}
+
+With CMake 4.0 or newer, `CMakePresets.json` at the top of the source tree replaces the configure
+lines above. The build itself still needs only CMake 3.20; older versions refuse the presets with a
+clear error, and plain `cmake -B build ...` keeps working without them. Each preset builds in
+`build/<preset>/`:
+
+| Preset | Host | Configures |
+|--------|------|------------|
+| `linux-debug` | Linux | Debug, tests on |
+| `linux-release` | Linux | Release, tests on |
+| `linux-clang-debug` | Linux | Debug with `clang`, tests on |
+| `macos-debug` | macOS | Debug with the Homebrew paths and help options from the macOS section |
+| `windows-debug` | MSYS2 MINGW64 | Debug with gettext off, as in the Windows section |
+
+`cmake --list-presets=all` shows the ones that apply to your host. A workflow preset of the same
+name runs configure, build and the unit tests in one command:
+
+```sh
+cmake --workflow --preset linux-debug
+```
+
+Or step by step:
+
+```sh
+cmake --preset linux-debug
+cmake --build --preset linux-debug
+ctest --preset linux-debug        # unit tests; linux-debug-all adds the regression demos
+                                  # when they are enabled (see below)
+```
+
+The test presets leave out the `regression` label, like the CI test jobs. On macOS, run
+`eval "$(brew shellenv)"` first: `macos-debug` takes its paths from `HOMEBREW_PREFIX`. Personal
+presets go in `CMakeUserPresets.json`, which git and Hg ignore. CI runs the `linux-debug`,
+`macos-debug` and `windows-debug` workflows, the Linux one with CMake 4.0.7 (see
+\ref ci-tooling-overview "CI tooling overview").
+
 # Dev-build filename hash suffix
 
 Every untagged dev build's *compiled-in* version string (About dialog, `--version` CLI output)
