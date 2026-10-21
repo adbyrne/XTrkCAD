@@ -451,9 +451,11 @@ Three buttons control which <b>Layers</b> are visible on the <b>Main Window</b> 
 without toggling each layer's visibility by hand:
 
 - <b>Show Only</b> shows only the selected group's members and hides every other <b>Layer</b>, a
-  quick way to isolate one group's content.
+  quick way to isolate one group's content. The current layer is the exception: it stays visible
+  even when it isn't in the group, because the current layer can't be hidden.
 - <b>Hide Only</b> is its mirror: it hides only the selected group's members and shows every other
-  <b>Layer</b>, a quick way to see everything except one group.
+  <b>Layer</b>, a quick way to see everything except one group. The current layer stays visible
+  here too, even when it's one of the group's members.
 - <b>Restore View</b> undoes either of them. It gives every layer back the visibility it had
   before you first used <b>Show Only</b> or <b>Hide Only</b>. That's your own view, not
   necessarily every layer: a layer you'd hidden yourself beforehand stays hidden.

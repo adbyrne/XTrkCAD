@@ -205,7 +205,7 @@
                             <child>
                               <object class="GtkButton" id="showonly">
                                 <property name="label" translatable="yes">Show Only</property>
-                                <property name="tooltip-text" translatable="yes">Show only this group's layers; hide every other layer</property>
+                                <property name="tooltip-text" translatable="yes">Show only this group's layers; hide every other layer. The current layer always stays visible</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
@@ -219,7 +219,7 @@
                             <child>
                               <object class="GtkButton" id="shownot">
                                 <property name="label" translatable="yes">Hide Only</property>
-                                <property name="tooltip-text" translatable="yes">Hide only this group's layers; show every other layer</property>
+                                <property name="tooltip-text" translatable="yes">Hide only this group's layers; show every other layer. The current layer always stays visible, even if it's in this group</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
