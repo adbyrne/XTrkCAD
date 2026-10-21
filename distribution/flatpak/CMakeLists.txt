@@ -103,7 +103,7 @@ add_custom_command(
             flathub https://flathub.org/repo/flathub.flatpakrepo
     COMMAND ${Flatpak_builder_EXECUTABLE}
             --state-dir=${FLATPAK_STATE_DIR}
-            --force-clean --user --install --repo=${FLATPAK_REPO}
+            --force-clean --user --repo=${FLATPAK_REPO}
             --install-deps-from=flathub
 	    ${FLATPAK_WORK_DIR} ${_XTRK_MANIFEST_FILE}
     #COMMAND sh -c "flatpak run --command=flatpak-builder-lint org.flatpak.Builder repo ${FLATPAK_REPO} || echo 'Flatpak lint ERROR: finish-args-home-filesystem-access and *screenshot* are ok, others need correcting'" VERBATIM
