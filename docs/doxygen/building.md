@@ -103,8 +103,9 @@ ctest --preset linux-debug        # unit tests; linux-debug-all adds the regress
 
 The test presets leave out the `regression` label, like the CI test jobs. On macOS, run
 `eval "$(brew shellenv)"` first: `macos-debug` takes its paths from `HOMEBREW_PREFIX`. Personal
-presets go in `CMakeUserPresets.json`, which git and Hg ignore. CI's `cmake-presets` job runs the
-`linux-debug` workflow with CMake 4.0.7 (see \ref ci-tooling-overview "CI tooling overview").
+presets go in `CMakeUserPresets.json`, which git and Hg ignore. CI runs the `linux-debug`,
+`macos-debug` and `windows-debug` workflows, the Linux one with CMake 4.0.7 (see
+\ref ci-tooling-overview "CI tooling overview").
 
 # Dev-build filename hash suffix
 

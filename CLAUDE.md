@@ -234,7 +234,7 @@ With CMake 4.0+, `CMakePresets.json` (SF #626) covers the standard configuration
 `cmake --workflow --preset linux-debug` configures, builds and runs the unit tests in
 `<source>/build/linux-debug/`. It's for in-tree work; the commands above, with their
 out-of-tree `build/` and `-DXTRKCAD_APPEND_SRC_HASH=ON`, stay the way to build here. CI's
-`cmake-presets` job runs that workflow with a pinned CMake 4.0.7.
+`cmake-presets` jobs run the Linux (pinned CMake 4.0.7), macOS and Windows workflows.
 
 Useful CMake options:
 - `-DXTRKCAD_TESTING=ON` — build unit tests (auto-enabled when CMocka is found)

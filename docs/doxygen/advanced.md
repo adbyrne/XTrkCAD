@@ -103,11 +103,12 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
   in `debian:bookworm` and `debian:trixie` containers on amd64 and arm64. The arm64 entries stand
   in for Raspberry Pi OS on a Pi 3/4/5, and Bookworm's older GCC 12, CMake 3.25 and GTK 3.24.38
   catch code that only builds on newer toolchains.
-- **`cmake-presets`** — runs the `linux-debug` workflow preset from `CMakePresets.json`
-  (configure, build, unit tests) with CMake 4.0.7, installed by `setup-cmake` because the presets
-  require CMake 4.0 or newer. Pinning the oldest supported CMake means the file can't quietly start
-  depending on a newer one. The macOS and Windows presets are only checked as far as
-  `cmake --list-presets` parsing the file. See \ref cmake-presets "CMake presets".
+- **`cmake-presets`, `cmake-presets-macos`, `cmake-presets-windows`** — run each platform's
+  workflow preset from `CMakePresets.json` (configure, build, unit tests): `linux-debug`,
+  `macos-debug` and `windows-debug`. The Linux job uses CMake 4.0.7, installed by `setup-cmake`,
+  because the presets require CMake 4.0 or newer and pinning the oldest supported CMake means the
+  file can't quietly start depending on a newer one. The macOS and Windows jobs use Homebrew's and
+  MSYS2's CMake, which roll and are already 4.x. See \ref cmake-presets "CMake presets".
 - **`regression-gtk3`** — replays the full demo suite (`RegressionTestAll()`, the `-T` flag) in
   one process via the `RegressionSuite` `ctest` target (see
   \ref advanced-optional-local-checks "Advanced/optional local checks" in the

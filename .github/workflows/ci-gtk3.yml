@@ -185,8 +185,7 @@ jobs:
     # file can't go stale or start depending on a newer CMake without CI
     # noticing. The other jobs keep their plain -D configure lines, because the
     # Debian containers' CMake (3.25, 3.31) is too old for presets. The macOS
-    # and Windows presets only get checked here as far as --list-presets
-    # parsing the whole file.
+    # and Windows presets have their own jobs below.
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -199,6 +198,59 @@ jobs:
           cmake --list-presets=all
       - name: Configure, build and unit-test (workflow preset linux-debug)
         run: xvfb-run cmake --workflow --preset linux-debug
+
+  cmake-presets-macos:
+    # The macos-debug workflow preset, set up like c-tests-macos. Uses
+    # Homebrew's CMake, which rolls (already 4.x); the 4.0 floor is
+    # cmake-presets' job, and --preset itself refuses anything older.
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/select-xcode
+      - name: Install dependencies
+        run: brew install ninja gtk+3 cmocka libzip librsvg
+      - name: Configure, build and unit-test (workflow preset macos-debug)
+        # macos-debug takes its paths from HOMEBREW_PREFIX, which
+        # brew shellenv sets; each step is a new shell, so set it here.
+        run: |
+          eval "$(brew shellenv)"
+          cmake --version
+          cmake --list-presets=all
+          cmake --workflow --preset macos-debug
+
+  cmake-presets-windows:
+    # The windows-debug workflow preset, set up like c-tests-windows. Uses
+    # MSYS2's CMake, which rolls (already 4.x); see cmake-presets-macos.
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          pacboy: >-
+            gcc:p
+            cmake:p
+            ninja:p
+            pkgconf:p
+            gtk3:p
+            zlib:p
+            libzip:p
+            mxml:p
+            librsvg:p
+            gettext-tools:p
+            cmocka:p
+      - uses: ./.github/actions/msys2-pin-gcc
+      - name: Configure, build and unit-test (workflow preset windows-debug)
+        run: |
+          cmake --version
+          cmake --list-presets=all
+          cmake --workflow --preset windows-debug
 
   regression-gtk3-sanitizers:
     # Closes the gap SF #682 documented: c-tests-sanitizers (gtk3-toolchain.yml) excludes the
