@@ -2,7 +2,9 @@
 
 from pathlib import Path
 
-from xtrkcad_mcp.models import Endpoint, LayerInfo, Layout, NoteObject, TrackObject
+from xtrkcad_mcp.models import (
+    Endpoint, LayerGroup, LayerInfo, Layout, NoteObject, TrackObject,
+)
 
 TRACK_KINDS = frozenset(
     {"STRAIGHT", "CURVE", "JOINT", "TURNOUT", "TURNTABLE", "CORNU", "BEZIER", "HANDLAID"}
@@ -10,6 +12,10 @@ TRACK_KINDS = frozenset(
 
 # paramVersion >= this value means NOTE content is inline (not multiline until END).
 _VERSION_INLINENOTE = 12
+
+# paramVersion >= this value can carry LAYERGROUP records; XTrkCAD ignores
+# them in older files, and so does this parser.
+_VERSION_LAYERGROUPS = 13
 
 
 def _parse_roomsize(value: str) -> tuple[float, float]:
@@ -47,6 +53,40 @@ def _parse_layers_line(line: str, layout: Layout) -> None:
         except ValueError:
             pass
     layout.layers[idx] = LayerInfo(index=idx, name=name, visible=visible)
+
+
+def _parse_layergroup_line(line: str, layout: Layout) -> None:
+    """Parse a LAYERGROUP DEFINE or MEMBERS record into layout.layer_groups.
+
+    LAYERGROUP DEFINE <idx> "<name>"
+    LAYERGROUP MEMBERS <idx> "<n>;<n>;..."   (n = layer index + 1)
+
+    Follows XTrkCAD's ReadLayerGroups(): a DEFINE is accepted only for the
+    next index in sequence, and member values below 1 are skipped.
+    """
+    parts = line.split(None, 3)
+    if len(parts) < 4:
+        return
+    try:
+        idx = int(parts[2])
+    except ValueError:
+        return
+    value = _first_quoted(line)
+    if parts[1] == "DEFINE":
+        if idx == len(layout.layer_groups):
+            layout.layer_groups.append(LayerGroup(index=idx, name=value))
+    elif parts[1] == "MEMBERS":
+        if not 0 <= idx < len(layout.layer_groups):
+            return
+        members: list[int] = []
+        for token in value.replace(",", ";").replace(" ", ";").split(";"):
+            try:
+                n = int(token)
+            except ValueError:
+                continue
+            if n > 0 and n - 1 not in members:
+                members.append(n - 1)
+        layout.layer_groups[idx].layers = members
 
 
 def _scan_quoted(line: str, start: int) -> tuple[str, int] | None:
@@ -178,6 +218,9 @@ def parse_file(path: str | Path) -> Layout:
                 )
             elif keyword == "LAYERS":
                 _parse_layers_line(line, layout)
+            elif (keyword == "LAYERGROUP"
+                  and layout.param_version >= _VERSION_LAYERGROUPS):
+                _parse_layergroup_line(line, layout)
             elif keyword == "NOTE" and not line.startswith("NOTE MAIN") and len(parts) >= 9:
                 # NOTE id layer 0 0 x y 0 op_or_len [content...]
                 try:
