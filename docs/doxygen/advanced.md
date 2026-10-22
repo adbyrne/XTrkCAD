@@ -59,7 +59,7 @@ after the branch, for someone to review.
 
 # CI tooling overview {#ci-tooling-overview}
 
-The main CI is `.github/workflows/ci-gtk3.yml` (`ci-gtk3-preview.yml`, `ci-mcp.yml`,
+The main CI is `.github/workflows/ci-gtk3.yml` (`ci-gtk3-preview.yml`,
 `codeql.yml`, `release.yml` and `hg-sync-default.yml` are separate workflows — see below). Read the workflow file
 directly for exact command lines; this is a map of what each job checks and whether it can fail
 your run, not a copy of it.
