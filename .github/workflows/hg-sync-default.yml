@@ -174,18 +174,28 @@ jobs:
           git checkout -q -b "$branch" "origin/$GIT_BRANCH"
 
           # Apply file by file. Our process is git first, so an Hg change can
-          # already be on main; a file whose diff reverse-applies cleanly is
-          # skipped as already present instead of failing the whole sync.
+          # already be on main. A file that already matches Hg at TIP (or is
+          # absent from both) is skipped as already present. Only the others
+          # are patched, so a failed patch is a real conflict. Checking the
+          # content first matters: a hunk that only adds lines can apply a
+          # second time to a file that already has them, a few lines further
+          # on (2026-10-22: it duplicated a function in cselect.c).
+          HG="hg -R $RUNNER_TEMP/hg"
+          matches_tip() {
+            if $HG cat -r "$TIP" "path:$1" > "$RUNNER_TEMP/tipfile" 2> /dev/null; then
+              [ -f "$1" ] && cmp -s "$RUNNER_TEMP/tipfile" "$1"
+            else
+              [ ! -e "$1" ]
+            fi
+          }
           : > "$RUNNER_TEMP/apply.err"
           : > "$RUNNER_TEMP/already.txt"
           if [ -s "$RUNNER_TEMP/upstream.diff" ]; then
             sed -n 's|^diff --git a/.* b/||p' "$RUNNER_TEMP/upstream.diff" | sort -u > "$RUNNER_TEMP/files.txt"
             while IFS= read -r f; do
-              if git apply --index --include="$f" "$RUNNER_TEMP/upstream.diff" 2>> "$RUNNER_TEMP/apply.err"; then
-                :
-              elif git apply --reverse --check --include="$f" "$RUNNER_TEMP/upstream.diff" 2> /dev/null; then
+              if matches_tip "$f"; then
                 echo "$f" >> "$RUNNER_TEMP/already.txt"
-              else
+              elif ! git apply --index --include="$f" "$RUNNER_TEMP/upstream.diff" 2>> "$RUNNER_TEMP/apply.err"; then
                 echo "FAILED: $f" >> "$RUNNER_TEMP/apply.err"
               fi
             done < "$RUNNER_TEMP/files.txt"

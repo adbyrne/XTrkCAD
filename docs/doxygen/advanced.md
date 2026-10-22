@@ -87,9 +87,9 @@ On `%main`, `hg-sync-default.yml` also mirrors SourceForge Hg `default` into git
 day. It diffs from the last synced Hg node, which is recorded as an `Hg-Node:` commit trailer,
 and applies the result to a `test/upstream-default-*` branch. It runs `ci-gtk3.yml` there and
 fast-forwards `%main` only if CI passes; a conflict or failure opens a GitHub issue instead.
-It applies the diff file by file. Changes usually land in git first, so a file whose Hg change
-is already on `%main` (its diff reverse-applies cleanly) is skipped and listed in the commit
-message rather than reported as a conflict.
+It applies the diff file by file. Changes usually land in git first, so a file that already
+matches Hg (its content on `%main` equals Hg's at the synced changeset) is skipped and listed in
+the commit message rather than patched; a file that doesn't apply is reported as a conflict.
 Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it starts
 `ci-gtk3.yml` through `workflow_dispatch`.
 
