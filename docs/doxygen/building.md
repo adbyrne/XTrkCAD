@@ -8,7 +8,7 @@ anything itself.
 The commands below are what CI actually runs, with the CI-only bits called out — a local desktop
 build doesn't need everything CI needs. The full, authoritative CI configuration lives in
 `.github/workflows/` (`ci-gtk3.yml` for the main CI, `ci-gtk3-preview.yml` for its
-next-toolchain preview, plus `ci-mcp.yml`, `codeql.yml`, `release.yml`, and
+next-toolchain preview, plus `codeql.yml`, `release.yml`, and
 `hg-sync-default.yml`) — worth reading directly if you have a GitHub account and want
 more detail than the summary below, e.g. exact job-by-job dependency lists or the release
 packaging steps. If you're working purely from the SourceForge/Hg checkout, these files are
@@ -305,7 +305,6 @@ in this table.
 |------|-----------|------------------------------------------|
 | Doxygen | pinned | 1.15.0 (upstream Linux binary, `.github/actions/setup-doxygen`) for the dev-guide jobs (`ci-gtk3.yml`'s `doxygen` and `help-links-check`, `release.yml`'s `package-docs`). The packaging jobs build the User Guide with the OS package instead: apt/Homebrew (unpinned) on Linux/macOS; MSYS2 `mingw-w64-x86_64-doxygen` pinned to 1.16.1-4 in `package-windows`, since 1.18.0-3 aborts on the User Guide build (`std::system_error`, 2026-10-05) |
 | AStyle | pinned | 3.6.13, all platforms (built from source, not the OS package; version set in `tools/astyle-check.sh`) |
-| Python (`ci-mcp.yml`) | pinned | 3.14, all platforms (via `setup-uv`). Unpinned, uv picked macOS's 3.15, which `rpds-py`'s PyO3 build can't target yet |
 | CMake | floor/ceiling only (`3.20`–`4.0`) | 3.28.3 (Linux), 4.4.x (Windows/MSYS2), Homebrew current (macOS) |
 | cppcheck | pinned (runner) | 2.13.0 (Ubuntu 24.04) |
 | clang-tidy | pinned (runner) | 18.0 (Ubuntu 24.04) |
