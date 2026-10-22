@@ -47,6 +47,20 @@ Configure in `~/.claude/settings.json` (Claude Code) or `claude_desktop_config.j
 uv run --extra dev pytest    # 423 tests
 ```
 
+## CI
+
+`.github/workflows/ci-mcp.yml` runs the tests on Linux (Ubuntu 24.04 and 26.04), macOS and
+Windows whenever `mcp/` or the workflow changes; it's separate from the C application's CI.
+Python is pinned to 3.14: unpinned, `uv` picked macOS's 3.15, which `rpds-py`'s PyO3 build
+can't target yet.
+
+`.github/dependabot.yml` has Dependabot open one grouped pull request a week that updates
+`uv.lock`. It skips new major versions of the `mcp` SDK, since moving to one changes the
+server's code, not just the lock file.
+
+The MCP server isn't part of XTrkCAD upstream (SourceForge Hg), so this directory, its
+workflow and the Dependabot config exist only in the GitHub repository.
+
 ## Layout files
 
 The server reads `.xtc`/`.xtce` files of any XTrkCAD version, including Layer
