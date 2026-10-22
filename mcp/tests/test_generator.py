@@ -834,3 +834,87 @@ def test_merge_benchwork_preserves_extra_custom_layer(tmp_path):
     # Standard layers were still freshly regenerated as usual
     assert '"L1-Main"' in content
     assert content.count("LAYERS CURRENT") == 1
+
+
+# ---------------------------------------------------------------------------
+# File version 13 and Layer Groups
+# ---------------------------------------------------------------------------
+
+def _two_level_layout(tmp_path, extra=""):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 12x16\nlevels: 2\n" + extra + "grid: []\n")
+    out = tmp_path / "t.xtc"
+    generate(load_config(cfg).config, out)
+    return out
+
+
+def test_generate_writes_current_file_version(simple_config, tmp_path):
+    out = tmp_path / "t.xtc"
+    generate(load_config(simple_config).config, out)
+    content = out.read_text(encoding="utf-8")
+    assert content.startswith("VERSION 13 5.4.0\n")
+    # VERSION 12+ object blocks end in END$SEGS; a bare END is read as the
+    # end of the file.
+    assert "\tEND$SEGS" in content
+    assert not any(line == "END" for line in content.splitlines())
+
+
+def test_generate_writes_category_layer_groups(tmp_path):
+    groups = {g.name: g.layers for g in parse_file(_two_level_layout(tmp_path)).layer_groups}
+    # L1-Main is layer 1, L2-Main layer 8; L1-Staging 4, L2-Staging 11.
+    assert groups["Mainline"] == [1, 8]
+    assert groups["Staging"] == [4, 11]
+    assert set(groups) >= {"Mainline", "Passing", "Storage", "Staging",
+                           "Connecting", "Service"}
+
+
+def test_generate_writes_level_groups(tmp_path):
+    groups = {g.name: g.layers for g in parse_file(_two_level_layout(tmp_path)).layer_groups}
+    assert groups["Level 1"] == [1, 2, 3, 4, 5, 6, 7]
+    assert groups["Level 2"] == [8, 9, 10, 11, 12, 13, 14]
+
+
+def test_generate_single_level_has_no_level_groups(simple_config, tmp_path):
+    out = tmp_path / "t.xtc"
+    generate(load_config(simple_config).config, out)
+    names = [g.name for g in parse_file(out).layer_groups]
+    assert "Level 1" not in names
+    assert "Mainline" in names
+
+
+def test_generate_groups_only_for_active_track_types(tmp_path):
+    out = _two_level_layout(tmp_path, "track_types: [Main, Staging]\n")
+    names = [g.name for g in parse_file(out).layer_groups]
+    assert names == ["Mainline", "Staging", "Level 1", "Level 2"]
+
+
+def test_merge_keeps_layer_groups_after_layers(tmp_path):
+    existing = _two_level_layout(tmp_path)
+    cfg = tmp_path / "layout.yaml"
+    out = tmp_path / "merged.xtc"
+    merge_benchwork_into(existing, load_config(cfg).config, out)
+    lines = out.read_text(encoding="utf-8").splitlines()
+    assert [g.name for g in parse_file(out).layer_groups] == \
+        [g.name for g in parse_file(existing).layer_groups]
+    first_group = next(i for i, ln in enumerate(lines) if ln.startswith("LAYERGROUP"))
+    current = next(i for i, ln in enumerate(lines) if ln.startswith("LAYERS CURRENT"))
+    assert current < first_group
+
+
+def test_merge_keeps_layer_settings_records(tmp_path):
+    existing = tmp_path / "existing.xtc"
+    existing.write_text(
+        "VERSION 13 5.4.0\nTITLE1 T\nSCALE HO\nROOMSIZE 96 x 96\n\n"
+        'LAYERS 0 1 0 1 8421504 0 0 0 0 "Floor" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        'LAYERS 1 1 0 1 0 0 0 0 0 "L1-Main" 1 0 0.000000 0.000000 0.000000 0.000000 0.000000\n'
+        "LAYERS CURRENT 1\n"
+        'LAYERS SET 1 "Code 83"\n'
+        'MANAGENOTES "Signals"\n\n'
+    )
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text("name: T\nscale: HO\ngrid: []\n")
+    out = tmp_path / "merged.xtc"
+    merge_benchwork_into(existing, load_config(cfg).config, out)
+    content = out.read_text(encoding="utf-8")
+    assert 'LAYERS SET 1 "Code 83"' in content
+    assert 'MANAGENOTES "Signals"' in content

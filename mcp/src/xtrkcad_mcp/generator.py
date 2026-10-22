@@ -96,6 +96,13 @@ def _find_template_id(pl: GridPlacement, lib: TemplateLibrary) -> str | None:
 # File versioning
 # ---------------------------------------------------------------------------
 
+# File format written for new layouts: XTrkCAD's current PARAMVERSION
+# (xtrkcad-config.h.in). 13 is the first version that reads LAYERGROUP
+# records; 12+ ends object blocks with END$SEGS.
+_GENERATED_VERSION = 13
+_GENERATED_VERSION_NAME = "5.4.0"
+
+
 def _version_backup(path: Path) -> Path | None:
     """Copy path → path_vN.xtc (N increments) before overwriting. Returns copy path."""
     if not path.exists():
@@ -177,6 +184,39 @@ def _layer_line(lyr_id: int, name: str, color: int) -> str:
         f'LAYERS {lyr_id} 1 0 1 {color} 0 0 0 0 "{name}" '
         f'1 0 0.000000 0.000000 0.000000 0.000000 0.000000'
     )
+
+
+# Layer Group names for the track types: a group named after a category is
+# what get_operation_density reads to categorize its layers.
+_TYPE_GROUP_NAMES = {"Main": "Mainline"}
+
+
+def _layer_groups_lines(
+    num_levels: int,
+    track_types: "list[str] | None" = None,
+) -> list[str]:
+    """Emit LAYERGROUP records: one group per active track type across all
+    levels ("Mainline", "Passing", ...), then, with more than one level,
+    one group per level holding its track and benchwork layers.
+
+    XTrkCAD stores members as layer index + 1.
+    """
+    active = set(track_types) if track_types is not None else set(_TRACK_TYPES)
+    groups: list[tuple[str, list[int]]] = []
+    for t_idx, t_name in enumerate(_TRACK_TYPES):
+        if t_name in active:
+            groups.append((_TYPE_GROUP_NAMES.get(t_name, t_name),
+                           [_track_type_layer(lv, t_idx) for lv in range(1, num_levels + 1)]))
+    if num_levels > 1:
+        for lv in range(1, num_levels + 1):
+            members = [_track_type_layer(lv, t_idx)
+                       for t_idx, t_name in enumerate(_TRACK_TYPES) if t_name in active]
+            groups.append((f"Level {lv}", members + [_benchwork_layer(lv)]))
+    result: list[str] = []
+    for g_idx, (name, layers) in enumerate(groups):
+        result.append(f'LAYERGROUP DEFINE {g_idx} "{name}"')
+        result.append(f'LAYERGROUP MEMBERS {g_idx} "{";".join(str(i + 1) for i in layers)}"')
+    return result
 
 
 def _layers_header(
@@ -438,7 +478,7 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
     num_levels = config.levels
 
     lines += [
-        f"VERSION 10 3.0.0",
+        f"VERSION {_GENERATED_VERSION} {_GENERATED_VERSION_NAME}",
         f"TITLE1 {config.name}",
         f"TITLE2 Generated {timestamp} scale={config.scale} main={config.mainline}",
         f"SCALE {config.scale}",
@@ -447,6 +487,7 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
     ]
 
     lines += _layers_header(num_levels, config.track_types, config.distinct_track_colors)
+    lines += _layer_groups_lines(num_levels, config.track_types)
     lines.append("")
 
     track_id = 1
@@ -456,10 +497,11 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
     lines.append("")
 
     if config.floor_plan is not None:
-        track_id = _write_floor_plan(config.floor_plan, lines, track_id)
+        track_id = _write_floor_plan(config.floor_plan, lines, track_id, _GENERATED_VERSION)
 
     if config.benchwork_sections:
-        track_id = _write_benchwork_sections(config.benchwork_sections, lines, track_id)
+        track_id = _write_benchwork_sections(
+            config.benchwork_sections, lines, track_id, _GENERATED_VERSION)
 
     for pl in config.placements:
         template_id = _find_template_id(pl, lib)
@@ -495,7 +537,7 @@ def generate(config: LayoutConfig, output_path: Path) -> GenerationResult:
             lines.append(_track_header(track.kind, track_id, _track_type_layer(pl.level), config.scale, track.extra))
             for ep in track.endpoints:
                 lines.append(_endpoint_line(ep.x * sf + x0, ep.y * sf + y0, ep.angle))
-            lines.append("END")
+            lines.append("\tEND$SEGS")
             placed.track_ids.append(track_id)
             track_id += 1
 
@@ -757,8 +799,15 @@ def merge_benchwork_into(
 
     clean_header: list[str] = []
     extra_layers: list[str] = []
+    # Records XTrkCAD writes after "LAYERS CURRENT": LAYERS LINK/SET, then
+    # LAYERGROUP and MANAGENOTES. Kept as is, and written back in that place.
+    after_layers: list[str] = []
     for hl in header_lines:
         parts = hl.strip().split()
+        if parts and (parts[0] in ("LAYERGROUP", "MANAGENOTES")
+                      or parts[:1] == ["LAYERS"] and parts[1:2] in (["LINK"], ["SET"])):
+            after_layers.append(hl)
+            continue
         if not parts or parts[0] != "LAYERS":
             clean_header.append(hl)
             continue
@@ -782,6 +831,7 @@ def merge_benchwork_into(
     output.extend(new_layers_body)
     output.extend(extra_layers)
     output.extend(new_layers_current)
+    output.extend(after_layers)
     output.append("")
 
     # Q3 wall DRAWs come first (matching original file order)
