@@ -75,8 +75,12 @@ with `gh workflow run hg-sync-default.yml`; for testing, the inputs are `dry_run
 
 ### When the sync workflow opens an issue
 
-The usual cause is an upstream change colliding with a git-only file or hunk (astyle fixes, git
-CI descriptions in the dev guide, held features). Handle it by hand:
+The usual cause is an upstream change colliding with a git-only file or hunk (astyle fixes, held
+features). Check first that the difference really is git-only and not a change that never reached
+Hg. The dev guide's CI pages (`advanced.md`, `building.md`) are not git-only: they describe the
+workflows, which are in Hg too, so their changes go to Hg like any other. Listing them as git-only
+in the sync exceptions hid a gap and caused the 2026-10-22 sync failure (#251, fixed in r7780).
+Handle it by hand:
 
 ```sh
 hg -R xtrkcad-hg pull && hg -R xtrkcad-hg update default
