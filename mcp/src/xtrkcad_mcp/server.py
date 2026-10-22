@@ -11,6 +11,7 @@ from mcp.server.fastmcp import FastMCP
 from xtrkcad_mcp.config import load_config
 from xtrkcad_mcp.models import (
     SCALE_RATIOS,
+    Layout,
     arc_polyline,
     cars_per_real_ft,
     level_from_layer_name,
@@ -49,6 +50,53 @@ def _resolve_plan(path: str) -> Path:
     if p.is_absolute():
         return p
     return _PLANS_DIR / p
+
+
+def _scope_layer_set(
+    layout: Layout, layers: list[str] | None, groups: list[str] | None,
+) -> set[int] | None:
+    """The layer indexes selected by layers and groups, or None for all.
+
+    layers takes layer names or index numbers; groups takes Layer Group
+    names. Both match names case-insensitively, and the result is their
+    union. Unknown names raise ValueError listing the available ones.
+    """
+    if not layers and not groups:
+        return None
+    selected: set[int] = set()
+    by_name = {info.name.lower(): idx for idx, info in layout.layers.items()}
+    for item in layers or []:
+        key = str(item).strip()
+        if key.isdigit() and int(key) in layout.layers:
+            selected.add(int(key))
+        elif key.lower() in by_name:
+            selected.add(by_name[key.lower()])
+        else:
+            available = ", ".join(info.name for info in layout.layers.values())
+            raise ValueError(f"No layer {key!r} in this layout. Layers: {available}")
+    group_by_name = {g.name.lower(): g for g in layout.layer_groups}
+    for item in groups or []:
+        group = group_by_name.get(str(item).strip().lower())
+        if group is None:
+            available = ", ".join(g.name for g in layout.layer_groups) or "none"
+            raise ValueError(f"No Layer Group {item!r} in this layout. Groups: {available}")
+        selected.update(group.layers)
+    return selected
+
+
+def _load_layout(
+    path: str | Path,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> Layout:
+    """Parse a layout, keeping only the tracks and notes on the selected
+    layers and Layer Groups (see _scope_layer_set). With neither given, the
+    whole layout is returned."""
+    layout = parse_file(_resolve_plan(str(path)))
+    scope = _scope_layer_set(layout, layers, groups)
+    return layout if scope is None else layout.scoped_to_layers(scope)
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -540,17 +588,26 @@ def write_benchwork_report(
 
 
 @mcp.tool()
-def get_layout_summary(path: str) -> dict:
+def get_layout_summary(
+    path: str,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> dict:
     """Return a summary of a layout: title, scale, room size, track counts.
 
     Args:
         path: Path to a .xtc or .xtce file.
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns:
         Dict with title1, title2, version, scale, room_width, room_height,
-        track_counts (by type), total_tracks, layers.
+        track_counts (by type), total_tracks, layers, layer_group_count and
+        layer_groups (name and member layer indexes of each Layer Group).
     """
-    layout = parse_file(_resolve_plan(path))
+    layout = _load_layout(path, layers, groups)
     return {
         "title1": layout.title1,
         "title2": layout.title2,
@@ -567,21 +624,62 @@ def get_layout_summary(path: str) -> dict:
             str(idx): {"name": li.name, "visible": li.visible}
             for idx, li in sorted(layout.layers.items())
         },
+        "layer_group_count": len(layout.layer_groups),
+        "layer_groups": [
+            {"name": g.name, "layers": g.layers} for g in layout.layer_groups
+        ],
     }
 
 
 @mcp.tool()
-def get_track_objects(path: str) -> list[dict]:
-    """Return all track objects in a layout with positions, connections, and lengths.
+def get_layer_groups(path: str) -> list[dict]:
+    """List the layout's Layer Groups and the layers in each.
+
+    Layer Groups are named sets of layers defined in XTrkCAD's Manage Layer
+    Groups dialog (layout files of VERSION 13 and later). Their names can be
+    passed as groups=[...] to the report tools to limit a report to those
+    layers, for example one railroad of several in the same file.
 
     Args:
         path: Path to a .xtc or .xtce file.
 
     Returns:
+        List of {"name", "layers": [{"index", "name"}]} in file order.
+    """
+    layout = parse_file(_resolve_plan(path))
+    return [
+        {
+            "name": g.name,
+            "layers": [
+                {"index": idx,
+                 "name": layout.layers[idx].name if idx in layout.layers else f"Layer {idx}"}
+                for idx in g.layers
+            ],
+        }
+        for g in layout.layer_groups
+    ]
+
+
+@mcp.tool()
+def get_track_objects(
+    path: str,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> list[dict]:
+    """Return all track objects in a layout with positions, connections, and lengths.
+
+    Args:
+        path: Path to a .xtc or .xtce file.
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
+
+    Returns:
         List of dicts, each with id, kind, layer, length_model_in, length_real_ft,
         and endpoints.
     """
-    layout = parse_file(_resolve_plan(path))
+    layout = _load_layout(path, layers, groups)
     result = []
     for t in layout.tracks:
         result.append(
@@ -607,16 +705,24 @@ def get_track_objects(path: str) -> list[dict]:
 
 
 @mcp.tool()
-def find_unconnected_endpoints(path: str) -> list[dict]:
+def find_unconnected_endpoints(
+    path: str,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> list[dict]:
     """Find all open (unconnected) endpoints in a layout.
 
     Args:
         path: Path to a .xtc or .xtce file.
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns:
         List of dicts with track_id, x, y, angle for each open endpoint.
     """
-    layout = parse_file(_resolve_plan(path))
+    layout = _load_layout(path, layers, groups)
     return [
         {
             "track_id": track_id,
@@ -634,17 +740,25 @@ def find_unconnected_endpoints(path: str) -> list[dict]:
 
 
 @mcp.tool()
-def get_track_lengths(path: str) -> dict:
+def get_track_lengths(
+    path: str,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> dict:
     """Return track lengths broken down by layer, in real feet and model inches.
 
     Args:
         path: Path to a .xtc or .xtce file.
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns:
         Dict with total lengths and a per-layer breakdown including layer name,
         total feet, turnout count, and car capacity.
     """
-    layout = parse_file(_resolve_plan(path))
+    layout = _load_layout(path, layers, groups)
     total_ft = layout.total_length_real_feet()
     cpf = cars_per_real_ft(layout.scale)
     car_len_in = 12.0 / cpf
@@ -676,7 +790,11 @@ def get_track_lengths(path: str) -> dict:
 
 
 @mcp.tool()
-def get_curve_stats(path: str) -> dict:
+def get_curve_stats(
+    path: str,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> dict:
     """Return curve radius statistics for a layout.
 
     Minimum radius is critical for knowing which locomotives and passenger cars
@@ -684,12 +802,16 @@ def get_curve_stats(path: str) -> dict:
 
     Args:
         path: Path to a .xtc or .xtce file.
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns:
         Dict with min_radius, max_radius, mean_radius (all in model inches and
         real inches), curve count, and a histogram of radius ranges.
     """
-    layout = parse_file(_resolve_plan(path))
+    layout = _load_layout(path, layers, groups)
     radii = layout.curve_radii()
     if not radii:
         return {"curve_count": 0, "min_radius_in": None, "max_radius_in": None}
@@ -732,6 +854,7 @@ def get_curve_stats(path: str) -> dict:
 # "L{n}-" or "L{n}H-" prefix) to a Fugate category.
 _SUFFIX_TO_CATEGORY: dict[str, str] = {
     "main":       "mainline",
+    "mainline":   "mainline",
     "passing":    "passing",
     "storage":    "storage",
     "staging":    "staging",
@@ -772,21 +895,29 @@ def _build_category_fn(
                 idx_to_cat[int(key)] = cat.lower()
             except ValueError:
                 name_to_cat[key.lower()] = cat.lower()
+    # A Layer Group named after a category ("Mainline", "Staging", ...)
+    # categorizes its member layers; the first such group wins for a layer
+    # that is in several.
+    group_cat: dict[int, str] = {}
+    for group in layout.layer_groups:
+        cat = _category_from_name(group.name)
+        if cat is None:
+            continue
+        for idx in group.layers:
+            group_cat.setdefault(idx, cat)
 
     def _category(layer_idx: int) -> str:
-        # Explicit index override takes highest precedence
+        # Precedence: explicit index, explicit name, Layer Group, then the
+        # standard layer-name suffix; anything else counts as mainline.
+        name = layout.layers[layer_idx].name.lower() if layer_idx in layout.layers else None
         if layer_idx in idx_to_cat:
             return idx_to_cat[layer_idx]
-        if layer_idx in layout.layers:
-            name = layout.layers[layer_idx].name
-            # Explicit name override
-            if name.lower() in name_to_cat:
-                return name_to_cat[name.lower()]
-            # Auto-categorize from standard layer name suffix
-            inferred = _category_from_name(name)
-            if inferred is not None:
-                return inferred
-        return "mainline"
+        if name is not None and name in name_to_cat:
+            return name_to_cat[name]
+        if layer_idx in group_cat:
+            return group_cat[layer_idx]
+        inferred = _category_from_name(name) if name is not None else None
+        return inferred if inferred is not None else "mainline"
 
     return _category
 
@@ -797,6 +928,8 @@ def get_operation_density(
     layer_categories: dict | None = None,
     car_length_model_in: float | None = None,
     train_length_cars: int = 6,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
 ) -> dict:
     """Compute Operation Density statistics using Joe Fugate's methodology (MRH Oct 2014).
 
@@ -816,6 +949,10 @@ def get_operation_density(
             Fugate's published factor for the layout's scale (HO=6in, N=3in, etc.)
         train_length_cars: Assumed train length in cars for estimating train count
             (default 6). Does not affect max_cars or cars_moved formulas.
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns:
         Dict with room info, track by category, by_level breakdown, and
@@ -825,7 +962,7 @@ def get_operation_density(
         (e.g. "L1-Main" → level "1"); layers without a standard prefix
         appear under level "0".
     """
-    layout = parse_file(_resolve_plan(path))
+    layout = _load_layout(path, layers, groups)
     scale = layout.scale
 
     cpf = cars_per_real_ft(scale)
@@ -962,6 +1099,8 @@ def write_operation_density_report(
     car_length_model_in: float | None = None,
     train_length_cars: int = 6,
     format: str = "txt",
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
 ) -> str:
     """Write a Fugate Operation Density report.
 
@@ -975,11 +1114,16 @@ def write_operation_density_report(
         car_length_model_in: Same as get_operation_density.
         train_length_cars: Same as get_operation_density.
         format: Output format — "txt" (default), "md", or "html".
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns:
         Confirmation message with the absolute path written.
     """
-    data = get_operation_density(path, layer_categories, car_length_model_in, train_length_cars)
+    data = get_operation_density(path, layer_categories, car_length_model_in,
+                                 train_length_cars, layers=layers, groups=groups)
     ops = data["operations"]
     room = data["room"]
     totals = data["totals"]
@@ -1447,6 +1591,8 @@ def write_layout_report(
     layer_categories: dict | None = None,
     stations_yaml: str | None = None,
     format: str = "txt",
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
 ) -> str:
     """Write a full layout summary report.
 
@@ -1463,11 +1609,15 @@ def write_layout_report(
         stations_yaml: Optional path to stations.yaml. When provided the
             validation section also checks for missing STATION:/INDUSTRY: notes.
         format: Output format — "txt" (default), "md", or "html".
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns:
         Confirmation message with the absolute path written.
     """
-    layout = parse_file(_resolve_plan(path))
+    layout = _load_layout(path, layers, groups)
     _val_config = load_stations_config(stations_yaml) if stations_yaml else None
     validation_issues = validate_layout_annotations(layout, _val_config)
     scale = layout.scale
@@ -1729,8 +1879,13 @@ def write_layout_report(
 
 
 @mcp.tool()
-def write_equipment_report(path: str, output_path: str,
-                            format: str = "txt") -> str:
+def write_equipment_report(
+    path: str,
+    output_path: str,
+    format: str = "txt",
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> str:
     """Write an equipment suitability report based on the layout's minimum curve radius.
 
     Compares the minimum curve radius against published minimums for common
@@ -1740,11 +1895,15 @@ def write_equipment_report(path: str, output_path: str,
         path: Path to the source .xtc or .xtce file.
         output_path: Destination path for the report.
         format: Output format — "txt" (default), "md", "html", or "json".
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns:
         Confirmation message with the absolute path written.
     """
-    layout = parse_file(_resolve_plan(path))
+    layout = _load_layout(path, layers, groups)
     scale = layout.scale
     radii = [r for r in layout.curve_radii() if r >= 9.0]  # skip decorative curves
     min_r = min(radii) if radii else None
@@ -1864,8 +2023,13 @@ def write_equipment_report(path: str, output_path: str,
 
 
 @mcp.tool()
-def write_turnout_report(path: str, output_path: str,
-                          format: str = "txt") -> str:
+def write_turnout_report(
+    path: str,
+    output_path: str,
+    format: str = "txt",
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> str:
     """Write a turnout density report to a text file.
 
     Reports total turnouts, density (turnouts per 100 ft of track), and a
@@ -1875,11 +2039,15 @@ def write_turnout_report(path: str, output_path: str,
     Args:
         path: Path to the source .xtc or .xtce file.
         output_path: Destination path for the .txt report.
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns:
         Confirmation message with the absolute path written.
     """
-    layout = parse_file(_resolve_plan(path))
+    layout = _load_layout(path, layers, groups)
     total_ft = layout.total_length_real_feet()
     total_turnouts = sum(1 for t in layout.tracks if t.kind == "TURNOUT")
     by_layer = layout.length_by_layer()
@@ -1996,8 +2164,13 @@ def write_turnout_report(path: str, output_path: str,
 
 
 @mcp.tool()
-def write_gaps_report(path: str, output_path: str,
-                       format: str = "txt") -> str:
+def write_gaps_report(
+    path: str,
+    output_path: str,
+    format: str = "txt",
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> str:
     """Write an open endpoints (track gaps) report.
 
     Lists every unconnected endpoint with its track ID, position, and angle.
@@ -2011,11 +2184,15 @@ def write_gaps_report(path: str, output_path: str,
         path: Path to the source .xtc or .xtce file.
         output_path: Destination path for the report.
         format: Output format — "txt" (default), "md", "html", or "json".
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns:
         Confirmation message with the absolute path written.
     """
-    layout = parse_file(_resolve_plan(path))
+    layout = _load_layout(path, layers, groups)
     all_open = [
         {"track_id": tid, "x": ep.x, "y": ep.y, "angle": ep.angle}
         for tid, ep in layout.unconnected_endpoints()
@@ -2178,6 +2355,8 @@ def write_radius_map(
     path: str,
     output_path: str,
     flag_radius: float | None = None,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
 ) -> str:
     """Generate an SVG map of the layout with curves color-coded by radius.
 
@@ -2197,11 +2376,15 @@ def write_radius_map(
         output_path: Destination path for the .svg file.
         flag_radius: Model-inch threshold for red flagging. Defaults to
             18\" HO scaled to the layout's scale.
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns:
         Confirmation message with the absolute path written.
     """
-    layout = parse_file(_resolve_plan(path))
+    layout = _load_layout(path, layers, groups)
     scale = layout.scale
 
     ho_ratio = SCALE_RATIOS.get("HO", 87.1)
@@ -2468,7 +2651,11 @@ def fix_dead_connections(path: str) -> str:
 
 
 @mcp.tool()
-def get_stations(path: str) -> list[dict]:
+def get_stations(
+    path: str,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> list[dict]:
     """List all stations identified by STATION: NOTE objects in the layout.
 
     Stations are marked by placing a text NOTE in XTrkCAD whose text begins
@@ -2477,9 +2664,13 @@ def get_stations(path: str) -> list[dict]:
 
     Args:
         path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
     """
     p = _resolve_plan(path)
-    layout = parse_file(p)
+    layout = _load_layout(path, layers, groups)
     stations = extract_stations(layout)
     return [
         {
@@ -2501,6 +2692,8 @@ def get_station_distances(
     layer_categories: dict | None = None,
     route_layer_names: list[str] | None = None,
     exclude_turnouts: bool = False,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
 ) -> list[dict]:
     """Compute track-graph distances between all STATION: notes in the layout.
 
@@ -2522,9 +2715,13 @@ def get_station_distances(
         layer_categories: Optional map of layer index → category name.
         route_layer_names: Optional list of category names to restrict routing.
         exclude_turnouts: If True, TURNOUT track lengths are excluded from totals.
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
     """
     p = _resolve_plan(path)
-    layout = parse_file(p)
+    layout = _load_layout(path, layers, groups)
     results = compute_distances(
         layout,
         layer_categories=layer_categories,
@@ -2552,6 +2749,8 @@ def write_station_distance_report(
     exclude_turnouts: bool = False,
     format: str = "md",
     stations_yaml: str = "",
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
 ) -> str:
     """Write a station distance report to a file.
 
@@ -2578,9 +2777,13 @@ def write_station_distance_report(
         stations_yaml: Optional path to stations.yaml for mp_scale.  When
             omitted the directory of the .xtc file is searched for a
             *_stations.yaml match; falls back to mp_scale=12.
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
     """
     p = _resolve_plan(path)
-    layout = parse_file(p)
+    layout = _load_layout(path, layers, groups)
     fmt = _resolve_format(output_path, format)
     stations = extract_stations(layout)
     results = compute_distances(
@@ -2677,7 +2880,11 @@ def write_station_distance_report(
 
 
 @mcp.tool()
-def get_siding_capacities(path: str) -> list[dict]:
+def get_siding_capacities(
+    path: str,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> list[dict]:
     """Report usable track length and car capacity for storage/passing tracks.
 
     Three sources of capacity data are combined:
@@ -2694,6 +2901,10 @@ def get_siding_capacities(path: str) -> list[dict]:
 
     Args:
         path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
 
     Returns a list of dicts with keys:
         name            — marker label (station id for passing, note label for storage)
@@ -2704,7 +2915,7 @@ def get_siding_capacities(path: str) -> list[dict]:
         max_cars        — whole cars that fit (Fugate formula, no partial)
     """
     p = _resolve_plan(path)
-    layout = parse_file(p)
+    layout = _load_layout(path, layers, groups)
     results = compute_capacities(layout)
     return [
         {
@@ -2798,7 +3009,11 @@ def list_plans_resource() -> str:
 
 
 @mcp.tool()
-def list_labeled_segments(path: str) -> list[dict]:
+def list_labeled_segments(
+    path: str,
+    layers: list[str] | None = None,
+    groups: list[str] | None = None,
+) -> list[dict]:
     """List all annotated track segments found in the layout.
 
     Scans every text NOTE for STATION:, STORAGE:, INDUSTRY:, HOUSE_TRACK:, and
@@ -2810,9 +3025,13 @@ def list_labeled_segments(path: str) -> list[dict]:
 
     Args:
         path: Path to the .xtc layout file.
+        layers: Optional layer names or index numbers. With layers and/or
+            groups, only tracks and notes on the selected layers are used.
+        groups: Optional Layer Group names (see get_layer_groups); selects
+            every layer in each group, combined with layers.
     """
     p = _resolve_plan(path)
-    layout = parse_file(p)
+    layout = _load_layout(path, layers, groups)
     segments = list_annotated_segments(layout)
     return [
         {
@@ -2876,8 +3095,8 @@ def validate_layout(path: str, stations_yaml: str = "") -> dict:
 @mcp.tool()
 def export_layout_data(
     path: str,
-    stations_yaml: str = "",
     output_path: str = "",
+    stations_yaml: str = "",
 ) -> dict:
     """Export layout measurement data to layout_data.json for RR_server.
 
@@ -2897,10 +3116,10 @@ def export_layout_data(
 
     Args:
         path: Path to the .xtc layout file.
-        stations_yaml: Optional path to stations.yaml.  When omitted, all
-                       station metadata is derived from the .xtc notes.
         output_path: Where to write layout_data.json.  Defaults to
                      layout_data.json alongside the .xtc file.
+        stations_yaml: Optional path to stations.yaml.  When omitted, all
+                       station metadata is derived from the .xtc notes.
     """
     import json
 

@@ -2,7 +2,7 @@
 
 import math
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 
 # Fugate cars-per-real-foot factors (MRH Oct 2014).
@@ -61,6 +61,18 @@ class LayerInfo:
     index: int
     name: str
     visible: bool = True
+
+
+@dataclass
+class LayerGroup:
+    """Named Layer Group from LAYERGROUP DEFINE/MEMBERS records (VERSION 13+).
+
+    layers holds 0-based layer indexes, matching LAYERS records and each
+    object's layer field (the file itself stores index + 1).
+    """
+    index: int
+    name: str
+    layers: list[int] = field(default_factory=list)
 
 
 @dataclass
@@ -137,6 +149,18 @@ class Layout:
     tracks: list[TrackObject] = field(default_factory=list)
     layers: dict[int, LayerInfo] = field(default_factory=dict)
     notes: list[NoteObject] = field(default_factory=list)
+    layer_groups: list[LayerGroup] = field(default_factory=list)
+
+    def scoped_to_layers(self, layer_set: set[int]) -> "Layout":
+        """A copy holding only the tracks and notes on layers in layer_set.
+
+        Layers and Layer Groups are kept whole so names still resolve.
+        """
+        return replace(
+            self,
+            tracks=[t for t in self.tracks if t.layer in layer_set],
+            notes=[n for n in self.notes if n.layer in layer_set],
+        )
 
     def track_counts(self) -> dict[str, int]:
         counts: dict[str, int] = {}

@@ -53,6 +53,91 @@ _ALL_PREFIXES: list[tuple[str, str]] = [
 
 _SNAP_WARN_THRESHOLD = 12.0  # model inches — warn if NOTE is more than 1 model foot from track
 
+_NOTE_OP_TEXT = 0
+_NOTE_OP_JSON = 3
+
+
+def _json_str(obj: dict, key: str) -> str:
+    """obj[key] as a stripped string, or "" when absent or not a string."""
+    value = obj.get(key)
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _json_annotation(text: str) -> str | None:
+    """Rewrite a JSON Note body as the equivalent text-prefix annotation.
+
+    Each kind maps onto its text form, so JSON Notes and text notes go
+    through the same parsing below:
+
+        {"kind": "station", "id", "terminus", "switchback", "ref_tag"}
+                                        -> STATION: <id> [!TERM] [!SWB] [@ref_tag]
+        {"kind": "storage", "id"}       -> STORAGE: <id>
+        {"kind": "industry", "id", "name", "station"}
+                                        -> INDUSTRY: <id> [name] [@station]
+        {"kind": "house_track", "id"}   -> HOUSE_TRACK: <id>
+        {"kind": "yard_track", "id", "label"}
+                                        -> YARD_TRACK: <id> <label>
+        {"kind": "reference", "id", "mp_scale"}
+                                        -> REFERENCE: <id> [mp_scale=N]
+
+    Returns None for anything else: invalid JSON, an unknown kind, or a
+    missing id.
+    """
+    try:
+        obj = json.loads(text)
+    except (json.JSONDecodeError, TypeError):
+        return None
+    if not isinstance(obj, dict):
+        return None
+    kind = obj.get("kind")
+    ident = _json_str(obj, "id")
+    if not ident:
+        return None
+    if kind == "station":
+        parts = [STATION_PREFIX, ident]
+        if obj.get("terminus") is True:
+            parts.append("!TERM")
+        if obj.get("switchback") is True:
+            parts.append("!SWB")
+        if _json_str(obj, "ref_tag"):
+            parts.append("@" + _json_str(obj, "ref_tag"))
+    elif kind == "storage":
+        parts = [STORAGE_PREFIX, ident]
+    elif kind == "industry":
+        parts = [INDUSTRY_PREFIX, ident]
+        if _json_str(obj, "name"):
+            parts.append(_json_str(obj, "name"))
+        if _json_str(obj, "station"):
+            parts.append("@" + _json_str(obj, "station"))
+    elif kind == "house_track":
+        parts = [HOUSE_TRACK_PREFIX, ident]
+    elif kind == "yard_track":
+        if not _json_str(obj, "label"):
+            return None
+        parts = [YARD_TRACK_PREFIX, ident, _json_str(obj, "label")]
+    elif kind == "reference":
+        parts = [REFERENCE_PREFIX, ident]
+        mp_scale = obj.get("mp_scale")
+        if isinstance(mp_scale, (int, float)) and not isinstance(mp_scale, bool):
+            parts.append(f"mp_scale={mp_scale:g}")
+    else:
+        return None
+    return " ".join(parts)
+
+
+def note_annotation(note: NoteObject) -> str | None:
+    """The annotation a note carries, in text-prefix form ("STATION: WP ...").
+
+    A text note's body is returned as is; a JSON Note's body is rewritten by
+    _json_annotation(). Link and file notes, and JSON Notes that aren't
+    annotations, give None.
+    """
+    if note.op == _NOTE_OP_TEXT:
+        return note.text.strip()
+    if note.op == _NOTE_OP_JSON:
+        return _json_annotation(note.text)
+    return None
+
 
 @dataclass
 class Station:
@@ -92,12 +177,8 @@ def extract_stations(layout: Layout) -> list[Station]:
 
     stations: list[Station] = []
     for note in layout.notes:
-        if note.op == 0:
-            parsed = _parse_station_note(note.text.strip())
-        elif note.op == 3:
-            parsed = _parse_station_json(note.text)
-        else:
-            continue
+        text = note_annotation(note)
+        parsed = _parse_station_note(text) if text is not None else None
         if parsed is None:
             continue
         station_id, terminus, switchback, ref_tag = parsed
@@ -346,24 +427,6 @@ def _note_prefix(text: str) -> tuple[str, str] | None:
     return None
 
 
-def _note_prefix_json(text: str) -> tuple[str, str] | None:
-    """JSON Note equivalent of _note_prefix, storage only for now: a JSON body
-    shaped like {"kind": "storage", "id": <id>} -> ("storage", id).
-
-    INDUSTRY:/HOUSE_TRACK: have no JSON schema yet -- industry's id/name/
-    within-station shape in particular needs its own design pass, not
-    invented here without a fixture that actually exercises it.
-    """
-    try:
-        obj = json.loads(text)
-    except (json.JSONDecodeError, TypeError):
-        return None
-    if not isinstance(obj, dict) or obj.get("kind") != "storage":
-        return None
-    note_id = obj.get("id")
-    if not isinstance(note_id, str) or not note_id:
-        return None
-    return "storage", note_id
 
 
 def _parse_station_note(
@@ -390,36 +453,14 @@ def _parse_station_note(
     return station_id, terminus, switchback, ref_tag
 
 
-def _parse_station_json(text: str) -> tuple[str, bool, bool, str | None] | None:
-    """JSON Note equivalent of _parse_station_note: a JSON body shaped like
-    {"kind": "station", "id": <id>, "terminus": bool, "switchback": bool,
-    "ref_tag": <str>} -> (id, terminus, switchback, ref_tag), matching
-    _parse_station_note's return shape. Only "id" is required; the other
-    three default to False/False/None when absent.
-    """
-    try:
-        obj = json.loads(text)
-    except (json.JSONDecodeError, TypeError):
-        return None
-    if not isinstance(obj, dict) or obj.get("kind") != "station":
-        return None
-    station_id = obj.get("id")
-    if not isinstance(station_id, str) or not station_id:
-        return None
-    terminus = obj.get("terminus", False) is True
-    switchback = obj.get("switchback", False) is True
-    ref_tag = obj.get("ref_tag")
-    if not isinstance(ref_tag, str) or not ref_tag:
-        ref_tag = None
-    return station_id, terminus, switchback, ref_tag
 
 
 def _extract_mp_scale(layout: Layout) -> float:
     """Return mp_scale from 'REFERENCE: MP_ZERO mp_scale=N', defaulting to 12.0."""
     for note in layout.notes:
-        if note.op != 0:
+        text = note_annotation(note)
+        if text is None:
             continue
-        text = note.text.strip()
         if not text.upper().startswith(REFERENCE_PREFIX):
             continue
         rest = text[len(REFERENCE_PREFIX):].strip().split()
@@ -597,12 +638,10 @@ def compute_capacities(layout: Layout) -> list[CapacityResult]:
     results: list[CapacityResult] = []
 
     for note in layout.notes:
-        if note.op == 0:
-            parsed = _note_prefix(note.text)
-        elif note.op == 3:
-            parsed = _note_prefix_json(note.text)
-        else:
+        text = note_annotation(note)
+        if text is None:
             continue
+        parsed = _note_prefix(text)
         if parsed is None:
             continue
         kind, name = parsed
@@ -665,9 +704,9 @@ def compute_yard_tracks(layout: Layout) -> list[YardTrackResult]:
     results: list[YardTrackResult] = []
 
     for note in layout.notes:
-        if note.op != 0:
+        text = note_annotation(note)
+        if text is None:
             continue
-        text = note.text.strip()
         if not text.upper().startswith(YARD_TRACK_PREFIX):
             continue
         body = text[len(YARD_TRACK_PREFIX):].strip()
@@ -1194,9 +1233,9 @@ def extract_reference_points(layout: Layout) -> list[ReferencePoint]:
 
     points: list[ReferencePoint] = []
     for note in layout.notes:
-        if note.op != 0:
+        text = note_annotation(note)
+        if text is None:
             continue
-        text = note.text.strip()
         if not text.upper().startswith(REFERENCE_PREFIX):
             continue
         # First token only — ignore trailing params (e.g. "mp_scale=12" in MP_ZERO note)
@@ -1311,9 +1350,9 @@ def list_annotated_segments(layout: Layout) -> list[AnnotatedSegment]:
     track_by_id = {t.id: t for t in layout.tracks}
 
     for note in layout.notes:
-        if note.op != 0:
+        text = note_annotation(note)
+        if text is None:
             continue
-        text = note.text.strip()
         upper = text.upper()
 
         matched_type: str | None = None
