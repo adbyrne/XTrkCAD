@@ -216,7 +216,9 @@ jobs:
           git -c user.name='github-actions[bot]' \
               -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
               commit -q --allow-empty -F "$RUNNER_TEMP/msg.txt"
-          git log -1 --stat | head -60
+          # Not "| head": under pipefail, head closing the pipe early fails the
+          # step with SIGPIPE (exit 141) once a sync touches 60+ files.
+          git --no-pager log -1 --stat --stat-count=60
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
       - name: Keep the diff
