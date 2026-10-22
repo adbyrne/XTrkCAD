@@ -17,6 +17,10 @@ Actions at a plain, empty repo they create under their own account. Throughout t
 substitute your own everywhere you see it, or just `export GITHUB_USER=yourname` so the commands
 below work as written.
 
+The two repositories name the release line differently: Hg `default` and git `%main` are the same
+branch. This page describes the GitHub workflows, so it says `%main`; where it refers to Hg, it
+says `default`.
+
 1. Create a GitHub account if you don't already have one.
 2. Create a new repository under your account — with the [`gh` CLI](https://cli.github.com/):
    ```sh
