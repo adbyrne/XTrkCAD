@@ -1,0 +1,16 @@
+# Dependency updates for the MCP server (mcp/). The C application has no
+# package-manager dependencies.
+version: 2
+updates:
+  - package-ecosystem: "uv"
+    directory: "/mcp"
+    schedule:
+      interval: "weekly"
+    groups:
+      mcp-dependencies:
+        patterns: ["*"]
+    ignore:
+      # mcp 2.x renames FastMCP and changes its API; moving to it is a
+      # separate migration, not a routine update.
+      - dependency-name: "mcp"
+        update-types: ["version-update:semver-major"]
