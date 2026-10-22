@@ -786,7 +786,7 @@ def test_export_layout_data_tool(tmp_path):
     os.environ["XTRKCAD_PLANS_DIR"] = str(FIXTURES_DIR)
     from xtrkcad_mcp.server import export_layout_data
     out = tmp_path / "layout_data.json"
-    result = export_layout_data(str(EXPORT_FIXTURE), str(EXPORT_STATIONS), str(out))
+    result = export_layout_data(str(EXPORT_FIXTURE), str(out), str(EXPORT_STATIONS))
     assert out.exists()
     assert result["stations"] == 2   # WP and XP
     assert result["industries"] == 1  # KIEL

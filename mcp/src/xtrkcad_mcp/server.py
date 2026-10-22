@@ -3095,8 +3095,8 @@ def validate_layout(path: str, stations_yaml: str = "") -> dict:
 @mcp.tool()
 def export_layout_data(
     path: str,
-    stations_yaml: str = "",
     output_path: str = "",
+    stations_yaml: str = "",
 ) -> dict:
     """Export layout measurement data to layout_data.json for RR_server.
 
@@ -3116,10 +3116,10 @@ def export_layout_data(
 
     Args:
         path: Path to the .xtc layout file.
-        stations_yaml: Optional path to stations.yaml.  When omitted, all
-                       station metadata is derived from the .xtc notes.
         output_path: Where to write layout_data.json.  Defaults to
                      layout_data.json alongside the .xtc file.
+        stations_yaml: Optional path to stations.yaml.  When omitted, all
+                       station metadata is derived from the .xtc notes.
     """
     import json
 

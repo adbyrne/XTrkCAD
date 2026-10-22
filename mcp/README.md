@@ -20,6 +20,14 @@ uv sync --extra dev   # also installs pytest
 uv run xtrkcad-mcp          # stdio transport (for Claude Desktop / claude-code)
 ```
 
+`xtrkcad-report` writes the layout report from the command line, optionally for
+some layers or Layer Groups only:
+
+```sh
+uv run xtrkcad-report layout.xtc -f html -o report.html
+uv run xtrkcad-report layout.xtc -g NYE -f md      # one Layer Group; repeat -g / -l for more
+```
+
 Configure in `~/.claude/settings.json` (Claude Code) or `claude_desktop_config.json`:
 
 ```json
@@ -36,8 +44,15 @@ Configure in `~/.claude/settings.json` (Claude Code) or `claude_desktop_config.j
 ## Tests
 
 ```sh
-uv run pytest          # 362 tests
+uv run --extra dev pytest    # 423 tests
 ```
+
+## Layout files
+
+The server reads `.xtc`/`.xtce` files of any XTrkCAD version, including Layer
+Groups (`LAYERGROUP` records, file `VERSION 13`) and JSON Notes.  Layouts it
+generates use XTrkCAD's current format, `VERSION 13`, and so need XTrkCAD 5.4
+or later.
 
 ## Tools
 
@@ -49,14 +64,25 @@ uv run pytest          # 362 tests
 | `load_layout_config` | Load and validate a YAML layout config; returns questionnaire for missing fields |
 | `list_templates` | List available track element templates, optionally filtered by category |
 | `get_template_info` | Detailed metadata for one template by id |
-| `generate_layout` | Generate an initial `.xtc` file from a YAML config |
+| `generate_layout` | Generate an initial `.xtc` file from a YAML config, with standard layers and Layer Groups |
 | `merge_benchwork` | Replace floor/benchwork layers in an existing `.xtc`, preserving all track objects and NOTEs |
+| `add_track_layers` | Add the standard `L{n}-*` track-type layers to an existing `.xtc` |
+| `rename_layers` | Rename layers by name, e.g. to standard names op-density recognizes |
+
+### Views
+
+| Tool | Description |
+|---|---|
+| `write_plan_view` | Top-down SVG of the benchwork, one deck or all, optionally with track from an `.xtc` |
+| `write_elevation_view` | Wall-profile SVG of benchwork heights |
+| `write_benchwork_report` | Table of every benchwork section with area and bounding box |
 
 ### Read / analyse
 
 | Tool | Description |
 |---|---|
-| `get_layout_summary` | Title, scale, room size, track counts |
+| `get_layout_summary` | Title, scale, room size, track counts, layers, Layer Groups |
+| `get_layer_groups` | Layer Groups and the layers in each |
 | `get_track_objects` | All track objects with endpoints and connections |
 | `find_unconnected_endpoints` | Open (unconnected) endpoints |
 | `get_track_lengths` | Total track length by kind and layer |
@@ -75,30 +101,50 @@ All write-report tools accept a `format` parameter: `"txt"` (default), `"md"`, `
 | `write_turnout_report` | Turnout count and density per 100 ft, by layer |
 | `write_gaps_report` | Open endpoints, near-miss pairs, turntable stall summary |
 | `write_radius_map` | SVG colour-coded curve radius map |
+| `write_station_distance_report` | Station-to-station distances |
+
+### Limiting a tool to part of the layout
+
+The read, analyse, report and annotation tools take two optional arguments:
+`layers` (layer names or index numbers) and `groups` (Layer Group names).  With
+either, only tracks and notes on the selected layers are used, so a file holding
+two railroads can be reported on one railroad at a time:
+
+```
+write_layout_report("layout.xtc", "nye.md", format="md", groups=["NYE"])
+```
+
+`get_operation_density` classifies layers by explicit `layer_categories` first,
+then by Layer Groups named after a category (`Mainline`, `Passing`, `Storage`,
+`Staging`, `Connecting`, `Service`), then by the layer-name suffix
+(`L1-Staging`).
 
 ### Annotation and export
 
-These tools measure track capacity and compute station mileposts from NOTE annotations
-placed on the layout.  Annotations use the following `NOTE` text prefixes:
+These tools measure track capacity and compute station mileposts from notes placed
+on the layout.  Annotations are XTrkCAD JSON Notes with a `kind` and an `id`:
 
-| Prefix | Purpose |
+| JSON Note | Purpose |
 |---|---|
-| `STATION: <id>` | Station or yard identity; Dijkstra milepost origin |
-| `REFERENCE: <name>` | Named reference point (e.g. `REFERENCE: MP_ZERO`) |
-| `INDUSTRY: <id>` | Industry spur; length measured from nearest endpoint |
-| `STORAGE: <id>` | Standalone freight spur (not a station house track) |
-| `HOUSE_TRACK: <id>` | Station freight-house / team track; coexists with passing siding |
-| `YARD_TRACK: <id> <label>` | Individual yard track capacity |
+| `{"kind": "station", "id": "WP"}` | Station; optional `terminus`, `switchback` (true/false) and `ref_tag` |
+| `{"kind": "reference", "id": "MP_ZERO"}` | Named reference point; `MP_ZERO` is the milepost origin, optional `mp_scale` |
+| `{"kind": "industry", "id": "KIEL", "name": "Kiel Co", "station": "WP"}` | Industry spur; `name` and `station` optional |
+| `{"kind": "storage", "id": "Car Barn"}` | Standalone freight spur (not a station house track) |
+| `{"kind": "house_track", "id": "WP"}` | Station freight-house / team track; coexists with passing siding |
+| `{"kind": "yard_track", "id": "WP", "label": "Track 2"}` | One yard track's capacity |
 
-Passing siding capacity is inferred automatically from `L{n}-Passing` layers —
-no NOTE is required on the passing track itself.
+Text notes with the older prefixes (`STATION: WP !TERM`, `INDUSTRY: KIEL Kiel Co @WP`,
+`YARD_TRACK: WP Track 2`, ...) are read the same way.  Passing siding capacity is
+inferred automatically from `L{n}-Passing` layers — no note is required on the
+passing track itself.  `docs/layout-config-guide.md` section 6 describes every field.
 
 | Tool | Description |
 |---|---|
+| `get_stations` | Station notes and the track each one snaps to |
 | `get_siding_capacities` | Usable track length and car capacity for all annotated segments |
 | `get_station_distances` | Milepost and inter-station distances |
 | `list_labeled_segments` | Audit all annotated tracks before running validate/export |
-| `validate_layout` | Check NOTE annotations against stations.yaml config |
+| `validate_layout` | Check the annotations for completeness |
 | `export_layout_data` | Write `layout_data.json` (mileposts, sidings, house tracks, industries) |
 
 ### Edit
@@ -198,4 +244,7 @@ src/xtrkcad_mcp/
   generator.py   — .xtc file generator from LayoutConfig
   templates.py   — Template library loader
   templates/     — 12 stub .xtc files + index.yaml catalog
+  stations.py    — note annotations (JSON and text), station routing, capacities, export
+  svg_views.py   — plan and elevation SVG views
+  cli.py         — xtrkcad-report command-line entry point
 ```

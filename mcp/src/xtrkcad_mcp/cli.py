@@ -28,6 +28,18 @@ def report_main() -> None:
         choices=["txt", "md", "html", "json"],
         help="Output format (default: txt)",
     )
+    parser.add_argument(
+        "-l", "--layer",
+        action="append",
+        metavar="LAYER",
+        help="Report only this layer (name or index); repeat for more",
+    )
+    parser.add_argument(
+        "-g", "--group",
+        action="append",
+        metavar="GROUP",
+        help="Report only this Layer Group's layers; repeat for more",
+    )
     args = parser.parse_args()
 
     from pathlib import Path
@@ -44,10 +56,16 @@ def report_main() -> None:
         suffix = f".{args.format}" if args.format != "txt" else ".txt"
         output_path = str(input_path.with_suffix("") ) + "_report" + suffix
 
-    result = write_layout_report(
-        path=str(input_path),
-        output_path=output_path,
-        stations_yaml=args.stations,
-        format=args.format,
-    )
+    try:
+        result = write_layout_report(
+            path=str(input_path),
+            output_path=output_path,
+            stations_yaml=args.stations,
+            format=args.format,
+            layers=args.layer,
+            groups=args.group,
+        )
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
     print(result)

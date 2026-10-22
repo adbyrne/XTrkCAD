@@ -1018,3 +1018,12 @@ def test_write_benchwork_report_empty_config(tmp_path):
     write_benchwork_report(str(cfg), str(out))
     content = out.read_text(encoding="utf-8")
     assert "No benchwork sections" in content
+
+
+def test_export_layout_data_output_path_is_second_argument(tmp_path):
+    """The layout-config guide calls export_layout_data(path, output_path)."""
+    from xtrkcad_mcp.server import export_layout_data
+    out = tmp_path / "layout_data.json"
+    result = export_layout_data(str(HILLSIDE_TRACK), str(out))
+    assert out.exists()
+    assert result["stations"] == 2

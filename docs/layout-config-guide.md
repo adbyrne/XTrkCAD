@@ -494,6 +494,16 @@ L1-Benchwork layer (7) shows Level 1 shelf outlines.  The L2-Benchwork layer
 (L2-Main through L2-Service) are ready for track placement.  Use the Layers
 dialog to toggle each level or track type independently.
 
+The file also defines **Layer Groups** (Manage → Layer Groups in XTrkCAD):
+one per track type across all decks (`Mainline` holds L1-Main and L2-Main,
+`Staging` holds L1-Staging and L2-Staging, and so on) and, on a multi-deck
+layout, one per deck (`Level 1`, `Level 2`).  Use them in XTrkCAD to show,
+select or report on a whole category or deck at once.  The category groups
+also tell `get_operation_density` how to classify track (see section 6).
+
+The generated file uses XTrkCAD's current file format (`VERSION 13`), so it
+needs XTrkCAD 5.4 or later.
+
 **Adding track-type layers to an existing file:**
 
 If you started placing track before running `generate_layout` with the current
@@ -586,40 +596,71 @@ grade).
 
 ## 6. Track annotations and layout export
 
-Once you have placed track in XTrkCAD, add text NOTE objects to describe the
-operational geography.  The MCP server reads these notes to compute mileposts,
-siding lengths, and industry spur data, then writes them to `layout_data.json`
-for use by dispatcher and timetable tools.
+Once you have placed track in XTrkCAD, add notes that describe the operational
+geography.  The MCP server reads these notes to compute mileposts, siding
+lengths, and industry spur data, then writes them to `layout_data.json` for use
+by dispatcher and timetable tools.
 
-### Annotation note format
+### Annotation notes
 
-All notes use XTrkCAD's built-in text NOTE objects (Insert → Note).  The
-server recognises four prefixes:
+Use XTrkCAD's **JSON Note** (the Note command's JSON variant).  Each note holds
+one JSON object with a `kind` and an `id`; the other fields depend on the kind:
 
-| Note text | Meaning |
-|-----------|---------|
-| `REFERENCE: MP_ZERO mp_scale=N` | Milepost origin — place at the first decision point (first switch south of the originating yard). `mp_scale` is the number of layout inches per milepost unit; defaults to 12.0 if omitted. |
-| `STATION: <id> [!TERM] [!SWB] [@ref]` | Station stop. `!TERM` marks a terminus (no through exit; `milepost_exit` is null). `!SWB` marks a switchback (train enters, shoves to the far end, exits back out the same switch). `@ref` links to a named REFERENCE: point to resolve the exit milepost when the station's own NOTE can't reach the exit switch via Dijkstra (e.g. `STATION: MC !SWB @MC_EXIT`). |
-| `INDUSTRY: <id> <name> [@sta]` | Industry spur — place the note on or near the spur track. The first token is the short ID used in reports; the remaining tokens before any `@` are the display name. An optional `@STA` token names the station whose yard limits contain this industry (omit for on-line spurs directly off the mainline). |
-| `YARD_TRACK: <yard_id> <label>` | Individual yard track within a yard area. |
+| Kind | Fields | Meaning |
+|------|--------|---------|
+| `reference` | `id`, optional `mp_scale` | Named reference point.  `{"kind": "reference", "id": "MP_ZERO"}` is the milepost origin: place it at the first decision point (first switch south of the originating yard).  `mp_scale` is the number of layout inches per milepost unit; it defaults to 12. |
+| `station` | `id`, optional `terminus`, `switchback`, `ref_tag` | Station stop.  `"terminus": true` marks a terminus (no through exit; `milepost_exit` is null).  `"switchback": true` marks a switchback (train enters, shoves to the far end, exits back out the same switch).  `ref_tag` names a `reference` point that resolves the exit milepost when the station's own note can't reach the exit switch (e.g. a switchback station's exit). |
+| `industry` | `id`, optional `name`, `station` | Industry spur; place the note on or near the spur track.  `id` is the short ID used in reports, `name` the display name.  `station` names the station whose yard limits contain this industry; leave it out for on-line spurs directly off the mainline. |
+| `house_track` | `id` | A station's freight-house or team track; `id` is the station. |
+| `storage` | `id` | A standalone freight spur that isn't a station house track. |
+| `yard_track` | `id`, `label` | One track in a yard; `id` is the yard, `label` the track's name. |
 
-**Examples for the Hillside Division:**
+Passing siding capacity comes from the `L{n}-Passing` layers, so passing tracks
+need no note.
+
+**Examples for the Hillside Division** (`mcp/tests/fixtures/hillside_track.xtc`):
+
+```json
+{"kind": "reference", "id": "MP_ZERO"}
+{"kind": "station", "id": "SOUTH"}
+{"kind": "station", "id": "NORTH"}
+{"kind": "industry", "id": "FREIGHT", "name": "Freight House", "station": "SOUTH"}
+```
+
+Place each note close to the track it describes: the server snaps each note
+to the nearest track endpoint (or, for `yard_track`, the nearest track
+segment) to measure distances.
+
+Plain text notes with a prefix are read the same way, e.g.
+`STATION: NORTH !TERM`, `INDUSTRY: FREIGHT Freight House @SOUTH`,
+`REFERENCE: MP_ZERO mp_scale=8` or `YARD_TRACK: WP Track 2`, so layouts
+annotated before JSON Notes existed keep working.
+
+### Reporting on part of a layout
+
+Most read and report tools take two optional arguments that limit them to part
+of the layout: `layers` (layer names or index numbers) and `groups` (Layer
+Group names).  Only tracks and notes on the selected layers are used.  This is
+how one file holding two railroads gets a separate report for each:
 
 ```
-REFERENCE: MP_ZERO mp_scale=8
-STATION: SOUTH
-STATION: NORTH !TERM
-INDUSTRY: FREIGHT Freight House @SOUTH
+get_layer_groups("my_layout.xtc")
+write_layout_report("my_layout.xtc", "nye_report.html", format="html",
+                    groups=["NYE"])
+get_station_distances("my_layout.xtc", groups=["C&O"])
 ```
 
-Place each NOTE close to the track it describes — the server snaps each note
-to the nearest track endpoint (or segment for YARD_TRACK) to measure distances.
+`get_operation_density` classifies each layer, in this order: an explicit
+`layer_categories` entry, a Layer Group named after a category (`Mainline`,
+`Passing`, `Storage`, `Staging`, `Connecting`, `Service`), then the layer
+name's suffix (`L1-Staging`, `L2-CO-Passing`).  Anything else counts as
+mainline.
 
 ### Export tools
 
 | Tool | What it does |
 |------|-------------|
-| `validate_layout(path)` | Check that every STATION: note snaps close to a track and that REFERENCE: MP_ZERO exists.  Returns error/warning counts and a list of issues. |
+| `validate_layout(path)` | Check that every station note snaps close to a track and that the `MP_ZERO` reference exists.  Returns error/warning counts and a list of issues. |
 | `export_layout_data(path, output_path="")` | Compute mileposts, siding lengths, and industry spur data; write `layout_data.json`. |
 
 Both tools derive all metadata from the `.xtc` notes — no separate YAML file

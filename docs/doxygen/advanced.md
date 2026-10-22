@@ -60,6 +60,10 @@ The main CI is `.github/workflows/ci-gtk3.yml` (`ci-gtk3-preview.yml`, `ci-mcp.y
 directly for exact command lines; this is a map of what each job checks and whether it can fail
 your run, not a copy of it.
 
+`.github/dependabot.yml` has Dependabot open one grouped pull request a week that updates the MCP
+server's locked Python dependencies (`mcp/uv.lock`); `ci-mcp.yml` tests it. It skips new major
+versions of the `mcp` SDK, since moving to one changes the server's code, not just the lock file.
+
 No job definition is kept as a hand-made copy of another, because copies drifted more than once.
 The shared pieces:
 
