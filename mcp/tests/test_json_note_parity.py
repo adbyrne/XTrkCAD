@@ -28,10 +28,12 @@ TOOLS = [
 
 
 def _normalized(result):
-    """JSON text of a tool result, with note ids and the file path left out
-    (the two fixtures differ only in note format, so ids match anyway)."""
+    """JSON text of a tool result with the fixture name made the same for both.
+
+    Only the file name is swapped, not the full path: in JSON text a Windows
+    path's backslashes are escaped, so it wouldn't match the plain path."""
     return json.dumps(result, sort_keys=True, default=str).replace(
-        JSON_FIXTURE, TEXT_FIXTURE)
+        "annotations_json", "annotations_text")
 
 
 @pytest.mark.parametrize("tool", TOOLS)
