@@ -46,7 +46,8 @@ jobs:
     # suppressed first (see .claude/doxygen-triage-plan.md; down to 402 as
     # of 2026-07-17, from an original 930).
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    # 30 minutes leaves room for a slow apt mirror; see compiler-warnings in gtk3-qa-reports.yml.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps
@@ -100,7 +101,8 @@ jobs:
     # sets don't overlap at all -- app/doc/*.dox (where every \page cmd...
     # topic lives) isn't in the internal-docs job's INPUT.
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    # 30 minutes leaves room for a slow apt mirror; see compiler-warnings in gtk3-qa-reports.yml.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps

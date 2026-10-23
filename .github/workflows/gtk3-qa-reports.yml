@@ -272,7 +272,8 @@ jobs:
     # baseline) -> 711 after this filter, with zero remaining primary
     # (warning:/error:) lines pointing at the three vendored headers.
     runs-on: ${{ inputs.runner }}
-    timeout-minutes: 15
+    # 30 minutes leaves room for a slow apt mirror; see compiler-warnings in gtk3-qa-reports.yml.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps
