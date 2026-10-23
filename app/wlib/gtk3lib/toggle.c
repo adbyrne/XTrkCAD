@@ -35,6 +35,7 @@
 
 #include "gtkint.h"
 #include "i18n.h"
+#include "stickytogglebutton.h"
 #include <stdbool.h>
 
 #define MAX_SCROLL_AREA_SIZE 200
@@ -292,7 +293,6 @@ wControl_p wToggleCreate(
 	return b;
 }
 
-static bool ignoreClick;
 /**
  * Set the status of the button
  *
@@ -312,24 +312,28 @@ void wButtonSetBusy(wControl_p bb, int newState)
 	}
 	currentState = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
 	if (currentState != newState) {
-		ignoreClick = true;
 		bb->attributes.button.quiet++;
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), newState);
+		// a sticky state set by a long press lasts until the command ends
+		if (!newState && IS_STICKY_TOGGLE_BUTTON(button)
+		    && sticky_toggle_button_get_mode(STICKY_TOGGLE_BUTTON(button))
+		    == STICKY_TOGGLE_BUTTON_TEMP) {
+			sticky_toggle_button_set_sticky(STICKY_TOGGLE_BUTTON(button), FALSE);
+		}
 		bb->attributes.button.quiet--;
-		ignoreClick = false;
 	}
 }
 
 /**
  * Callback for toggle buttons on the toolbar. Fires on every user click
  * (both activate and deactivate). Suppressed for programmatic state
- * changes (wButtonSetBusy) via ignoreClick.
+ * changes (wButtonSetBusy) via the button's quiet counter.
  */
 static void toolbarClicked(GtkToggleButton *widget, gpointer value)
 {
 	struct button *b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
 
-	if (b->action && !ignoreClick) {
+	if (b->action && !b->quiet) {
 		b->action(((wControl_p)value)->context);
 	}
 }

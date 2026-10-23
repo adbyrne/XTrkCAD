@@ -34,8 +34,6 @@
 #include "i18n.h"
 #include "stickytogglebutton.h"
 
-static bool ignoreClick;
-
 static GtkWidget *GetActionButton(wControl_p toolbarButton)
 {
 	GtkWidget *actionButton;
@@ -64,9 +62,9 @@ void wStickySetBusy(wControl_p bb, int newState)
 
 	currentState = gtk_toggle_button_get_active(targetButton);
 	if (currentState != newState) {
-		ignoreClick = true;
+		bb->attributes.button.quiet++;
 		gtk_toggle_button_set_active(targetButton, newState);
-		ignoreClick = false;
+		bb->attributes.button.quiet--;
 	}
 }
 
@@ -88,7 +86,7 @@ static void toolbarClicked(StickyToggleButton* widget, gpointer value)
 {
 	struct button* b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
 
-	if (b->action && !ignoreClick) {
+	if (b->action && !b->quiet) {
 		b->action(((wControl_p)value)->context);
 	}
 }

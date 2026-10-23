@@ -728,6 +728,7 @@ static BOOL_T playbackNonStop = FALSE;
 static int playbackKeyState;
 
 static void DoDemoButton(void *context);
+static void CreateDemoW(void);
 static paramTextData_t demoTextData = {50, 16};
 static paramData_t demoPLs[] = {
 #define I_DEMOSTEP (0)
@@ -1581,6 +1582,10 @@ static int StartPlayback(int cnt, char **pathName, void *context)
 
 	paramFileName = strdup(pathName[0]);
 
+	if (demoW == NULL) {
+		CreateDemoW();
+	}
+	wButtonSetLabel(demoNext, _("Save"));
 	PlaybackSetup();
 	curDemo = -1;
 	UndoSuspend();
@@ -1674,16 +1679,20 @@ static void CreateDemoW(void)
 	wComboBoxAddValue(demoSpeedL, _("Faster"), I2VP(4));
 	wComboBoxAddValue(demoSpeedL, _("Fastest"), I2VP(5));
 	wComboBoxSetIndex(demoSpeedL, (wIndex_t)playbackSpeed);
-	playbackFile_fs = wFilSelCreate(mainW, FS_LOAD, 0, title, sRecordFilePattern,
-	                                StartPlayback, NULL);
 }
 
+/**
+ * Macro > Playback: pick a recorded file. The demo dialog is only created
+ * once a file was chosen in StartPlayback(): creating a dialog shows it, and
+ * quitting a playback that never started crashes in PlaybackQuit().
+ */
 EXPORT void DoPlayBack(void *context)
 {
-	if (demoW == NULL) {
-		CreateDemoW();
+	if (playbackFile_fs == NULL) {
+		playbackFile_fs = wFilSelCreate(mainW, FS_LOAD, 0,
+		                                MakeWindowTitle(_("Demo")),
+		                                sRecordFilePattern, StartPlayback, NULL);
 	}
-	wButtonSetLabel(demoNext, _("Save"));
 	wFilSelect(playbackFile_fs, GetCurrentPath(MACROPATHKEY));
 }
 
