@@ -9,6 +9,10 @@
 #   podman run --rm -v "$PWD:/src:ro,z" ubuntu:26.04 \
 #       sh /src/tools/package-install-test.sh /src/xtrkcad-setup-...deb
 #
+# Fedora needs --privileged: its gdk-pixbuf runs image loaders in a bwrap
+# sandbox (glycin), which can't start in an unprivileged container, and GTK
+# then aborts on its first icon.
+#
 # release.yml's install-test jobs run it the same way. It installs the
 # package with the distribution's own package manager (so missing or
 # misnamed dependencies fail here, as they would for a user), then checks:

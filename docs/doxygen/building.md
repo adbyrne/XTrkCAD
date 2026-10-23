@@ -299,7 +299,7 @@ and still update on their own schedule. `ci-gtk3-preview.yml` runs the toolchain
 on the next images ahead of a move (see \ref ci-tooling-overview "CI tooling overview"). The
 `c-tests-debian` jobs and `release.yml`'s `package-linux-debian` jobs build inside
 `debian:bookworm` and `debian:trixie` containers, so they get those releases' own GCC 12/14,
-CMake and GTK. The AStyle pin exists specifically because an unpinned version once produced
+CMake and GTK; `package-linux-fedora` does the same in `fedora:44` and `fedora:45` containers. The AStyle pin exists specifically because an unpinned version once produced
 different formatting output for identical input (SF #638) — if you're chasing a formatting or
 doc-generation mismatch against CI, matching these two matters more than matching anything else
 in this table.
