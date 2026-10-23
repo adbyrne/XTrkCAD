@@ -28,7 +28,7 @@
 #define ELLIPSIZE "..."
 
 /**
- * Replace all whitespace characters with blanks. Successive occurences are reduced to a single blank.
+ * Replace all whitespace characters with blanks. Successive occurrences are reduced to a single blank.
  *
  * \param source IN string to convert
  * \param dest IN buffer for converted string, minimum size is the size of the source string

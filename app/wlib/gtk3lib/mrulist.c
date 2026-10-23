@@ -76,7 +76,7 @@ void *MRUTouchEntry(MRUList* list, const char* label, void *entry)
 {
 	if (!list || !label) { return(NULL); }
 
-	// check for existance of entry
+	// check for existence of entry
 	GList* link = g_queue_find_custom(list->elements, label,
 	                                  (GCompareFunc)labelcmp);
 
@@ -111,7 +111,7 @@ void* MRUAppendEntry(MRUList* list, const char* label, void* entry)
 {
 	if (!list || !label) { return(NULL); }
 
-	// check for existance of entry
+	// check for existence of entry
 	const GList* link = g_queue_find_custom(list->elements, label,
 	                                        (GCompareFunc)labelcmp);
 

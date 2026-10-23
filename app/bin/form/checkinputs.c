@@ -202,7 +202,7 @@ FLOAT_T FormFloatGetValue(paramData_p data, const char *enteredValue)
 			ShowErrorMessage(data, FormGetParseError());
 		}
 		/**
-		 * \todo The original version set the entry field to a properly formated value incl. scale conversion.
+		 * \todo The original version set the entry field to a properly formatted value incl. scale conversion.
 		 * This was removed from DecodeDistance for clarity but could be put here if it makes sense
 		 */
 	} else {

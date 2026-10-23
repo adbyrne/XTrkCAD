@@ -535,7 +535,7 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttonInx)
 	       mainD.size.x, mainD.size.y,
 	       cmdX, cmdY,
 	       pos.x, pos.y ) );
-	// This hilites the control nd moves the cursor
+	// This hilites the control and moves the cursor
 	MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttonInx].control);
 }
 

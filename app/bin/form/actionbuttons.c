@@ -48,7 +48,7 @@ void FormDialogOkActive(
 
 #define  FORMCANCEL_NEWUNDO
 #ifdef FORMCANCEL_NEWUNDO
-/* No Cancel button, Commnd can be undone
+/* No Cancel button, Command can be undone
  */
 EXPORT void FormCancel_Undo(
         paramGroup_cp group)

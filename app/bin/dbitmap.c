@@ -268,7 +268,7 @@ static paramGroup_t outputBitMapPG = { "outputbitmap", PGO_FULLDIALOGFROMBUILDER
 
 /**
  * The upper limit for the dpi setting is calculated. The limit is set
- * to make sute that the number of pixels in any direction is below the
+ * to make sure that the number of pixels in any direction is below the
  * maximum value.
  *
  * \param [in]		size	The size of the layout

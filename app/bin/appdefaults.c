@@ -304,7 +304,7 @@ GetParamFullPath(struct appDefault *ptrDefault, const void *additionalData)
 
 
 /**
- * The following are three jump points for the correct implementation. Changing the funtion pointer
+ * The following are three jump points for the correct implementation. Changing the function pointer
  * allows to switch from the extended default version to the basic implementation.
  */
 

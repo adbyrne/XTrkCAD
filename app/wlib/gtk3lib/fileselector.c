@@ -195,7 +195,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		// NOTE: this is not the recommended way to set the folder
 		// See https://docs.gtk.org/gtk3/method.FileChooser.set_current_folder.html
 		// However this works for now
-		// TODO: revist how to set the current folder
+		// TODO: revisit how to set the current folder
 		gtk_file_chooser_set_current_folder(
 		        GTK_FILE_CHOOSER(fs->window), dirName );
 

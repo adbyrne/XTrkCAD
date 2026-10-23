@@ -344,7 +344,7 @@ wIndex_t wListGetValues(
  * Check whether row is selected
  * \param listControl IN widget
  * \param inx IN row
- * \returns TRUE if selected, FALSE if not existant or unselected
+ * \returns TRUE if selected, FALSE if not existent or unselected
  */
 
 wBool_t wListGetItemSelected(

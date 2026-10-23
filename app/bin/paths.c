@@ -88,7 +88,7 @@ AddPath(const char *type, char*path)
 
 /**
  * Update the current directory for a specific filetype. Get the directory part from the current file.
- * XTrackCAD keeps seprate directories for different filetypes.(for trackplans, bitmaps and DXF files).
+ * XTrackCAD keeps separate directories for different filetypes.(for trackplans, bitmaps and DXF files).
  * The paths are stored in a hash table using the file type as the hash.
  *
  * \param pathType IN file type
@@ -212,7 +212,7 @@ char *FindFileExtension(char *path)
 }
 
 /**
-* Make a full path definition from directorys and filenames. The individual pieces are
+* Make a full path definition from directories and filenames. The individual pieces are
 * Concatenated. Where necessary a path delimiter is added. A pointer to the resulting
 * string is returned. This memory should be free'd when no longer needed.
 * Windows: to construct an absolute path, a leading backslash has to be included after

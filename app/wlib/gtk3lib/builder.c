@@ -63,7 +63,7 @@ wlibFileNameFromDialog( const char *dialog )
 }
 
 /**
- * Check for the existance of a ui definition
+ * Check for the existence of a ui definition
  *
  * \param name IN name of ui definition
  * \return true if exists, false otherwise
@@ -146,7 +146,8 @@ wlibCreateWindowFromBuilder(wControl_p window, const char* nameStr, long option)
 		nameStr = tempStr;
 		containerName = nameStr;
 	} else {
-		containerName = (option & F_DEFINEDINBUILDER ? nameStr : BASICBUILDER_RESOURCE);
+		containerName = ((option & F_DEFINEDINBUILDER) ? nameStr :
+		                 BASICBUILDER_RESOURCE);
 		resourcePath = g_strconcat(XTRKCAD_RESOURCE_PATH,
 		                           containerName,
 		                           ".ui",

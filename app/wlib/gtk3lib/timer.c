@@ -44,7 +44,7 @@ static setTriggerCallback_p triggerFunc = NULL;
  * timer expires
  *
  * \param data IN callback function
- * \returns alwys 0
+ * \returns always 0
  */
 
 static gint doAlarm(

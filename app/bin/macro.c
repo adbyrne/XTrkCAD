@@ -648,7 +648,7 @@ EXPORT void MovePlaybackCursor(drawCmd_p d, coOrd pos, wBool_t direct,
 {
 #ifdef MOVECURSORTOCOMMANDBUTTON
 	// Show the cursor clicking on the command button
-	// Not possile with current structure
+	// Not possible with current structure
 	playbackD = &tempD;
 	if (!direct) {
 		MoveCursor(d, NULL, wActionMove, pos, arrow0_bm, wDrawColorBlack);
@@ -673,7 +673,7 @@ EXPORT void MovePlaybackCursor(drawCmd_p d, coOrd pos, wBool_t direct,
 	wDrawSetTempMode(d->d, bTemp);
 	d->options = options;
 #else
-	// Just hilight the button
+	// Just highlight the button
 	if (control) {
 		wControlHilite(control, TRUE);
 		wPause(bRunTests ? 0 : 1000);

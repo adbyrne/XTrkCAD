@@ -312,7 +312,7 @@ wPrefReset(void )
  * If a token is not present, NULL is returned instead.
  * The input line is modified.
  *
- * \param line		input line, modified during excution of function
+ * \param line		input line, modified during execution of function
  * \param section	section if present
  * \param name		name of config value if present
  * \param value		name of value if present
@@ -342,7 +342,7 @@ wPrefTokenize(char* line, char** section, char** name, char** value)
  * \param section	section, returned inside squared brackets
  * \param name		name, left side of '='
  * \param value		value, right side of '='
- * \param result	pointer to buffer for formated line.
+ * \param result	pointer to buffer for formatted line.
  */
 
 void

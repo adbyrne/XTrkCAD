@@ -424,7 +424,7 @@ static wBool_t SearchUiDlgUpdate(
 /**
  * Get the system default directory for parameter files. First step is to
  * check the configuration file for a user specific setting. If that is not
- * found, the diretory is based derived from the installation directory.
+ * found, the directory is based derived from the installation directory.
  * The returned string has to be free'd() when no longer needed.
  *
  * \return   parameter file directory

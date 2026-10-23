@@ -147,7 +147,7 @@ ReplaceDirectoryName(DynString *result, char* in, const char* dir,
 }
 
 /**
- * Find the user id in a string and replace it with a placeholer.
+ * Find the user id in a string and replace it with a placeholder.
  *
  * \param result	resulting string DynFree() after use
  * \param in		string to search in

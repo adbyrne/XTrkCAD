@@ -315,7 +315,7 @@ void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width,
 }
 
 /**
- * Terminates the applicaton. Before closing the main window
+ * Terminates the application. Before closing the main window
  * call back is called with wQuit_e.
  *
  * \param rc IN exit code

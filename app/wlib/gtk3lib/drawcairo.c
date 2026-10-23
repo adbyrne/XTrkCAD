@@ -126,7 +126,7 @@ static cairo_t *gtkDrawCreateCairoContext(struct draw *bd,
 				        You are seeing this message because there is a wDraw*() call on
 				   tempD but you are not in the context of TempRedraw() Typically this
 				   happens when Cmd<Object>() is processing a C_DOWN or C_MOVE action
-				   and it writes directly to tempD Instead it sould set some state which
+				   and it writes directly to tempD Instead it should set some state which
 				   allows c_redraw to do the actual drawing If you set a break point on
 				   the printf you'll see the offending wDraw*() call in the traceback It
 				   should be sufficient to remove that draw code or move it to C_REDRAW

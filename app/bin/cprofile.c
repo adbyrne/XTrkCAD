@@ -539,7 +539,7 @@ static void RedrawProfileW( wDraw_p d, void * context, wWinPix_t x,
 	prof.maxC = prof.minC + (prof.maxC-prof.minC+prof.incrC-1)/prof.incrC *
 	            prof.incrC;
 
-	/* Reset bounds based on intergal values */
+	/* Reset bounds based on integral values */
 	prof.minE = GetDim(prof.minC);
 	rngE = GetDim(prof.maxC) - prof.minE;
 	if (rngE < 1.0) {

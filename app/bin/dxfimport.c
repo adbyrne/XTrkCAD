@@ -633,7 +633,7 @@ static void ProcessDxfFile(
 							dxfAddOutput(tmp);
 							dxfDebugMessage(ok, fileName);
 
-							// Detect polylines that are actually cloesd
+							// Detect polylines that are actually closed
 							if (vertices > 1 && vrt_x[0] == vrt_x[vertices - 1]
 							    && vrt_y[0] == vrt_y[vertices - 1]) {
 								closed = 1;

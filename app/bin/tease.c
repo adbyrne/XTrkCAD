@@ -53,8 +53,8 @@ a                                                                       aa
 '0' is curve origin.
 '**..TT' is tangent line.
 'a' is arc with radius 'R'.
-'*' is the transisition curve.
-'x' is transisition curve offset.
+'*' is the transition curve.
+'x' is transition curve offset.
 
 For a better representation of this, build 'testjoin' and
 do 'testjoin psplot 10 10 40 1 | lpr -Ppostscript'

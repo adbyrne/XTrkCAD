@@ -160,7 +160,7 @@ FormatKey(DynString* keyPtr, Part* part)
 }
 
 /**
- * Save entered price to configuration using part informtion as key.
+ * Save entered price to configuration using part information as key.
  */
 
 static void

@@ -95,7 +95,7 @@ CompareStyle(sCssStyle *a, sCssStyle *b)
 /**
  * Add style to cache. If an identical style definition can be found in the
  * cache, the class name is returned.
- * If no previous definition is in the cache, a new one is contructed and
+ * If no previous definition is in the cache, a new one is constructed and
  * stored in the cache. The new class name is returned
  *
  * \param [in] styleDef style definition.

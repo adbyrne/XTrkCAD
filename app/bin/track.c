@@ -154,7 +154,7 @@ EXPORT DIST_T GetTrkDistance( track_cp trk, coOrd * pos )
 
 /**
  * Check whether the track passed as parameter is close to an existing piece. Track
- * pieces that aren't visible (in a tunnel or on an invisble layer) can be ignored,
+ * pieces that aren't visible (in a tunnel or on an invisible layer) can be ignored,
  * depending on flag. If there is a track closeby, the passed track is moved to that
  * position. This implements the snap feature.
  *
@@ -226,7 +226,7 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
 
 /**
  * Check whether the track passed as parameter is close to an existing piece. Track
- * pieces that aren't visible (in a tunnel or on an invisble layer) are ignored,
+ * pieces that aren't visible (in a tunnel or on an invisible layer) are ignored,
  * This function is basically a wrapper function to OnTrack2().
  */
 

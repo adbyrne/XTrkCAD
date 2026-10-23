@@ -595,7 +595,7 @@ draw_tooltip(GtkWidget* widget, gint x, gint y, gboolean kbd,
  * Position information is ignored when creating the area from builder.
  * This is set by the layout engine in GTK3.
  *
- * The size of the drawing area can be explicitely set by passing values
+ * The size of the drawing area can be explicitly set by passing values
  * large than 0. This is optional for builder defined controls but should
  * be set for runtime created drawing areas.
  *

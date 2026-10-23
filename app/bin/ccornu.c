@@ -1139,7 +1139,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 		else { Da.crvSegs_da_cnt = 0; }
 		Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
 		return C_CONTINUE;
-		break;
 	}
 
 	case wActionMove:
@@ -3004,7 +3003,7 @@ static STATUS_T CmdConvertTo(
 			if (Da.trk[0]) { Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],trk); }
 			else { Da.ep[0] = -1; }
 			EPINX_T ep0 = 0;
-			//Move down the LHS adding tracks until no more Selected or not modifyable
+			//Move down the LHS adding tracks until no more Selected or not modifiable
 			while (Da.trk[0] && GetTrkSelected( Da.trk[0]) && IsTrack(Da.trk[0])
 			       && (QueryTrack(Da.trk[0], Q_CORNU_CAN_MODIFY)
 			           || QueryTrack(Da.trk[0], Q_IS_CORNU)) ) {
@@ -3040,7 +3039,7 @@ static STATUS_T CmdConvertTo(
 			EPINX_T ep1 = 1;
 			if (Da.trk[1]) { Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],trk); }
 			else { Da.ep[1] = -1; }
-			//Move down RHS adding tracks until no more Selected or not modifyable
+			//Move down RHS adding tracks until no more Selected or not modifiable
 			while (Da.trk[1] && GetTrkSelected( Da.trk[1])
 			       && (QueryTrack(Da.trk[1], Q_CORNU_CAN_MODIFY)
 			           || QueryTrack(Da.trk[1], Q_IS_CORNU))) {

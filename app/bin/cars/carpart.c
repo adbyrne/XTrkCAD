@@ -347,7 +347,7 @@ void CarPartDelete(carPart_p partP)
 /**
 * Delete all car part definitions that came from a specific parameter file.
 * CarParts are stored in DYNARR for the specific car model. These DYNARRs
-* are linked from CarPartParents, again DYNARRs. Thes parents are created
+* are linked from CarPartParents, again DYNARRs. These parents are created
 * from part definition and only contain manufacturer and type information.
 *
 * \param[in] fileIndex parameter file

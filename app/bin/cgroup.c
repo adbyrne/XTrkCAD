@@ -42,7 +42,7 @@
  * See TODO-BUMPER
  *
  * The remaining issue is that the ShortestPath logic aborts if it gets to the end of a
- * path elem list and can't find the corresponing EP.
+ * path elem list and can't find the corresponding EP.
  */
 
 /*****************************************************************************
@@ -1198,7 +1198,7 @@ static void GroupOk( void * unused )
 //				int start = trackSegs_da.cnt;
 
 				GetBezierSegmentsFromCornu(trk,&trackSegs_da,
-				                           TRUE);  //Only give back Bezier - cant be undone
+				                           TRUE);  //Only give back Bezier - can't be undone
 
 			} else {
 				if (IsTrack(trk)) { hasTracks=TRUE; }

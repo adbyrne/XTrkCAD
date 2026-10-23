@@ -202,7 +202,7 @@ static void CreateMenuItem(
         const char * labelStr,
         int acclKey )
 {
-	// create a modifyable copy of the label
+	// create a modifiable copy of the label
 	char *labelcopy = ChangeToUnderscore(labelStr);
 
 	switch ( mtype ) {
