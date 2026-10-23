@@ -41,7 +41,8 @@ jobs:
   c-tests-linux:
     name: c-tests-linux (ubuntu-${{ inputs.ubuntu }})
     runs-on: ubuntu-${{ inputs.ubuntu }}
-    timeout-minutes: 15
+    # 30 minutes leaves room for a slow apt mirror; see compiler-warnings in gtk3-qa-reports.yml.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps
@@ -60,7 +61,8 @@ jobs:
   c-tests-linux-clang:
     name: c-tests-linux-clang (ubuntu-${{ inputs.ubuntu }})
     runs-on: ubuntu-${{ inputs.ubuntu }}
-    timeout-minutes: 15
+    # 30 minutes leaves room for a slow apt mirror; see compiler-warnings in gtk3-qa-reports.yml.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps

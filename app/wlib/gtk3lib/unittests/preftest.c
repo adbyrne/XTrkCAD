@@ -17,7 +17,7 @@
 #include "wlib.h"
 #include "../gtkint.h"
 
-unsigned dontHideCursor;
+long dontHideCursor;
 
 static void GetLibdir(void **state)
 {

@@ -272,7 +272,8 @@ jobs:
     # baseline) -> 711 after this filter, with zero remaining primary
     # (warning:/error:) lines pointing at the three vendored headers.
     runs-on: ${{ inputs.runner }}
-    timeout-minutes: 15
+    # 30 minutes leaves room for a slow apt mirror; see compiler-warnings in gtk3-qa-reports.yml.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps
@@ -436,8 +437,13 @@ jobs:
     # gettext (in the apt-deps base set) matters: without msgfmt the build
     # stalled generating locale .mo files and ran into the timeout instead of
     # failing fast -- see project_compiler_warnings_job_gettext_gap memory.
+    #
+    # 30 minutes, not 15: on 2026-10-23 the Ubuntu mirror ran at ~50 kB/s and
+    # apt-deps alone took longer than 15 minutes, three times. apt-deps now
+    # fails a stalled download itself, so this limit only has to bound a
+    # slow one.
     runs-on: ${{ inputs.runner }}
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps

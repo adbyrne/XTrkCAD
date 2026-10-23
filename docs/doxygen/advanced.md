@@ -299,15 +299,25 @@ picks the hash suffix back up automatically, with no separate manual toggle need
 
 ## Linux packages and install tests {#package-install-tests}
 
-`release.yml` builds one `.deb` per supported release, each on that release:
-`package-linux-ubuntu` on Ubuntu 24.04 and 26.04 runners, `package-linux-debian` in
-`debian:bookworm` and `debian:trixie` containers, all for amd64 and arm64. The file name ends in
-the release (`-ubuntu2404.deb`, `-ubuntu2604.deb`, `-debian12.deb`, `-debian13.deb`), because a
-`.deb` built on one release declares that release's library package names and usually won't
-install on another. A 24.04 `.deb` doesn't install on 26.04, for example: it depends on
-`libzip4t64` and 26.04 only has `libzip5` (Development Issues #37). The Ubuntu 24.04 amd64 job
-also builds the RPM, the STGZ installer and the source archives. The RPM is built on Ubuntu, so
-it names Ubuntu's sonames and doesn't install on Fedora yet (Development Issues #38).
+`release.yml` builds one Linux package per supported release, each on that release, all for
+amd64 and arm64:
+
+- `.deb`: `package-linux-ubuntu` on Ubuntu 24.04 and 26.04 runners, `package-linux-debian` in
+  `debian:bookworm` and `debian:trixie` containers;
+- `.rpm`: `package-linux-fedora` in `fedora:44` and `fedora:45` containers.
+
+The file name ends in the release (`-ubuntu2404.deb`, `-ubuntu2604.deb`, `-debian12.deb`,
+`-debian13.deb`, `-fedora44.rpm`, `-fedora45.rpm`), because a package built on one release
+declares that release's library package names or sonames and usually won't install on another.
+A 24.04 `.deb` doesn't install on 26.04, for example: it depends on `libzip4t64` and 26.04 only
+has `libzip5` (Development Issues #37). The RPM used to be built on Ubuntu and required
+`libzip.so.4`, which no Fedora release has (#38). The Ubuntu 24.04 amd64 job also builds the
+STGZ installer and the source archives.
+
+The Fedora containers run with `--privileged`. Fedora's gdk-pixbuf loads images through
+glycin, which runs each image loader in a `bwrap` sandbox; `bwrap` can't create its namespaces
+in an unprivileged container, so the loader dies and GTK aborts on its first icon. That's a
+property of the container, not of a real Fedora system.
 
 The `install-test-linux` jobs then install each package in a fresh container of the release
 it's for, with that release's own `apt-get` or `dnf`, and run `tools/package-install-test.sh`.
@@ -326,10 +336,8 @@ It also warns, without failing, when there's no system-wide `.desktop` entry: to
 entry is only set up per user, by the `.deb`'s postinst (Development Issues #39).
 
 The install tests are advisory. No publish job depends on them, so a failure shows on the run
-but never holds back `latest-main` or a release. A matrix entry with a `known-issue` field is
-expected to fail for an already-ticketed reason and runs with `continue-on-error`; remove the
-field when the ticket is fixed. To run the same test locally, mount the package and the script
-into a container of the target release:
+but never holds back `latest-main` or a release. To run the same test locally, mount the
+package and the script into a container of the target release (add `--privileged` for Fedora):
 
 ```sh
 podman run --rm -v "$PWD:/src:ro,z" ubuntu:26.04 \
