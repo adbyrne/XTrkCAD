@@ -1106,8 +1106,8 @@ static void ReportsPopulateTrackLenList(void)
 
 	wListClear( reportsTrackLenList );
 	for ( i = 0; i < reportsTrackLenList_da.cnt; i++ ) {
-		reportsTrackLenLayer_t *entry = &DYNARR_N(reportsTrackLenLayer_t,
-		                                reportsTrackLenList_da, i);
+		const reportsTrackLenLayer_t *entry = &DYNARR_N(reportsTrackLenLayer_t,
+		                                      reportsTrackLenList_da, i);
 		DIST_T pct = reportsTrackLenTotalFt > 0.0 ?
 		             (entry->lengthFt / reportsTrackLenTotalFt * 100.0) : 0.0;
 
@@ -1305,8 +1305,8 @@ static void ReportsPopulateCurveList(void)
 
 	wListClear( reportsCurveList );
 	for ( i = 0; i < reportsCurveList_da.cnt; i++ ) {
-		reportsCurveBucket_t *entry = &DYNARR_N(reportsCurveBucket_t,
-		                                        reportsCurveList_da, i);
+		const reportsCurveBucket_t *entry = &DYNARR_N(reportsCurveBucket_t,
+		                                    reportsCurveList_da, i);
 		snprintf( row, sizeof row, "%s\t%d", entry->label, entry->count );
 		wListAddValue( reportsCurveList, row, NULL, NULL );
 	}
@@ -1525,8 +1525,9 @@ static void ReportsPopulateEquipList(void)
 
 	wListClear( reportsEquipList );
 	for ( i = 0; i < reportsEquipList_da.cnt; i++ ) {
-		reportsEquipClass_t *entry = &DYNARR_N(reportsEquipClass_t, reportsEquipList_da,
-		                                       i);
+		const reportsEquipClass_t *entry = &DYNARR_N(reportsEquipClass_t,
+		                                   reportsEquipList_da,
+		                                   i);
 		const char *statusStr = entry->status == REPORTS_EQUIP_PASS ? _("PASS") :
 		                        entry->status == REPORTS_EQUIP_MARGINAL ? _("MARGINAL") : _("FAIL");
 
@@ -1562,7 +1563,6 @@ void ReportsEquipmentSuitability( void * unused )
 	BOOL_T haveRadius = FALSE;
 	DIST_T minR = 0.0;
 	DIST_T scaleFactor;
-	size_t i;
 
 	{
 		SCALEINX_T hoIdx = LookupScale( "HO" );
@@ -1596,7 +1596,7 @@ void ReportsEquipmentSuitability( void * unused )
 	DYNARR_INIT( reportsEquipClass_t, reportsEquipList_da );
 
 	if ( haveRadius ) {
-		for ( i = 0; i < REPORTS_EQUIP_COUNT; i++ ) {
+		for ( size_t i = 0; i < REPORTS_EQUIP_COUNT; i++ ) {
 			reportsEquipClass_t *row;
 			DIST_T thresholdIn = reportsEquipThresholds[i].hoThresholdIn * scaleFactor;
 
