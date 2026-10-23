@@ -35,7 +35,7 @@ DEBUGF_T debugIntersection = 0;
 
 /*****************************************************************************
  *
- * UTLITY FUNCTIONS
+ * UTILITY FUNCTIONS
  *
  */
 

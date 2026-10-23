@@ -352,7 +352,7 @@ static void EnsureCheckpointFileNames( void )
  * \param[in] fileName pointer to filename part in pathName
  * \param[in] full
  * \param[in] noSetCurDir if FALSE current directory is changed to file location
- * \param[in] complain  if FALSE error messages are supressed
+ * \param[in] complain  if FALSE error messages are suppressed
  *
  * \return FALSE in case of load error
  */
@@ -564,7 +564,7 @@ int LoadTracks(
 	checkPtMark = changed = 0;
 	if (!data) {
 		LayoutBackGroundInit(
-		        TRUE);        //Keep values of background -> will be overriden by archive
+		        TRUE);        //Keep values of background -> will be overridden by archive
 	}
 	UndoSuspend();
 	useCurrentLayer = FALSE;

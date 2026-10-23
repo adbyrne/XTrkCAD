@@ -42,7 +42,7 @@ static GtkLabel *message;	/**< window handle for progress message */
  *
  * \param[in]  appName the product name to be shown
  * \param[in]  appVer  the product version to be shown
- * \return    TRUE if window was created, FALSE if an error occured
+ * \return    TRUE if window was created, FALSE if an error occurred
  */
 
 int

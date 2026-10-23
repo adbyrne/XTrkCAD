@@ -87,7 +87,7 @@ BOOL_T IsFileNote(track_p trk)
 	return(xx->op == OP_NOTEFILE );
 }
 
-/** Check for the file existance
+/** Check for the file existence
  *
  * \param fileName IN file
  * \return TRUE if exists, FALSE otherwise
@@ -145,7 +145,7 @@ static void NoteFileBrowse(void * junk)
 }
 
 /**
- * Open the file using an external program. Before opening the file existance and permissions are checked.
+ * Open the file using an external program. Before opening the file existence and permissions are checked.
  * If access is not allowed the Open Button is disabled
  *
  * \param fileName IN file
@@ -284,7 +284,7 @@ void ActivateFileNote(track_p trk)
  *
  * \param trk the existing, valid note
  * \param str the field to put a text version of the note so it will appear on the status line
- * \param len the lenght of the field
+ * \param len the length of the field
  */
 
 void DescribeFileNote(track_p trk, char * str, CSIZE_T len)

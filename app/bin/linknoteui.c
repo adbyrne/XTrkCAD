@@ -200,7 +200,7 @@ void ActivateLinkNote(track_p trk)
  *
  * \param trk the existing, valid note
  * \param str the field to put a text version of the note so it will appear on the status line
- * \param len the lenght of the field
+ * \param len the length of the field
  */
 
 void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)

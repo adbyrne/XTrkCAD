@@ -145,7 +145,7 @@ XtcStricmp(const char *a, const char *b)
 
 
 /**
- * Strip single trailing CR/LF characters from string. Multiple occurences
+ * Strip single trailing CR/LF characters from string. Multiple occurrences
  * will be ignored.
  *
  * \param line	string to be checked. CR/LF are removed in place

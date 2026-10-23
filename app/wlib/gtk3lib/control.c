@@ -83,7 +83,7 @@ void wControlShow(
 
 /**
  * Cause the control \a b to be marked active or inactive.
- * Inactive controls donot respond to actions.
+ * Inactive controls do not respond to actions.
  *
  * \param b IN Control
  * \param active IN TRUE for active

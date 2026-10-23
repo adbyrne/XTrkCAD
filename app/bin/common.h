@@ -1,5 +1,5 @@
 /** \file common.h
- * Defnitions of basic types
+ * Definitions of basic types
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -185,7 +185,7 @@ typedef struct {
 #include "command.h"
 #include "menu.h"
 
-// Remove once Describe/Proerties is implemnted
+// Remove once Describe/Properties is implemented
 #define DESCRIBENOTIMPL
 #endif
 

@@ -2846,7 +2846,7 @@ static char * BuildTrimedTitle( char * cp, const char * sep, const char * sMfg,
 
 
 //
-// Output definitons
+// Output definitions
 //
 static void OutputTurnoutDef(
         toDesignDesc_t * dp,

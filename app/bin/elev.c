@@ -539,7 +539,7 @@ static void ComputeForkElev( void )
  *      fork_da         - fork distance/elev data (overwritten)
  * Outputs:
  *      fork_da         - just .trk used for forks
- *      forkCnt         - numer of forks found
+ *      forkCnt         - number of forks found
  */
 {
 	int i1, i2;
@@ -662,7 +662,7 @@ static void PropogateForkElev(
         EPINX_T ep1,
         DIST_T d1,
         DIST_T e )
-/* Propogate elev from fork connection
+/* Propagate elev from fork connection
  *   The track list starting from trk1:ep1 ends at a DefElev or a Fork
  * Inputs:
  * Working:
@@ -752,7 +752,7 @@ nextStep:
 
 static void PropogateForkElevs( void )
 /* For all Forks, For all connections not already processed or not on ElevPath do
- *    propogate elev along connection
+ *    propagate elev along connection
  * Inputs:
  *      fork_da         - list of forks
  *      forkCnt         - number of forks
@@ -769,7 +769,7 @@ static void PropogateForkElevs( void )
 	DIST_T d1, e;
 	long time0 = wGetTimer();
 
-	/* propogate elevs between forks */
+	/* propagate elevs between forks */
 	for ( i1=0; i1<forkCnt; i1++ ) {
 		n1 = &fork(i1);
 		if ( n1->ep >= 0 ) {
@@ -797,7 +797,7 @@ static void PropogateForkElevs( void )
 }
 
 static void PropogateDefElevs( void )
-/* Propogate Elev from DefElev (if not handled already)
+/* Propagate Elev from DefElev (if not handled already)
  * Inputs:
  *      develev_da      - list of DefElev
  * Outputs:
@@ -808,7 +808,7 @@ static void PropogateDefElevs( void )
 	DIST_T e;
 	long time0 = wGetTimer();
 
-	/* propogate elevs between DefElev pts (not handled by propogateForkElevs) */
+	/* propagate elevs between DefElev pts (not handled by propogateForkElevs) */
 	for ( i1=0; i1<defelev_da.cnt; i1++ ) {
 		defelev_t * dep = &defelev(i1);
 		if (GetTrkOnElevPath( dep->trk, &e ))

@@ -248,7 +248,7 @@ void DrawHilightPolygon(drawCmd_p, coOrd *, int);
 #define BOX_BOX			(2)         // draw a frame around text
 #define BOX_INVERT		(3)         // invert colors, text is drawn gray
 #define BOX_ARROW		(4)         // box has a connector
-#define BOX_BACKGROUND	(5)         // draw box with backgound only, no frame    
+#define BOX_BACKGROUND	(5)         // draw box with background only, no frame    
 #define BOX_ARROW_BACKGROUND (6)    // box has a connector and background
 #define BOX_BOX_BACKGROUND (7)      // draw complete frame and background
 #define BOX_POS_BOTTOM_LEFT	(1<<8)	// Origin position

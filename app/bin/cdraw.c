@@ -944,7 +944,7 @@ static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
 			}
 			break;
 		case SEG_TEXT:
-			break; //Doesnt Use
+			break; //Doesn't Use
 		default:;
 		}
 		break;

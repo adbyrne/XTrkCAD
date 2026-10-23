@@ -72,11 +72,8 @@ char *ChildProgramFile(char *parentProgram)
 void wHelp(const char * topic)
 {
 	pid_t newPid;
-	int len;
 	int status;
 	const char html[] = ".html";
-	static char *directory;				/**< base directory for HTML files */
-	char * htmlFile;
 
 	struct {
 		int length;

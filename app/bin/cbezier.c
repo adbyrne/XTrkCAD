@@ -355,7 +355,7 @@ EXPORT enum BezierType AnalyseCurve(coOrd inpos[4], double *Rfx, double *Rfy,
 /*
  * ConvertToArcs
  * Take a Bezier curve and turn it into a set of circular arcs, such that the error between the arc and the
- * Bezier is under 0.5 pixels at maxiumum zoom.
+ * Bezier is under 0.5 pixels at maximum zoom.
  *
  * This enables us to use normal methods (operating over the array of arcs)
  * to perform actions on the Bezier and also to export it to DXF.

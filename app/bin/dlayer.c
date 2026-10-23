@@ -1352,7 +1352,7 @@ void FillLayerList(wControl_p listLayers)
 /**
  * Initialize the layer lists.
  *
- * \param[in] LayerInitFunc pointer to function that actually initialize tha data structures
+ * \param[in] LayerInitFunc pointer to function that actually initialize the data structures
  * \param[in] newCurrLayer current layer (0...NUM_LAYERS), (-1) for no change
  */
 static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer)

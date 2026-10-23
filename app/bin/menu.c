@@ -291,7 +291,7 @@ EXPORT void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func)
 	                StartIndexDialog, func);
 }
 
-//All values multipled by 100 to support decimal points from PD_FLOAT
+//All values multiplied by 100 to support decimal points from PD_FLOAT
 EXPORT void AddRotateMenu(wMenu_p m, rotateDialogCallBack_t func)
 {
 	wMenuPushCreate(m, "", _("180 "), 0, func, I2VP(180000));

@@ -1,5 +1,5 @@
 /** \file dxfformat.c
-* Formating of DXF commands and parameters
+* Formatting of DXF commands and parameters
 */
 
 /*  XTrkCad - Model Railroad CAD
@@ -277,7 +277,7 @@ DxfTextCommand(DynString *result, int layer, double x,
 
 /**
  * Append the header lines needed to define the measurement system. This includes the
- * definition of the measurement system (metric or English) vie the $MEASUREMENT variable
+ * definition of the measurement system (metric or English) via the $MEASUREMENT variable
  * and the units i.e. inches for English and mm for metric.
  *
  * \param result OUT buffer for the completed command

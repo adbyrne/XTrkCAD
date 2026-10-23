@@ -1945,7 +1945,7 @@ double BezierAddLengthIfClose(coOrd start[4], double error)
 
 #ifdef LATER
 /**
- * Use recursive splitting to get close approximation ot length of bezier
+ * Use recursive splitting to get close approximation of length of bezier
  *
  */
 static double BezierMathLength(coOrd p[4], double error)

@@ -917,7 +917,7 @@ CreateMenuDialog(wControl_p mainW)
 	                NULL, 				/* help topic */
 	                "3 Button Notice", 				/* submenu title */
 	                WCTL + '3', 					/* accelerator key */
-	                Notice, 				/* callback funtion */
+	                Notice, 				/* callback function */
 	                (void*)3 			/* pointer to user attributes */
 	               );
 
@@ -948,7 +948,7 @@ void TestMenu(wControl_p mainW)
 	                NULL, 				/* help topic */
 	                "Add to MRU", 				/* submenu title */
 	                WCTL + 'a', 					/* accelerator key */
-	                doFile, 				/* callback funtion */
+	                doFile, 				/* callback function */
 	                (void*)1 			/* pointer to user attributes */
 	               );
 
@@ -964,7 +964,7 @@ void TestMenu(wControl_p mainW)
 	                NULL, 				/* help topic */
 	                "_Quit", 				/* submenu title */
 	                WALT + 'x',					/* accelerator key */
-	                doFile, 				/* callback funtion */
+	                doFile, 				/* callback function */
 	                (void*)0 			/* pointer to user attributes */
 	               );
 
@@ -1035,7 +1035,7 @@ void TestMenu(wControl_p mainW)
 	                NULL, 				/* help topic */
 	                "Pause", 				/* submenu title */
 	                WALT + 'p',					/* accelerator key */
-	                doPause, 				/* callback funtion */
+	                doPause, 				/* callback function */
 	                (void*)0 			/* pointer to user attributes */
 	               );
 

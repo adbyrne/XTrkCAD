@@ -137,7 +137,7 @@ void wBeep(void)
 }
 
 /**
- * Flushs all commands to the Window.
+ * Flushes all commands to the Window.
  */
 
 void wFlush(

@@ -34,7 +34,7 @@ typedef struct {
 #define CHECK_SIZE(T,DA)
 
 /**
- * Append INCR mambers to DA
+ * Append INCR members to DA
  * INCR is > 1 if we plan to add more members soon
  * Increments .cnt for the next member
  * Note: new members may not be empty

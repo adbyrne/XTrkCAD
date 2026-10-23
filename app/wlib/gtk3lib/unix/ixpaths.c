@@ -79,7 +79,7 @@ GetProgramDir(char *pBuf, ssize_t len)
 }
 
 /**
- * Check for existance of a directory
+ * Check for existence of a directory
  *
  * \param name directory name
  * \return true directory exists

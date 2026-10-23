@@ -58,7 +58,7 @@ void wEntrySetValue(
 		abort();
 	}
 
-	// the contents should not be changed programatically while
+	// the contents should not be changed programmatically while
 	// the user is editing it
 	// TODO: find replacement  for signal_block
 	if( !(gtk_widget_has_focus(b->widget))) {

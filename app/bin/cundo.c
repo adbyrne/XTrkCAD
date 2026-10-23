@@ -34,11 +34,11 @@
  *  - copy of the track
  *  - endpts, extradata, extra-extradata
  *
- *  Undo pulls records from the undoStream (ReadObject) for the current transation
+ *  Undo pulls records from the undoStream (ReadObject) for the current transaction
  *  to recreate modified and deleted tracks.
  *  New tracks are snipped from the tracklist
  *
- * Undone records can be copied to redoStream for susequent redo ops
+ * Undone records can be copied to redoStream for subsequent redo ops
  *
  * The undo transactions are stored in a circular buffer (undoStack).
  * When this buffer wraps around, the old transaction is recycled,
@@ -312,7 +312,7 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 	if (op == ModifyOp) {
 		UASSERT( (op==ModifyOp) && !IsTrackDeleted(&tempTrk), GetTrkIndex(&tempTrk) );
 	}
-	// op==DeleteOp doesnot imply that tmpTrk.delete == TRUE: SetDeleteOpInStream
+	// op==DeleteOp does not imply that tmpTrk.delete == TRUE: SetDeleteOpInStream
 	if (tempTrk.endCnt != trk->endCnt) {
 		tempTrk.endPt = MyRealloc( trk->endPt, EndPtSize(tempTrk.endCnt) );
 	} else {
@@ -840,7 +840,7 @@ BOOL_T UndoDelete( track_p trk )
  * \param trk
  *
  * New tracks are added to the end of the Track list
- * Save the begining of New tracks in this Undo transaction in us->newTrks
+ * Save the beginning of New tracks in this Undo transaction in us->newTrks
  */
 BOOL_T UndoNew( track_p trk )
 {

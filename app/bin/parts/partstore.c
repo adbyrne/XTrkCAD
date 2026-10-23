@@ -1,6 +1,6 @@
 /**
  * \file   partstore.c
- * \brief  Accss to list for parts
+ * \brief  Access to list for parts
  *
  * \author Martin Fischer
  */
