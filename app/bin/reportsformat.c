@@ -125,10 +125,9 @@ DIST_T ReportsCarsPerFoot(const char *scaleName)
 		{ "HOn3", 2.0 }, { "On3", 1.0 }, { "Sn3", 1.5 }, { "Nn3", 4.0 },
 		{ "G", 0.5 }, { "TT", 3.0 }, { "I", 0.75 },
 	};
-	size_t i;
 
 	if (scaleName) {
-		for (i = 0; i < sizeof table / sizeof table[0]; i++) {
+		for (size_t i = 0; i < sizeof table / sizeof table[0]; i++) {
 			if (strcasecmp(scaleName, table[i].name) == 0) {
 				return table[i].factor;
 			}
@@ -164,13 +163,13 @@ void ReportsFormatTurnoutList(DynString *out,
                               const reportsTurnoutLayer_t *list, int count)
 {
 	char line[128];
-	int i, j;
+	int i;
 	int *order = count > 0 ? malloc((size_t) count * sizeof(int)) : NULL;
 
 	for (i = 0; order && i < count; i++) {
 		DIST_T keyDensity = list[i].density;
+		int j = i - 1;
 
-		j = i - 1;
 		while (j >= 0 && list[order[j]].density < keyDensity) {
 			order[j + 1] = order[j];
 			j--;
@@ -456,7 +455,6 @@ void ReportsFormatNoteList(DynString *out, const reportsNoteRow_t *list,
 const char *ReportsNoteResolveGroup(cJSON *parsed,
                                     const char * const *registeredNames, int registeredCount)
 {
-	cJSON *field;
 	int i;
 
 	/* No registry entries at all (SF #800 phase 2's own state, until
@@ -473,7 +471,8 @@ const char *ReportsNoteResolveGroup(cJSON *parsed,
 	 * name is simplest correct approach; a registry large enough to make
 	 * this a real cost is not a realistic near-term scenario. */
 	for (i = 0; i < registeredCount; i++) {
-		field = cJSON_GetObjectItemCaseSensitive(parsed, registeredNames[i]);
+		const cJSON *field = cJSON_GetObjectItemCaseSensitive(parsed,
+		                     registeredNames[i]);
 		if (field != NULL) {
 			return registeredNames[i];
 		}
