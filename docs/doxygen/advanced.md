@@ -53,7 +53,8 @@ workflow by hand on your branch:
 gh workflow run release.yml --ref your-branch-name
 ```
 
-This runs every packaging and report job against your branch without publishing anything. Its
+This runs every packaging, install-test and report job against your branch without publishing
+anything. Its
 optional `publish_temp_release` input publishes the packages to a temporary prerelease named
 after the branch, for someone to review.
 
@@ -295,6 +296,45 @@ A tagged release build — `git tag v5.4.1 && git push origin v5.4.1`, see `rele
 otherwise unchanged: after tagging, bump `XTRKCAD_RELEASE_VERSION` (and `XTRKCAD_VERSION_MODIFIER`
 if used) for the next dev cycle in the same commit or a prompt follow-up — every build after that
 picks the hash suffix back up automatically, with no separate manual toggle needed per commit.
+
+## Linux packages and install tests {#package-install-tests}
+
+`release.yml` builds one `.deb` per supported release, each on that release:
+`package-linux-ubuntu` on Ubuntu 24.04 and 26.04 runners, `package-linux-debian` in
+`debian:bookworm` and `debian:trixie` containers, all for amd64 and arm64. The file name ends in
+the release (`-ubuntu2404.deb`, `-ubuntu2604.deb`, `-debian12.deb`, `-debian13.deb`), because a
+`.deb` built on one release declares that release's library package names and usually won't
+install on another. A 24.04 `.deb` doesn't install on 26.04, for example: it depends on
+`libzip4t64` and 26.04 only has `libzip5` (Development Issues #37). The Ubuntu 24.04 amd64 job
+also builds the RPM, the STGZ installer and the source archives. The RPM is built on Ubuntu, so
+it names Ubuntu's sonames and doesn't install on Fedora yet (Development Issues #38).
+
+The `install-test-linux` jobs then install each package in a fresh container of the release
+it's for, with that release's own `apt-get` or `dnf`, and run `tools/package-install-test.sh`.
+The script checks that:
+
+- the package installs, so every dependency it declares exists on that release;
+- the binary is on `PATH`, all its libraries resolve, and `-V` prints the version in the
+  package file name;
+- the data directory the program computes (`../share/<binary name>` next to the binary, see
+  `wGetAppLibDir()`) holds `params`, `demos`, `examples` and the help HTML;
+- the installed binary plays the `dmintro` and `dmstrtrk` demos from the installed data under
+  Xvfb, with an empty `HOME`;
+- the package removes cleanly.
+
+It also warns, without failing, when there's no system-wide `.desktop` entry: today the menu
+entry is only set up per user, by the `.deb`'s postinst (Development Issues #39).
+
+The install tests are advisory. No publish job depends on them, so a failure shows on the run
+but never holds back `latest-main` or a release. A matrix entry with a `known-issue` field is
+expected to fail for an already-ticketed reason and runs with `continue-on-error`; remove the
+field when the ticket is fixed. To run the same test locally, mount the package and the script
+into a container of the target release:
+
+```sh
+podman run --rm -v "$PWD:/src:ro,z" ubuntu:26.04 \
+    sh /src/tools/package-install-test.sh /src/xtrkcad-setup-5.4.0-1.x86_64-ubuntu2604.deb
+```
 
 # Code quality: process and patterns {#code-quality-process-and-patterns}
 

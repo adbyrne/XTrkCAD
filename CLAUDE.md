@@ -164,9 +164,9 @@ build/                     Out-of-source CMake build (source: xtrkcad-hg)
 CLAUDE.md                  This file — also committed into xtrkcad-git (main)
 ```
 
-Retired 2026-10-20, kept until the switch has settled (delete only with the user's OK):
-`xtrkcad-hg-gtk3v2main/` (clone of the closed GTK3V2MAIN branch), `xtrkcad-git-gtk3/` (git
-worktree of the frozen git `GTK3V2MAIN` branch) and `build-gtk3v2main/`.
+The retired GTK3V2MAIN copies (`xtrkcad-hg-gtk3v2main/`, the `xtrkcad-git-gtk3/` worktree and
+`build-gtk3v2main/`) were deleted 2026-10-21 with the user's OK, after the held features reached
+Hg `default`. The frozen git `GTK3V2MAIN` branch stays on GitHub as a record.
 
 ## SourceForge / Mercurial remote
 

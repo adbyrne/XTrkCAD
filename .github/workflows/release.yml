@@ -33,25 +33,51 @@ on:
         default: false
 
 # Runners and compilers are pinned the same way as ci-gtk3.yml (see its
-# header): ubuntu-24.04(-arm), macos-26 and macos-26-intel with
+# header): ubuntu-24.04(-arm), plus ubuntu-26.04(-arm) for the Ubuntu
+# 26.04 DEB, macos-26 and macos-26-intel with
 # .github/actions/select-xcode, windows-2025 with
 # .github/actions/msys2-pin-gcc. The report jobs come from
 # gtk3-qa-reports.yml, shared with ci-gtk3.yml, so they can't drift apart.
 
 jobs:
-  # ── Linux x86-64 — DEB + RPM + STGZ ───────────────────────────────────────
-  # Every Linux job is pinned to ubuntu-24.04 rather than ubuntu-latest
-  # (Ubuntu 26.04 from 2026-10-19). Packages built on the older LTS still
-  # install on the newer one, but not the other way round (glibc/GTK symbol
-  # versions). ci-gtk3-preview.yml previews the next images.
-  package-linux:
-    runs-on: ubuntu-24.04
+  # ── Linux — DEB (Ubuntu 24.04/26.04) + RPM + STGZ + source ─────────────
+  # One DEB per Ubuntu LTS. A DEB built on 24.04 does not install on 26.04
+  # (it depends on libzip4t64; 26.04 only has libzip5, Development Issues
+  # #37), so each release gets its own, named *-ubuntu2404.deb and
+  # *-ubuntu2604.deb like the Debian ones. The 24.04 amd64 entry also builds
+  # the RPM, the STGZ installer and the source archives. The RPM is built
+  # here on Ubuntu, so it names Ubuntu's sonames and does not install on
+  # Fedora (Development Issues #38).
+  #
+  # The runners are pinned to exact Ubuntu releases, never ubuntu-latest
+  # (Ubuntu 26.04 from 2026-10-19), so a runner image change can't quietly
+  # change which release a package is for.
+  package-linux-ubuntu:
+    name: package-linux-ubuntu (${{ matrix.ubuntu }}, ${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu: ['24.04', '26.04']
+        arch: [amd64, arm64]
+        include:
+          - ubuntu: '24.04'
+            suffix: ubuntu2404
+          - ubuntu: '26.04'
+            suffix: ubuntu2604
+          - arch: amd64
+            runner-suffix: ''
+          - arch: arm64
+            runner-suffix: '-arm'
+          - ubuntu: '24.04'
+            arch: amd64
+            extra-packages: true
+    runs-on: ubuntu-${{ matrix.ubuntu }}${{ matrix.runner-suffix }}
     steps:
       - uses: actions/checkout@v7
 
       - uses: ./.github/actions/apt-deps
         with:
-          extra: doxygen dpkg-dev rpm
+          extra: doxygen dpkg-dev ${{ matrix.extra-packages && 'rpm' || '' }}
 
       - name: Configure (Release)
         run: |
@@ -72,10 +98,17 @@ jobs:
           xvfb-run ctest --test-dir build --output-on-failure -LE regression
           ctest --test-dir build --output-on-failure -L regression-ci
 
-      - name: Package (DEB + RPM + STGZ + source archives)
+      - name: Package (DEB)
+        run: |
+          cd build && cpack -G DEB
+          for f in xtrkcad-setup-*.deb; do
+            mv "$f" "${f%.deb}-${{ matrix.suffix }}.deb"
+          done
+
+      - name: Package (RPM + STGZ + source archives)
+        if: matrix.extra-packages
         run: |
           cd build
-          cpack -G DEB
           cpack -G RPM
           cpack -G STGZ
           cpack --config CPackSourceConfig.cmake -G TGZ
@@ -84,48 +117,12 @@ jobs:
       - name: Upload packages
         uses: actions/upload-artifact@v7
         with:
-          name: packages-linux-x86_64
+          name: packages-linux-${{ matrix.suffix }}-${{ matrix.arch }}
           path: |
             build/*.deb
             build/*.rpm
             build/*.sh
             build/xtrkcad-source-*
-          retention-days: 14
-
-  # ── Linux ARM64 — DEB (Ubuntu 24.04) ──────────────────────────────────────
-  package-linux-arm64-ubuntu:
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: ./.github/actions/apt-deps
-        with:
-          extra: doxygen dpkg-dev
-
-      - name: Configure (Release)
-        run: |
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DXTRKCAD_TESTING=ON
-
-      - name: Build
-        run: cmake --build build
-
-      - name: Test
-        # See package-linux's Test step comment: the per-demo regression tests
-        # aren't self-contained standalone, so gate separately on RegressionSuite.
-        run: |
-          xvfb-run ctest --test-dir build --output-on-failure -LE regression
-          ctest --test-dir build --output-on-failure -L regression-ci
-
-      - name: Package (DEB)
-        run: cd build && cpack -G DEB
-
-      - name: Upload package
-        uses: actions/upload-artifact@v7
-        with:
-          name: packages-linux-arm64-ubuntu
-          path: build/*.deb
           retention-days: 14
 
   # ── Linux — DEB (Debian 12/13, Raspberry Pi OS Bookworm/Trixie) ─────────
@@ -414,6 +411,57 @@ jobs:
           path: build/*.exe
           retention-days: 14
 
+  # ── Install tests — Linux packages on clean systems ───────────────────────
+  # Installs each Linux package in a fresh container of the release it's
+  # for, with that release's own package manager, and runs
+  # tools/package-install-test.sh: dependencies resolve, the binary runs and
+  # plays demos from the installed data, removal is clean. Until these
+  # existed, no CI job ever installed a package.
+  #
+  # Advisory: no publish job needs these, so a failure shows on the run but
+  # never holds back latest-main or a release. known-issue entries fail for
+  # a reason already ticketed and are allowed to fail (continue-on-error);
+  # drop the field once the ticket is fixed.
+  install-test-linux:
+    name: install-test-linux (${{ matrix.target }}, ${{ matrix.arch }})
+    needs: [package-linux-ubuntu, package-linux-debian]
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {target: ubuntu2404, arch: amd64, image: 'ubuntu:24.04', package: '*-ubuntu2404.deb', artifact: packages-linux-ubuntu2404-amd64}
+          - {target: ubuntu2404, arch: arm64, image: 'ubuntu:24.04', package: '*-ubuntu2404.deb', artifact: packages-linux-ubuntu2404-arm64}
+          - {target: ubuntu2604, arch: amd64, image: 'ubuntu:26.04', package: '*-ubuntu2604.deb', artifact: packages-linux-ubuntu2604-amd64}
+          - {target: ubuntu2604, arch: arm64, image: 'ubuntu:26.04', package: '*-ubuntu2604.deb', artifact: packages-linux-ubuntu2604-arm64}
+          - {target: debian12, arch: amd64, image: 'debian:bookworm', package: '*-debian12.deb', artifact: packages-linux-debian12-amd64}
+          - {target: debian12, arch: arm64, image: 'debian:bookworm', package: '*-debian12.deb', artifact: packages-linux-debian12-arm64}
+          - {target: debian13, arch: amd64, image: 'debian:trixie', package: '*-debian13.deb', artifact: packages-linux-debian13-amd64}
+          - {target: debian13, arch: arm64, image: 'debian:trixie', package: '*-debian13.deb', artifact: packages-linux-debian13-arm64}
+          - {target: fedora44, arch: amd64, image: 'fedora:44', package: '*.rpm', artifact: packages-linux-ubuntu2404-amd64, known-issue: 'Development Issues #38'}
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    container: ${{ matrix.image }}
+    continue-on-error: ${{ matrix.known-issue && true || false }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download package
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ matrix.artifact }}
+          path: pkg
+
+      - name: Install test
+        env:
+          KNOWN_ISSUE: ${{ matrix.known-issue }}
+          PATTERN: ${{ matrix.package }}
+        run: |
+          [ -z "$KNOWN_ISSUE" ] || echo "::notice::Expected to fail until $KNOWN_ISSUE is fixed"
+          # shellcheck disable=SC2086 # PATTERN is a glob
+          set -- pkg/$PATTERN
+          [ $# -eq 1 ] && [ -f "$1" ] || { echo "expected one $PATTERN in pkg/, found: $*"; exit 1; }
+          sh tools/package-install-test.sh "$1"
+
   # ── Analysis reports for GitHub Pages ─────────────────────────────────────
   # coverage, cppcheck-deep, clang-tidy, codespell and compiler-warnings as
   # xtrkcad-<tool>-html artifacts, from the same job definitions ci-gtk3.yml
@@ -630,7 +678,7 @@ jobs:
   # (which may opt into experimental NSIS/DMG builds) are excluded so those
   # can't silently replace the normal rolling-release assets.
   publish-latest-release:
-    needs: [package-linux, package-linux-arm64-ubuntu, package-linux-debian, package-macos, package-windows]
+    needs: [package-linux-ubuntu, package-linux-debian, package-macos, package-windows]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     concurrency:
@@ -694,7 +742,7 @@ jobs:
   # delete the tag once the branch merges or is abandoned (github-release
   # and publish-latest-release are both unaffected by this job).
   publish-temp-release:
-    needs: [package-linux, package-linux-arm64-ubuntu, package-linux-debian, package-macos, package-windows]
+    needs: [package-linux-ubuntu, package-linux-debian, package-macos, package-windows]
     if: github.event_name == 'workflow_dispatch' && inputs.publish_temp_release == true
     runs-on: ubuntu-24.04
     concurrency:
@@ -749,7 +797,7 @@ jobs:
 
   # ── GitHub Release — created only on version tags ──────────────────────────
   github-release:
-    needs: [package-linux, package-linux-arm64-ubuntu, package-linux-debian, package-macos, package-windows, package-docs]
+    needs: [package-linux-ubuntu, package-linux-debian, package-macos, package-windows, package-docs]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
     permissions:
