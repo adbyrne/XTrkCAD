@@ -28,16 +28,22 @@ runs:
         if [ "$BASE" = true ]; then
           PKGS="cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb xauth"
         fi
-        # apt-get hung in this step on three CI runs on 2026-10-23. Give each
-        # apt-get call 5 minutes and retry it up to three times;
-        # Acquire::Retries also retries single failed downloads in one call.
+        # apt-get stalled in this step on three CI runs on 2026-10-23, and on
+        # another the mirror was slow (30-70 kB/s) but kept going. So no
+        # overall time limit, which would kill a slow download that's still
+        # moving: the http/https Timeout aborts a connection only after 60s
+        # with no data, Acquire::Retries retries that download, and a failed
+        # apt-get call is retried up to three times (downloaded files are
+        # kept, so a retry resumes).
         apt_get() {
           for try in 1 2 3; do
-            # shellcheck disable=SC2086 # word splitting is intended
-            if $SUDO timeout 300 apt-get -o Acquire::Retries=3 "$@"; then
+            # shellcheck disable=SC2086 # empty SUDO must vanish
+            if $SUDO apt-get -o Acquire::Retries=3 \
+                -o Acquire::http::Timeout=60 -o Acquire::https::Timeout=60 \
+                "$@"; then
               return 0
             fi
-            echo "::warning::apt-get $1 failed or timed out (attempt $try of 3)"
+            echo "::warning::apt-get $1 failed (attempt $try of 3)"
             sleep 15
           done
           return 1
