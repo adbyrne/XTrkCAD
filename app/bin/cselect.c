@@ -3343,19 +3343,19 @@ static void CallPushModify(void * unused)
 
 /** Track currently under the cursor while Select is the active command
  * (set on every wActionMove, not just C_DOWN) -- see ClearSelect(). */
-static track_p trk = NULL;
+static track_p selectCursorTrk = NULL;
 
 /**
- * Reset the Select command's cursor-tracking state. \c trk is set on every
- * mouse move over a track and is otherwise never cleared, so after a file
- * load it can point at a track ClearTracks() already freed; the post-load
+ * Reset the Select command's cursor-tracking state. \c selectCursorTrk is
+ * set on every mouse move over a track and is otherwise never cleared, so
+ * after a file load it can point at a track ClearTracks() already freed; the post-load
  * redraw (LoadTracks -> Reset -> DoRedraw -> CmdSelect's \c C_REDRAW) then
  * draws that stale track. Same problem and fix as ClearDescribe() (SF #785).
  * Called from ClearTracks().
  */
 EXPORT void ClearSelect(void)
 {
-	trk = NULL;
+	selectCursorTrk = NULL;
 }
 
 static STATUS_T CmdSelect(
@@ -3400,7 +3400,7 @@ static STATUS_T CmdSelect(
 		wMenuPushEnable( rotateAlignMI, FALSE );
 		wSetCursor(mainD.d,defaultCursor);
 		mode = AREA;
-		trk = NULL;
+		selectCursorTrk = NULL;
 		break;
 
 	case wActionModKey:
@@ -3411,14 +3411,14 @@ static STATUS_T CmdSelect(
 //		showMode = NOSHOW;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		coOrd p = pos;
-		trk = OnTrack( &p, FALSE, FALSE );
+		selectCursorTrk = OnTrack( &p, FALSE, FALSE );
 		track_p ht;
-		if ((selectedTrackCount==0) && (trk == NULL)) {
+		if ((selectedTrackCount==0) && (selectCursorTrk == NULL)) {
 			return C_CONTINUE;
 		}
-		if (trk && !CheckTrackLayerSilent( trk ) ) {
-			if (GetLayerFrozen(GetTrkLayer(trk)) ) {
-				trk = NULL;
+		if (selectCursorTrk && !CheckTrackLayerSilent( selectCursorTrk ) ) {
+			if (GetLayerFrozen(GetTrkLayer(selectCursorTrk)) ) {
+				selectCursorTrk = NULL;
 				InfoMessage(_("Track is in Frozen Layer"));
 				return C_CONTINUE;
 			}
@@ -3487,7 +3487,7 @@ static STATUS_T CmdSelect(
 		default:
 			;
 		}
-		trk = NULL;
+		selectCursorTrk = NULL;
 		return rc;
 		break;
 	case wActionExtKey:
@@ -3572,10 +3572,10 @@ static STATUS_T CmdSelect(
 		break;
 
 	case C_REDRAW:
-		if ( trk != NULL && IsTrackDeleted(trk) ) {
-			// If the track is deleted, then trk should be cleared
-			// TODO: This should be done at the point trk is deleted
-			trk = NULL;
+		if ( selectCursorTrk != NULL && IsTrackDeleted(selectCursorTrk) ) {
+			// If the track is deleted, then selectCursorTrk should be cleared
+			// TODO: This should be done at the point selectCursorTrk is deleted
+			selectCursorTrk = NULL;
 		}
 		if (doingDouble) {
 			return CallModify(action,pos);
@@ -3602,31 +3602,31 @@ static STATUS_T CmdSelect(
 		}
 
 		// Highlight a whole Module's worth of tracks if we are hovering over one
-		if (trk && GetLayerModule(GetTrkLayer(trk))) {
+		if (selectCursorTrk && GetLayerModule(GetTrkLayer(selectCursorTrk))) {
 			if ( (selectMode == 1)
 			     && ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL) ) {
-				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,
-				               !GetTrkSelected(trk));        //Toggle
+				DoModuleTracks(GetTrkLayer(selectCursorTrk),DrawSingleTrack,
+				               !GetTrkSelected(selectCursorTrk));        //Toggle
 			} else {
-				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
+				DoModuleTracks(GetTrkLayer(selectCursorTrk),DrawSingleTrack,TRUE);
 			}
-			DrawHighlightLayer(GetTrkLayer(trk));
+			DrawHighlightLayer(GetTrkLayer(selectCursorTrk));
 		}
 
 		//Draw all existing highlight boxes only
-		DrawHighlightBoxes(FALSE, FALSE, trk);
+		DrawHighlightBoxes(FALSE, FALSE, selectCursorTrk);
 
 		// If not on a track, show all tracks as going to be de-selected if selectZero on
-		if (!trk) {
+		if (!selectCursorTrk) {
 			if ( selectZero ) {
 				HighlightSelectedTracks(NULL, FALSE, TRUE);
 			} else {
-				HighlightSelectedTracks(trk, TRUE, FALSE);
+				HighlightSelectedTracks(selectCursorTrk, TRUE, FALSE);
 			}
 		} else {
 			//Handle the SHIFT+ which means SelectAllConnected case
 			if ((MyGetKeyState() & WKEY_SHIFT) ) {
-				SelectConnectedTracks(trk, TRUE);        //Highlight all connected
+				SelectConnectedTracks(selectCursorTrk, TRUE);        //Highlight all connected
 			}
 			//Normal case - handle track we are hovering over
 			else {
@@ -3634,61 +3634,61 @@ static STATUS_T CmdSelect(
 				if (selectMode == 1) {
 					if  ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL) {
 						//Only Highlight if adding otherwise show already selected
-						if (!GetTrkSelected(trk)) {
-							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+						if (!GetTrkSelected(selectCursorTrk)) {
+							DrawTrack(selectCursorTrk,&tempD,wDrawColorPreviewSelected);
 						} else {
-							DrawTrack(trk,&tempD,selectedColor);
+							DrawTrack(selectCursorTrk,&tempD,selectedColor);
 						}
 					} else {
-						if (GetTrkSelected(trk)) {
-							DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);        //Toggle
+						if (GetTrkSelected(selectCursorTrk)) {
+							DrawTrack(selectCursorTrk,&tempD,wDrawColorPreviewUnselected);        //Toggle
 						} else {
-							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+							DrawTrack(selectCursorTrk,&tempD,wDrawColorPreviewSelected);
 						}
 					}
 					//Select=Only
 				} else {
 					if  ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL) {
-						if (GetTrkSelected(trk)) {
-							DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);        //Toggle
+						if (GetTrkSelected(selectCursorTrk)) {
+							DrawTrack(selectCursorTrk,&tempD,wDrawColorPreviewUnselected);        //Toggle
 						} else {
-							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+							DrawTrack(selectCursorTrk,&tempD,wDrawColorPreviewSelected);
 						}
 					} else {
 						//Only Highlight if adding
-						if (!GetTrkSelected(trk)) {
-							DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
+						if (!GetTrkSelected(selectCursorTrk)) {
+							DrawTrack(selectCursorTrk,&tempD,wDrawColorPreviewSelected );
 						} else {
-							DrawTrack(trk,&tempD,selectedColor);
+							DrawTrack(selectCursorTrk,&tempD,selectedColor);
 						}
 					}
 				}
 			}
 			// Now Highlight the rest of the tracks or Module
-			if (GetLayerModule(GetTrkLayer(trk))) {
+			if (GetLayerModule(GetTrkLayer(selectCursorTrk))) {
 				if (selectMode == 1
 				    && ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL) ) {
-					DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,
-					               !GetTrkSelected(trk));        //Toggle
+					DoModuleTracks(GetTrkLayer(selectCursorTrk),DrawSingleTrack,
+					               !GetTrkSelected(selectCursorTrk));        //Toggle
 				} else {
-					DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
+					DoModuleTracks(GetTrkLayer(selectCursorTrk),DrawSingleTrack,TRUE);
 				}
-				DrawHighlightLayer(GetTrkLayer(trk));
+				DrawHighlightLayer(GetTrkLayer(selectCursorTrk));
 			}
 			//Select=Add
 			if (selectMode == 1) {
 				if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL)) {
-					HighlightSelectedTracks(trk, FALSE, TRUE);
+					HighlightSelectedTracks(selectCursorTrk, FALSE, TRUE);
 				} else {
-					HighlightSelectedTracks(trk, TRUE,
+					HighlightSelectedTracks(selectCursorTrk, TRUE,
 					                        FALSE);        // Highlight all others selected
 				}
 				//Select=Only
 			} else {
 				if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL)) {
-					HighlightSelectedTracks(trk, FALSE, TRUE);
+					HighlightSelectedTracks(selectCursorTrk, FALSE, TRUE);
 				} else {
-					HighlightSelectedTracks(trk, TRUE,
+					HighlightSelectedTracks(selectCursorTrk, TRUE,
 					                        FALSE);        // Highlight all others selected
 				}
 			}
