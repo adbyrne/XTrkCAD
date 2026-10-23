@@ -67,13 +67,15 @@ NewFilter(const char *name)
 /**
  * Derive the default extension from a filter pattern.
  *
- * A pattern qualifies if it has the form "*.ext" where ext is not empty
+ * A pattern qualifies if it has the form `"*.ext"` where ext is not empty
  * and contains no wildcard characters ('*', '?', '['). Examples:
- *   "*.txt"     -> "txt"
- *   "*.tar.gz"  -> "tar.gz"
- *   "*"         -> NULL
- *   "*.t*"      -> NULL
- *   "*.[ch]"    -> NULL
+ * \verbatim
+   "*.txt"     -> "txt"
+   "*.tar.gz"  -> "tar.gz"
+   "*"         -> NULL
+   "*.t*"      -> NULL
+   "*.[ch]"    -> NULL
+   \endverbatim
  *
  * \param pattern  IN  single filter pattern, may be NULL
  * \return         pointer into pattern (not a copy), or NULL if none
