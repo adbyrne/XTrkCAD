@@ -1020,9 +1020,6 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	LOG1(log_init, ("DefaultLayerProperties"));
 	DefaultLayerProperties();
 
-	/* see whether last layout should be reopened on startup */
-	wPrefGetInteger("DialogItem", "pref-onstartup", &onStartup, 0);
-
 	/*
 	 * THE END
 	 */

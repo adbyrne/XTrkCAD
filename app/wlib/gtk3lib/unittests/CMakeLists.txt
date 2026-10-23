@@ -43,3 +43,25 @@ set_target_properties(
 	mrulisttest
  	PROPERTIES FOLDER UnitTestsWLib
 )
+
+# build unit tests for the file selector helpers
+# fileselector.c is included by the test, so xtrkcad-wlib is not linked
+
+add_executable(fileselectortest fileselectortest.c)
+target_link_libraries(fileselectortest
+    PRIVATE
+	${CMOCKA_LIBRARIES}
+	${GTK3_LIBRARIES}
+)
+target_include_directories(fileselectortest
+	PRIVATE
+	${GTK3_INCLUDE_DIRS}
+	"../../include"
+	"../../../bin"
+)
+add_test(FileSelectorTest fileselectortest)
+
+set_target_properties(
+	fileselectortest
+ 	PROPERTIES FOLDER UnitTestsWLib
+)
