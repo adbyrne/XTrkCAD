@@ -40,7 +40,7 @@ int optind = 1, opterr, optopt;
 int getopt(int argc, char *argv[], const char *optstring)
 {
 	static int pos = 0;
-	char *str;
+	const char *str;
 
 	if (pos == 0) {
 		if ((optind >= argc) || (*argv[optind] != OPTCHAR)) {
@@ -63,7 +63,9 @@ int getopt(int argc, char *argv[], const char *optstring)
 
 	if (str[1] == ':') {
 		if (argv[optind][pos+1] != '\0') {
+			// argument attached, as in /Tdemo: go on with the next word
 			optarg = &argv[optind][pos+1];
+			optind++; pos = 0;
 			return *str;
 		}
 		optind++;
