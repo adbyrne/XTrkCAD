@@ -43,6 +43,8 @@ For flatpak information, see \subpage flatpak.
 
 # macOS
 
+For the Homebrew-dependent package, file locations and debugging on macOS, see \subpage macos.
+
 ```sh
 brew install ninja gtk+3 cmocka libzip librsvg
 GTK_PREFIX=$(brew --prefix gtk+3)
@@ -56,6 +58,9 @@ ctest --test-dir build --output-on-failure
 ```
 
 # Windows (MSYS2/MinGW64)
+
+For how Windows differs at run time (options start with `/`, file locations, the ZIP's
+contents, pitfalls), see \subpage windows.
 
 Run from an MSYS2 MINGW64 shell. This is the only supported Windows path — the older
 MSVC/`mswlib` build was removed (SF r6508) and `app/wlib/mswlib/` is gone from the source tree.
