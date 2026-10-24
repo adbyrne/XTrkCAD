@@ -352,6 +352,40 @@ podman run --rm -v "$PWD:/src:ro,z" ubuntu:26.04 \
     sh /src/tools/package-install-test.sh /src/xtrkcad-setup-5.4.0-1.x86_64-ubuntu2604.deb
 ```
 
+## Windows install test {#package-install-test-windows}
+
+The Windows package is the ZIP from `package-windows`. Users install it by unpacking it
+anywhere. The `install-test-windows` job runs `tools/package-install-test-windows.ps1` on a
+fresh `windows-2025` runner. The script unpacks the ZIP into a directory whose name contains a
+space and runs the program with only the Windows system directories on `PATH`. Without that,
+a DLL the package forgot could still be found in the runner's MSYS2, Git or Perl. It checks
+that:
+
+- there's exactly one `bin\xtrkcad-<version>.exe`, and it starts: a missing DLL shows as exit
+  code `0xC0000135`;
+- `/V` prints the version in the ZIP's name. On Windows, options start with `/`
+  (`app/wlib/gtk3lib/win32/getopt.c`), and a `-V` would be opened as a layout file;
+- `share\<binary name>` holds `params`, `demos`, `examples` and the help HTML;
+- the program plays the `dmintro` and `dmstrtrk` demos from the unpacked data. On Windows the
+  log goes to a file rather than stdout (`lprintf.c`), so the script passes `/l` and reads
+  `Regression Tests Pass` from it;
+- it warns when running the program writes into its install directory, which is read-only
+  under `Program Files`.
+
+`package-windows` builds the ZIP by installing to a staging directory and copying in the GTK3
+runtime: pixbuf loaders, GSettings schemas, the hicolor icon theme, and every MinGW64 DLL that
+`ntldd -R` finds for the binary and the loaders. Before this test existed, that copy failed
+without anyone noticing (`xargs` dropped the backslashes in `ntldd`'s Windows paths, and
+`|| true` hid the errors), so no ZIP had ever shipped a DLL. The step now fails on any error.
+
+Every run of the program has a timeout, because a modal dialog (an unknown option, a missing
+file) would otherwise hang the job. Like the Linux tests it's advisory. To run it on a Windows
+machine:
+
+```powershell
+pwsh tools/package-install-test-windows.ps1 xtrkcad-5.4.0-windows-x64.zip
+```
+
 # Code quality: process and patterns {#code-quality-process-and-patterns}
 
 CI runs several static-analysis tools on this branch (AStyle formatting, CodeQL, `cppcheck-deep`,
