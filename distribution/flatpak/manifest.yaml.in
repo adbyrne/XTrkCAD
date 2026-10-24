@@ -68,6 +68,8 @@ modules:
   - name: mercurial
     # needed due to versioning (hg not part of flatpak builder sandbox)
     buildsystem: simple
+    only-arches:
+      - x86_64
     sources:
       - type: file
         url: https://files.pythonhosted.org/packages/e1/21/fe7e9230f0e8b43e2c897d38067ea8c6baf1dd54f10775784b019dcf59de/mercurial-7.2.4-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl

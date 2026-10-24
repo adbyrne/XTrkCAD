@@ -202,23 +202,26 @@ void ShowTip( void * flagsVP )
 /*--------------------------------------------------------------------*/
 
 #define ABOUT_TEXT DESCRIPTION \
-		"\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017" \
-		" by Bob Blackwell, Martin Fischer, Adam Richards and Russell Shilling.\n" \
+		"\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017-2026" \
+		" by the XTrackCAD developers.\n" \
 		"\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)\n" \
 		"\nSome icons by Yusuke Kamiyamane. " \
 		"Licensed under a Creative Commons Attribution 3.0 License.\n" \
-		"\nContributions by: Robert Heller, Mikko Nissinen, " \
-		"Timothy M. Shead, Daniel Luis Spagnol" \
-		"\nParameter Files by: Ralph Boyd, Dwayne Ward\n" \
+		"\nContributions by: Bob Blackwell, Dave Bullis, Allen Byrne, " \
+		"Phil Cameron, Martin Fischer, Robert Heller, John R. Jackson, " \
+		"Neil Mayhew, Harald Nikolisin, Mikko Nissinen, Adam Richards, " \
+		"Ken Shaffer, Timothy M. Shead, Russell Shilling, " \
+		"Daniel Luis Spagnol" \
+		"\nParameter Files by: Ralph Boyd, Dwyane Ward\n" \
 		"\nThe following software is distributed with XTrackCAD\n\n" \
 		"Cornu Algorithm and Implementation by: Raph Levien" \
 		"\n\nuthash, utlist Copyright notice:" \
 		"\nCopyright (c) 2003-2026, Troy D. Hanson https://troydhanson.github.io/uthash/" \
 		"\nAll rights reserved." \
 		"\n\ncJSON: Copyright (c) 2009-2017 Dave Gamble and cJSON contributors" \
-		"\n\nlibzip:  Copyright(C) 1999 - 2019 Dieter Baron and Thomas Klausner\n" \
-		"The authors can be contacted at libzip@nih.at" \
-		"\n\nMiniXML: Copyright (c) 2003-2019 by Michael R Sweet.\n" \
+		"\n\nlibzip:  Copyright(C) 1999 - 2024 Dieter Baron and Thomas Klausner\n" \
+		"The authors can be contacted at info@libzip.org" \
+		"\n\nMiniXML: Copyright (c) 2003-2022 by Michael R Sweet.\n" \
 		"The Mini - XML library is licensed under the Apache License Version 2.0 with an\n" \
 		"exception to allow linking against GPL2 / LGPL2 - only software."
 

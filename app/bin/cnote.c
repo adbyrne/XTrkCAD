@@ -55,6 +55,7 @@ static void NoteOk(void * unused)
 		len = wTextGetSize(noteT);
 		mainText = (char*)MyMalloc(len+2);
 		wTextGetText(noteT, mainText, len);
+		SetFileChanged();
 	}
 
 	wHide(noteW);
