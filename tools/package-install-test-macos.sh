@@ -122,21 +122,48 @@ echo "$OUT" | tail -20
 echo "$OUT" | grep -q '^Regression Tests Pass' ||
 	fail "demo run did not report 'Regression Tests Pass'"
 
-# A crash (exit 128 + signal; 142 is our own SIGALRM timeout): show the
-# crash report macOS wrote and a backtrace from lldb. The release binary
-# has no debug info, but its function names are there.
+# A crash (exit 128 + signal; 142 is our own SIGALRM timeout): show where
+# from the crash report macOS writes, then rerun a few times to see how
+# often it happens. The release binary has no debug info, but its function
+# names are in the report.
+show_crash_report() {
+	# ReportCrash writes the report a moment after the process dies.
+	sleep 10
+	IPS=$(ls -t "$HOME"/Library/Logs/DiagnosticReports/"$NAME"*.ips 2>/dev/null | head -1)
+	if [ -z "$IPS" ]; then
+		echo "no crash report for $NAME"
+		return
+	fi
+	echo "--- $IPS: crashing thread"
+	# An .ips file is a one-line JSON header followed by a JSON body.
+	python3 - "$IPS" <<'PY'
+import json, sys
+text = open(sys.argv[1]).read()
+body = json.loads(text[text.index("\n") + 1:])
+print("exception:", body.get("exception"))
+images = body.get("usedImages", [])
+thread = body["threads"][body["faultingThread"]]
+for i, f in enumerate(thread.get("frames", [])[:40]):
+    img = images[f["imageIndex"]].get("name", "?") if "imageIndex" in f else "?"
+    print("%2d %-28s %s +%s" % (i, img, f.get("symbol", "?"),
+                               f.get("symbolLocation", f.get("imageOffset"))))
+PY
+}
 if [ $RC -gt 128 ] && [ $RC -ne 142 ]; then
 	step "Crash details"
-	IPS=$(ls -t "$HOME"/Library/Logs/DiagnosticReports/*.ips 2>/dev/null | head -1)
-	if [ -n "$IPS" ]; then
-		echo "--- $IPS (first 120 lines)"
-		head -120 "$IPS"
-	fi
-	echo "--- lldb backtrace"
-	TESTHOME=$(mktemp -d)
-	HOME=$TESTHOME run_timeout 600 lldb --batch \
-		-o 'process launch' -k 'thread backtrace all' -k 'quit 1' \
-		-- "$BIN" -Tdmintro,dmstrtrk 2>&1 | tail -150
+	show_crash_report
+	CRASHES=1
+	for i in 2 3 4 5; do
+		TESTHOME=$(mktemp -d)
+		HOME=$TESTHOME run_timeout 600 "$BIN" -Tdmintro,dmstrtrk >/dev/null 2>&1
+		R=$?
+		echo "demo run $i: exit $R"
+		if [ $R -gt 128 ] && [ $R -ne 142 ]; then
+			CRASHES=$((CRASHES + 1))
+			show_crash_report
+		fi
+	done
+	echo "crashed $CRASHES of 5 runs"
 fi
 
 rm -rf "$WORK" "$TESTHOME"
