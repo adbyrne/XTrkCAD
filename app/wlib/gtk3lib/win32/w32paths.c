@@ -55,14 +55,11 @@ static char *userHomeDir;
 /**
  * Find the directory where configuration files, help, demos etc are installed.
  *
- * Windows: the directory is expected to be at ..\share\xtrkcad
- *
- * Unix: The search order is:
- *  1. Directory specified by the XTRKCADLIB environment variable
- *  2. relative path ../xtrkcad from the installation directory
- *  3. /usr/share/xtrkcad
- *  4. /usr/local/share/xtrkcad
- *  if no directory can be found, the program terminates
+ * Windows: the directory is expected to be at
+ * \<install dir\>\\share\\\<app name\>, e.g. C:\\XTrackCAD\\share\\xtrkcad-5.4.0
+ * for C:\\XTrackCAD\\bin\\xtrkcad-5.4.0.exe. This is where the install puts it
+ * (XTRKCAD_SHARE_INSTALL_DIR), and the layout Unix finds as
+ * ../share/\<app name\> next to the binary.
  *
  *  \return pointer to directory name
  */
@@ -71,18 +68,15 @@ const char*
 wGetAppLibDir(void)
 {
 	gchar* moduleDir;
-	GString* libDir;
 
 	if (appLibDir != NULL) {
 		return appLibDir;
 	}
 
+	// The install root: GLib drops a trailing bin directory from the exe's path
 	moduleDir = g_win32_get_package_installation_directory_of_module(NULL);
-	libDir = g_string_new(moduleDir);
-	g_string_append(libDir, "\\..\\share\\xtrkcad");
-	appLibDir = g_canonicalize_filename(libDir->str, NULL);
+	appLibDir = g_build_filename(moduleDir, "share", wlibGetAppName(), NULL);
 	g_free(moduleDir);
-	g_string_free(libDir, TRUE);
 
 	return(appLibDir);
 }
