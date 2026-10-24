@@ -90,8 +90,8 @@ MISSING=$(ldd "$BIN" | grep 'not found')
 
 # xtrkcad-setup-<version>-1.<arch>[-<suffix>].<ext>
 WANT=$(basename "$PKG" | sed -n 's/^xtrkcad-setup-\(.*\)-[0-9]*\.[^.-]*\(-[a-z0-9]*\)\{0,1\}\.[a-z]*$/\1/p')
-# -V needs a display until Development Issues #40 is fixed.
-GOT=$(xvfb-run -a "$BIN" -V 2>/dev/null | sed -n 's/^Version: //p')
+# Without a display: -V is handled before GTK starts (Development Issues #40).
+GOT=$(env -u DISPLAY -u WAYLAND_DISPLAY "$BIN" -V 2>/dev/null | sed -n 's/^Version: //p')
 echo "-V: $GOT (package file says $WANT)"
 [ -n "$GOT" ] || fail "$BIN -V printed no version"
 [ -z "$WANT" ] || [ "$GOT" = "$WANT" ] ||

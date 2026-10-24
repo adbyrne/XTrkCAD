@@ -540,6 +540,10 @@ FILE *wFileOpen(const char *, const char *);
  */
 
 wControl_p wMain(int, char *[]);
+/** Print the program's version for the version option; provided by the
+ * application, like wMain(). Called before GTK is initialized, so it must not
+ * use wlib or GTK. */
+void wPrintVersion(void);
 #define DONTGRABFOCUS 0x100
 void wWinSetAspectRatio(wControl_p win, wWinPix_t x, wWinPix_t y);
 void wWinShow(wControl_p control, wBool_t visibility);

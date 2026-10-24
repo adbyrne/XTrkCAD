@@ -777,6 +777,15 @@ InitAudio()
 EXPORT BOOL_T bRunTests = FALSE;
 
 #ifndef XTRKCAD_TESTBUILD_NO_WMAIN
+/**
+ * Print the version for -V (/V on Windows). wlib's main() calls this before
+ * GTK is initialized, so -V works without a display (Development Issues #40).
+ */
+EXPORT void wPrintVersion(void)
+{
+	printf("Version: %s\n", XTRKCAD_VERSION);
+}
+
 EXPORT wControl_p wMain(int argc, char * argv[])
 {
 	int c;
@@ -857,8 +866,8 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 			              argv[optind - 1]);
 			exit(1);
 			break;
-		case 'V': // display version
-			printf("Version: %s\n",XTRKCAD_VERSION);
+		case 'V': // display version (a lone -V is handled in wlib's main())
+			wPrintVersion();
 			exit(0);
 			break;
 		case 'T': // run tests, optionally scoped to a comma-separated demo list (-Tdemo1,demo2)

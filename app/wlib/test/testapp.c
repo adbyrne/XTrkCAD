@@ -1227,6 +1227,11 @@ bool mainCallBack(wControl_p window, winProcEvent ev, void *data1, void *data2 )
 	}
 }
 
+/* wlib's main() calls this for the version option */
+void wPrintVersion(void)
+{
+}
+
 wControl_p wMain( int argc, char * argv[] )
 {
 

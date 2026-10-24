@@ -161,6 +161,11 @@ static void RemoveEntryByLabel(void **state)
 	MRUDestroy(list);
 }
 
+/* wlib's main() calls this for the version option */
+void wPrintVersion(void)
+{
+}
+
 wControl_p wMain(int argc, char **argv)
 {
 	const struct CMUnitTest tests[] = {

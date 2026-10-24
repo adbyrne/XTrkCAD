@@ -22,6 +22,7 @@
  */
 
 #include <locale.h>
+#include <string.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -171,6 +172,21 @@ int main(int argc, char *argv[])
 	const char *app_id = getenv("XTRKCAD_APP_ID");
 	if (!app_id || !*app_id) {
 		app_id = XTRKCAD_APPL_ID;
+	}
+
+	// The version option must work without a display (Development Issues
+	// #40), so handle it before GTK is initialized. Options start with '/'
+	// on Windows (win32/getopt.c).
+#ifdef WINDOWS
+	const char *versionOption = "/V";
+#else
+	const char *versionOption = "-V";
+#endif
+	for (int i = 1; i < argc; i++) {
+		if (strcmp(argv[i], versionOption) == 0) {
+			wPrintVersion();
+			return 0;
+		}
 	}
 
 	gtk_init(&argc, &argv);

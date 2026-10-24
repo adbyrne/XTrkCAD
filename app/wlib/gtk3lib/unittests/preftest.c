@@ -103,6 +103,11 @@ static void FloatIni(void **state)
 
 
 
+/* wlib's main() calls this for the version option */
+void wPrintVersion(void)
+{
+}
+
 wControl_p wMain(int argc, char **argv)
 {
 	const struct CMUnitTest tests[] = {
