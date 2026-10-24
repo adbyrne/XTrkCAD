@@ -569,7 +569,16 @@ jobs:
         run: |
           $zips = @(Get-ChildItem pkg -Filter 'xtrkcad-*-windows-x64.zip')
           if ($zips.Count -ne 1) { throw "expected one ZIP in pkg/, found $($zips.Count)" }
-          ./tools/package-install-test-windows.ps1 $zips[0].FullName
+          ./tools/package-install-test-windows.ps1 $zips[0].FullName -ArtifactDir "$env:RUNNER_TEMP/install-test-windows"
+
+      - name: Upload screenshots of hung runs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: install-test-windows-screenshots
+          path: ${{ runner.temp }}/install-test-windows
+          if-no-files-found: ignore
+          retention-days: 14
 
   # ── Analysis reports for GitHub Pages ─────────────────────────────────────
   # coverage, cppcheck-deep, clang-tidy, codespell and compiler-warnings as

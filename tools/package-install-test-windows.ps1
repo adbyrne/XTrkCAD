@@ -20,7 +20,9 @@
 # annotations and don't change the exit status.
 
 param(
-	[Parameter(Mandatory = $true)][string]$Package
+	[Parameter(Mandatory = $true)][string]$Package,
+	# Where to save screenshots of runs that time out (release.yml uploads it)
+	[string]$ArtifactDir = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -29,6 +31,23 @@ $script:Failed = $false
 function Fail([string]$msg) { Write-Output "::error::$msg"; $script:Failed = $true }
 function Warn([string]$msg) { Write-Output "::warning::$msg" }
 function Step([string]$msg) { Write-Output ''; Write-Output "=== $msg" }
+
+# Saves a screenshot of the whole desktop, to show which dialog a hung
+# run is waiting on.
+function Save-Screenshot([string]$Path) {
+	try {
+		Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+		$b = [System.Windows.Forms.SystemInformation]::VirtualScreen
+		$bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+		$g = [System.Drawing.Graphics]::FromImage($bmp)
+		$g.CopyFromScreen($b.Left, $b.Top, 0, 0, $bmp.Size)
+		$bmp.Save($Path, [System.Drawing.Imaging.ImageFormat]::Png)
+		$g.Dispose(); $bmp.Dispose()
+		Write-Output "screenshot: $Path"
+	} catch {
+		Warn "screenshot failed: $_"
+	}
+}
 
 # Runs the binary with a timeout: a modal dialog (bad option, missing
 # file) would otherwise hang the job. Returns the exit code, or $null on
@@ -40,6 +59,12 @@ function Invoke-XTrkCAD([string[]]$ArgList, [int]$TimeoutSec, [string]$OutFile) 
 	# Without a cached handle, ExitCode reads as $null after exit.
 	$null = $p.Handle
 	if (-not $p.WaitForExit($TimeoutSec * 1000)) {
+		$p.Refresh()
+		Write-Output "timed out; window title: '$($p.MainWindowTitle)'" | Out-Host
+		if ($script:ArtifactDir) {
+			$shot = Join-Path $script:ArtifactDir "$(Split-Path -Leaf $OutFile).png"
+			Save-Screenshot $shot | Out-Host
+		}
 		$p.Kill($true)
 		return $null
 	}
@@ -57,6 +82,8 @@ function Show-Exit($code) {
 }
 
 $Package = (Resolve-Path $Package).Path
+$script:ArtifactDir = $ArtifactDir
+if ($ArtifactDir) { New-Item -ItemType Directory -Force $ArtifactDir | Out-Null }
 $Work = Join-Path ([IO.Path]::GetTempPath()) "xtrkcad-install-test-$PID"
 $Root = Join-Path $Work 'XTrackCAD install test'
 New-Item -ItemType Directory -Force $Root | Out-Null
