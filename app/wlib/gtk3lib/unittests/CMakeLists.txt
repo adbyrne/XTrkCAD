@@ -65,3 +65,22 @@ set_target_properties(
 	fileselectortest
  	PROPERTIES FOLDER UnitTestsWLib
 )
+
+# build unit tests for the getopt() replacement used on Windows
+# win32/getopt.c is included by the test, so it runs on every platform
+
+add_executable(getopttest getopttest.c)
+target_link_libraries(getopttest
+    PRIVATE
+	${CMOCKA_LIBRARIES}
+)
+target_include_directories(getopttest
+	PRIVATE
+	"../../include"
+)
+add_test(GetoptTest getopttest)
+
+set_target_properties(
+	getopttest
+ 	PROPERTIES FOLDER UnitTestsWLib
+)
