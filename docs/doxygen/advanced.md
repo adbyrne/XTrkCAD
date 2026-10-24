@@ -371,6 +371,12 @@ that:
 - it warns when running the program writes into its install directory, which is read-only
   under `Program Files`.
 
+`package-windows` builds the ZIP by installing to a staging directory and copying in the GTK3
+runtime: pixbuf loaders, GSettings schemas, the hicolor icon theme, and every MinGW64 DLL that
+`ntldd -R` finds for the binary and the loaders. Before this test existed, that copy failed
+without anyone noticing (`xargs` dropped the backslashes in `ntldd`'s Windows paths, and
+`|| true` hid the errors), so no ZIP had ever shipped a DLL. The step now fails on any error.
+
 Every run of the program has a timeout, because a modal dialog (an unknown option, a missing
 file) would otherwise hang the job. Like the Linux tests it's advisory. To run it on a Windows
 machine:

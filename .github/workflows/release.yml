@@ -421,36 +421,46 @@ jobs:
         run: cmake --install build --prefix "$(pwd)/staging"
 
       - name: Collect GTK3 runtime DLLs
-        # Walk the binary's DLL dependencies and copy all MinGW64 DLLs.
-        # Also copy GTK3 runtime data (pixbuf loaders, GSettings schemas,
-        # icon theme) needed for a working installation.
+        # Copy the GTK3 runtime data (pixbuf loaders, GSettings schemas, icon
+        # theme), then every MinGW64 DLL the binary or a loader needs.
+        # Errors fail the step: until 2026-10-24 this used
+        # `xargs cp ... || true`, xargs ate the backslashes in ntldd's
+        # Windows paths, every copy failed silently, and no ZIP ever
+        # shipped a DLL (found by install-test-windows).
         run: |
+          set -eo pipefail
           STAGING="$(pwd)/staging"
           BINARY="$STAGING/bin/xtrkcad-${XTRKCAD_VERSION}.exe"
           MINGW=/mingw64
 
-          # Collect DLL dependencies (filter to MinGW64 only)
-          ntldd -R "$BINARY" \
-            | grep -i mingw64 \
-            | awk '{print $3}' \
-            | xargs -I{} cp -n "{}" "$STAGING/bin/" || true
-
           # GTK3 pixbuf loaders (needed for SVG icons and PNG images)
           GDK_VER=$(ls $MINGW/lib/gdk-pixbuf-2.0/)
-          mkdir -p "$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/loaders"
-          cp -r "$MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders.cache" \
-                "$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/" || true
-          cp "$MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/"*.dll \
-             "$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/" 2>/dev/null || true
+          LOADERS="$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/loaders"
+          mkdir -p "$LOADERS"
+          cp "$MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders.cache" \
+             "$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/"
+          cp "$MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/"*.dll "$LOADERS/"
 
           # GSettings compiled schemas (required by GTK3 on Windows)
           mkdir -p "$STAGING/share/glib-2.0/schemas"
           cp "$MINGW/share/glib-2.0/schemas/gschemas.compiled" \
-             "$STAGING/share/glib-2.0/schemas/" || true
+             "$STAGING/share/glib-2.0/schemas/"
 
           # Hicolor icon theme (GTK3 fallback icons)
           mkdir -p "$STAGING/share/icons"
-          cp -r "$MINGW/share/icons/hicolor" "$STAGING/share/icons/" || true
+          cp -r "$MINGW/share/icons/hicolor" "$STAGING/share/icons/"
+
+          # DLL dependencies of the binary and the loaders, MinGW64 only.
+          # ntldd prints "name => D:\...\mingw64\bin\name.dll (0x...)";
+          # cygpath turns the Windows path into one cp can use.
+          ntldd -R "$BINARY" "$LOADERS"/*.dll \
+            | awk '$3 ~ /[\\\/]mingw64[\\\/]/ {print $3}' \
+            | cygpath -u -f - | sort -u > dlls.txt
+          [ -s dlls.txt ] || { echo "::error::ntldd found no MinGW64 DLLs"; exit 1; }
+          while IFS= read -r dll; do
+            cp -n "$dll" "$STAGING/bin/"
+          done < dlls.txt
+          echo "copied $(wc -l < dlls.txt) DLLs into bin/"
 
       - name: Create ZIP archive
         run: |
