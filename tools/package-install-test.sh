@@ -21,9 +21,9 @@
 #   - the data directory the app computes (wGetAppLibDir(): ../share/<bin>
 #     next to the binary) holds params, demos, examples and the help HTML
 #   - the installed binary plays demos from the installed data under Xvfb
-#   - a system-wide .desktop entry exists (warning only, see Development
-#     Issues #39)
-#   - removal deletes the binary and the data directory
+#   - the system-wide menu entry, icons and MIME type are installed, valid
+#     and registered by the distribution's triggers (Development Issues #39)
+#   - removal deletes the binary, the data directory and the desktop files
 #
 # Hard failures exit 1. Warnings are printed as GitHub Actions ::warning::
 # annotations and don't change the exit status.
@@ -52,11 +52,12 @@ case "$PKG" in
 *.deb)
 	export DEBIAN_FRONTEND=noninteractive
 	apt-get update -q || exit 1
-	apt-get install -y -q xvfb xauth desktop-file-utils || exit 1
+	apt-get install -y -q xvfb xauth desktop-file-utils \
+		shared-mime-info || exit 1
 	;;
 *.rpm)
 	dnf -y -q install xorg-x11-server-Xvfb xauth desktop-file-utils \
-		util-linux || exit 1
+		shared-mime-info util-linux || exit 1
 	;;
 *)
 	echo "unknown package type: $PKG"
@@ -124,15 +125,29 @@ echo "$OUT" | grep -q '^Regression Tests Pass' ||
 	fail "demo run did not report 'Regression Tests Pass'"
 
 step "Desktop integration"
-DESKTOP=$(find /usr/share/applications -name "*$NAME*.desktop" 2>/dev/null)
-if [ -z "$DESKTOP" ]; then
-	warn "no system-wide .desktop entry in /usr/share/applications, so XTrackCAD is missing from the menu (Development Issues #39)"
-else
-	echo "$DESKTOP"
-	for f in $DESKTOP; do
-		desktop-file-validate "$f" || fail "$f does not validate"
-	done
+# The test tools above include desktop-file-utils and shared-mime-info, so
+# their triggers ran when the package was installed, as on a desktop system.
+DESKTOP=/usr/share/applications/$NAME.desktop
+MIMEXML=/usr/share/mime/packages/$NAME.xml
+ICONS="/usr/share/icons/hicolor/scalable/apps/$NAME.svg /usr/share/icons/hicolor/64x64/apps/$NAME.png"
+for f in $DESKTOP $MIMEXML $ICONS; do
+	[ -f "$f" ] || fail "$f is missing"
+done
+if [ -f "$DESKTOP" ]; then
+	desktop-file-validate "$DESKTOP" || fail "$DESKTOP does not validate"
+	grep -q "^Exec=$NAME " "$DESKTOP" || fail "$DESKTOP does not run $NAME"
+	grep -q "^Icon=$NAME\$" "$DESKTOP" || fail "$DESKTOP does not use icon $NAME"
 fi
+# update-mime-database writes one file per known type.
+[ -f /usr/share/mime/application/x-xtrkcad.xml ] ||
+	fail "application/x-xtrkcad is not in the MIME database"
+# update-desktop-database maps each type to the entries that open it.
+grep -q "^application/x-xtrkcad=.*$NAME.desktop" \
+	/usr/share/applications/mimeinfo.cache 2>/dev/null ||
+	fail "$NAME.desktop is not registered for application/x-xtrkcad"
+# Nothing per user: the old postinst wrote into the installing user's HOME.
+[ ! -e /root/.local/share/applications/$NAME.desktop ] ||
+	fail "per-user desktop entry created in /root"
 
 step "Remove"
 case "$PKG" in
@@ -144,6 +159,11 @@ esac
 	fail "$SHARE is still there after removal:"
 	find "$SHARE" | head -20
 }
+for f in $DESKTOP $MIMEXML $ICONS; do
+	[ ! -e "$f" ] || fail "$f is still there after removal"
+done
+[ ! -f /usr/share/mime/application/x-xtrkcad.xml ] ||
+	fail "application/x-xtrkcad is still in the MIME database after removal"
 
 echo
 if [ $FAIL -ne 0 ]; then

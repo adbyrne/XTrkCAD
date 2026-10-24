@@ -101,5 +101,28 @@ if(UNIX AND NOT APPLE)
 			xtrkcad.xml
 			DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/applications"
 			)
+		# System-wide menu entry, icon and file type. The distribution's
+		# triggers (desktop-file-utils, shared-mime-info, the icon cache)
+		# register them for every user. Each file is named after this
+		# build's binary, so several versions can be installed side by side.
+		install(FILES
+			${CMAKE_CURRENT_BINARY_DIR}/${XTRKCAD_BIN}.desktop
+			DESTINATION "share/applications"
+			)
+		install(FILES
+			xtrkcad.xml
+			DESTINATION "share/mime/packages"
+			RENAME ${XTRKCAD_BIN}.xml
+			)
+		install(FILES
+			xtrkcad_logo_128x128.svg
+			DESTINATION "share/icons/hicolor/scalable/apps"
+			RENAME ${XTRKCAD_BIN}.svg
+			)
+		install(FILES
+			xtrkcad.png
+			DESTINATION "share/icons/hicolor/64x64/apps"
+			RENAME ${XTRKCAD_BIN}.png
+			)
 	endif()
 endif()
