@@ -22,11 +22,16 @@
 
 #include <ctype.h>
 #include <dirent.h>
-#include <libgen.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
+
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -62,19 +67,40 @@ static char *userHomeDir;
  */
 
 
+/**
+ * Get the directory the running binary is in, with symbolic links resolved.
+ *
+ * \param pBuf buffer for the directory name, set to "" when it can't be found
+ * \param len size of pBuf
+ * \return length of the directory name
+ */
 static int
 GetProgramDir(char *pBuf, ssize_t len)
 {
+	char exe[PATH_MAX];
+	gchar *dir;
 
-	ssize_t result_len = readlink("/proc/self/exe", pBuf, len);
+	pBuf[0] = '\0';
+#ifdef __APPLE__
+	// macOS has no /proc: ask dyld, then resolve symlinks like /proc does
+	char unresolved[PATH_MAX];
+	uint32_t size = sizeof(unresolved);
 
-	int bytes = MIN(result_len, len - 1);
-	if (bytes >= 0) {
-		pBuf[bytes] = '\0';
-	} else {
-		pBuf[0] = '\0';
+	if (_NSGetExecutablePath(unresolved, &size) != 0 ||
+	    realpath(unresolved, exe) == NULL) {
+		return 0;
 	}
-	(void)dirname(pBuf);
+#else
+	ssize_t result_len = readlink("/proc/self/exe", exe, sizeof(exe) - 1);
+
+	if (result_len < 0) {
+		return 0;
+	}
+	exe[result_len] = '\0';
+#endif
+	dir = g_path_get_dirname(exe);
+	g_strlcpy(pBuf, dir, len);
+	g_free(dir);
 	return strlen(pBuf);
 }
 
