@@ -354,6 +354,8 @@ podman run --rm -v "$PWD:/src:ro,z" ubuntu:26.04 \
 
 ## Windows install test {#package-install-test-windows}
 
+Background on Windows' run-time differences and the ZIP's layout: \ref windows.
+
 The Windows package is the ZIP from `package-windows`. Users install it by unpacking it
 anywhere. The `install-test-windows` job runs `tools/package-install-test-windows.ps1` on a
 fresh `windows-2025` runner. The script unpacks the ZIP into a directory whose name contains a
@@ -387,6 +389,8 @@ pwsh tools/package-install-test-windows.ps1 xtrkcad-5.4.0-windows-x64.zip
 ```
 
 ## macOS install test {#package-install-test-macos}
+
+Background on the macOS package and on debugging there: \ref macos.
 
 The macOS package is a Homebrew-dependent `.tar.gz` per architecture, with the binary linked
 against Homebrew's GTK3 by absolute path. The `install-test-macos` jobs follow its
