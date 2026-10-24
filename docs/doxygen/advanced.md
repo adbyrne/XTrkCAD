@@ -363,10 +363,11 @@ that:
 
 - there's exactly one `bin\xtrkcad-<version>.exe`, and it starts: a missing DLL shows as exit
   code `0xC0000135`;
-- `-V` prints the version in the ZIP's name;
+- `/V` prints the version in the ZIP's name. On Windows, options start with `/`
+  (`app/wlib/gtk3lib/win32/getopt.c`), and a `-V` would be opened as a layout file;
 - `share\<binary name>` holds `params`, `demos`, `examples` and the help HTML;
 - the program plays the `dmintro` and `dmstrtrk` demos from the unpacked data. On Windows the
-  log goes to a file rather than stdout (`lprintf.c`), so the script passes `-l` and reads
+  log goes to a file rather than stdout (`lprintf.c`), so the script passes `/l` and reads
   `Regression Tests Pass` from it;
 - it warns when running the program writes into its install directory, which is read-only
   under `Program Files`.

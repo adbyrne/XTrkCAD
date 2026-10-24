@@ -10,7 +10,8 @@
 # for one the package forgot), and checks:
 #   - exactly one bin\xtrkcad-<version>.exe, and every DLL it loads is in
 #     the package (a missing one shows as STATUS_DLL_NOT_FOUND)
-#   - -V prints the version in the package file name
+#   - /V prints the version in the package file name (options start with
+#     '/' on Windows)
 #   - share\<binary name> holds params, demos, examples and the help HTML
 #   - the binary plays demos from the unpacked data
 #   - running it writes nothing into the install directory, which may be
@@ -114,19 +115,21 @@ if ((Split-Path -Leaf $Package) -match '^xtrkcad-(.+)-windows-[a-z0-9]+\.zip$') 
 	$Want = $Matches[1]
 }
 $out = Join-Path $Work 'version.txt'
-$rc = Invoke-XTrkCAD @('-V') 60 $out
+# Options start with '/' on Windows (app/wlib/gtk3lib/win32/getopt.c);
+# a '-V' would be taken as a layout file name.
+$rc = Invoke-XTrkCAD @('/V') 60 $out
 $Got = ''
 if (Test-Path $out) {
 	$line = Select-String -Path $out -Pattern '^Version: (.+)$' | Select-Object -First 1
 	if ($line) { $Got = $line.Matches[0].Groups[1].Value.Trim() }
 }
-Write-Output "-V: $Got (package file says $Want), $(Show-Exit $rc)"
-if ($rc -ne 0) { Fail "$Name -V failed: $(Show-Exit $rc)" }
-elseif (-not $Got) { Fail "$Name -V printed no version" }
+Write-Output "/V: $Got (package file says $Want), $(Show-Exit $rc)"
+if ($rc -ne 0) { Fail "$Name /V failed: $(Show-Exit $rc)" }
+elseif (-not $Got) { Fail "$Name /V printed no version" }
 # The binary's version carries a build hash the ZIP name may not have
 # (5.4.0.<hash> vs 5.4.0); compare the part the file name has.
 elseif ($Want -and $Got -ne $Want -and -not $Got.StartsWith("$Want.")) {
-	Fail "-V reports $Got, package file name says $Want"
+	Fail "/V reports $Got, package file name says $Want"
 }
 
 Step 'Data directory'
@@ -143,10 +146,11 @@ foreach ($f in 'xtrkcad.xtq', 'html\index.html') {
 
 Step 'Play demos from the unpacked data'
 # dmstrtrk carries REGRESSION checks; dmintro exercises a full demo with
-# dialogs. On Windows the log goes to a file (lprintf.c), so name one.
+# dialogs. On Windows the log goes to a file (lprintf.c), so name one
+# with /l.
 $log = Join-Path $Work 'xtclog.txt'
 $out = Join-Path $Work 'demo.txt'
-$rc = Invoke-XTrkCAD @('-l', "`"$log`"", '-Tdmintro,dmstrtrk') 600 $out
+$rc = Invoke-XTrkCAD @('/l', "`"$log`"", '/Tdmintro,dmstrtrk') 600 $out
 Write-Output "demo run: $(Show-Exit $rc)"
 foreach ($f in $out, "$out.err", $log) {
 	if (Test-Path $f) {
