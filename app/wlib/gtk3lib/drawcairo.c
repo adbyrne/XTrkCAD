@@ -352,13 +352,17 @@ void wDrawDelayUpdate(
         wBool_t delay )
 {
 	cairo_rectangle_int_t update_rect;
+	wWinPix_t width, height;
 
 	if ( (!delay) && bd->attributes.draw.delayUpdate ) {
 		if ( iDrawLog >= 1 ) { printf( "wDrawDelayUpdate( %u -> %d ) - update\n", bd->attributes.draw.delayUpdate, delay ); }
 		update_rect.x = 0;
 		update_rect.y = 0;
-		wDrawGetSize(bd, (wWinPix_t *)&update_rect.width,
-		             (wWinPix_t *)&update_rect.height);
+		// wWinPix_t is a long: reading it straight into the rectangle's int
+		// fields wrote 4 bytes past update_rect on the stack (Dev Issues #46)
+		wDrawGetSize(bd, &width, &height);
+		update_rect.width = (int)width;
+		update_rect.height = (int)height;
 		cairo_region_t * cairo_region = cairo_region_create_rectangle(&update_rect);
 		gtk_widget_queue_draw_region(bd->widget, cairo_region);
 		cairo_region_destroy(cairo_region);
