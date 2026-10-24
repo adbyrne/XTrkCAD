@@ -15,17 +15,18 @@ INSTALLATION
 ------------
 Extract the archive to a location of your choice, for example:
 
+    mkdir -p ~/Applications/XTrkCAD
     tar -xzf xtrkcad-*-macos-arm64.tar.gz -C ~/Applications/XTrkCAD
 
 Then run:
 
-    ~/Applications/XTrkCAD/bin/xtrkcad
+    ~/Applications/XTrkCAD/bin/@XTRKCAD_BIN@
 
 GATEKEEPER WARNING
 ------------------
 Because this build is not signed with an Apple Developer certificate,
 macOS will show a security warning the first time you run it.
-To bypass: right-click (or Control-click) xtrkcad and choose "Open",
+To bypass: right-click (or Control-click) @XTRKCAD_BIN@ and choose "Open",
 then click "Open" in the dialog.
 
 SUPPORT
