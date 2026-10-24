@@ -597,6 +597,17 @@ tool's message alone.
   fixed — fixing the comment wouldn't make the function reachable, and the function has no
   purpose to reach. Documented here so a future session doesn't re-diagnose the same dead end.
 
+- **A file-system path helper used to build a path that isn't a file-system path.**
+  `MakeFullpath()` (`paths.c`) joins its parts with `FILE_SEP_CHAR`, which is `\` on Windows.
+  GResource paths (`g_resources_lookup_data()`, the compiled-in icons and fonts) always use `/`,
+  as do URLs. Development Issues #44 — `dlayer.c`'s `InitializeCustomFont()` built the
+  layer-button font's resource path with `MakeFullpath()`. On Linux that gives
+  `/fonts/xtrackcad-10.bdf`, but on Windows it gives `/\fonts/\xtrackcad-10.bdf`, the lookup
+  failed, and `wFTLabelLoadFontFromResource()` aborted every Windows build at startup. Nothing
+  caught it, since CI ran no Windows binary past its unit tests. The Windows ZIP install test
+  (`install-test-windows` in `release.yml`) found it. Build resource paths with `/` explicitly
+  (`DynStringPrintf(&path, "%sfonts/%s", XTRKCAD_SYMBOLS_PATH, name)`).
+
 ## Confirmed-safe codebase conventions (not bugs, but non-obvious enough to document)
 
 Unlike the section above, these are cases where deep verification confirmed the code is doing
