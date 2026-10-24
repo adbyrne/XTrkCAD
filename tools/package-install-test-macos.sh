@@ -60,14 +60,19 @@ NAME=$(basename "$BIN")
 echo "$BIN"
 # Every linked library outside the OS must exist (Homebrew's, by absolute
 # path). @rpath/@loader_path entries would have to be inside the archive.
-MISSING=$(otool -L "$BIN" | tail -n +2 | awk '{print $1}' |
-	while read -r lib; do
-		case "$lib" in
-		/usr/lib/* | /System/*) ;;
-		/*) [ -e "$lib" ] || echo "$lib" ;;
-		*) echo "$lib (not an absolute path)" ;;
-		esac
-	done)
+# A function, because macOS's /bin/sh (bash 3.2) can't parse a case
+# statement inside $(...).
+missing_libs() {
+	otool -L "$1" | tail -n +2 | awk '{print $1}' |
+		while read -r lib; do
+			case "$lib" in
+			/usr/lib/* | /System/*) ;;
+			/*) [ -e "$lib" ] || echo "$lib" ;;
+			*) echo "$lib (not an absolute path)" ;;
+			esac
+		done
+}
+MISSING=$(missing_libs "$BIN")
 [ -z "$MISSING" ] || fail "libraries not found: $MISSING"
 
 README="$ROOT/README-INSTALL.txt"
