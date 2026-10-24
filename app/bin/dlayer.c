@@ -2578,17 +2578,15 @@ wButton_p layerB;
 
 static void InitializeCustomFont(int size)
 {
-	char *pathToFontFile = NULL;
+	// A GResource path always uses '/'. MakeFullpath() joins with the
+	// platform's file separator, '\\' on Windows.
+	DynString pathToFontFile;
 
-	MakeFullpath(&pathToFontFile, XTRKCAD_SYMBOLS_PATH, "fonts/", customFonts[size],
-	             NULL);
-	if (pathToFontFile) {
-
-		wFTLabelLoadFontFromResource(pathToFontFile);
-
-		free(pathToFontFile);
-	}
-
+	DynStringMalloc(&pathToFontFile, 0);
+	DynStringPrintf(&pathToFontFile, "%sfonts/%s", XTRKCAD_SYMBOLS_PATH,
+	                customFonts[size]);
+	wFTLabelLoadFontFromResource(DynStringToCStr(&pathToFontFile));
+	DynStringFree(&pathToFontFile);
 }
 
 static void CreateLayerButtons()
