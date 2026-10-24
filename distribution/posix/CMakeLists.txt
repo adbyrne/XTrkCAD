@@ -15,24 +15,11 @@ else()
 endif()
 set(CPACK_PACKAGING_INSTALL_PREFIX ${CPACK_INSTALL_PREFIX})
 
-# Generate postinst/prerm from templates so they know this build's actual
-# install location instead of a hand-maintained guess (previously hardcoded
-# to /usr/local/share/xtrkcad-beta unconditionally, which silently broke
-# desktop/mime registration on every non-beta build).
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/postinst.in ${CMAKE_CURRENT_BINARY_DIR}/postinst @ONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/prerm.in ${CMAKE_CURRENT_BINARY_DIR}/prerm @ONLY)
-# configure_file() does not carry over the executable bit the static files
-# used to have — dpkg refuses to run non-executable maintainer scripts, so
-# this has to be set explicitly.
-file(CHMOD ${CMAKE_CURRENT_BINARY_DIR}/postinst PERMISSIONS
-	OWNER_READ OWNER_WRITE OWNER_EXECUTE
-	GROUP_READ GROUP_EXECUTE
-	WORLD_READ WORLD_EXECUTE)
-file(CHMOD ${CMAKE_CURRENT_BINARY_DIR}/prerm PERMISSIONS
-	OWNER_READ OWNER_WRITE OWNER_EXECUTE
-	GROUP_READ GROUP_EXECUTE
-	WORLD_READ WORLD_EXECUTE)
-set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_BINARY_DIR}/postinst;${CMAKE_CURRENT_BINARY_DIR}/prerm")
+# No maintainer scripts: the desktop entry, icon and MIME type are installed
+# under share/applications, share/icons and share/mime (app/lib), where the
+# distribution's own triggers register them for every user. The old
+# postinst/prerm ran xtrkcad-setup for the sudo user only (Development
+# Issues #39).
 
 # get the specific configuration for each packager
 set(CPACK_PROJECT_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/package.txt)
@@ -40,7 +27,8 @@ set(CPACK_PROJECT_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/package.txt)
 set(CPACK_PACKAGE_VENDOR "XTrackCAD Fork Project")
 
 # common dependencies for all Linux builds
-set(CPACK_RPM_PACKAGE_REQUIRES "glibc gtk3 zlib libzip mxml librsvg2")
+# xdg-utils: help opens in the browser through xdg-open (browserhelp.c)
+set(CPACK_RPM_PACKAGE_REQUIRES "glibc gtk3 zlib libzip mxml librsvg2 xdg-utils")
 
 set(CPACK_RPM_BUILDREQUIRES
     "gcc, cmake >= 3.20, pkgconfig, gtk3-devel"
@@ -65,6 +53,15 @@ set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
 	"/usr/local/share/locale/*"
 	"/usr/share/applications"
 	"/usr/share/pixmaps"
+	"${CPACK_PACKAGING_INSTALL_PREFIX}/share/applications"
+	"${CPACK_PACKAGING_INSTALL_PREFIX}/share/icons"
+	"${CPACK_PACKAGING_INSTALL_PREFIX}/share/icons/hicolor"
+	"${CPACK_PACKAGING_INSTALL_PREFIX}/share/icons/hicolor/scalable"
+	"${CPACK_PACKAGING_INSTALL_PREFIX}/share/icons/hicolor/scalable/apps"
+	"${CPACK_PACKAGING_INSTALL_PREFIX}/share/icons/hicolor/64x64"
+	"${CPACK_PACKAGING_INSTALL_PREFIX}/share/icons/hicolor/64x64/apps"
+	"${CPACK_PACKAGING_INSTALL_PREFIX}/share/mime"
+	"${CPACK_PACKAGING_INSTALL_PREFIX}/share/mime/packages"
 )
 
 set(CPACK_RPM_DEFAULT_DIR_PERMISSIONS

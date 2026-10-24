@@ -330,14 +330,22 @@ The script checks that:
   `wGetAppLibDir()`) holds `params`, `demos`, `examples` and the help HTML;
 - the installed binary plays the `dmintro` and `dmstrtrk` demos from the installed data under
   Xvfb, with an empty `HOME`;
-- the package removes cleanly.
+- the menu entry (`share/applications/<binary name>.desktop`, which must pass
+  `desktop-file-validate`), the icons (`share/icons/hicolor`) and the MIME type
+  (`share/mime/packages`) are installed system-wide, and the distribution's triggers have
+  registered them: `application/x-xtrkcad` is in the MIME database and `mimeinfo.cache` maps it
+  to the `.desktop` file;
+- the package removes cleanly, desktop files included.
 
-It also warns, without failing, when there's no system-wide `.desktop` entry: today the menu
-entry is only set up per user, by the `.deb`'s postinst (Development Issues #39).
+The packages have no maintainer scripts. The distribution's own triggers (desktop-file-utils,
+shared-mime-info, the icon cache) register the files for every user, so a package installed
+from a GUI installer or a root shell gets a menu entry too. Each file carries the binary name,
+so several versions can be installed side by side.
 
 The install tests are advisory. No publish job depends on them, so a failure shows on the run
 but never holds back `latest-main` or a release. To run the same test locally, mount the
-package and the script into a container of the target release (add `--privileged` for Fedora):
+package and the script into a container of the target release (add `--privileged` for Fedora,
+and for Ubuntu 26.04 under rootless podman, whose gdk-pixbuf also uses glycin):
 
 ```sh
 podman run --rm -v "$PWD:/src:ro,z" ubuntu:26.04 \
