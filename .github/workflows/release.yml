@@ -536,6 +536,31 @@ jobs:
           [ $# -eq 1 ] && [ -f "$1" ] || { echo "expected one $PATTERN in pkg/, found: $*"; exit 1; }
           sh tools/package-install-test.sh "$1"
 
+  # ── Install test — Windows ZIP on a clean runner ──────────────────────────
+  # Unpacks the ZIP into a path with a space in it and runs
+  # tools/package-install-test-windows.ps1 with only the Windows system
+  # directories on PATH, so a DLL the package forgot can't be found in the
+  # runner's MSYS2, Git or Perl. Advisory, like install-test-linux.
+  install-test-windows:
+    needs: [package-windows]
+    if: ${{ !cancelled() }}
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download package
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-windows-x64-zip
+          path: pkg
+
+      - name: Install test
+        shell: pwsh
+        run: |
+          $zips = @(Get-ChildItem pkg -Filter 'xtrkcad-*-windows-x64.zip')
+          if ($zips.Count -ne 1) { throw "expected one ZIP in pkg/, found $($zips.Count)" }
+          ./tools/package-install-test-windows.ps1 $zips[0].FullName
+
   # ── Analysis reports for GitHub Pages ─────────────────────────────────────
   # coverage, cppcheck-deep, clang-tidy, codespell and compiler-warnings as
   # xtrkcad-<tool>-html artifacts, from the same job definitions ci-gtk3.yml
