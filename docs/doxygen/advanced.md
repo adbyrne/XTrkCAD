@@ -386,6 +386,31 @@ machine:
 pwsh tools/package-install-test-windows.ps1 xtrkcad-5.4.0-windows-x64.zip
 ```
 
+## macOS install test {#package-install-test-macos}
+
+The macOS package is a Homebrew-dependent `.tar.gz` per architecture, with the binary linked
+against Homebrew's GTK3 by absolute path. The `install-test-macos` jobs follow its
+`README-INSTALL.txt` on fresh `macos-26` (arm64) and `macos-26-intel` (x86_64) runners with
+`tools/package-install-test-macos.sh`: `brew install` the prerequisites, unpack the archive into
+a directory whose name contains a space, and start the binary by its full path from `$HOME`. It
+checks that:
+
+- there's exactly one `bin/xtrkcad-<version>`, and every library it links (`otool -L`) exists;
+- `README-INSTALL.txt` names that binary;
+- `-V` prints the version in the archive's name;
+- `share/<binary name>` holds `params`, `demos`, `examples` and the help HTML;
+- the program plays the `dmintro` and `dmstrtrk` demos from the unpacked data, with an empty
+  `HOME`.
+
+Starting from `$HOME` matters: the program has to find its data from its own location. Before
+Development Issues #43, macOS looked for it relative to the current directory. macOS has no
+`timeout(1)`, so the script bounds each run with a `perl` alarm. Like the Linux tests, the
+jobs are advisory. To run it on a Mac:
+
+```sh
+sh tools/package-install-test-macos.sh xtrkcad-5.4.0-macos-arm64.tar.gz
+```
+
 # Code quality: process and patterns {#code-quality-process-and-patterns}
 
 CI runs several static-analysis tools on this branch (AStyle formatting, CodeQL, `cppcheck-deep`,

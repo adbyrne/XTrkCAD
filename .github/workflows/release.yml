@@ -580,6 +580,39 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  # ── Install tests — macOS archives on clean runners ───────────────────────
+  # Follows README-INSTALL.txt on a fresh runner of each architecture
+  # (brew install the prerequisites, unpack, run by full path from $HOME)
+  # with tools/package-install-test-macos.sh. Advisory, like
+  # install-test-linux.
+  install-test-macos:
+    name: install-test-macos (${{ matrix.arch }})
+    needs: [package-macos]
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-26
+          - arch: x86_64
+            runner: macos-26-intel
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download package
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-macos-${{ matrix.arch }}
+          path: pkg
+
+      - name: Install test
+        run: |
+          set -- pkg/xtrkcad-*-macos-${{ matrix.arch }}.tar.gz
+          [ $# -eq 1 ] && [ -f "$1" ] || { echo "expected one archive in pkg/, found: $*"; exit 1; }
+          sh tools/package-install-test-macos.sh "$1"
+
   # ── Analysis reports for GitHub Pages ─────────────────────────────────────
   # coverage, cppcheck-deep, clang-tidy, codespell and compiler-warnings as
   # xtrkcad-<tool>-html artifacts, from the same job definitions ci-gtk3.yml
