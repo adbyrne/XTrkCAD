@@ -122,6 +122,23 @@ echo "$OUT" | tail -20
 echo "$OUT" | grep -q '^Regression Tests Pass' ||
 	fail "demo run did not report 'Regression Tests Pass'"
 
+# A crash (exit 128 + signal; 142 is our own SIGALRM timeout): show the
+# crash report macOS wrote and a backtrace from lldb. The release binary
+# has no debug info, but its function names are there.
+if [ $RC -gt 128 ] && [ $RC -ne 142 ]; then
+	step "Crash details"
+	IPS=$(ls -t "$HOME"/Library/Logs/DiagnosticReports/*.ips 2>/dev/null | head -1)
+	if [ -n "$IPS" ]; then
+		echo "--- $IPS (first 120 lines)"
+		head -120 "$IPS"
+	fi
+	echo "--- lldb backtrace"
+	TESTHOME=$(mktemp -d)
+	HOME=$TESTHOME run_timeout 600 lldb --batch \
+		-o 'process launch' -k 'thread backtrace all' -k 'quit 1' \
+		-- "$BIN" -Tdmintro,dmstrtrk 2>&1 | tail -150
+fi
+
 rm -rf "$WORK" "$TESTHOME"
 echo
 if [ $FAIL -ne 0 ]; then
