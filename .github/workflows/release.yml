@@ -380,7 +380,6 @@ jobs:
             mingw-w64-x86_64-librsvg
             mingw-w64-x86_64-gettext
             mingw-w64-x86_64-cmocka
-            mingw-w64-x86_64-ntldd-git
             mingw-w64-x86_64-doxygen
             git
 
@@ -408,6 +407,19 @@ jobs:
         run: |
           pacman -U --noconfirm "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-doxygen-${MSYS2_DOXYGEN_PKG_VERSION}-any.pkg.tar.zst"
           doxygen --version
+
+      # ntldd collects the DLLs for the ZIP (below). Installed from its URL
+      # rather than through setup-msys2: on 2026-10-25 MSYS2 changed the
+      # ntldd-r19.7fb9365-4 entry in its package database without changing
+      # the version, so the runner image's database expected a different
+      # signature and pacman rejected the download as corrupted. pacman -U
+      # checks the file against its own .sig instead.
+      - name: Install ntldd
+        env:
+          MSYS2_NTLDD_PKG: mingw-w64-x86_64-ntldd-r19.7fb9365-4-any.pkg.tar.zst
+        run: |
+          pacman -U --noconfirm "https://repo.msys2.org/mingw/mingw64/${MSYS2_NTLDD_PKG}"
+          command -v ntldd
 
       - name: Get version
         run: |
