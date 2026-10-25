@@ -129,7 +129,7 @@ static void SetDescHiliteBox(track_p trk)
 
 
 
-static void DescribeUpdate(
+static wBool_t DescribeUpdate(
         paramGroup_p pg,
         int inx,
         void * data)
@@ -137,7 +137,7 @@ static void DescribeUpdate(
 	descData_p ddp;
 
 	if (inx < 0) {
-		return;
+		return TRUE;
 	}
 
 	ddp = (descData_p)pg->paramPtr[inx].context;
@@ -147,12 +147,12 @@ static void DescribeUpdate(
 		 * DESC_POS3D: untested, see track.h */
 		if (ddp->type != DESC_POS3D || pg->paramPtr[inx].control != ddp->control2
 		    || (ddp->mode & DESC_Z_IGNORE)) {
-			return;
+			return TRUE;
 		}
 	}
 
 	if (ddp->type == DESC_PIVOT) {
-		return;
+		return TRUE;
 	}
 
 	LOG( log_describe, 3, ( "DescribeUpdate( %s %d:%s\n",
@@ -161,7 +161,7 @@ static void DescribeUpdate(
 	if (!descTrk) {
 		// A late focus-out after Done: must not open an undo that
 		// nothing would close.
-		return;
+		return TRUE;
 	}
 
 	if (!descUndoStarted) {
@@ -216,6 +216,7 @@ static void DescribeUpdate(
 
 		FormLoadSingleControl(describePG, inx);
 	}
+	return TRUE;
 }
 
 

@@ -808,7 +808,7 @@ static void LayoutOk(void * unused)
 * \param unused IN unused
 */
 
-static void LayoutCancel( wControl_p unused)
+static void LayoutCancel( paramGroup_cp unused)
 {
 	// thisLayout.props = *(thisLayout.copyOfLayoutProps);
 	// The background position, size, angle and screen are applied while the

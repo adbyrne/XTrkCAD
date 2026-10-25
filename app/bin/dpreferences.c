@@ -243,7 +243,7 @@ static void PrefRestore(void)
 	autosaveChkPoints = prefSaved.autosaveChkPoints;
 }
 
-static void OptionDlgUpdate(
+static wBool_t OptionDlgUpdate(
         paramGroup_p pg,
         int inx,
         void* valueP)
@@ -251,7 +251,7 @@ static void OptionDlgUpdate(
 	if (inx < 0) {
 		// window closed: same as Cancel
 		PrefRestore();
-		return;
+		return TRUE;
 	}
 
 	switch (inx) {
@@ -288,6 +288,7 @@ static void OptionDlgUpdate(
 		LOG( log_dpreferences, 1, ( "unexpected inx %d in OptionDlgUpdate\n", inx ) )
 		break;
 	}
+	return TRUE;
 }
 
 static void PrefOk(void* junk)

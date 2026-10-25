@@ -714,7 +714,7 @@ static void DoProfilePrint(void * junk);
 static void DoProfileCancel(paramGroup_cp pg);
 static void DoProfileChangeMode(void * junk);
 static void SelProfileW(wIndex_t, coOrd);
-static void CloseProfileWindow(paramGroup_p pg, int event, void *data);
+static wBool_t CloseProfileWindow(paramGroup_p pg, int event, void *data);
 
 static paramDrawData_t profileDrawData = { 300, 150, RedrawProfileW, SelProfileW, &screenProfileD };
 static paramData_t profilePLs[] = {
@@ -839,11 +839,11 @@ static void HilightProfileElevations(BOOL_T show)
  * \param 		   event The event.
  * \param [in,out] data  If non-null, the data.
  */
-void
+wBool_t
 CloseProfileWindow(paramGroup_p pg, int event, void *data)
 {
 	Reset();
-	return;
+	return TRUE;
 }
 
 

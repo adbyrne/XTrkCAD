@@ -33,7 +33,7 @@
  * defaults and hides the dialog, nothing else needs to be done
  */
 EXPORT void FormOk_Null(
-        paramGroup_p group)
+        const void *group)
 {
 }
 

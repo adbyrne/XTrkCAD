@@ -1598,7 +1598,7 @@ static int StartPlayback(int cnt, char **pathName, void *context)
 }
 
 
-static void DemoFinish(paramGroup_p demoPGp)
+static void DemoFinish(const void *demoPGp)
 {
 	if ( inPlayback ) {
 		SetInPlayback(FALSE);
@@ -1658,12 +1658,13 @@ static void DoDemoButton(void *command)
 	}
 }
 
-static void DemoDlgUpdate(paramGroup_cp pg, int inx, void *valueP)
+static wBool_t DemoDlgUpdate(paramGroup_cp pg, int inx, void *valueP)
 {
 	if (inx != I_DEMOSPEED) {
-		return;
+		return TRUE;
 	}
 	SetPlaybackSpeed((wIndex_t) * (long *)valueP);
+	return TRUE;
 }
 
 static void CreateDemoW(void)

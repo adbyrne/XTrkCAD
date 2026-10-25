@@ -657,7 +657,7 @@ static wControl_p DrawDescGetControl(
 	return NULL;
 }
 
-static void UpdateDraw( track_p trk, int drawDescInx, descUpdate_t * descUpd,
+static void UpdateDraw( track_p trk, int drawDescInx, descData_p descUpd,
                         BOOL_T final )
 {
 	struct extraDataDraw_t *xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);

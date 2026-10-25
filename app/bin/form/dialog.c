@@ -83,8 +83,10 @@ void FormRegister(paramGroup_p pg)
 	FormLoadDefaultValues(pg);
 }
 
-static void ButtonOk(paramGroup_p group)
+static void ButtonOk(void *data)
 {
+	paramGroup_p group = data;
+
 	LOG(log_form, 1, ("DialogsButtonOk: %s\n", group->nameStr));
 	if (!FormCheckInputs(group, (wControl_p)group->okB)) {
 		return;
@@ -107,8 +109,10 @@ static void ButtonOk(paramGroup_p group)
 	wHide(group->win);
 }
 
-static void ButtonCancel(paramGroup_p group)
+static void ButtonCancel(void *data)
 {
+	paramGroup_p group = data;
+
 	FormMacroRecord("PARAMETER %s %s\n", group->nameStr, "cancel");
 
 	if (group->cancelProc) {
@@ -126,7 +130,9 @@ static void ButtonHelp(void *context)
 }
 
 
-static void DialogProc(
+// wWinCallBack_p: dialogs ignore the result; FALSE = not handled, as for
+// the main window, where TRUE would stop a close (Development Issues #53).
+static bool DialogProc(
         wControl_p win,
         winProcEvent e,
         void* refresh,
@@ -150,6 +156,7 @@ static void DialogProc(
 	default:
 		break;
 	}
+	return FALSE;
 }
 
 

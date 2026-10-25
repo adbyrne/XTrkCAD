@@ -606,7 +606,7 @@ static void SignalEditOk ( void * junk )
 	wHide( signalEditW );
 }
 
-static void SignalEditCancel ( void * junk )
+static void SignalEditCancel ( paramGroup_cp junk )
 {
 	wIndex_t ia;
 

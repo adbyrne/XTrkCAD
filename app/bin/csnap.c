@@ -682,7 +682,7 @@ static void GridChange( long changes )
 }
 
 
-static void GridDlgUpdate(
+static wBool_t GridDlgUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP )
@@ -702,6 +702,7 @@ static void GridDlgUpdate(
 		GridButtonUpdate( 0 );
 		MainRedraw(); // GridDlgUpdate
 	}
+	return TRUE;
 }
 
 

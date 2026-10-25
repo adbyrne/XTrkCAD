@@ -47,14 +47,15 @@ long GetChanges( paramGroup_p pg )
 	return changes;
 }
 
-static void OptionDlgUpdate(
+static wBool_t OptionDlgUpdate(
         paramGroup_p pg,
         int inx,
         void* valueP)
 {
-	if (inx < 0) { return; }
+	if (inx < 0) { return TRUE; }
 
 
+	return TRUE;
 }
 
 /****************************************************************************

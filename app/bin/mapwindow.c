@@ -408,12 +408,15 @@ EXPORT void MapWindowShow(int state)
 	wPrefSetInteger("map", "visible", mapVisible);
 }
 
-void
-MapWindowEventProc( int event, void *data)
+// The map dialog's paramChangeProc. It was defined as (int, void *), so
+// FormCreateDialog's (group, index, value) arguments arrived shifted; it
+// ignores them, which is the only reason that worked (Development Issues #53).
+static wBool_t
+MapWindowEventProc(paramGroup_p pg, int inx, void *valueP)
 {
 	wToggleGroupSetActive(TOGGLEGRP_MAP_VISIBLE, FALSE);
 	mapVisible = FALSE;
-	return;
+	return TRUE;
 }
 
 wControl_p

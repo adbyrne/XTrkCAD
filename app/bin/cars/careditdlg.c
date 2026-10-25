@@ -183,7 +183,7 @@ static void CarDlgRedraw( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y );
 
 static paramDrawData_t carDlgDrawData = { 500, 120, CarDlgRedraw, NULL, &carDlgD };
 static paramTextData_t notesData = { 500, 156 };
-static void CarDlgUpdate( paramGroup_p, int, void * );
+static wBool_t CarDlgUpdate( paramGroup_p, int, void * );
 static void CarDlgNewDesc( void );
 static void CarDlgManufFocusOut( void );
 static void CarDlgModelFocusOut( void );
@@ -1741,7 +1741,7 @@ static void CarDlgUpdateSummaries( paramGroup_p pg )
 	                             _("Model car data") );
 }
 
-static void CarDlgUpdate(
+static wBool_t CarDlgUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP )
@@ -2016,7 +2016,7 @@ static void CarDlgUpdate(
 		if ( carDlgDim.carLength == 0.0 ) {
 			carDlgCarLengthClock = 0;
 		} else if ( carDlgDim.carLength < 100/ratio ) {
-			return;
+			return TRUE;
 		} else if ( carDlgCouplerLength != 0 && ( carDlgDim.coupledLength == 0
 		                || carDlgCouplerLengthClock >= carDlgCoupledLengthClock ) ) {
 			len = carDlgDim.carLength+carDlgCouplerLength*2.0;
@@ -2048,7 +2048,7 @@ static void CarDlgUpdate(
 		if ( carDlgDim.coupledLength == 0 ) {
 			carDlgCoupledLengthClock = 0;
 		} else if ( carDlgDim.coupledLength < 100/ratio ) {
-			return;
+			return TRUE;
 		} else if ( carDlgDim.carLength != 0 && ( carDlgCouplerLength == 0
 		                || carDlgCarLengthClock > carDlgCouplerLengthClock ) ) {
 			len = (carDlgDim.coupledLength-carDlgDim.carLength)/2.0;
@@ -2082,7 +2082,7 @@ static void CarDlgUpdate(
 			redraw = TRUE;
 			break;
 		} else if ( carDlgCouplerLength < 1/ratio ) {
-			return;
+			return TRUE;
 		} else if ( carDlgDim.carLength != 0 && ( carDlgDim.coupledLength == 0
 		                || carDlgCarLengthClock >= carDlgCoupledLengthClock ) ) {
 			len = carDlgDim.carLength+carDlgCouplerLength*2.0;
@@ -2111,7 +2111,7 @@ static void CarDlgUpdate(
 
 	case I_CD_CARWIDTH:
 		carDlgChanged++;
-		if ( carDlgDim.carLength < 30/ratio ) { return; }
+		if ( carDlgDim.carLength < 30/ratio ) { return TRUE; }
 		redraw = TRUE;
 		break;
 
@@ -2212,7 +2212,7 @@ static void CarDlgUpdate(
 		     size.y <= 0.0 ||
 		     size.x < size.y ) {
 			NoticeMessage( MSG_CARPROTO_BADSEGS, _("Ok"), NULL );
-			return;
+			return TRUE;
 		}
 		orig.x = -orig.x;
 		orig.y = -orig.y;
@@ -2336,6 +2336,7 @@ static void CarDlgUpdate(
 	FormControlActive( pg, I_CD_PROTOTYPE_LIST, !S_ITEM || carDlgManufInx >= 0 );
 
 	FormDialogOkActive( pg, ok );
+	return TRUE;
 }
 
 
@@ -2598,7 +2599,7 @@ static void CarDlgClose( wControl_p win )
  * pushed level's frozen count (carDlgStk[i].changed) must be checked too,
  * not just the current innermost one, so real changes made before
  * descending into the nested panel still get flagged. */
-static void CarDlgCancel( wControl_p win )
+static void CarDlgCancel( paramGroup_cp pg )
 {
 	wIndex_t i;
 	BOOL_T anyChanged = carDlgChanged != 0;

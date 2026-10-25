@@ -157,7 +157,7 @@ typedef struct {
 } reportsOpCtx_t;
 
 static void DoReportsOp(void *data);
-static void ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP);
+static wBool_t ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP);
 static void ReportsCancel(paramGroup_cp pg);
 static void ReportsShowDialog(reportsDialog_t *rd, const char *title);
 
@@ -418,29 +418,29 @@ void ReportsDrawIndicator(void *dArg)
  * Matches the pg/inx/valueP-dispatch pattern denum.c's EnumDlgUpdate()
  * already uses for the same kind of "one shared changeProc, several
  * controls" dialog. */
-static void ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP)
+static wBool_t ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 {
 	wIndex_t sel;
 	reportsEndPt_t *entry;
 
 	if (inx != I_REPORTSLIST) {
-		return;
+		return TRUE;
 	}
 
 	/* Ignore selection-changed events GTK fires synchronously mid-clear/
 	 * repopulate (ReportsPopulateList()) -- see reportsPopulating's doc
 	 * comment. Real crash without this guard, not a hypothetical. */
 	if (reportsPopulating) {
-		return;
+		return TRUE;
 	}
 
 	sel = wListGetIndex(reportsList);
 	if (sel < 0) {
-		return;
+		return TRUE;
 	}
 	entry = (reportsEndPt_t *)wListGetItemContext(reportsList, sel);
 	if (!entry) {
-		return;
+		return TRUE;
 	}
 
 	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
@@ -448,6 +448,7 @@ static void ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 	                       sel, entry->trackId, entry->pos.x, entry->pos.y ) )
 
 	ReportsSetIndicator(entry->pos, entry->scale);
+	return TRUE;
 }
 
 /** paramActionCancelProc (phase 1.5): clear the indicator before the
@@ -1655,7 +1656,7 @@ void ReportsEquipmentSuitability( void * unused )
 /** Tentative declaration -- same reason as reportsPG above. */
 static paramGroup_t reportsGapsPG;
 static void ReportsBuildGapsText(DynString *out);
-static void ReportsDlgUpdateGaps(paramGroup_p pg, int inx, void *valueP);
+static wBool_t ReportsDlgUpdateGaps(paramGroup_p pg, int inx, void *valueP);
 static void ReportsCancelGaps(paramGroup_cp pg);
 
 static reportsDialog_t reportsGapsDlg = {
@@ -1757,26 +1758,26 @@ static void ReportsPopulateGapsList(void)
  * indicates at the pair's midpoint (using trackA's own scale for the
  * indicator radius, see reportsGapPair_t's doc comment). Same guard/
  * recovery shape as phase 1's ReportsDlgUpdate(). */
-static void ReportsDlgUpdateGaps(paramGroup_p pg, int inx, void *valueP)
+static wBool_t ReportsDlgUpdateGaps(paramGroup_p pg, int inx, void *valueP)
 {
 	wIndex_t sel;
 	reportsGapPair_t *entry;
 	coOrd mid;
 
 	if (inx != I_REPORTSGAPSLIST) {
-		return;
+		return TRUE;
 	}
 	if (reportsGapsPopulating) {
-		return;
+		return TRUE;
 	}
 
 	sel = wListGetIndex(reportsGapsList);
 	if (sel < 0) {
-		return;
+		return TRUE;
 	}
 	entry = (reportsGapPair_t *)wListGetItemContext(reportsGapsList, sel);
 	if (!entry) {
-		return;
+		return TRUE;
 	}
 
 	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
@@ -1787,6 +1788,7 @@ static void ReportsDlgUpdateGaps(paramGroup_p pg, int inx, void *valueP)
 	mid.x = (entry->posA.x + entry->posB.x) / 2.0;
 	mid.y = (entry->posA.y + entry->posB.y) / 2.0;
 	ReportsSetIndicator(mid, entry->scale);
+	return TRUE;
 }
 
 /** paramActionCancelProc for the Gaps dialog -- same shape as phase 1's
@@ -1986,7 +1988,7 @@ void ReportsGaps( void * unused )
 /** Tentative declaration -- same reason as reportsPG above. */
 static paramGroup_t reportsKinkedPG;
 static void ReportsBuildKinkedText(DynString *out);
-static void ReportsDlgUpdateKinked(paramGroup_p pg, int inx, void *valueP);
+static wBool_t ReportsDlgUpdateKinked(paramGroup_p pg, int inx, void *valueP);
 static void ReportsCancelKinked(paramGroup_cp pg);
 
 static reportsDialog_t reportsKinkedDlg = {
@@ -2068,25 +2070,25 @@ static void ReportsPopulateKinkedList(void)
 
 /** paramGroup_t changeProc for the Kinked Joints dialog -- selecting a
  * row pans/indicates at the joint's own position. */
-static void ReportsDlgUpdateKinked(paramGroup_p pg, int inx, void *valueP)
+static wBool_t ReportsDlgUpdateKinked(paramGroup_p pg, int inx, void *valueP)
 {
 	wIndex_t sel;
 	reportsKinkedJoint_t *entry;
 
 	if (inx != I_REPORTSKINKEDLIST) {
-		return;
+		return TRUE;
 	}
 	if (reportsKinkedPopulating) {
-		return;
+		return TRUE;
 	}
 
 	sel = wListGetIndex(reportsKinkedList);
 	if (sel < 0) {
-		return;
+		return TRUE;
 	}
 	entry = (reportsKinkedJoint_t *)wListGetItemContext(reportsKinkedList, sel);
 	if (!entry) {
-		return;
+		return TRUE;
 	}
 
 	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
@@ -2095,6 +2097,7 @@ static void ReportsDlgUpdateKinked(paramGroup_p pg, int inx, void *valueP)
 	       sel, entry->trackA, entry->trackB, entry->angleDelta ) )
 
 	ReportsSetIndicator(entry->pos, entry->scale);
+	return TRUE;
 }
 
 /** paramActionCancelProc for the Kinked Joints dialog. */
@@ -2232,7 +2235,7 @@ void ReportsKinkedJoints( void * unused )
 /** Tentative declaration -- same reason as reportsPG above. */
 static paramGroup_t reportsNotesPG;
 static void ReportsBuildNoteText(DynString *out);
-static void ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP);
+static wBool_t ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP);
 static void ReportsCancelNotes(paramGroup_cp pg);
 
 static reportsDialog_t reportsNotesDlg = {
@@ -2419,7 +2422,7 @@ static void ReportsPopulateNoteList(void)
 /** paramGroup_t changeProc for the Notes dialog -- selecting a row pans/
  * indicates at that note's own position. Same guard/recovery shape as
  * phase 1's ReportsDlgUpdate()/Gaps' ReportsDlgUpdateGaps(). */
-static void ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP)
+static wBool_t ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP)
 {
 	wIndex_t sel;
 	reportsNoteRow_t *entry;
@@ -2431,23 +2434,23 @@ static void ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP)
 	 * the same way Refresh's own REPORTSOP_REFRESH case does. */
 	if (inx == I_REPORTSNOTESTYPEFILTER || inx == I_REPORTSNOTESROOTNAMESFILTER) {
 		ReportsNotes(NULL);
-		return;
+		return TRUE;
 	}
 
 	if (inx != I_REPORTSNOTESLIST) {
-		return;
+		return TRUE;
 	}
 	if (reportsNotesPopulating) {
-		return;
+		return TRUE;
 	}
 
 	sel = wListGetIndex(reportsNotesList);
 	if (sel < 0) {
-		return;
+		return TRUE;
 	}
 	entry = (reportsNoteRow_t *)wListGetItemContext(reportsNotesList, sel);
 	if (!entry) {
-		return;
+		return TRUE;
 	}
 
 	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
@@ -2456,6 +2459,7 @@ static void ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP)
 	       sel, entry->noteIndex, entry->pos.x, entry->pos.y ) )
 
 	ReportsSetIndicator(entry->pos, entry->scale);
+	return TRUE;
 }
 
 /** paramActionCancelProc for the Notes dialog -- same shape as phase 1's

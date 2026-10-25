@@ -1235,7 +1235,7 @@ static void SetTrainDirection(
 }
 
 
-static void ControllerDialogUpdate(
+static wBool_t ControllerDialogUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP)
@@ -1245,7 +1245,7 @@ static void ControllerDialogUpdate(
 	struct extraDataCar_t * xx;
 
 	if (dlg == NULL) {
-		return;
+		return TRUE;
 	}
 
 	TrainTimeEndPause();
@@ -1256,7 +1256,7 @@ static void ControllerDialogUpdate(
 		                                     (wIndex_t)*(long*)valueP);
 
 		if (train == NULL) {
-			return;
+			return TRUE;
 		}
 
 		dlg->train = train;
@@ -1265,7 +1265,7 @@ static void ControllerDialogUpdate(
 
 	case I_ZERO:
 		if (dlg->train == NULL) {
-			return;
+			return TRUE;
 		}
 
 		TrainTimeEndPause();
@@ -1278,7 +1278,7 @@ static void ControllerDialogUpdate(
 
 	case I_GOTO:
 		if (dlg->train == NULL) {
-			return;
+			return TRUE;
 		}
 
 
@@ -1296,7 +1296,7 @@ static void ControllerDialogUpdate(
 
 	case I_FOLLOW:
 		if (dlg->train == NULL) {
-			return;
+			return TRUE;
 		}
 
 		if (*(long*)valueP) {
@@ -1316,7 +1316,7 @@ static void ControllerDialogUpdate(
 
 	case I_AUTORVRS:
 		if (dlg->train == NULL) {
-			return;
+			return TRUE;
 		}
 
 		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
@@ -1325,7 +1325,7 @@ static void ControllerDialogUpdate(
 
 	case I_DIR:
 		if (dlg->train == NULL) {
-			return;
+			return TRUE;
 		}
 
 		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
@@ -1338,7 +1338,7 @@ static void ControllerDialogUpdate(
 
 	case I_STOP:
 		if (dlg->train == NULL) {
-			return;
+			return TRUE;
 		}
 
 		TrainTimeEndPause();
@@ -1358,6 +1358,7 @@ static void ControllerDialogUpdate(
 
 	/*ControllerDialogSync( dlg );*/
 	TrainTimeStartPause();
+	return TRUE;
 }
 
 

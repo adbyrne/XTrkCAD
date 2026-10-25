@@ -161,7 +161,7 @@ static paramData_t newCarPLs[] = {
 	{ PD_DROPLIST, &newCarInx, "newcarsel", PDO_DLGWIDE, I2VP(400), N_("Item") },
 	{ PD_MESSAGE, NULL, "newcardesc", 0, NULL }
 };
-static void CarItemHotbarUpdate(
+static wBool_t CarItemHotbarUpdate(
         paramGroup_p pg,
         int inx,
         void* data);
@@ -308,7 +308,7 @@ static char* CarItemHotbarProc(
 }
 
 
-static void CarItemHotbarUpdate(
+static wBool_t CarItemHotbarUpdate(
         paramGroup_p pg,
         int inx,
         void* data)
@@ -318,7 +318,7 @@ static void CarItemHotbarUpdate(
 	if (inx == I_NEWCARSEL) {
 		wIndex_t carItemInx = (wIndex_t) * (long*)data;
 		if (carItemInx < 0) {
-			return;
+			return TRUE;
 		}
 		carItemInx = (wIndex_t)VP2L(wListGetItemContext((wList_p)
 		                            pg->paramPtr[inx].control, carItemInx));
@@ -329,6 +329,7 @@ static void CarItemHotbarUpdate(
 			FormLoadMessage(pg, I_NEWCARDESC, FormatCarDescManuf(item, descManufBuf));
 		}
 	}
+	return TRUE;
 }
 
 
