@@ -214,7 +214,7 @@ static void EasementSel(
 }
 
 
-static void EasementDlgUpdate(
+static wBool_t EasementDlgUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP )
@@ -235,6 +235,7 @@ static void EasementDlgUpdate(
 		LOG( log_dease, 1, ( "unexpected inx %d in EasementDlgUpdate\n", inx ) )
 		break;
 	}
+	return TRUE;
 }
 
 

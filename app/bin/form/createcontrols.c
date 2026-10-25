@@ -172,7 +172,9 @@ static void RegateOk(paramData_p p)
 	}
 }
 
-static void IntegerPush(const char* value, void* dp)
+// wEntryCallBack_p: FALSE lets wlib store the text, but this entry has no
+// valueP, so nothing is stored either way (Development Issues #53).
+static bool IntegerPush(const char* value, void* dp)
 {
 	paramData_p p = (paramData_p)dp;
 	long valL;
@@ -202,12 +204,12 @@ static void IntegerPush(const char* value, void* dp)
 		 * this same early-return path, and it sets the Ok button's tooltip
 		 * to explain why. */
 		RegateOk(p);
-		return;
+		return FALSE;
 	}
 
 	if (!FormIntegerRangeCheck(p, valL)) {
 		RegateOk(p);
-		return;
+		return FALSE;
 	}
 
 	p->bInvalid = FALSE;
@@ -225,7 +227,7 @@ static void IntegerPush(const char* value, void* dp)
 	// effects (e.g. cprint.c's DoPrintScale, which re-shows the dialog and
 	// resets the page grid) don't retrigger spuriously.
 	if (p->valueP && *((long*)(p->valueP)) == valL) {
-		return;
+		return FALSE;
 	}
 
 	if (DO_MACRO_RECORD(p)) {
@@ -238,9 +240,11 @@ static void IntegerPush(const char* value, void* dp)
 	if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
 		p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &valL);
 	}
+	return FALSE;
 }
 
-static void FloatPush(const char* value, void * dp)
+// wEntryCallBack_p, see IntegerPush.
+static bool FloatPush(const char* value, void * dp)
 {
 	paramData_p p = (paramData_p)dp;
 	FLOAT_T valF;
@@ -262,12 +266,12 @@ static void FloatPush(const char* value, void * dp)
 		 * never runs for a value we refuse to write into the dialog's bound
 		 * variable. */
 		RegateOk(p);
-		return;
+		return FALSE;
 	}
 
 	if (!FormFloatRangeCheck(p, valF)) {
 		RegateOk(p);
-		return;
+		return FALSE;
 	}
 	p->bInvalid = FALSE;
 	if (wasInvalid) {
@@ -281,7 +285,7 @@ static void FloatPush(const char* value, void * dp)
 	if (p->valueP &&
 	    strcmp(value, FormFloatFormat(p, *(FLOAT_T*)(p->valueP))) == 0) {
 		wControlHilite(p->control, p->bInvalid);
-		return;
+		return FALSE;
 	}
 
 	if (DO_MACRO_RECORD(p)) {
@@ -295,6 +299,7 @@ static void FloatPush(const char* value, void * dp)
 		p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &valF);
 	}
 	wControlHilite( p->control, p->bInvalid);
+	return FALSE;
 }
 
 
@@ -345,7 +350,8 @@ static bool StringPush(const char* val, void* dp)
 	return(result);
 }
 
-static void
+// wScaleCallBack_p: wlib ignores the result (Development Issues #53).
+static bool
 ScalePush(FLOAT_T value, void* dp)
 {
 	paramData_p p = (paramData_p)dp;
@@ -357,6 +363,7 @@ ScalePush(FLOAT_T value, void* dp)
 		p->group->changeProc(p->group, (int)(p - p->group->paramPtr), &value);
 	}
 
+	return FALSE;
 }
 
 static void

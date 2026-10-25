@@ -977,7 +977,7 @@ static void RescaleDlgOk(
 }
 
 
-static void RescaleDlgUpdate(
+static wBool_t RescaleDlgUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP )
@@ -1028,6 +1028,7 @@ static void RescaleDlgUpdate(
 		bOkActive = rescalePercent != 100.0;
 	}
 	FormDialogOkActive( pg, bOkActive );
+	return TRUE;
 }
 
 /**

@@ -2490,10 +2490,10 @@ static void LayerOk(void *unused)
 	wHide(layerW);
 }
 
-static void LayerDlgUpdate(paramGroup_p pg, int inx, void *valueP)
+static wBool_t LayerDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 {
 	if (layerSelecting) {           // we're in a programmatic reload — ignore
-		return;
+		return TRUE;
 	}
 
 	switch (inx) {
@@ -2546,6 +2546,7 @@ static void LayerDlgUpdate(paramGroup_p pg, int inx, void *valueP)
 		LOG( log_dlayer, 1, ( "unexpected inx %d in LayerDlgUpdate\n", inx ) )
 		break;
 	}
+	return TRUE;
 }
 
 static void DoLayer(void *unused)

@@ -166,6 +166,15 @@ typedef struct {
 
 typedef void (*paramActionOkProc)( void const * );
 typedef void (*paramActionCancelProc)( paramGroup_cp group );
+/**
+ * Called when a control in the group changes (and with index -1 for dialog
+ * events). For a PD_STRING control the result is passed back to the text
+ * entry (StringPush), where TRUE means the application already stored the
+ * value; today the entry has nothing further to store either way. Return
+ * TRUE unless there's a reason not to. Functions registered here must have
+ * exactly this type: one returning void left the result undefined
+ * (Development Issues #53).
+ */
 typedef wBool_t (*paramChangeProc)( paramGroup_cp group, int index,
                                     void * value);
 
@@ -257,7 +266,7 @@ wBool_t FormCheckInputs(paramGroup_p group, wControl_p b);
 long FormUpdate(paramGroup_p pg);
 
 void FormDialogOkActive(paramGroup_p pg, int active);
-void FormOk_Null(paramGroup_p group);
+void FormOk_Null(const void *group);
 void FormCancel_Undo(paramGroup_cp group );
 void FormCancel_Current(paramGroup_cp group);
 void FormCancel_Reset(paramGroup_cp group);

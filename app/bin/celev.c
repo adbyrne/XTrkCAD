@@ -179,7 +179,7 @@ static int GetElevMode( void )
 
 
 
-static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
+static wBool_t DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 {
 	int oldMode, newMode;
 	DIST_T elevNewValue;
@@ -187,7 +187,7 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 	if ( inx == 0 ) {
 		long mode = *(long*)valueP;
 		if ( mode < 0 || mode >= 7 ) {
-			return;
+			return TRUE;
 		}
 		FormControlActive( &elevationPG, I_HEIGHT, FALSE );
 		FormControlActive( &elevationPG, I_STATION, FALSE );
@@ -214,10 +214,10 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 	FormFetchData( &elevationPG );
 	newMode = GetElevMode();
 	if (newMode == -1) {
-		return;
+		return TRUE;
 	}
 	if (elevTrk == NULL) {
-		return;
+		return TRUE;
 	}
 	oldMode = GetTrkEndElevUnmaskedMode( elevTrk, elevEp );
 	elevNewValue = 0.0;
@@ -229,14 +229,14 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 			DIST_T elevOldValue = GetTrkEndElevHeight( elevTrk, elevEp );
 			DIST_T diff = fabs( elevOldValue-elevNewValue );
 			if ( diff < 0.02 ) {
-				return;
+				return TRUE;
 			}
 		} else if ((newMode&ELEV_MASK) == ELEV_STATION) {
 			if ( strcmp(elevStationV, GetTrkEndElevStation( elevTrk, elevEp ) ) == 0) {
-				return;
+				return TRUE;
 			}
 		} else {
-			return;
+			return TRUE;
 		}
 	}
 	if (elevUndo == FALSE) {
@@ -245,6 +245,7 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 	}
 	UpdateTrkEndElev( elevTrk, elevEp, newMode, elevNewValue, elevStationV );
 	TempRedraw(); // DoElevUpdate
+	return TRUE;
 }
 
 

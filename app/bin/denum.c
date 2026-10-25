@@ -109,13 +109,14 @@ static void DoEnumOp(
 }
 
 
-static void EnumDlgUpdate(
+static wBool_t EnumDlgUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP )
 {
-	if ( inx != I_ENUMLISTPRICE && inx != I_ENUMLISTINDEXES) { return; }
+	if ( inx != I_ENUMLISTPRICE && inx != I_ENUMLISTINDEXES) { return TRUE; }
 	EnumerateTracks( NULL );
+	return TRUE;
 }
 
 

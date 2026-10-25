@@ -380,7 +380,7 @@ static void ParamFileOk(void * junk)
 }
 
 
-static void ParamFileDlgUpdate(
+static wBool_t ParamFileDlgUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP)
@@ -394,6 +394,7 @@ static void ParamFileDlgUpdate(
 		LOG( log_dprmfile, 1, ( "unexpected inx %d in ParamFileDlgUpdate\n", inx ) )
 		break;
 	}
+	return TRUE;
 }
 
 

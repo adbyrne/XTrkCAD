@@ -446,6 +446,17 @@ GetParamsPath()
 }
 
 /**
+ * The Done button closes the dialog, like a cancel. It's the dialog's ok
+ * proc, so it takes the paramActionOkProc type (Development Issues #53).
+ *
+ * \param pg the dialog's paramGroup
+ */
+static void SearchUiDone(const void *pg)
+{
+	FormCancel_Current(pg);
+}
+
+/**
  * Create and open the search dialog.
  *
  * \param junk
@@ -466,7 +477,7 @@ void DoSearchParams(void * junk)
 
 		searchUiW = FormCreateDialog(&searchUiPG,
 		                             MakeWindowTitle(_("Choose parameter files")),
-		                             _("Done"), FormCancel_Current,
+		                             _("Done"), SearchUiDone,
 		                             NULL, NULL,
 		                             TRUE, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
 

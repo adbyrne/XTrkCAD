@@ -494,7 +494,7 @@ static void FormatDisplayItem(carItem_p item)
 	wListAddValue(carInvPLs[I_CI_LIST].control, line, NULL, item);
 }
 
-static void CarInvDlgUpdate(
+static wBool_t CarInvDlgUpdate(
         paramGroup_p pg,
         int inx,
         void* valueP)
@@ -541,6 +541,7 @@ static void CarInvDlgUpdate(
 		                _("Delete"));
 		FormControlActive(&carInvPG, I_CI_DELETE, bEnableDelete);
 	}
+	return TRUE;
 }
 
 
@@ -1500,7 +1501,7 @@ static void DlgFind(void* unused)
 }
 #endif
 
-static void ButtonOk(paramGroup_p group)
+static void ButtonOk(const void *unused)
 {
 
 }

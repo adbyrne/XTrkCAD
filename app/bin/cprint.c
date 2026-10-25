@@ -690,7 +690,8 @@ static void DoPrintMarginOk( void * context )
 	DoPrintScale();
 }
 
-static void PrintMarginDlgUpdate( paramGroup_p pg, int index, void * context )
+static wBool_t PrintMarginDlgUpdate( paramGroup_p pg, int index,
+                                     void * context )
 {
 	wBool_t bEnable =
 	        fabs( printerMargin.top - customMargin.top ) >= 0.001 ||
@@ -698,6 +699,7 @@ static void PrintMarginDlgUpdate( paramGroup_p pg, int index, void * context )
 	        fabs( printerMargin.bottom - customMargin.bottom ) >= 0.001 ||
 	        fabs( printerMargin.left - customMargin.left ) >= 0.001;
 	wControlActive( customMarginPLs[I_PM_RESET].control, bEnable );
+	return TRUE;
 }
 
 /**
@@ -1470,12 +1472,12 @@ static void PrintChange( long changes )
 }
 
 
-static void PrintDlgUpdate(
+static wBool_t PrintDlgUpdate(
         paramGroup_p pg,
         int inx,
         void * valueP )
 {
-	if ( inx < 0 ) { return; }
+	if ( inx < 0 ) { return TRUE; }
 	if ( pg->paramPtr[inx].context == I2VP(1) ) {
 		DoPrintScale();
 	} else if ( pg->paramPtr[inx].context == I2VP(2) ) {
@@ -1483,6 +1485,7 @@ static void PrintDlgUpdate(
 	}
 	FormControlActive( &printPG, I_RULER, currPrintGrid.angle == 0 );
 	TempRedraw(); // PrintDlgUpdate
+	return TRUE;
 }
 
 static STATUS_T CmdPrint(
