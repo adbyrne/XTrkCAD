@@ -38,7 +38,7 @@ int iDebugList = 0;
 
 struct listSearch {
 	const char *search;
-	char *result;
+	bool found;
 	int row;
 };
 
@@ -165,14 +165,15 @@ CompareListData(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
 		printf( "  CompareListData %s <> %s\n", DynStringToCStr(&strKey),
 		        search->search );
 	}
-	if ( !strcmp( DynStringToCStr(&strKey), search->search ) ) {
-		search->result = g_strdup(&strKey);
-	} else {
-		search->result = NULL;
+	// Only whether a row matched is used. This used to be a g_strdup() of
+	// the DynString struct itself (&strKey), never freed (Development
+	// Issues #52).
+	search->found = !strcmp( DynStringToCStr(&strKey), search->search );
+	if ( !search->found ) {
 		search->row++;
 	}
 	DynStringFree( &strKey );
-	return search->result != NULL;
+	return search->found;
 }
 
 /**
@@ -198,13 +199,14 @@ wIndex_t wListFindValue(
 		        b->name,  val );
 	}
 	thisSearch.search = val;
+	thisSearch.found = false;	// an empty list never runs CompareListData
 	thisSearch.row = 0;
 
 	gtk_tree_model_foreach(GTK_TREE_MODEL(b->attributes.list.listStore),
 	                       CompareListData,
 	                       (void *)&thisSearch);
 
-	if (!thisSearch.result) {
+	if (!thisSearch.found) {
 		return -1;
 	} else {
 		return thisSearch.row;

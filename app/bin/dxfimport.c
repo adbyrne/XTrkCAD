@@ -828,9 +828,10 @@ static void ProcessDxfFile(
 	fclose(dxfFile);
 	dxfFile = NULL;
 
-	// Change the extension to create the XTI file
-	MakeFullpath(&pathName, workingDir, nameOfFile, NULL);
-
+	// Change the extension to create the XTI file. (This used to be called
+	// twice, the first time with &pathName: that stored the new string over
+	// the local pathName, so the second call wrote a pointer into the first
+	// bytes of that string and leaked it. Development Issues #52.)
 	MakeFullpath(pathName, workingDir, nameOfFile, NULL);
 
 	char* p = strstr(pathName[0], ".dxf");
