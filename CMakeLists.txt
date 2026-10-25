@@ -142,6 +142,9 @@ set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")
 # on, so this disambiguates successive dev builds of the same nominal
 # version too, not just distinct point releases — see ProgramVersion.cmake
 # for why filenames use XTRKCAD_FILE_VERSION rather than XTRKCAD_VERSION.
+# XTRKCAD_VERSIONED_INSTALL (also ProgramVersion.cmake) drops the version
+# altogether, which tagged release builds do by default, so that a new
+# release replaces the previous install (Development Issues #48).
 #
 # Note: flatpak builds cannot have periods in the name since periods delimit
 #       the namespace.
@@ -151,7 +154,7 @@ elseif (XTRKCAD_BUILD_FLATPAK)
 	string(REPLACE "." "_" XTRKCAD_VERSION_ID "${XTRKCAD_FILE_VERSION}")
 	set(XTRKCAD_BIN "xtrkcad${XTRKCAD_VERSION_ID}")
 else()
-	set(XTRKCAD_BIN "xtrkcad-${XTRKCAD_FILE_VERSION}")
+	set(XTRKCAD_BIN "xtrkcad${XTRKCAD_INSTALL_SUFFIX}")
 endif()
 
 set(XTRKCAD_SHARE_INSTALL_DIR "share/${XTRKCAD_BIN}")

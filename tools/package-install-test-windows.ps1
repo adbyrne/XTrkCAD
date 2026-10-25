@@ -8,7 +8,7 @@
 # whose name has a space in it, runs it with only the Windows system
 # directories on PATH (so no MSYS2, Git or Strawberry Perl DLL can stand in
 # for one the package forgot), and checks:
-#   - exactly one bin\xtrkcad-<version>.exe, and every DLL it loads is in
+#   - exactly one bin\xtrkcad-<version>.exe (or bin\xtrkcad.exe), and every DLL it loads is in
 #     the package (a missing one shows as STATUS_DLL_NOT_FOUND)
 #   - /V prints the version in the package file name (options start with
 #     '/' on Windows)
@@ -94,9 +94,12 @@ Expand-Archive -Path $Package -DestinationPath $Root
 Write-Output $Root
 
 Step 'Binary'
-$exes = @(Get-ChildItem (Join-Path $Root 'bin') -Filter 'xtrkcad-*.exe' -ErrorAction SilentlyContinue)
+# xtrkcad-<version>.exe, or plain xtrkcad.exe for an unversioned release
+# build (XTRKCAD_VERSIONED_INSTALL).
+$exes = @(Get-ChildItem (Join-Path $Root 'bin') -Filter 'xtrkcad*.exe' -ErrorAction SilentlyContinue |
+	Where-Object { $_.Name -match '^xtrkcad(-.+)?\.exe$' })
 if ($exes.Count -ne 1) {
-	Fail "expected one bin\xtrkcad-*.exe, found $($exes.Count)"
+	Fail "expected one bin\xtrkcad.exe or bin\xtrkcad-*.exe, found $($exes.Count)"
 	exit 1
 }
 $script:Exe = $exes[0].FullName

@@ -73,7 +73,7 @@ render_ref() {
     cmake --build "$build" >&2
     cmake --install "$build" --prefix "$install" >&2
     mkdir -p "$home"
-    bin=$(find "$install" -maxdepth 3 -type f -name "xtrkcad-*" | head -1)
+    bin=$(find "$install/bin" -maxdepth 1 -type f \( -name xtrkcad -o -name "xtrkcad-*" \) | head -1)
     if [ -z "$bin" ]; then
         echo "ERROR: no installed xtrkcad binary found under $install" >&2
         return 1

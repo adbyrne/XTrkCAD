@@ -430,7 +430,11 @@ jobs:
         run: |
           set -eo pipefail
           STAGING="$(pwd)/staging"
-          BINARY="$STAGING/bin/xtrkcad-${XTRKCAD_VERSION}.exe"
+          # xtrkcad-<version>.exe, or plain xtrkcad.exe on a tagged release
+          # (unversioned install, XTRKCAD_VERSIONED_INSTALL).
+          set -- "$STAGING"/bin/xtrkcad*.exe
+          [ $# -eq 1 ] && [ -f "$1" ] || { echo "::error::expected one xtrkcad binary in bin/, found: $*"; exit 1; }
+          BINARY=$1
           MINGW=/mingw64
 
           # GTK3 pixbuf loaders (needed for SVG icons and PNG images)

@@ -123,7 +123,9 @@ a developer coming from the historic three-part version expects. Add
 dev builds of the same nominal version can install side by side instead of colliding — this is
 what CI does automatically (SF #712; see `ProgramVersion.cmake` for the full
 `XTRKCAD_VERSION`/`XTRKCAD_FILE_VERSION` split). A tagged release build is unaffected either
-way — both variables drop the hash and stay the plain three-part version.
+way — both variables drop the hash and stay the plain three-part version. Whether the version
+is part of the install name at all is a separate switch; see
+\ref release-defaults "Defaults for Release".
 
 ```sh
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_APPEND_SRC_HASH=ON
@@ -141,6 +143,71 @@ git checkout <commit-hash>                       # or: hg update -r <commit-hash
 cmake -B build -S . -DXTRKCAD_APPEND_SRC_HASH=ON  # force the reconfigure
 cmake --build build
 ```
+
+# Defaults for Release {#release-defaults}
+
+A release has to replace the previous install when a user installs it, the way XTrackCAD
+releases always did. Development builds do the opposite: each one carries its version in its
+install name so that several can be installed side by side. `XTRKCAD_VERSIONED_INSTALL`
+(`ProgramVersion.cmake`, Development Issues #48) chooses between the two. It covers the
+binary, the `.deb`/`.rpm` package name, the share directory, the desktop and MIME files, the
+work/preferences directory, and on Windows the install folder, Start menu folder and registry
+key.
+
+| Value | Install name |
+|-------|--------------|
+| `AUTO` (default) | `OFF` on the exact commit a `v<version>` tag points at, `ON` otherwise |
+| `ON` | `xtrkcad-<version>`, `~/.xtrkcad-<version>`, `XTrkCAD <version>` |
+| `OFF` | `xtrkcad`, `~/.xtrkcad`, `XTrkCAD` |
+
+`AUTO` is re-evaluated on every configure, so a build directory first configured on an untagged
+commit switches to the unversioned name after you check out the tag and reconfigure. The
+configure output names the result: `XTrkCAD install identity: xtrkcad (...)`.
+
+With the defaults, the three kinds of build come out like this (`<version>` is `5.4.0` here):
+
+| Build | `--version` / About | Package file name | Install name |
+|-------|---------------------|-------------------|--------------|
+| Local, untagged commit | `5.4.0.<hash>` | `xtrkcad-setup-5.4.0-...` | `xtrkcad-5.4.0` |
+| CI (`latest-main`), untagged commit | `5.4.0.<hash>` | `xtrkcad-setup-5.4.0.<hash>-...` | `xtrkcad-5.4.0.<hash>` |
+| Tagged release `v5.4.0` | `5.4.0` | `xtrkcad-setup-5.4.0-...` | `xtrkcad` |
+
+Package and archive *file* names always keep the version, so downloads of different releases
+can't be confused. Only the name the package installs under changes.
+
+**Cutting a release** needs no extra option: tag the commit (`git tag v5.4.0 && git push origin
+v5.4.0`) and `release.yml` builds unversioned packages from it. Configuring a tagged checkout
+by hand gives the same result.
+
+**An unversioned build from an untagged commit**, for someone who wants a dev build to update
+their current install in place:
+
+```sh
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DXTRKCAD_VERSIONED_INSTALL=OFF
+cmake --build build
+```
+
+It replaces the installed release and uses its preferences. Its `--version` still carries the
+commit hash, so it can be told apart from the release.
+
+**A versioned build from a tagged commit**, e.g. a release candidate that should install next to
+the current release: add `-DXTRKCAD_VERSIONED_INSTALL=ON`.
+
+What an unversioned install does on each platform:
+
+- **Linux:** the `.deb`/`.rpm` package is named `xtrkcad`, so the package manager upgrades the
+  installed `xtrkcad` package. The Debian version carries the epoch `1:` (SF #149), so a
+  distribution's own `xtrkcad` package doesn't replace it on the next system update.
+- **Windows:** the NSIS installer uses the `XTrkCAD` folder and registry key, and offers to
+  uninstall the previous release first (`CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL`). From the
+  ZIP, unpack over the previous folder; the program is `bin\xtrkcad.exe`.
+- **macOS:** the archive's program is `bin/xtrkcad`; unpack it over the previous install.
+- **Preferences:** an unversioned install uses `~/.xtrkcad` (`%APPDATA%\xtrkcad` on Windows),
+  the same directory releases before 5.4.0 used, so upgrading keeps the user's settings.
+  Versioned dev builds keep their own directories and don't touch it.
+
+Flatpak builds don't use this option; they have their own, `XTRKCAD_FLATPAK_NOVERSION` (see
+\ref flatpak "Flatpak").
 
 # Advanced/optional local checks {#advanced-optional-local-checks}
 

@@ -7,10 +7,10 @@ string(REPLACE "/" "\\\\" XTRKCAD_SHARE_INSTALL_DIR_WIN "${XTRKCAD_SHARE_INSTALL
 
 set(CPACK_GENERATOR "NSIS")
 # NOTE: CPACK_PACKAGE_INSTALL_DIRECTORY is intentionally NOT set here — it
-# inherits the version-qualified value ("XTrkCAD ${XTRKCAD_FILE_VERSION}") set in
-# distribution/CMakeLists.txt. A fixed "XTrackCAD" override here used to
-# make every version install into the same Program Files folder, clobbering
-# each other exactly like the .deb/.rpm collision this whole change fixes.
+# inherits "XTrkCAD${XTRKCAD_DISPLAY_SUFFIX}" from distribution/CMakeLists.txt:
+# version-qualified for a versioned install, so versions install side by
+# side, and plain "XTrkCAD" for an unversioned release, so a new release
+# replaces the old one (XTRKCAD_VERSIONED_INSTALL, ProgramVersion.cmake).
 set(CPACK_NSIS_EXECUTABLE_NAME "bin\\\\${XTRKCAD_BIN}.exe")
 set(CPACK_NSIS_DISPLAY_NAME "XTrackCAD ${CPACK_PACKAGE_VERSION}")
 set(CPACK_PACKAGE_ICON "${NATIVE_CURRENT_SOURCE_DIR}\\\\headerimage.bmp")
@@ -18,7 +18,7 @@ set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${XTRKCAD_BIN}.exe")
 set(CPACK_NSIS_HELP_LINK "http://www.xtrkcad.org")
 set(CPACK_NSIS_MUI_FINISHPAGE_RUN "${XTRKCAD_BIN}.exe")
 set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "on")
-set(CPACK_NSIS_STARTMENU_FOLDER "XTrackCAD ${XTRKCAD_FILE_VERSION}")
+set(CPACK_NSIS_STARTMENU_FOLDER "XTrackCAD${XTRKCAD_DISPLAY_SUFFIX}")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/install.nsh.in ${CMAKE_CURRENT_BINARY_DIR}/install.nsh @ONLY)
 

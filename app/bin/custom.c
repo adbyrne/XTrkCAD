@@ -45,11 +45,14 @@ char * sProdName = Product;
  * For local flatpak builds, this should not contain any periods.
  *
  * For flathub flatpak builds, this should only be "xtrkcad".
+ *
+ * Otherwise it's "xtrkcad-<version>", or just "xtrkcad" for an unversioned
+ * install (XTRKCAD_VERSIONED_INSTALL, ProgramVersion.cmake).
  */
 #if XTRKCAD_BUILD_FLATPAK
 char * sProdNameLower = product XTRKCAD_VERSION_ID;
 #else
-char * sProdNameLower = product "-" XTRKCAD_FILE_VERSION;
+char * sProdNameLower = product XTRKCAD_INSTALL_SUFFIX;
 #endif
 char * sProdNameUpper = PRODUCT;
 

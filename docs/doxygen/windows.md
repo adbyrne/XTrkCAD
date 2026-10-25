@@ -42,8 +42,9 @@ an attached argument hung the program at startup; `getopttest` covers both forms
 
 `<install root>` is the directory above `bin\`. `g_win32_get_package_installation_directory_of_module()`
 already drops a trailing `bin`, so don't append `..` to it (Development Issues #41).
-`<app name>` is the binary name without `.exe` (`XTRKCAD_BIN`), so several versions can be
-installed side by side without sharing data or preferences.
+`<app name>` is the binary name without `.exe` (`XTRKCAD_BIN`), so several versioned builds can
+be installed side by side without sharing data or preferences. A release build's `<app name>` is
+plain `xtrkcad` (\ref release-defaults "Defaults for Release").
 
 The work directory can be moved with an `xtrkcad0.ini` file in the data directory:
 

@@ -250,6 +250,10 @@ Useful CMake options:
   carries the hash regardless of this flag — see the Version section's "dev-build hash suffix"
   note.) Defaults OFF (matches the historic single-overwriting dev install) except under CI,
   where it defaults ON automatically. Always pass it explicitly for local builds, as shown above.
+- `-DXTRKCAD_VERSIONED_INSTALL=AUTO|ON|OFF` — whether the version is in the install name at all
+  (`xtrkcad-5.4.0` vs plain `xtrkcad`). `AUTO` (default) is OFF on a tagged release, so a new
+  release replaces the previous install, and ON otherwise (Development Issues #48; dev guide
+  "Defaults for Release").
 
 ## Tests
 
@@ -370,6 +374,12 @@ The option defaults OFF locally (a local build's filename/install path stays fix
 commits, and each new build overwrites the last) and ON under CI (GitHub Actions' built-in `CI`
 env var), so concurrent jobs and artifacts never collide. After tagging a release, bump
 `XTRKCAD_RELEASE_VERSION` (and `XTRKCAD_VERSION_MODIFIER`, if used) for the next dev cycle.
+
+**Release install name:** a tagged release also drops the version from the install identity
+(`XTRKCAD_VERSIONED_INSTALL=AUTO`): binary, packages, share dir, `~/.xtrkcad` prefs dir and
+the Windows `XTrkCAD` folder/registry key are unversioned, so installing a release replaces the
+previous one. Package *file* names keep the version. Untagged builds stay versioned unless
+`-DXTRKCAD_VERSIONED_INSTALL=OFF` is passed.
 
 **To build one specific past commit:** `git checkout <hash>` (or `hg update -r <hash>`) in the
 source tree, then explicitly reconfigure — `cmake -B build -S xtrkcad-hg` — before
