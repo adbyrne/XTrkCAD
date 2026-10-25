@@ -11,6 +11,16 @@ set(CPACK_GENERATOR "NSIS")
 # version-qualified for a versioned install, so versions install side by
 # side, and plain "XTrkCAD" for an unversioned release, so a new release
 # replaces the old one (XTRKCAD_VERSIONED_INSTALL, ProgramVersion.cmake).
+
+# A 64-bit program: install under "Program Files", not "Program Files (x86)",
+# which is where NSIS's default $PROGRAMFILES points.
+set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
+# The Start menu shortcut. distribution/CMakeLists.txt names the binary
+# "xtrkcad", which is only right for an unversioned install; a versioned
+# installer's shortcut pointed at a file that didn't exist (Development
+# Issues #49).
+set(CPACK_PACKAGE_EXECUTABLES "${XTRKCAD_BIN};XTrackCAD${XTRKCAD_DISPLAY_SUFFIX}")
+
 set(CPACK_NSIS_EXECUTABLE_NAME "bin\\\\${XTRKCAD_BIN}.exe")
 set(CPACK_NSIS_DISPLAY_NAME "XTrackCAD ${CPACK_PACKAGE_VERSION}")
 set(CPACK_PACKAGE_ICON "${NATIVE_CURRENT_SOURCE_DIR}\\\\headerimage.bmp")

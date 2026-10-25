@@ -3,8 +3,12 @@
 ; from the CMake generated NSIS file during install.
 ;
 
-CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD ReadMe.lnk" "notepad.exe" "$INSTDIR\@XTRKCAD_SHARE_INSTALL_DIR_WIN@\ReadMe.txt"
-CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD CHANGELOG.lnk" "notepad.exe" "$INSTDIR\@XTRKCAD_SHARE_INSTALL_DIR_WIN@\CHANGELOG.txt"
+; Readme.txt and CHANGELOG.txt are only built when pandoc is available
+; (app/lib/CMakeLists.txt), so only link the ones that were installed.
+IfFileExists "$INSTDIR\@XTRKCAD_SHARE_INSTALL_DIR_WIN@\Readme.txt" 0 +2
+  CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD ReadMe.lnk" "notepad.exe" "$INSTDIR\@XTRKCAD_SHARE_INSTALL_DIR_WIN@\Readme.txt"
+IfFileExists "$INSTDIR\@XTRKCAD_SHARE_INSTALL_DIR_WIN@\CHANGELOG.txt" 0 +2
+  CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD CHANGELOG.lnk" "notepad.exe" "$INSTDIR\@XTRKCAD_SHARE_INSTALL_DIR_WIN@\CHANGELOG.txt"
 
 
 ;
