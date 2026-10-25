@@ -352,7 +352,9 @@ Python package for layout analysis and report generation; CI in `ci-mcp.yml`. No
 
 Current version: **5.4.0** (`ProgramVersion.cmake`, no modifier). To cut a release:
 `git tag v5.4.0 && git push origin v5.4.0` — GitHub Actions (`release.yml`) automatically builds
-packages and creates a draft GitHub Release. Every push to `main` also refreshes the rolling
+packages and creates a draft GitHub Release, once the tag matches `ProgramVersion.cmake`
+(`check-release-tag`) and every install test passed. Do a trial run with a suffixed tag
+(`v5.4.0-test1`, drafted as a prerelease) first; see the dev guide's "Cutting a release". Every push to `main` also refreshes the rolling
 `latest-main` prerelease.
 
 **Dev-build hash suffix:** `ProgramVersion.cmake` (SF #712) produces two version strings on every

@@ -3,7 +3,9 @@ name: Release
 # Builds Release packages on every push to main where the build and
 # tests pass. Packages are uploaded as GitHub Actions artifacts (14-day
 # retention) on every push. When a version tag (v*.*.*) is pushed, a
-# permanent GitHub Release is also created with all packages attached.
+# permanent GitHub Release is also created with all packages attached,
+# once the tag matches ProgramVersion.cmake and every install test passed
+# (check-release-tag, github-release).
 #
 # Two more things happen on every ordinary main push (not on tags or
 # workflow_dispatch), giving stable links that never expire or change:
@@ -521,8 +523,9 @@ jobs:
   # plays demos from the installed data, removal is clean. Until these
   # existed, no CI job ever installed a package.
   #
-  # Advisory: no publish job needs these, so a failure shows on the run but
-  # never holds back latest-main or a release.
+  # They don't hold back latest-main, but github-release needs them, so a
+  # release is only drafted when every install test passed (Development
+  # Issues #48).
   install-test-linux:
     name: install-test-linux (${{ matrix.target }}, ${{ matrix.arch }})
     needs: [package-linux-ubuntu, package-linux-debian, package-linux-fedora]
@@ -604,8 +607,8 @@ jobs:
   # ── Install tests — macOS archives on clean runners ───────────────────────
   # Follows README-INSTALL.txt on a fresh runner of each architecture
   # (brew install the prerequisites, unpack, run by full path from $HOME)
-  # with tools/package-install-test-macos.sh. Advisory, like
-  # install-test-linux.
+  # with tools/package-install-test-macos.sh. Like install-test-linux, it
+  # gates github-release but not latest-main.
   install-test-macos:
     name: install-test-macos (${{ matrix.arch }})
     needs: [package-macos]
@@ -967,9 +970,40 @@ jobs:
             --latest=false \
             "${FILES[@]}"
 
+  # ── Release tag check — only on version tags ──────────────────────────────
+  # The tag must name the version ProgramVersion.cmake builds: v<version>
+  # for a release, or v<version>-<suffix> (e.g. v5.4.0-test1) for a trial
+  # run, which github-release publishes as a prerelease. Without this, a
+  # tag v5.4.1 on a commit still at 5.4.0 drafted "XTrkCAD v5.4.1" with
+  # 5.4.0 packages (Development Issues #48).
+  check-release-tag:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tag matches ProgramVersion.cmake
+        run: |
+          MAJOR=$(awk -F'"' '/set\(XTRKCAD_MAJOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MINOR=$(awk -F'"' '/set\(XTRKCAD_MINOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          PATCH=$(awk -F'"' '/set\(XTRKCAD_RELEASE_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MODIFIER=$(awk -F'"' '/set\(XTRKCAD_VERSION_MODIFIER/{print $2; exit}' ProgramVersion.cmake)
+          VERSION="${MAJOR}.${MINOR}.${PATCH}${MODIFIER}"
+          TAG="${{ github.ref_name }}"
+          case "$TAG" in
+          "v$VERSION") echo "release tag $TAG" ;;
+          "v$VERSION"-*) echo "trial tag $TAG, will publish as a prerelease" ;;
+          *)
+            echo "::error::tag $TAG does not match ProgramVersion.cmake ($VERSION): use v$VERSION, or v$VERSION-<suffix> for a trial"
+            exit 1
+            ;;
+          esac
+
   # ── GitHub Release — created only on version tags ──────────────────────────
+  # Waits for the install tests as well as the packages: a release is only
+  # drafted from packages that installed and ran on clean systems.
   github-release:
-    needs: [package-linux-ubuntu, package-linux-debian, package-linux-fedora, package-macos, package-windows, package-docs]
+    needs: [check-release-tag, package-linux-ubuntu, package-linux-debian, package-linux-fedora, package-macos, package-windows, package-docs, install-test-linux, install-test-windows, install-test-macos]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
     permissions:
@@ -996,10 +1030,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG=${GITHUB_REF#refs/tags/}
+          # A suffixed tag (v5.4.0-test1) is a trial run, checked by
+          # check-release-tag: mark it a prerelease.
+          PRERELEASE=()
+          case "$TAG" in *-*) PRERELEASE=(--prerelease --latest=false) ;; esac
           # Flatten all artifact subdirectories into a single file list
           mapfile -t FILES < <(find release-packages -type f | sort)
           gh release create "$TAG" \
             --title "XTrkCAD ${TAG}" \
             --generate-notes \
             --draft \
+            "${PRERELEASE[@]}" \
             "${FILES[@]}"

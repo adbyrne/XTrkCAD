@@ -177,7 +177,34 @@ can't be confused. Only the name the package installs under changes.
 
 **Cutting a release** needs no extra option: tag the commit (`git tag v5.4.0 && git push origin
 v5.4.0`) and `release.yml` builds unversioned packages from it. Configuring a tagged checkout
-by hand gives the same result.
+by hand gives the same result. On a tag, `release.yml` also:
+
+- checks that the tag names the version in `ProgramVersion.cmake` (`check-release-tag`): `v5.4.0`
+  for 5.4.0, or `v5.4.0-<suffix>` for a trial run. Any other tag fails the run;
+- fails the Windows build unless configure reports the unversioned install name;
+- drafts the GitHub Release (`github-release`) only after every package built **and** passed its
+  install test on a clean system. A suffixed tag's release is marked as a prerelease.
+
+## Cutting a release {#cutting-a-release}
+
+1. Check `ProgramVersion.cmake` has the version being released, with no modifier left over from
+   development, and that `main` is green.
+2. **Trial run.** Tag the release commit with a suffix and run the workflow on it as well, so
+   the optional packages are built too:
+   ```sh
+   git tag v5.4.0-test1 <commit> && git push origin v5.4.0-test1
+   gh workflow run release.yml --ref v5.4.0-test1 -f include_nsis=true -f include_dmg=true
+   ```
+   Both runs build from the tagged commit, so the packages install as plain `xtrkcad`. Check
+   the draft prerelease's packages, then delete the draft release(s) and the tag
+   (`gh release delete v5.4.0-test1 --cleanup-tag`).
+3. **Release.** `git tag v5.4.0 <commit> && git push origin v5.4.0`. Wait for the run to finish,
+   review the draft release and its generated notes, and publish it.
+4. **Next cycle.** Bump `XTRKCAD_RELEASE_VERSION` (and `XTRKCAD_VERSION_MODIFIER` if used) in
+   `ProgramVersion.cmake`, so development builds no longer claim the released version.
+
+In Hg, `hg tag v5.4.0` commits the tag as a new changeset and moves the working copy onto it,
+and that changeset isn't the tagged one. To build the release from Hg, `hg update v5.4.0` first.
 
 **An unversioned build from an untagged commit**, for someone who wants a dev build to update
 their current install in place:
