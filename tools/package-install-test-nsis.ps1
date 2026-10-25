@@ -30,9 +30,11 @@ param(
 $ErrorActionPreference = 'Stop'
 $script:Failed = $false
 
-function Fail([string]$msg) { Write-Output "::error::$msg"; $script:Failed = $true }
-function Warn([string]$msg) { Write-Output "::warning::$msg" }
-function Step([string]$msg) { Write-Output ''; Write-Output "=== $msg" }
+# Write-Host, not Write-Output: inside a function, Write-Output becomes
+# part of the function's return value instead of reaching the log.
+function Fail([string]$msg) { Write-Host "::error::$msg"; $script:Failed = $true }
+function Warn([string]$msg) { Write-Host "::warning::$msg" }
+function Step([string]$msg) { Write-Host ''; Write-Host "=== $msg" }
 
 $Installer = (Resolve-Path $Installer).Path
 
@@ -89,8 +91,8 @@ function Install-Once([string]$What) {
 		if ($entries.Count -eq 0) { return $null }
 	}
 	$e = $entries[0]
-	Write-Output "uninstall entry: $($e.PSChildName), DisplayName '$($e.DisplayName)'"
-	Write-Output "UninstallString: $($e.UninstallString)"
+	Write-Host "uninstall entry: $($e.PSChildName), DisplayName '$($e.DisplayName)'"
+	Write-Host "UninstallString: $($e.UninstallString)"
 	return $e
 }
 
@@ -112,6 +114,7 @@ if (-not $InstallDir.StartsWith($env:ProgramFiles + '\')) {
 Step 'Installed tree (tools/package-install-test-windows.ps1)'
 $testArgs = @{ Package = $Installer; InstallDir = $InstallDir }
 if ($ArtifactDir) { $testArgs.ArtifactDir = $ArtifactDir }
+$global:LASTEXITCODE = 0
 & "$PSScriptRoot/package-install-test-windows.ps1" @testArgs
 if ($LASTEXITCODE -ne 0) { Fail 'checks of the installed tree failed (see above)' }
 

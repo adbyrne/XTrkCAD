@@ -26,12 +26,14 @@
     "${Index}-Restore:"
       WriteRegStr HKCR ".xtce" "" $1
       DeleteRegValue HKCR ".xtce" "backup_xtce"
-
-  DeleteRegKey HKCR "XTrackCAD.Design" ;Delete key with association settings
-
-  System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
   "${Index}-NoOwn:"
   !undef Index
+
+; Delete the key with the association settings. It used to sit before the
+; label above, which the usual path (no earlier association to restore)
+; jumps to, so it was left behind (Development Issues #49).
+  DeleteRegKey HKCR "XTrackCAD.Design"
+  System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
 
 ; Remove shortcuts, if any
 SetShellVarContext all

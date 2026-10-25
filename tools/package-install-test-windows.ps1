@@ -195,3 +195,4 @@ if ($script:Failed) {
 	exit 1
 }
 Write-Output 'PASSED'
+exit 0
