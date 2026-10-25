@@ -148,7 +148,13 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
   formatting drift — that's what the gating `astyle-check` job is for). The Windows job checks out
   with `core.autocrlf` off, so astyle sees the same LF line endings as on Linux.
 - **`compiler-warnings`, `compiler-warnings-macos`, `compiler-warnings-windows`** — captures
-  `-Wall -Wextra` build output as an artifact on each platform.
+  `-Wall -Wextra` build output as an artifact on each platform. The Linux job also configures
+  with `-DXTRKCAD_REPORT_POINTER_TYPES=ON`, which turns `PlatformSettings.cmake`'s
+  `-Wno-incompatible-pointer-types` into `-Wno-error=incompatible-pointer-types`, and prints the
+  number of distinct `-Wincompatible-pointer-types` sites in the job summary. Normal builds still
+  suppress them: there were 333 on 2026-10-25, a few real bugs among mostly harmless type
+  differences, and they're being fixed in stages (Development Issues #52, #53, #54). The count
+  should only go down; a PR that raises it has added one.
 - **`coverage`** — generates an lcov HTML report and uploads it as an artifact.
 
 ## Toolchain preview (advisory)

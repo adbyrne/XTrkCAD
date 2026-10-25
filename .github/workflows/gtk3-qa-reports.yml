@@ -451,13 +451,21 @@ jobs:
         run: |
           gcc --version | head -1
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
-            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter" \
+            -DXTRKCAD_REPORT_POINTER_TYPES=ON
       - name: Build (warnings captured, non-fatal)
         run: cmake --build build 2>&1 | tee build/warnings.txt || true
       - name: Summarise warnings
         run: |
           COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
           echo "Total warnings: $COUNT"
+          # Distinct sites (a header warning repeats per file that includes
+          # it). Normally suppressed; being fixed in stages (Development
+          # Issues #52-#54): this count should only go down.
+          IPT=$(grep ': warning:.*\[-Wincompatible-pointer-types\]' build/warnings.txt \
+            | grep -oE '^[^ ]+:[0-9]+:[0-9]+:' | sort -u | wc -l)
+          echo "Incompatible pointer types (distinct sites): $IPT"
+          echo "## Incompatible pointer types: $IPT distinct sites (Development Issues #52-#54)" >> "$GITHUB_STEP_SUMMARY"
           echo ""
           echo "=== By warning flag ==="
           grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true

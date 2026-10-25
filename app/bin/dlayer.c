@@ -1524,6 +1524,7 @@ static void LayerPrefLoad(void)
 	const char *prefString;
 	long rgb;
 	long flags;
+	long prefValue;
 	/* reset layer preferences to system default */
 	LayerAllDefaults();
 	prefString = wPrefGetString(LAYERPREF_SECTION, "layers");
@@ -1573,9 +1574,14 @@ static void LayerPrefLoad(void)
 			layers[inx].button_off = ((flags & LAYERPREF_NOBUTTON) != 0);
 			layers[inx].inherit = ((flags & LAYERPREF_DEFAULT) != 0);
 
-			layerGetInteger(inx, LAYERPREF_SCALEINX, &layers[inx].scaleInx,
+			// layerGetInteger() stores a long. Read into one: storing it
+			// straight into the 4-byte useColor also zeroed frozen, the next
+			// field, so a frozen layer loaded unfrozen (Development Issues #52).
+			layerGetInteger(inx, LAYERPREF_SCALEINX, &prefValue,
 			                GetLayoutCurScale());
-			layerGetInteger(inx, LAYERPREF_USECOLOR, &layers[inx].useColor, TRUE);
+			layers[inx].scaleInx = (SCALEINX_T)prefValue;
+			layerGetInteger(inx, LAYERPREF_USECOLOR, &prefValue, TRUE);
+			layers[inx].useColor = (BOOL_T)prefValue;
 
 			GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx,
 			              &layers[inx].gaugeInx);
