@@ -709,7 +709,7 @@ static struct {
 	FLOAT_T elev[4];
 	coOrd orig;
 	ANGLE_T angle;
-	descPivot_t pivot;
+	long pivot;	// a descPivot_t, bound to a radio, which stores a long (Development Issues #50)
 	char manuf[STR_SIZE];
 	char name[STR_SIZE];
 	char partno[STR_SIZE];

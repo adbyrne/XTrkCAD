@@ -535,16 +535,21 @@ static struct {
 	ANGLE_T oldAngle;
 	long pointCount;
 	LWIDTH_T lineWidth;
-	BOOL_T boxed;
-	BOOL_T filled;
-	BOOL_T open;
-	BOOL_T lock_origin;
+	// boxed, filled, open, lock_origin and pivot are bound to Describe
+	// toggles and a radio (DESC_BOXED, DESC_PIVOT), which read and write a
+	// long. As BOOL_T/descPivot_t each store also zeroed the next field:
+	// changing Filled cleared Open, the pivot cleared fontSizeInx
+	// (Development Issues #50).
+	long boxed;
+	long filled;
+	long open;
+	long lock_origin;
 	wDrawColor color;
 	wDrawColor bg_color;
 	wIndex_t benchChoice;
 	wIndex_t benchOrient;
 	wIndex_t dimenSize;
-	descPivot_t pivot;
+	long pivot;			// a descPivot_t; see boxed above
 	wIndex_t fontSizeInx;
 	char text[STR_HUGE_SIZE];
 	unsigned int layer;
