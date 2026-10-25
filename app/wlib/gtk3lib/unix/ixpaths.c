@@ -116,6 +116,10 @@ IsExistingDirectory( char *name)
 {
 	struct stat dirState;
 
+	// The environment-variable candidate is NULL when the variable isn't set
+	if (name == NULL) {
+		return false;
+	}
 	if(( stat( name, &dirState) == 0 ) && S_ISDIR( dirState.st_mode)) {
 		return true;
 	} else {

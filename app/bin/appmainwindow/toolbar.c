@@ -440,7 +440,9 @@ EXPORT void ToolbarControlAdd(wControl_p control, long options, int cmdGroup)
 	CHECK(buttonCnt < BUTTON_MAX - 1);
 	buttonList[buttonCnt].enabled = TRUE;
 	buttonList[buttonCnt].options = options;
-	buttonList[buttonCnt].group = cmdGroup;
+	// BG_BIGGAP only tells menu.c to put a wider gap after the group. Left
+	// in, ISGROUPVISIBLE() shifted by 32781 (Development Issues #47).
+	buttonList[buttonCnt].group = cmdGroup & ~BG_BIGGAP;
 	//buttonList[buttonCnt].x = 0;
 	//buttonList[buttonCnt].y = 0;
 	buttonList[buttonCnt].control = control;

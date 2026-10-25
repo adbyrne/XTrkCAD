@@ -608,8 +608,7 @@ EXPORT void MainLayout(wBool_t bRedraw, wBool_t bNoBorder)
  * \param data additional data (unused)
  */
 
-wBool_t MainProc(wControl_p win, winProcEvent e, const void *refresh,
-                 void *data)
+bool MainProc(wControl_p win, winProcEvent e, void *refresh, void *data)
 {
 	wWinPix_t width, height;
 	switch (e) {

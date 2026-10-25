@@ -72,8 +72,8 @@ static int log_mapredraw = 0;
 static int delayUpdate = 1;
 
 static void DoMapPan(wAction_t action, coOrd pos);
-static wBool_t MapRedraw(wControl_p bd, void* pContex, wWinPix_t px,
-                         wWinPix_t py);
+static void MapRedraw(wControl_p bd, void* pContex, wWinPix_t px,
+                      wWinPix_t py);
 
 EXPORT drawCmd_t mapD = {
 	NULL, &screenDrawFuncs, DC_SIMPLE, INIT_MAP_SCALE, 0.0, {0.0,0.0}, {96.0,48.0}, Pix2CoOrd, CoOrd2Pix, 96.0
@@ -225,20 +225,20 @@ static void DoMapPan(wAction_t action, coOrd pos)
  * \param pContex [inout] Param context - not used
  * \param px, py [in] canvas size
  */
-static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
-                          wWinPix_t py)
+static void MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
+                       wWinPix_t py)
 {
 #ifndef WIN32
 	log_mapredraw = LogFindIndex("mapredraw");
 	log_mapsize = LogFindIndex("mapsize");
 #endif
 	if (inPlaybackQuit) {
-		return FALSE;
+		return;
 	}
 	static int cMR = 0;
 	LOG(log_mapredraw, 2, ("MapRedraw: %d\n", cMR++));
 	if (!mapVisible) {
-		return FALSE;
+		return;
 	}
 	if (delayUpdate) {
 		wDrawDelayUpdate(mapD.d, TRUE);
@@ -309,8 +309,6 @@ static wBool_t MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
 
 	wDrawSetTempModeNoClear(mapD.d, bTemp);
 	wDrawDelayUpdate(mapD.d, FALSE);
-
-	return TRUE;
 }
 
 

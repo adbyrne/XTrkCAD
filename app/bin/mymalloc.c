@@ -58,6 +58,22 @@ static int StorageLogCurrent = 0;
 
 static unsigned long guard0 = 0xDEADBEEF;
 static unsigned long guard1 = 0xAF00BA8A;
+
+/**
+ * Read the trailing guard of a block. It follows the caller's bytes, so it's
+ * usually not aligned for an unsigned long and has to be copied out
+ * (Development Issues #47).
+ *
+ * \param ptr  the block, as returned by MyMalloc()
+ * \param size the block's size
+ * \return     the guard value
+ */
+static unsigned long GetGuard1(const void* ptr, size_t size)
+{
+	unsigned long guard;
+	memcpy(&guard, (const char*)ptr + size, sizeof guard);
+	return guard;
+}
 /** @logcmd @showrefby `malloc=n` `mymalloc.c` */
 static int log_malloc;
 
@@ -111,7 +127,7 @@ EXPORT BOOL_T TestMallocs()
 				LogPrintf("Guard 0 hosed, " SLOG_FMT " size: %llu \n", (uintptr_t)old, oldSize);
 				rc = FALSE;
 			}
-			if (*(unsigned long*)((char*)old + oldSize) != guard1) {
+			if (GetGuard1(old, oldSize) != guard1) {
 				LogPrintf("Guard 1 hosed, " SLOG_FMT " size: %llu \n", (uintptr_t)old, oldSize);
 				rc = FALSE;
 			}
@@ -156,7 +172,9 @@ EXPORT void* MyMalloc(size_t size)
 	p = (char*)p + sizeof(size_t);
 	*(unsigned long*)p = guard0;
 	p = (char*)p + sizeof(unsigned long);
-	*(unsigned long*)((char*)p + size) = guard1;
+	// The trailing guard follows the caller's bytes, so it's usually not
+	// aligned for an unsigned long: copy it (Development Issues #47)
+	memcpy((char*)p + size, &guard1, sizeof guard1);
 	memset(p, 0, (size_t)size);
 	if (extraButtons) {
 		RecordMalloc(p, size);
@@ -188,7 +206,7 @@ EXPORT void* MyRealloc(void* old, size_t size)
 	CHECKMSG((*(unsigned long*)((char*)old - sizeof(unsigned long)) == guard0),
 	         ("Guard0 is hosed"));
 	oldSize = *(size_t*)((char*)old - sizeof(unsigned long) - sizeof(size_t));
-	CHECKMSG((*(unsigned long*)((char*)old + oldSize) == guard1),
+	CHECKMSG((GetGuard1(old, oldSize) == guard1),
 	         ("Guard1 is hosed"));
 
 	LOG1(log_malloc, ("  Realloc (" SLOG_FMT ",%ld) was %d\n", (size_t)old, size,
@@ -214,7 +232,7 @@ EXPORT void MyFree(void* ptr)
 	         ("Guard0 is hosed"));
 	oldSize = *(size_t*)((char*)ptr - sizeof(unsigned long)
 	                     - sizeof(size_t));
-	CHECKMSG((*(unsigned long*)((char*)ptr + oldSize) == guard1),
+	CHECKMSG((GetGuard1(ptr, oldSize) == guard1),
 	         ("Guard1 is hosed"));
 
 	LOG1(log_malloc,
