@@ -995,6 +995,10 @@ static void DrawDtoInit()
 
 	for (i = 0; i < DTO_DIM; i++) {
 		int n = dto[i].n;
+		// A part with no points has no last point (Development Issues #50)
+		if (n == 0) {
+			continue;
+		}
 		for (j = 0; j < n; j++) {
 			REORIGIN(p1,dto[i].base[j],xx->angle,xx->orig);
 			dto[i].pts[j] = p1;
