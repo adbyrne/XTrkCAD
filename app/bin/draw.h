@@ -277,8 +277,8 @@ void MainRedraw(void);
 void MainLayout(wBool_t, wBool_t);
 void TempRedraw(void);
 void DrawRuler(drawCmd_p, coOrd, coOrd, DIST_T, int, int, wDrawColor);
-wBool_t MainProc(wControl_p window, winProcEvent event, const void *refresh,
-                 void *context);
+bool MainProc(wControl_p window, winProcEvent event, void *refresh,
+              void *context);
 void InitInfoBar(void);
 void InitColor(void);
 void DrawInit(int);
