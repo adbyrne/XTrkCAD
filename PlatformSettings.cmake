@@ -11,12 +11,27 @@ if(XTRKCAD_USE_GTK3)
 	message(STATUS "Plattform settings for GTK3")
 endif()
 
+# Pointers passed or assigned through incompatible types are suppressed
+# below: there are hundreds of them, most harmless (wlib handle subtypes,
+# const-only callback differences), a few real bugs. They're being fixed in
+# stages (Development Issues #52, #53, #54). XTRKCAD_REPORT_POINTER_TYPES
+# reports them as warnings instead, for the compiler-warnings report, so the
+# count can be followed and new ones noticed.
+option(XTRKCAD_REPORT_POINTER_TYPES
+    "Report -Wincompatible-pointer-types as warnings instead of suppressing them"
+    OFF)
+if(XTRKCAD_REPORT_POINTER_TYPES)
+    set(XTRKCAD_POINTER_TYPES_FLAG -Wno-error=incompatible-pointer-types)
+else()
+    set(XTRKCAD_POINTER_TYPES_FLAG -Wno-incompatible-pointer-types)
+endif()
+
 if(UNIX)
     include(FindPkgConfig)
     SET (CMAKE_ENABLE_EXPORTS TRUE)
     set(XTRKCAD_USE_GTK_DEFAULT ON)
 	
-	add_compile_options(-Wno-incompatible-pointer-types)
+	add_compile_options(${XTRKCAD_POINTER_TYPES_FLAG})
 
     # Configure help display and i18n
     if(APPLE)
@@ -111,7 +126,7 @@ if(WIN32)
 		# GCC 14 (MSYS2 MinGW) promotes this to a hard error; GTK3 type-system
 		# pointer casts throughout the codebase rely on the same suppression
 		# that the UNIX build already applies unconditionally.
-		add_compile_options(-Wno-incompatible-pointer-types)
+		add_compile_options(${XTRKCAD_POINTER_TYPES_FLAG})
 		add_compile_options(-Wno-deprecated-declarations)
 		# paramData_t/descData_t positional aggregate literals (dialog control tables
 		# throughout app/bin) deliberately set only their leading fields and rely on
