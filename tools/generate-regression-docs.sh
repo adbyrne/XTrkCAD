@@ -59,7 +59,7 @@ cmake -B "$BUILD" -S "$REPO_ROOT" -G Ninja \
 cmake --build "$BUILD" --parallel "$JOBS" >&2
 cmake --install "$BUILD" --prefix "$INSTALL" >&2
 
-BIN=$(find "$INSTALL" -type f -name "xtrkcad-*" | head -1)
+BIN=$(find "$INSTALL/bin" -maxdepth 1 -type f \( -name xtrkcad -o -name "xtrkcad-*" \) | head -1)
 if [ -z "$BIN" ]; then
     echo "ERROR: no installed xtrkcad binary found under $INSTALL" >&2
     exit 1

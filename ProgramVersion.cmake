@@ -112,3 +112,47 @@ if(XTRKCAD_APPEND_SRC_HASH)
 else()
     set(XTRKCAD_FILE_VERSION "${XTRKCAD_MAJOR_VERSION}.${XTRKCAD_MINOR_VERSION}.${XTRKCAD_RELEASE_VERSION}${XTRKCAD_VERSION_MODIFIER}")
 endif()
+
+# XTRKCAD_VERSIONED_INSTALL decides whether the version is part of the
+# install identity at all (Development Issues #48). Versioned, the binary,
+# package, share directory, desktop file, work/prefs directory and Windows
+# install directory/registry key are all named after XTRKCAD_FILE_VERSION
+# (xtrkcad-5.4.0, ~/.xtrkcad-5.4.0, "XTrkCAD 5.4.0"), so different builds
+# install side by side (SF #673). Unversioned, they are plain xtrkcad,
+# ~/.xtrkcad and "XTrkCAD", so installing a new release replaces the
+# previous one, as releases did before #673.
+#
+# AUTO (the default) is OFF for a tagged release build and ON for every
+# other build. ON or OFF forces it either way, e.g. a versioned release
+# candidate, or an unversioned local build that updates the current
+# install in place. It's a STRING rather than an option() so that AUTO is
+# re-evaluated on every configure: a build directory first configured on
+# an untagged commit doesn't keep a cached ON after checking out the tag.
+# Flatpak builds use XTRKCAD_FLATPAK_NOVERSION instead (CMakeLists.txt).
+set(XTRKCAD_VERSIONED_INSTALL "AUTO" CACHE STRING
+    "Put the version in the install identity: AUTO (OFF for a tagged release, ON otherwise), ON or OFF")
+set_property(CACHE XTRKCAD_VERSIONED_INSTALL PROPERTY STRINGS AUTO ON OFF)
+
+if(XTRKCAD_VERSIONED_INSTALL STREQUAL "AUTO")
+    if(XTRKCAD_IS_TAGGED_RELEASE)
+        set(XTRKCAD_INSTALL_VERSIONED OFF)
+    else()
+        set(XTRKCAD_INSTALL_VERSIONED ON)
+    endif()
+elseif(XTRKCAD_VERSIONED_INSTALL)
+    set(XTRKCAD_INSTALL_VERSIONED ON)
+else()
+    set(XTRKCAD_INSTALL_VERSIONED OFF)
+endif()
+
+# XTRKCAD_INSTALL_SUFFIX goes after "xtrkcad" in file and directory names,
+# XTRKCAD_DISPLAY_SUFFIX after "XTrkCAD" in Windows folder and registry
+# names. Both are empty for an unversioned install.
+if(XTRKCAD_INSTALL_VERSIONED)
+    set(XTRKCAD_INSTALL_SUFFIX "-${XTRKCAD_FILE_VERSION}")
+    set(XTRKCAD_DISPLAY_SUFFIX " ${XTRKCAD_FILE_VERSION}")
+else()
+    set(XTRKCAD_INSTALL_SUFFIX "")
+    set(XTRKCAD_DISPLAY_SUFFIX "")
+endif()
+message(STATUS "XTrkCAD install identity: xtrkcad${XTRKCAD_INSTALL_SUFFIX} (XTRKCAD_VERSIONED_INSTALL=${XTRKCAD_VERSIONED_INSTALL})")

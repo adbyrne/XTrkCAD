@@ -42,8 +42,9 @@ an attached argument hung the program at startup; `getopttest` covers both forms
 
 `<install root>` is the directory above `bin\`. `g_win32_get_package_installation_directory_of_module()`
 already drops a trailing `bin`, so don't append `..` to it (Development Issues #41).
-`<app name>` is the binary name without `.exe` (`XTRKCAD_BIN`), so several versions can be
-installed side by side without sharing data or preferences.
+`<app name>` is the binary name without `.exe` (`XTRKCAD_BIN`), so several versioned builds can
+be installed side by side without sharing data or preferences. A release build's `<app name>` is
+plain `xtrkcad` (\ref release-defaults "Defaults for Release").
 
 The work directory can be moved with an `xtrkcad0.ini` file in the data directory:
 
@@ -74,7 +75,11 @@ session D-Bus at startup, there is none on Windows, and nothing in XTrackCAD nee
 # The Windows package {#windows-package}
 
 `release.yml`'s `package-windows` job builds in MSYS2 MINGW64 on `windows-2025` and publishes
-`xtrkcad-<version>-windows-x64.zip`. Users unpack it anywhere and run `bin\xtrkcad-<version>.exe`.
+`xtrkcad-<version>-windows-x64.zip`. Users unpack it anywhere and run `bin\xtrkcad-<version>.exe`,
+or `bin\xtrkcad.exe` in a release (\ref release-defaults "Defaults for Release"). The job installs
+MSYS2's own `git` so that `ProgramVersion.cmake` sees the commit hash and the release tag; on a
+tag it fails unless configure reports the unversioned install name. Before Development Issues #48
+MSYS2 had no git, so Windows builds had no hash and couldn't recognise a release tag.
 The ZIP must be complete on its own, because users don't have MSYS2:
 
 | Path in the ZIP | Contents | Where it comes from |

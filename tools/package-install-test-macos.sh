@@ -9,7 +9,7 @@
 # the prerequisites, unpack the archive (into a directory whose name has a
 # space in it), and start the binary by its full path from the home
 # directory, as a user would. It checks:
-#   - exactly one bin/xtrkcad-<version>, and every library it links
+#   - exactly one bin/xtrkcad-<version> (or bin/xtrkcad), and every library it links
 #     exists once the README's prerequisites are installed
 #   - README-INSTALL.txt names the binary that's in the archive
 #   - -V prints the version in the package file name
@@ -50,9 +50,14 @@ tar -xzf "$PKG" -C "$ROOT" || { fail "tar -xzf failed"; exit 1; }
 echo "$ROOT"
 
 step "Binary"
-set -- "$ROOT"/bin/xtrkcad-*
+# xtrkcad-<version>, or plain xtrkcad for an unversioned release build
+# (XTRKCAD_VERSIONED_INSTALL).
+set --
+for f in "$ROOT"/bin/xtrkcad "$ROOT"/bin/xtrkcad-*; do
+	[ -e "$f" ] && set -- "$@" "$f"
+done
 if [ $# -ne 1 ] || [ ! -x "$1" ]; then
-	fail "expected one bin/xtrkcad-*, found: $*"
+	fail "expected one bin/xtrkcad or bin/xtrkcad-*, found: $*"
 	exit 1
 fi
 BIN=$1

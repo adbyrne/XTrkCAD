@@ -23,7 +23,7 @@ GTK3 and its dependencies by absolute path, so users must install the prerequisi
 brew install gtk+3 libzip librsvg
 mkdir -p ~/Applications/XTrkCAD
 tar -xzf xtrkcad-<version>-macos-arm64.tar.gz -C ~/Applications/XTrkCAD
-~/Applications/XTrkCAD/bin/xtrkcad-<version>
+~/Applications/XTrkCAD/bin/xtrkcad-<version>   # bin/xtrkcad in a release archive
 ```
 
 The library paths are Homebrew's default prefix for the architecture the archive was built on:

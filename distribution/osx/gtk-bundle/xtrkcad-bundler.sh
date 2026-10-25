@@ -36,11 +36,16 @@ echo "copying shares from build to share directory"
 cp -R "${installib}/share/" "share/"
 
 #copy in binary
-# The installed binary is named xtrkcad-<version> (see top-level
-# CMakeLists.txt XTRKCAD_BIN); copy it in under the plain "xtrkcad" name
-# the bundle config (xtrkcad.bundle's <main-binary>) expects inside the .app.
+# The installed binary is named xtrkcad-<version>, or plain xtrkcad for an
+# unversioned release build (see top-level CMakeLists.txt XTRKCAD_BIN); copy
+# it in under the plain "xtrkcad" name the bundle config (xtrkcad.bundle's
+# <main-binary>) expects inside the .app.
 echo "copying binaries from build to bin directory"
-cp "${installib}/bin/xtrkcad-${version}" "bin/xtrkcad"
+if [ -f "${installib}/bin/xtrkcad-${version}" ]; then
+    cp "${installib}/bin/xtrkcad-${version}" "bin/xtrkcad"
+else
+    cp "${installib}/bin/xtrkcad" "bin/xtrkcad"
+fi
 # helphelper is only present in GTK2 builds (Apple Help backend)
 if [ -f "${installib}/bin/helphelper" ]; then
     cp "${installib}/bin/helphelper" "bin"

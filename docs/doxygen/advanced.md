@@ -270,7 +270,7 @@ overwriting each other.
 
 ## Per-version identity (SF #673)
 
-`XTRKCAD_BIN` (`CMakeLists.txt`), set to `xtrkcad-${XTRKCAD_VERSION}`, is the single source of
+`XTRKCAD_BIN` (`CMakeLists.txt`), set to `xtrkcad-${XTRKCAD_FILE_VERSION}`, is the single source of
 truth for a build's on-disk identity: the installed binary name, the `.deb`/`.rpm`/NSIS package
 name, the `.desktop` filename, the share/gettext-domain directory name, and (via the same
 `XTRKCAD_VERSION` string reused in `app/bin/custom.c`) the runtime work/prefs directory. Before
@@ -278,6 +278,12 @@ this, all of those were the fixed literal `xtrkcad`/`xtrkcad-beta` on every bran
 a GTK3 5.4.0 build over an existing GTK2 5.3.x install looked like an in-place upgrade to
 the package manager and silently clobbered it. Embedding the version means two different point
 releases now install and run side by side.
+
+That is what development builds want, but not releases: a new release should replace the
+previous one. `XTRKCAD_VERSIONED_INSTALL` (Development Issues #48) drops the version from
+`XTRKCAD_BIN` and the Windows install folder and registry key, giving plain `xtrkcad`. Its
+default does that on tagged release builds only; see
+\ref release-defaults "Defaults for Release" on the Building and Testing page.
 
 ## Dev-build hash suffix
 
@@ -292,7 +298,8 @@ source trees (see the \ref index "Developer Documentation" page's note on Source
 GitHub git mirror).
 
 A tagged release build — `git tag v5.4.1 && git push origin v5.4.1`, see `release.yml`'s
-`github-release` job — resolves to the plain three-part version, no hash. The release workflow is
+`github-release` job — resolves to the plain three-part version, no hash, and installs under the
+unversioned name `xtrkcad` (\ref release-defaults "Defaults for Release"). The release workflow is
 otherwise unchanged: after tagging, bump `XTRKCAD_RELEASE_VERSION` (and `XTRKCAD_VERSION_MODIFIER`
 if used) for the next dev cycle in the same commit or a prompt follow-up — every build after that
 picks the hash suffix back up automatically, with no separate manual toggle needed per commit.
@@ -340,10 +347,13 @@ The script checks that:
 The packages have no maintainer scripts. The distribution's own triggers (desktop-file-utils,
 shared-mime-info, the icon cache) register the files for every user, so a package installed
 from a GUI installer or a root shell gets a menu entry too. Each file carries the binary name,
-so several versions can be installed side by side.
+so several versioned builds can be installed side by side, and a release (plain `xtrkcad`)
+upgrades the previous one.
 
-The install tests are advisory. No publish job depends on them, so a failure shows on the run
-but never holds back `latest-main` or a release. To run the same test locally, mount the
+The install tests don't hold back `latest-main`: a failure shows on the run, and the packages
+are published anyway. A release is different: `github-release` needs every install test, so no
+release is drafted from a package that failed one (Development Issues #48). To run the same
+test locally, mount the
 package and the script into a container of the target release (add `--privileged` for Fedora,
 and for Ubuntu 26.04 under rootless podman, whose gdk-pixbuf also uses glycin):
 
@@ -381,7 +391,8 @@ without anyone noticing (`xargs` dropped the backslashes in `ntldd`'s Windows pa
 `|| true` hid the errors), so no ZIP had ever shipped a DLL. The step now fails on any error.
 
 Every run of the program has a timeout, because a modal dialog (an unknown option, a missing
-file) would otherwise hang the job. Like the Linux tests it's advisory. To run it on a Windows
+file) would otherwise hang the job. Like the Linux tests, it gates a release but not `latest-main`.
+To run it on a Windows
 machine:
 
 ```powershell
@@ -409,7 +420,7 @@ checks that:
 Starting from `$HOME` matters: the program has to find its data from its own location. Before
 Development Issues #43, macOS looked for it relative to the current directory. macOS has no
 `timeout(1)`, so the script bounds each run with a `perl` alarm. Like the Linux tests, the
-jobs are advisory. To run it on a Mac:
+jobs gate a release but not `latest-main`. To run it on a Mac:
 
 ```sh
 sh tools/package-install-test-macos.sh xtrkcad-5.4.0-macos-arm64.tar.gz
