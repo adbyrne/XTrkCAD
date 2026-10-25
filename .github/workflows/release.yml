@@ -380,8 +380,19 @@ jobs:
             mingw-w64-x86_64-cmocka
             mingw-w64-x86_64-ntldd-git
             mingw-w64-x86_64-doxygen
+            git
 
       - uses: ./.github/actions/msys2-pin-gcc
+
+      # ProgramVersion.cmake needs git to see the commit hash and the
+      # v<version> tag. Without it a tagged release still installed under
+      # the versioned name xtrkcad-<version> (Development Issues #48).
+      # The checkout belongs to another Windows account than MSYS2's git
+      # expects, so allow it explicitly.
+      - name: Let MSYS2 git read the checkout
+        run: |
+          git config --global --add safe.directory '*'
+          git describe --tags --always
 
       # MSYS2's doxygen package is rolling: 1.18.0-3 (landed between the
       # 2026-09-19 and 2026-10-05 runs) aborts on the User Guide build with
@@ -406,10 +417,16 @@ jobs:
 
       - name: Configure (Release)
         run: |
+          set -o pipefail
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DXTRKCAD_TESTING=ON \
-            -DXTRKCAD_USE_GETTEXT=OFF
+            -DXTRKCAD_USE_GETTEXT=OFF | tee configure.log
+          # A release tag must give the unversioned install name.
+          if [ "${{ github.ref_type }}" = tag ]; then
+            grep -q 'install identity: xtrkcad (' configure.log ||
+              { echo "::error::tagged build did not configure an unversioned install"; exit 1; }
+          fi
 
       - name: Build
         run: cmake --build build --parallel
