@@ -1,6 +1,11 @@
 # Install-test the XTrackCAD Windows ZIP package on a clean system.
 #
 # Usage: pwsh tools/package-install-test-windows.ps1 <package.zip>
+#        pwsh tools/package-install-test-windows.ps1 <installer.exe> -InstallDir <dir>
+#
+# With -InstallDir it checks a tree the NSIS installer already installed
+# there (tools/package-install-test-nsis.ps1) instead of unpacking a ZIP;
+# the package is then only used for the version in its file name.
 #
 # The Windows counterpart of tools/package-install-test.sh; release.yml's
 # install-test-windows job runs it on a fresh windows runner. A user installs
@@ -22,6 +27,8 @@
 
 param(
 	[Parameter(Mandatory = $true)][string]$Package,
+	# An installed tree to check instead of unpacking the package
+	[string]$InstallDir = '',
 	# Where to save screenshots of runs that time out (release.yml uploads it)
 	[string]$ArtifactDir = ''
 )
@@ -86,11 +93,16 @@ $Package = (Resolve-Path $Package).Path
 $script:ArtifactDir = $ArtifactDir
 if ($ArtifactDir) { New-Item -ItemType Directory -Force $ArtifactDir | Out-Null }
 $Work = Join-Path ([IO.Path]::GetTempPath()) "xtrkcad-install-test-$PID"
-$Root = Join-Path $Work 'XTrackCAD install test'
-New-Item -ItemType Directory -Force $Root | Out-Null
-
-Step "Unpack $(Split-Path -Leaf $Package)"
-Expand-Archive -Path $Package -DestinationPath $Root
+New-Item -ItemType Directory -Force $Work | Out-Null
+if ($InstallDir) {
+	$Root = (Resolve-Path $InstallDir).Path
+	Step "Installed tree"
+} else {
+	$Root = Join-Path $Work 'XTrackCAD install test'
+	New-Item -ItemType Directory -Force $Root | Out-Null
+	Step "Unpack $(Split-Path -Leaf $Package)"
+	Expand-Archive -Path $Package -DestinationPath $Root
+}
 Write-Output $Root
 
 Step 'Binary'
@@ -112,9 +124,12 @@ $env:PATH = @("$env:SystemRoot\System32", $env:SystemRoot,
 
 $Before = @(Get-ChildItem -Recurse -File $Root | ForEach-Object FullName)
 
-# xtrkcad-<version>-windows-x64.zip
+# xtrkcad-<version>-windows-x64.zip, or the installer's
+# xtrkcad-setup-<version>-x64.exe
 $Want = ''
-if ((Split-Path -Leaf $Package) -match '^xtrkcad-(.+)-windows-[a-z0-9]+\.zip$') {
+$Leaf = Split-Path -Leaf $Package
+if ($Leaf -match '^xtrkcad-(.+)-windows-[a-z0-9]+\.zip$' -or
+	$Leaf -match '^xtrkcad-setup-(.+)-x(64|86)\.exe$') {
 	$Want = $Matches[1]
 }
 $out = Join-Path $Work 'version.txt'
@@ -147,7 +162,7 @@ foreach ($f in 'xtrkcad.xtq', 'html\index.html') {
 	if (-not (Test-Path (Join-Path $Share $f))) { Fail "$Share\$f is missing" }
 }
 
-Step 'Play demos from the unpacked data'
+Step 'Play demos from the installed data'
 # dmstrtrk carries REGRESSION checks; dmintro exercises a full demo with
 # dialogs. On Windows the log goes to a file (lprintf.c), so name one
 # with /l.
@@ -180,3 +195,4 @@ if ($script:Failed) {
 	exit 1
 }
 Write-Output 'PASSED'
+exit 0

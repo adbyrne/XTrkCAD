@@ -26,7 +26,7 @@ on:
         type: boolean
         default: false
       include_nsis:
-        description: 'Build NSIS installer (experimental — DLLs not yet bundled via CMake install)'
+        description: 'Build and install-test the NSIS installer (always done on version tags)'
         type: boolean
         default: false
       include_dmg:
@@ -381,6 +381,7 @@ jobs:
             mingw-w64-x86_64-gettext
             mingw-w64-x86_64-cmocka
             mingw-w64-x86_64-doxygen
+            mingw-w64-x86_64-nsis
             git
 
       - uses: ./.github/actions/msys2-pin-gcc
@@ -511,21 +512,26 @@ jobs:
           retention-days: 14
 
       - name: Package NSIS installer
-        # Skipped on normal pushes — opt in via workflow_dispatch input.
-        # DLLs are not yet bundled via CMake install(); the ZIP (above) is
-        # the recommended Windows distributable until NSIS bundling is solved.
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_nsis == true }}
-        continue-on-error: true
+        # Built on version tags, and on request (include_nsis) otherwise.
+        # cmake --install doesn't collect the MinGW DLLs (the step above
+        # does, into staging/), so the installer is built from staging/ as
+        # well: CPACK_INSTALLED_DIRECTORIES adds it to what CPack installs
+        # from the build, and the installer ends up holding the same files
+        # as the ZIP (Development Issues #49).
+        if: ${{ github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.include_nsis == true) }}
         run: |
+          STAGING=$(cygpath -m "$(pwd)/staging")
           cd build
-          cpack -G NSIS
+          cpack -G NSIS -D "CPACK_INSTALLED_DIRECTORIES=$STAGING;."
+          ls -l xtrkcad-setup-*.exe
 
-      - name: Upload NSIS installer (if built)
+      - name: Upload NSIS installer
         uses: actions/upload-artifact@v7
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_nsis == true }}
+        if: ${{ github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.include_nsis == true) }}
         with:
           name: packages-windows-x64-nsis
-          path: build/*.exe
+          path: build/xtrkcad-setup-*.exe
+          if-no-files-found: error
           retention-days: 14
 
   # ── Install tests — Linux packages on clean systems ───────────────────────
@@ -586,7 +592,8 @@ jobs:
   # Unpacks the ZIP into a path with a space in it and runs
   # tools/package-install-test-windows.ps1 with only the Windows system
   # directories on PATH, so a DLL the package forgot can't be found in the
-  # runner's MSYS2, Git or Perl. Advisory, like install-test-linux.
+  # runner's MSYS2, Git or Perl. Like install-test-linux, it gates
+  # github-release but not latest-main.
   install-test-windows:
     needs: [package-windows]
     if: ${{ !cancelled() }}
@@ -613,6 +620,43 @@ jobs:
         with:
           name: install-test-windows-screenshots
           path: ${{ runner.temp }}/install-test-windows
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # ── Install test — Windows NSIS installer on a clean runner ───────────────
+  # Runs only when the installer was built (tags, include_nsis).
+  # tools/package-install-test-nsis.ps1 installs it silently into the
+  # default Program Files folder, runs the ZIP test's checks on the
+  # installed tree, checks the uninstall entry, Start menu shortcuts and
+  # .xtc association, installs again over the first install (the upgrade
+  # path, Development Issues #48), then uninstalls and checks nothing is
+  # left behind.
+  install-test-windows-nsis:
+    needs: [package-windows]
+    if: ${{ !cancelled() && (github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.include_nsis == true)) }}
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download installer
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-windows-x64-nsis
+          path: pkg
+
+      - name: Install test
+        shell: pwsh
+        run: |
+          $exes = @(Get-ChildItem pkg -Filter 'xtrkcad-setup-*.exe')
+          if ($exes.Count -ne 1) { throw "expected one installer in pkg/, found $($exes.Count)" }
+          ./tools/package-install-test-nsis.ps1 $exes[0].FullName -ArtifactDir "$env:RUNNER_TEMP/install-test-windows-nsis"
+
+      - name: Upload screenshots of hung runs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: install-test-windows-nsis-screenshots
+          path: ${{ runner.temp }}/install-test-windows-nsis
           if-no-files-found: ignore
           retention-days: 14
 
@@ -1015,7 +1059,7 @@ jobs:
   # Waits for the install tests as well as the packages: a release is only
   # drafted from packages that installed and ran on clean systems.
   github-release:
-    needs: [check-release-tag, package-linux-ubuntu, package-linux-debian, package-linux-fedora, package-macos, package-windows, package-docs, install-test-linux, install-test-windows, install-test-macos]
+    needs: [check-release-tag, package-linux-ubuntu, package-linux-debian, package-linux-fedora, package-macos, package-windows, package-docs, install-test-linux, install-test-windows, install-test-windows-nsis, install-test-macos]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
     permissions:

@@ -399,6 +399,33 @@ machine:
 pwsh tools/package-install-test-windows.ps1 xtrkcad-5.4.0-windows-x64.zip
 ```
 
+## Windows installer test {#package-install-test-nsis}
+
+When the NSIS installer is built (version tags, or `include_nsis`), the
+`install-test-windows-nsis` job runs `tools/package-install-test-nsis.ps1` on a fresh
+`windows-2025` runner. It does what a user does with the installer and checks the result:
+
+- it installs silently (`/S`) into the default folder, which must be under `Program Files`,
+  and leaves exactly one `XTrkCAD` uninstall entry in the registry;
+- `tools/package-install-test-windows.ps1 -InstallDir` runs all of the ZIP test's checks on the
+  installed tree, with the version taken from the installer's name;
+- every Start menu shortcut points at a file that exists, and one starts the installed binary;
+- `.xtc` and `.xtce` open with the installed binary;
+- installing again over the first install, the upgrade path, answers yes to "uninstall the old
+  version first" and leaves one uninstall entry and one binary;
+- uninstalling removes every file, the uninstall entry, the Start menu folder and the file
+  association.
+
+The installer needs administrator rights, which a GitHub runner has. On your own machine, run it
+from an administrator PowerShell on a system with no XTrackCAD installed through the installer:
+
+```powershell
+pwsh tools/package-install-test-nsis.ps1 xtrkcad-setup-5.4.0-x64.exe
+```
+
+Like the other install tests it gates a release (`github-release` needs it) but not
+`latest-main`, which has no installer.
+
 ## macOS install test {#package-install-test-macos}
 
 Background on the macOS package and on debugging there: \ref macos.

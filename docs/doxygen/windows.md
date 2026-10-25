@@ -95,9 +95,16 @@ Until Development Issues #42 the DLL copy ran through `xargs`, which dropped the
 The ZIP only worked on machines that had MSYS2 on `PATH`. The step now runs with
 `set -eo pipefail` and fails if `ntldd` finds nothing.
 
-**NSIS installer:** `cpack -G NSIS` runs only when `release.yml` is dispatched with
-`include_nsis`, and is `continue-on-error`. It doesn't bundle the DLLs yet, so the ZIP is the
-package to use.
+**NSIS installer:** `xtrkcad-setup-<version>-x64.exe`, built on version tags and, otherwise,
+only when `release.yml` is dispatched with `include_nsis`. `cmake --install` doesn't collect the
+MinGW DLLs, so `cpack -G NSIS` also gets the ZIP's staging directory through
+`CPACK_INSTALLED_DIRECTORIES`, and the installer holds the same files as the ZIP. It installs
+for all users under `Program Files` (`CPACK_NSIS_INSTALL_ROOT` is `$PROGRAMFILES64`), adds a
+Start menu folder and associates `.xtc`/`.xtce` with the program. A release installs into
+`Program Files\XTrkCAD` under the uninstall key `XTrkCAD`, so installing the next release offers
+to uninstall the previous one first and then replaces it (\ref release-defaults "Defaults for Release").
+Before Development Issues #49 the installer had no DLLs, wasn't built on tags, and its Start
+menu shortcut pointed at `bin\xtrkcad.exe` even when the binary was versioned.
 
 **Toolchain:** CI builds with MSYS2 MINGW64 and pins MinGW GCC (`.github/actions/msys2-pin-gcc`).
 MSYS2 has deprecated MINGW64. Moving CI and the release to UCRT64 is tracked as Development

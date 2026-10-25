@@ -182,20 +182,22 @@ by hand gives the same result. On a tag, `release.yml` also:
 - checks that the tag names the version in `ProgramVersion.cmake` (`check-release-tag`): `v5.4.0`
   for 5.4.0, or `v5.4.0-<suffix>` for a trial run. Any other tag fails the run;
 - fails the Windows build unless configure reports the unversioned install name;
+- builds the Windows NSIS installer, which ordinary pushes to `main` skip;
 - drafts the GitHub Release (`github-release`) only after every package built **and** passed its
-  install test on a clean system. A suffixed tag's release is marked as a prerelease.
+  install test on a clean system, the installer included. A suffixed tag's release is marked as
+  a prerelease.
 
 ## Cutting a release {#cutting-a-release}
 
 1. Check `ProgramVersion.cmake` has the version being released, with no modifier left over from
    development, and that `main` is green.
-2. **Trial run.** Tag the release commit with a suffix and run the workflow on it as well, so
-   the optional packages are built too:
+2. **Trial run.** Tag the release commit with a suffix:
    ```sh
    git tag v5.4.0-test1 <commit> && git push origin v5.4.0-test1
-   gh workflow run release.yml --ref v5.4.0-test1 -f include_nsis=true -f include_dmg=true
    ```
-   Both runs build from the tagged commit, so the packages install as plain `xtrkcad`. Check
+   The tag run builds and install-tests every release package, the NSIS installer included, and
+   the packages install as plain `xtrkcad`. The experimental self-contained DMG is still opt-in:
+   `gh workflow run release.yml --ref v5.4.0-test1 -f include_dmg=true` builds it. Check
    the draft prerelease's packages, then delete the draft release(s) and the tag
    (`gh release delete v5.4.0-test1 --cleanup-tag`).
 3. **Release.** `git tag v5.4.0 <commit> && git push origin v5.4.0`. Wait for the run to finish,
@@ -225,8 +227,9 @@ What an unversioned install does on each platform:
 - **Linux:** the `.deb`/`.rpm` package is named `xtrkcad`, so the package manager upgrades the
   installed `xtrkcad` package. The Debian version carries the epoch `1:` (SF #149), so a
   distribution's own `xtrkcad` package doesn't replace it on the next system update.
-- **Windows:** the NSIS installer uses the `XTrkCAD` folder and registry key, and offers to
-  uninstall the previous release first (`CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL`). From the
+- **Windows:** the NSIS installer uses the `Program Files\XTrkCAD` folder and the `XTrkCAD`
+  registry key, and offers to uninstall the previous release first
+  (`CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL`); `install-test-windows-nsis` checks that path. From the
   ZIP, unpack over the previous folder; the program is `bin\xtrkcad.exe`.
 - **macOS:** the archive's program is `bin/xtrkcad`; unpack it over the previous install.
 - **Preferences:** an unversioned install uses `~/.xtrkcad` (`%APPDATA%\xtrkcad` on Windows),
