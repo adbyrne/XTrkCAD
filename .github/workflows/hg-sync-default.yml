@@ -171,7 +171,7 @@ jobs:
           for n in $($HG log -r "reverse(only($tip, $last) and branch($HG_BRANCH))" -T '{node}\n'); do
             if main_has_changes_to "$n"; then
               last="$n"
-              echo "$GIT_BRANCH already has every change up to Hg $($HG log -r "$n" -T '{rev}:{node|short}'), not just the trailer's ${trailer:0:12}; starting there."
+              echo "$GIT_BRANCH already has every change up to Hg ${n:0:12}, not just the trailer's ${trailer:0:12}; starting there."
               break
             fi
           done
