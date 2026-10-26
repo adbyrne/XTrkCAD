@@ -57,7 +57,7 @@ struct {
 	coOrd pos;
 	int layer;
 	track_p trk;
-	long fieldObjectInx;
+	wIndex_t fieldObjectInx;
 	char fieldName[STR_SHORT_SIZE];
 	char fieldValue[STR_LONG_SIZE];
 } jsonNoteData;
@@ -560,7 +560,7 @@ JsonFieldApplyEdit(BOOL_T isDelete)
 
 	wTextClear(jsonTextEntry);
 	wTextAppend(jsonTextEntry, pretty);
-	JSONNOTE_LOG("jsonfield: %s '%s' on object #%ld, %d bytes\n",
+	JSONNOTE_LOG("jsonfield: %s '%s' on object #%d, %d bytes\n",
 	             isDelete ? "deleted" : "added/updated", name, jsonNoteData.fieldObjectInx,
 	             (int)strlen(pretty));
 	cJSON_free(pretty);

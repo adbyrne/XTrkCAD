@@ -156,7 +156,7 @@ EXPORT void AddHotBarCarDesc(void)
 #define I_NEWCARSEL  (0)
 #define I_NEWCARDESC (1)
 
-static long newCarInx;
+static wIndex_t newCarInx;
 static paramData_t newCarPLs[] = {
 	{ PD_DROPLIST, &newCarInx, "newcarsel", PDO_DLGWIDE, I2VP(400), N_("Item") },
 	{ PD_MESSAGE, NULL, "newcardesc", 0, NULL }

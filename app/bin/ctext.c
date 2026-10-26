@@ -46,7 +46,7 @@ static struct {
 	POS_T lastLineOffset;
 	coOrd pos;
 	long size;
-	long fontSizeInx;
+	wIndex_t fontSizeInx;
 	char text[STR_LONG_SIZE];
 	wDrawColor color;
 	long boxed;

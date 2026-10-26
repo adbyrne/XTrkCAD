@@ -220,6 +220,7 @@ char * FormatFloat( FLOAT_T );
 char * FormatDistance( FLOAT_T );
 char * FormatSmallDistance( FLOAT_T );
 char * FormatDistanceEx( FLOAT_T, long );
+FLOAT_T FormDecodeDistance( const char *enteredValue, BOOL_T* validP );
 
 void ParamRestoreAll( void );
 void ParamSaveAll( void );

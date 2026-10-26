@@ -854,8 +854,8 @@ static char rescaleFromGaugeStr[20];
 static long rescaleMode;
 static wIndex_t rescaleFromScaleInx;
 static wIndex_t rescaleFromGaugeInx;
-static long rescaleToScaleInx;
-static long rescaleToGaugeInx;
+static wIndex_t rescaleToScaleInx;
+static wIndex_t rescaleToGaugeInx;
 static wIndex_t rescaleToInx;
 static long rescaleNoChangeDim = FALSE;
 static FLOAT_T rescalePercent;
@@ -1136,8 +1136,11 @@ EXPORT void DoRescale( void * unused )
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_GAUGE, rescaleFromGaugeStr );
 
 	// TODO: rescale demo shows blank because DEMO scale inx is beyond the drop box entries
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_SCALE, &rescaleToScaleInx );
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_GAUGE, &rescaleToGaugeInx );
+	// RescaleDlgUpdate reads a long, as passed by ListPush
+	long toInx = rescaleToScaleInx;
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_SCALE, &toInx );
+	toInx = rescaleToGaugeInx;
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_GAUGE, &toInx );
 
 	InfoMessage( _("%ld Objects to be rescaled"), selectedTrackCount );
 	wShow( rescalePG.win );

@@ -33,7 +33,7 @@ static int log_dpreferences = -1;
 
 static wControl_p prefW;
 static long displayUnits;
-static long distanceFormatInx;
+static wIndex_t distanceFormatInx;
 
 
 static void UpdateMeasureFmt(void);
@@ -222,7 +222,7 @@ static void UpdateMeasureFmt()
  */
 static struct {
 	long units;
-	long distanceFormatInx;
+	wIndex_t distanceFormatInx;
 	long checkPtInterval;
 	long autosaveChkPoints;
 } prefSaved;

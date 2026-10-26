@@ -1,179 +1,273 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 1.0.2 -->
 <interface>
-    <requires lib="gtk" version="3.22" />
-    <object class="GtkDialog" id="demo">
+  <!-- interface-name demo.ui -->
+  <requires lib="gtk" version="3.22"/>
+  <requires lib="gtk+" version="3.22"/>
+  <object class="GtkDialog" id="demo">
+    <property name="border-width">12</property>
+    <property name="can-focus">False</property>
+    <property name="resizable">False</property>
+    <property name="type-hint">dialog</property>
+    <property name="use-header-bar">0</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
         <property name="can-focus">False</property>
-        <property name="border-width">12</property>
-        <property name="type-hint">dialog</property>
-        <property name="use-header-bar">0</property>
-        <property name="resizable">False</property>
-        <child type="action">
-            <object class="GtkButton" id="id_ok">
-                <property name="use-underline">True</property>
-                <property name="can-default">True</property>
-                <property name="label">_Finish</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">18</property>
+        <child>
+          <object class="GtkBox">
+            <property name="can-focus">False</property>
+            <property name="margin-bottom">12</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">12</property>
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkScrolledWindow" id="scrollwindow">
+                <property name="can-focus">True</property>
+                <property name="height-request">200</property>
+                <property name="hexpand">True</property>
+                <property name="min-content-height">150</property>
+                <property name="min-content-width">200</property>
+                <property name="shadow-type">in</property>
+                <property name="vexpand">True</property>
                 <property name="visible">True</property>
-            </object>
-        </child>
-        <action-widgets>
-            <action-widget response="GTK_RESPONSE_OK">id_ok</action-widget>
-        </action-widgets>
-        <child internal-child="vbox">
-            <object class="GtkBox">
-                <property name="can-focus">False</property>
-                <property name="orientation">vertical</property>
-                <property name="spacing">18</property>
-                <child internal-child="action_area">
-
-                </child>
+                <property name="width-request">450</property>
                 <child>
-                    <object class="GtkBox">
-                        <property name="visible">True</property>
+                  <object class="GtkTextView" id="text">
+                    <property name="accepts-tab">False</property>
+                    <property name="can-focus">True</property>
+                    <property name="cursor-visible">False</property>
+                    <property name="editable">False</property>
+                    <property name="monospace">True</property>
+                    <property name="visible">True</property>
+                    <property name="wrap-mode">word</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="can-focus">False</property>
+                <property name="spacing">6</property>
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="can-focus">False</property>
+                    <property name="margin-start">12</property>
+                    <property name="spacing">6</property>
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkLabel">
                         <property name="can-focus">False</property>
-                        <property name="margin-bottom">12</property>
-                        <property name="orientation">vertical</property>
-                        <property name="spacing">12</property>
+                        <property name="label" translatable="yes">S_peed</property>
+                        <property name="mnemonic-widget">speed</property>
+                        <property name="use-underline">True</property>
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="speed">
+                        <property name="can-focus">False</property>
+                        <property name="model">speedoptions</property>
+                        <property name="visible">True</property>
                         <child>
-                            <object class="GtkScrolledWindow" id="scrollwindow">
-                                <property name="width-request">450</property>
-                                <property name="height-request">200</property>
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="hexpand">True</property>
-                                <property name="vexpand">True</property>
-                                <property name="shadow-type">in</property>
-                                <property name="min-content-width">200</property>
-                                <property name="min-content-height">150</property>
-                                <child>
-                                    <object class="GtkTextView" id="text">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="editable">False</property>
-                                        <property name="wrap-mode">word</property>
-                                        <property name="cursor-visible">False</property>
-                                        <property name="accepts-tab">False</property>
-                                        <property name="monospace">True</property>
-                                    </object>
-                                </child>
-                            </object>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                            </packing>
+                          <object class="GtkCellRendererText" id="textfield">
+                            <property name="width-chars">20</property>
+                          </object>
+                          <!-- Custom child fragments -->
+                          <attributes>
+                            <attribute name="text">3</attribute>
+                          </attributes>
                         </child>
-                        <child>
-                            <object class="GtkBox">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="spacing">6</property>
-                                <child>
-                                    <object class="GtkBox">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="margin-start">12</property>
-                                        <property name="spacing">6</property>
-                                        <child>
-                                            <object class="GtkLabel">
-                                                <property name="visible">True</property>
-                                                <property name="can-focus">False</property>
-                                                <property name="label" translatable="yes">S_peed</property>
-                                                <property name="use-underline">True</property>
-                                                <property name="mnemonic-widget">speed</property>
-                                            </object>
-                                            <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="position">1</property>
-                                            </packing>
-                                        </child>
-                                        <child>
-                                            <object class="GtkComboBox" id="speed">
-                                                <property name="visible">True</property>
-                                                <property name="can-focus">False</property>
-                                                <property name="model">speedoptions</property>
-                                                <child>
-                                                    <object class="GtkCellRendererText"
-                                                        id="textfield">
-                                                        <property name="width-chars">20</property>
-                                                    </object>
-                                                    <attributes>
-                                                        <attribute name="text">3</attribute>
-                                                    </attributes>
-                                                </child>
-                                            </object>
-                                            <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="position">2</property>
-                                            </packing>
-                                        </child>
-                                    </object>
-                                    <packing>
-                                        <property name="expand">True</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">1</property>
-                                    </packing>
-                                </child>
-                                <child>
-                                    <object class="GtkToggleButton" id="step">
-                                        <property name="label">_Step</property>
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="receives-default">True</property>
-                                        <property name="use-underline">True</property>
-                                        <property name="image-position">right</property>
-                                    </object>
-                                    <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">False</property>
-                                        <property name="position">2</property>
-                                    </packing>
-                                </child>
-                                <child>
-                                    <object class="GtkToggleButton" id="next">
-                                        <property name="label">_Next Demo</property>
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="receives-default">True</property>
-                                        <property name="use-underline">True</property>
-                                        <property name="image-position">right</property>
-                                    </object>
-                                    <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">False</property>
-                                        <property name="position">3</property>
-                                    </packing>
-                                </child>
-                            </object>
-                            <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                            </packing>
-                        </child>
-                    </object>
-                    <packing>
+                      </object>
+                      <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
-                    </packing>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
-            </object>
+                <child>
+                  <object class="GtkBox" id="buttons">
+                    <property name="spacing">0</property>
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkToggleButton" id="back">
+                        <property name="label" translatable="yes">_Back</property>
+                        <property name="always-show-image">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="image">img_back</property>
+                        <property name="receives-default">True</property>
+                        <property name="use-underline">True</property>
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="step">
+                        <property name="label" translatable="yes">S_tep</property>
+                        <property name="always-show-image">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="image">img_step</property>
+                        <property name="receives-default">True</property>
+                        <property name="use-underline">True</property>
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="next">
+                        <property name="label" translatable="yes">_Next</property>
+                        <property name="always-show-image">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="image">img_next</property>
+                        <property name="receives-default">True</property>
+                        <property name="use-underline">True</property>
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkStack" id="contstop">
+                        <property name="homogeneous">True</property>
+                        <property name="visible">True</property>
+                        <child>
+                          <object class="GtkToggleButton" id="continuous">
+                            <property name="label" translatable="yes">Play _All</property>
+                            <property name="always-show-image">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="image">img_continuous</property>
+                            <property name="receives-default">True</property>
+                            <property name="use-underline">True</property>
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="name">play</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="stop">
+                            <property name="label" translatable="yes">_Stop</property>
+                            <property name="always-show-image">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="image">img_stop</property>
+                            <property name="receives-default">True</property>
+                            <property name="use-underline">True</property>
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="name">stop</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <style>
+                      <class name="linked"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
         </child>
-    </object>
-    <object class="GtkSizeGroup">
-        <widgets>
-            <widget name="step" />
-            <widget name="next" />
-        </widgets>
-    </object>
-    <object class="GtkListStore" id="speedoptions">
-        <columns>
-            <column type="gboolean" />
-            <column type="gpointer" />
-            <column type="GdkPixbuf" />
-            <column type="gchararray" />
-        </columns>
-    </object>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="id_ok">
+        <property name="can-default">True</property>
+        <property name="label" translatable="yes">_Done</property>
+        <property name="use-underline">True</property>
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="GTK_RESPONSE_OK">id_ok</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkImage" id="img_back">
+    <property name="icon-name">media-skip-backward-symbolic</property>
+    <property name="visible">True</property>
+  </object>
+  <object class="GtkImage" id="img_step">
+    <property name="icon-name">media-playback-start-symbolic</property>
+    <property name="visible">True</property>
+  </object>
+  <object class="GtkImage" id="img_next">
+    <property name="icon-name">media-skip-forward-symbolic</property>
+    <property name="visible">True</property>
+  </object>
+  <object class="GtkImage" id="img_continuous">
+    <property name="icon-name">media-seek-forward-symbolic</property>
+    <property name="visible">True</property>
+  </object>
+  <object class="GtkImage" id="img_stop">
+    <property name="icon-name">media-playback-stop-symbolic</property>
+    <property name="visible">True</property>
+  </object>
+  <!-- Same width for all buttons (the stack counts as one) -->
+  <object class="GtkSizeGroup">
+    <widgets>
+      <widget name="back"/>
+      <widget name="step"/>
+      <widget name="next"/>
+      <widget name="contstop"/>
+    </widgets>
+  </object>
+  <object class="GtkListStore" id="speedoptions">
+    <columns>
+      <column type="gboolean"/>
+      <column type="gpointer"/>
+      <column type="GdkPixbuf"/>
+      <column type="gchararray"/>
+    </columns>
+  </object>
 </interface>

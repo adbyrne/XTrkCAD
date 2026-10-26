@@ -2276,7 +2276,7 @@ static void DoReportsNotesFilter(void *unused)
  * registers a name there, NoteNameCount() is 0 and this dropdown shows
  * just "All ROOT Names" -- the correct, expected empty-registry state,
  * not a bug. */
-static long reportsNoteRootNamesFilterInx;
+static wIndex_t reportsNoteRootNamesFilterInx;
 
 /** Thin wrapper over NoteNameCount() (notenames.h) -- kept as its own
  * function (not inlined into the filter-population/compute-pass call
@@ -2302,7 +2302,7 @@ static const char *ReportsManagedNameAt(int i)
  * non-JSON note's resolved group is only ever set for JSON notes, so
  * combining e.g. Type=Weblink with a ROOT Names filter other than "All
  * ROOT Names" yields an empty, if unsurprising, result). */
-static long reportsNoteTypeFilterInx;
+static wIndex_t reportsNoteTypeFilterInx;
 static const char * reportsNoteTypeFilterLabels[] = {
 	N_("All Types"), N_("Text"), N_("Weblink"), N_("Document"), N_("JSON")
 };

@@ -2933,7 +2933,7 @@ static drawContext_t drawCmdContext = {
 
 static long benchChoice;
 static long benchOrient;
-static long dimArrowSize;
+static wIndex_t dimArrowSize;
 wDrawColor lineColor = 1;
 LWIDTH_T lineWidth = 0;
 wDrawColor benchColor;

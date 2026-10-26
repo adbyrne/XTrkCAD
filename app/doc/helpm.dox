@@ -58,13 +58,17 @@ The <b>Demo</b> dialog is displayed which contains a number of control buttons a
 
 - ![](demo.png)
 
-- <b>Next</b> - skip to the next demonstration.  If you hold down the <i>Shift</i> key then you will jump back to the previous demonstration.
+- <b>Back</b> - jump back to the previous demonstration.
 
-- <b>Quit</b> - quit demonstration mode.
+- <b>Step</b> - advance to the next step of the current demonstration.
+
+- <b>Next</b> - skip to the next demonstration.
+
+- <b>Play All</b> - run the remaining demonstrations without stopping at each step. While they run the button changes to <b>Stop</b>, which halts at the next step.
 
 - <b>Speed</b> - controls the speed of the demonstration.
 
-- <b>Step</b> - advance to the next step of the current demonstration.
+- <b>Finish</b> - quit demonstration mode.
 
 The state of the layout is saved when running demonstrations.
 

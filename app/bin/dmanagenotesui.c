@@ -58,7 +58,7 @@ static void RefreshNameList(void);
  * manageNotesShapeLabels[] below, which must stay in that same order. */
 static wDrawColor manageNotesTextColor, manageNotesWeblinkColor,
        manageNotesDocColor, manageNotesJsonColor;
-static long manageNotesTextShape, manageNotesWeblinkShape,
+static wIndex_t manageNotesTextShape, manageNotesWeblinkShape,
        manageNotesDocShape, manageNotesJsonShape;
 
 static const char *manageNotesShapeLabels[] = {

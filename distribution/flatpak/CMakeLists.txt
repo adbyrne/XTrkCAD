@@ -88,12 +88,6 @@ string(CONCAT _XTRK_MANIFEST_IN_FILE
 # maintained in the git repo https://github.com/flathub/io.sourceforge.xtrkcad_fork.xtrkcad
 configure_file(${_XTRK_MANIFEST_IN_FILE} "${_XTRK_MANIFEST_FILE}" @ONLY)
 
-# needed for gtk2
-file(COPY
-    ${CMAKE_CURRENT_SOURCE_DIR}/shared-modules
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-)
-
 # the flatpak commands to make a local flatpak (official flatpak builds
 # must be done via PR in its git repo)
 add_custom_command(

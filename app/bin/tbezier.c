@@ -276,7 +276,7 @@ static struct {
 	coOrd center[2];
 	LWIDTH_T lineWidth;
 	wDrawColor color;
-	long lineType;
+	wIndex_t lineType;
 } bezData;
 typedef enum { P0, A0, R0, C0, Z0, CP1, CP2, P1, A1, R1, C1, Z1, RA, LN, GR, LT, WI, CO, LY} crvDesc_e;
 static descData_t bezDesc[] = {

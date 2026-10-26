@@ -36,6 +36,7 @@
     <file preprocess="xml-stripblanks">print.ui</file>
     <file preprocess="xml-stripblanks">profile.ui</file>
     <file preprocess="xml-stripblanks">record.ui</file>
+    <file preprocess="xml-stripblanks">refreshSpecial.ui</file>
     <file preprocess="xml-stripblanks">reports.ui</file>
     <file preprocess="xml-stripblanks">reportscurvestats.ui</file>
     <file preprocess="xml-stripblanks">reportsequipment.ui</file>

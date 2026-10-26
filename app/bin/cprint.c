@@ -546,6 +546,25 @@ static void PrintUpdate( int inx0 )
 }
 
 
+/**
+ * Upper limit for a page size field. The field shows a rounded value, and
+ * parsing that text back on focus-out can give slightly more than the
+ * maximum itself, so allow whichever of the two is larger.
+ *
+ * \param max IN maximum page size
+ * \return limit for the range check
+ */
+
+static FLOAT_T PageSizeLimit( FLOAT_T max )
+{
+	BOOL_T valid;
+	FLOAT_T shown = FormDecodeDistance( FormatSmallDistance( max ), &valid );
+	if ( valid && shown > max ) {
+		max = shown;
+	}
+	return max + 0.0001;
+}
+
 static void SetMaxPageSize( BOOL_T doScale )
 {
 	WDOUBLE_T x, y;
@@ -572,8 +591,8 @@ static void SetMaxPageSize( BOOL_T doScale )
 		maxPageSize.x *= printScale;
 		maxPageSize.y *= printScale;
 	}
-	r1_pgsz_x.high = maxPageSize.x+0.0001;
-	r1_pgsz_y.high = maxPageSize.y+0.0001;
+	r1_pgsz_x.high = PageSizeLimit( maxPageSize.x );
+	r1_pgsz_y.high = PageSizeLimit( maxPageSize.y );
 }
 
 /**

@@ -395,7 +395,7 @@ static void Flash(wDrawColor color)
 }
 
 EXPORT long playbackDelay = 100;
-static long playbackSpeed = 2;
+static wIndex_t playbackSpeed = 2;
 
 static void SetPlaybackSpeed(wIndex_t inx)
 {
@@ -730,28 +730,60 @@ static int playbackKeyState;
 static void DoDemoButton(void *context);
 static void CreateDemoW(void);
 static paramTextData_t demoTextData = {50, 16};
+
+enum {
+	I_DEMOBACK,
+	I_DEMOSTEP,
+	I_DEMONEXT,
+	I_DEMOPLAY,
+	I_DEMOSTOP,
+	I_DEMOSPEED,
+	I_DEMOTEXT,
+};
+
+enum {
+	DEMO_STEP,
+	DEMO_NEXT,
+	DEMO_PAUSE,
+	DEMO_QUIT,
+	DEMO_BACK,
+	DEMO_PLAY,
+	DEMO_STOP,
+};
+
 static paramData_t demoPLs[] = {
-#define I_DEMOSTEP (0)
+#define demoBack (demoPLs[I_DEMOBACK].control)
+	[I_DEMOBACK] = {
+		PD_BUTTON, DoDemoButton, "back", PDO_NORECORD, NULL, NULL, 0,
+		I2VP(DEMO_BACK)
+	},
 #define demoStep (demoPLs[I_DEMOSTEP].control)
-	{
+	[I_DEMOSTEP] = {
 		PD_BUTTON, DoDemoButton, "step", PDO_NORECORD, NULL, NULL, BB_DEFAULT,
-		I2VP(0)
+		I2VP(DEMO_STEP)
 	},
-#define I_DEMONEXT (1)
 #define demoNext (demoPLs[I_DEMONEXT].control)
-	{
-		PD_BUTTON, DoDemoButton, "next", PDO_NORECORD | PDO_DLGHORZ, NULL, NULL, 0,
-		I2VP(1)
+	[I_DEMONEXT] = {
+		PD_BUTTON, DoDemoButton, "next", PDO_NORECORD, NULL, NULL, 0,
+		I2VP(DEMO_NEXT)
 	},
-#define I_DEMOSPEED (2)
+#define demoPlay (demoPLs[I_DEMOPLAY].control)
+	[I_DEMOPLAY] = {
+		PD_BUTTON, DoDemoButton, "continuous", PDO_NORECORD, NULL, NULL, 0,
+		I2VP(DEMO_PLAY)
+	},
+#define demoStop (demoPLs[I_DEMOSTOP].control)
+	[I_DEMOSTOP] = {
+		PD_BUTTON, DoDemoButton, "stop", PDO_NORECORD, NULL, NULL, 0,
+		I2VP(DEMO_STOP)
+	},
 #define demoSpeedL (demoPLs[I_DEMOSPEED].control)
-	{
+	[I_DEMOSPEED] = {
 		PD_COMBOLIST, &playbackSpeed, "speed",
-		PDO_NORECORD | PDO_LISTINDEX | PDO_DLGHORZ, I2VP(80), NULL
+		PDO_NORECORD | PDO_LISTINDEX, I2VP(80), NULL
 	},
-#define I_DEMOTEXT (3)
 #define demoT (demoPLs[I_DEMOTEXT].control)
-	{
+	[I_DEMOTEXT] = {
 		PD_TEXT, NULL, "text", PDO_NORECORD, &demoTextData, NULL,
 		BT_CHARUNITS | BO_READONLY
 	}
@@ -759,6 +791,21 @@ static paramData_t demoPLs[] = {
 static paramGroup_t demoPG = {"demo", PGO_FULLDIALOGFROMBUILDER, demoPLs,
                               COUNT(demoPLs)
                              };
+
+/**
+ * Switch between stepwise and non-stop playback. While playing non-stop
+ * the Play All button is replaced by Stop.
+ *
+ * \param nonStop IN TRUE to run through the remaining STEPs without stopping
+ */
+static void SetPlaybackNonStop(BOOL_T nonStop)
+{
+	playbackNonStop = nonStop;
+	if (demoW) {
+		wControlShow((wControl_p)demoPlay, !nonStop);
+		wControlShow((wControl_p)demoStop, nonStop);
+	}
+}
 
 EXPORT int MyGetKeyState(void)
 {
@@ -779,7 +826,7 @@ EXPORT void AddPlaybackProc(const char *label, playbackProc_p proc, void *data)
 
 static void PlaybackQuit(void)
 {
-	long playbackSpeed1 = playbackSpeed;
+	wIndex_t playbackSpeed1 = playbackSpeed;
 	LOG(log_playback, 2, ("Playback QUIT\n"));
 	if (paramFile) {
 		fclose(paramFile);
@@ -818,7 +865,7 @@ static void PlaybackQuit(void)
 	CloseDemoWindows();
 	curDemo = -1;
 	wPrefSetInteger("misc", "playbackspeed", playbackSpeed);
-	playbackNonStop = FALSE;
+	SetPlaybackNonStop(FALSE);
 	playbackSpeed = playbackSpeed1;
 	UndoResume();
 	wWinBlockEnable(TRUE);
@@ -1110,8 +1157,10 @@ static void EnableButtons(BOOL_T enable)
 	    ("EnableButtons( %d ), inPlayback:%d\n", enable, inPlayback));
 	wButtonSetBusy(demoStep, !enable);
 	wButtonSetBusy(demoNext, !enable);
+	wControlActive((wControl_p)demoBack, enable);
 	wControlActive((wControl_p)demoStep, enable);
 	wControlActive((wControl_p)demoNext, enable);
+	wControlActive((wControl_p)demoPlay, enable);
 #ifdef DEMOPAUSE
 	wButtonSetBusy(demoPause, enable);
 #endif
@@ -1142,6 +1191,7 @@ static void PlaybackSetup(void)
 {
 	SaveTrackState();
 	EnableButtons(TRUE);
+	SetPlaybackNonStop(playbackNonStop);
 
 	backgroundShown = GetLayoutBackGroundVisible();
 	if(backgroundShown) {
@@ -1313,7 +1363,7 @@ static void Playback(void)
 			}
 			if (playbackNonStop) {
 				// bRunTests (-T): skip the human-observable pacing pause,
-				// nothing is watching. Interactive Shift-held auto-play
+				// nothing is watching. Interactive Play All
 				// (also playbackNonStop) keeps its full 1s pause.
 				wPause(bRunTests ? 0 : 1000);
 				EnableButtons(FALSE);
@@ -1585,7 +1635,8 @@ static int StartPlayback(int cnt, char **pathName, void *context)
 	if (demoW == NULL) {
 		CreateDemoW();
 	}
-	wButtonSetLabel(demoNext, _("Save"));
+	wButtonSetLabel(demoNext, _("Sa_ve"));
+	wControlShow((wControl_p)demoBack, FALSE);
 	PlaybackSetup();
 	curDemo = -1;
 	UndoSuspend();
@@ -1613,13 +1664,21 @@ static void DemoFinish(const void *demoPGp)
 static void DoDemoButton(void *command)
 {
 	switch (VP2L(command)) {
-	case 0:
-		/* step */
-		playbackNonStop = (wGetKeyStateFromButton() & WKEY_SHIFT) != 0;
+	case DEMO_STEP:
 		Playback();
 		break;
-	case 1:
+	case DEMO_PLAY:
+		SetPlaybackNonStop(TRUE);
+		Playback();
+		break;
+	case DEMO_STOP:
+		/* Playback() stops at the next STEP */
+		SetPlaybackNonStop(FALSE);
+		break;
+	case DEMO_NEXT:
+	case DEMO_BACK:
 		if (curDemo == -1) {
+			/* playing back a recorded file: Next is Save, Back is hidden */
 			DoSaveAs(NULL);
 		} else {
 			if (inPlayback) {
@@ -1633,7 +1692,8 @@ static void DoDemoButton(void *command)
 			}
 			paramFile = NULL;
 			wTextClear(demoT);
-			if ((wGetKeyStateFromButton() & WKEY_SHIFT) != 0) {
+			if (VP2L(command) == DEMO_BACK) {
+				/* curDemo is the demo after the current one */
 				if (curDemo >= 2) {
 					curDemo -= 2;
 				} else {
@@ -1644,13 +1704,11 @@ static void DoDemoButton(void *command)
 		}
 		break;
 
-	case 2:
-		/* pause */
+	case DEMO_PAUSE:
 		pauseDemo = TRUE;
 		break;
 
-	case 3:
-		/* quit */
+	case DEMO_QUIT:
 		DemoFinish( &demoPG );
 		break;
 
@@ -1670,7 +1728,7 @@ static wBool_t DemoDlgUpdate(paramGroup_cp pg, int inx, void *valueP)
 static void CreateDemoW(void)
 {
 	char *title = MakeWindowTitle(_("Demo"));
-	demoW = FormCreateDialog(&demoPG, title, N_("Quit"), DemoFinish, NULL, NULL,
+	demoW = FormCreateDialog(&demoPG, title, N_("_Done"), DemoFinish, NULL, NULL,
 	                         FALSE, F_RESIZE, DemoDlgUpdate);
 
 	wComboBoxAddValue(demoSpeedL, _("Slowest"), I2VP(0));
@@ -1775,14 +1833,14 @@ static void DoDemo(void *demoNumber)
 	if (demoW == NULL) {
 		CreateDemoW();
 	}
-	wButtonSetLabel(demoNext, _("Next"));
+	wButtonSetLabel(demoNext, _("_Next"));
+	wControlShow((wControl_p)demoBack, TRUE);
 	curDemo = (int)VP2L(demoNumber);
 	if (curDemo < 0 || curDemo >= demoList_da.cnt) {
 		NoticeMessage(MSG_DEMO_BAD_NUM, _("Ok"), NULL, curDemo);
 		return;
 	}
 	PlaybackSetup();
-	playbackNonStop = (wGetKeyStateFromButton() & WKEY_SHIFT) != 0;
 	paramFile = NULL;
 	Playback();
 }

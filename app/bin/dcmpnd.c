@@ -82,7 +82,8 @@ static BOOL_T CheckCompoundEndPoint(
 }
 
 
-int refreshCompoundCnt;
+static int refreshCompoundCnt;	/**< reloaded from their own title */
+static int replaceCompoundCnt;	/**< given a different part */
 static BOOL_T RefreshCompound1(
         track_p trk,
         turnoutInfo_t * to )
@@ -133,7 +134,6 @@ static BOOL_T RefreshCompound1(
 		FlipSegs( xx->segCnt, xx->segs, zero, 90.0 );
 	}
 	ClrTrkBits( trk, TB_SELECTED );
-	refreshCompoundCnt++;
 	CloneFilledDraw( xx->segCnt, xx->segs, FALSE );
 	return TRUE;
 }
@@ -145,22 +145,22 @@ typedef struct {
 } refreshSpecial_t;
 static dynArr_t refreshSpecial_da;
 #define refreshSpecial(N) DYNARR_N( refreshSpecial_t, refreshSpecial_da, N )
-static long refreshSpecialInx;
+static wIndex_t refreshSpecialInx;
 static BOOL_T refreshReturnVal;
 static void RefreshSkip( void * junk );
 static paramListData_t refreshSpecialListData = { 30, 600, 0, NULL, NULL };
 static paramData_t refreshSpecialPLs[] = {
 #define REFRESH_M1		(0)
-	{ PD_MESSAGE, NULL, NULL, 0, I2VP(380) },
+	{ PD_MESSAGE, NULL, "msg1", 0, I2VP(380) },
 #define REFRESH_M2		(1)
-	{ PD_MESSAGE, NULL, NULL, 0, I2VP(380) },
+	{ PD_MESSAGE, NULL, "msg2", 0, I2VP(380) },
 #define REFRESH_S		(2)
-	{ PD_MESSAGE, NULL, NULL, 0, I2VP(380) },
+	{ PD_MESSAGE, NULL, "current", 0, I2VP(380) },
 #define REFRESH_L		(3)
 	{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF, &refreshSpecialListData, NULL, BO_READONLY },
-	{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") }
+	{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, NULL }
 };
-static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, COUNT( refreshSpecialPLs ) };
+static paramGroup_t refreshSpecialPG = { "refreshSpecial", PGO_FULLDIALOGFROMBUILDER, refreshSpecialPLs, COUNT( refreshSpecialPLs ) };
 static void RefreshSpecialOk(
         void * junk )
 {
@@ -191,8 +191,10 @@ EXPORT BOOL_T RefreshCompound(
 	SCALEINX_T scale;
 
 	if ( trk == NULL ) {
-		InfoMessage( _("%d Track(s) refreshed"), refreshCompoundCnt );
+		InfoMessage( _("%d Turnout(s)/Structure(s) replaced, %d refreshed"),
+		             replaceCompoundCnt, refreshCompoundCnt );
 		refreshCompoundCnt = 0;
+		replaceCompoundCnt = 0;
 		for ( inx=0; inx<refreshSpecial_da.cnt; inx++ )
 			if ( refreshSpecial(inx).name != NULL &&
 			     refreshSpecial(inx).to == NULL ) {
@@ -221,6 +223,7 @@ EXPORT BOOL_T RefreshCompound(
 			     (FIT_NONE != CompatibleScale( GetTrkEndPtCnt(trk)>0?FIT_TURNOUT:FIT_STRUCTURE,
 			                                   to->scaleInx, scale ) )) {
 				if ( RefreshCompound1( trk, refreshSpecial(inx).to ) ) {
+					replaceCompoundCnt++;
 					if ( strcasecmp( xx->title, to->title ) != 0 ) {
 						MyFree( xx->title );
 						xx->title = MyStrdup( to->title );
@@ -234,6 +237,7 @@ EXPORT BOOL_T RefreshCompound(
 	if ( to != NULL
 	     &&
 	     RefreshCompound1( trk, to ) ) {
+		refreshCompoundCnt++;
 		return TRUE;
 	}
 	if ( refreshSpecialPG.win == NULL ) {
@@ -280,6 +284,7 @@ EXPORT BOOL_T RefreshCompound(
 		        refreshSpecialPLs[REFRESH_L].control, refreshSpecialInx );
 		if ( to != NULL &&
 		     RefreshCompound1( trk, to ) ) {
+			replaceCompoundCnt++;
 			DYNARR_APPEND( refreshSpecial_t, refreshSpecial_da, 10 );
 			refreshSpecial(refreshSpecial_da.cnt-1).to = to;
 			refreshSpecial(refreshSpecial_da.cnt-1).name = MyStrdup( xx->title );

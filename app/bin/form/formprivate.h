@@ -24,7 +24,6 @@ char *FormFloatFormat(paramData_p entry, FLOAT_T value);
 /* formdistance.c */
 FLOAT_T FormDecodeNumber(const char* enteredValue, BOOL_T* validP, int option,
                          BOOL_T bDistance);
-FLOAT_T FormDecodeDistance(const char *enteredValue, BOOL_T* validP);
 FLOAT_T FormDecodeFloat(const char* enteredValue, BOOL_T* validP);
 char* FormGetParseError();
 
