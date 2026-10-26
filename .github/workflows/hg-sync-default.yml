@@ -7,7 +7,9 @@ name: Hg sync (default)
 # .claude/sync-exceptions-main.txt), so each run:
 #   1. clones Hg `default` anonymously over SF's read-only URL;
 #   2. diffs from the last Hg node already synced (the newest `Hg-Node:`
-#      commit trailer on `main`, else SEED_NODE) to the current tip;
+#      commit trailer on `main`, else SEED_NODE) to the current tip, or from
+#      a later `default` changeset if `main` already has every change up to
+#      it (our own work lands git first, so no trailer can name its node);
 #   3. applies that diff to a fresh test/upstream-default-* branch, commits
 #      it with a new `Hg-Node:` trailer, pushes, and runs ci-gtk3.yml on it;
 #   4. if CI passes, fast-forwards `main` to the test branch, runs ci-gtk3.yml on
@@ -140,6 +142,41 @@ jobs:
             "Hg sync (default): last synced node ${last:0:12} is not an ancestor of ${tip:0:12}" \
             "The last synced Hg node isn't in the history of the current \`$HG_BRANCH\` tip, so a diff between them wouldn't be an upstream update."
 
+          # Our process is git first, so changesets after the trailer can
+          # already be on main: our own work reaches Hg only after its git PR
+          # merged, so no git commit can name its Hg node. Diffing from the
+          # stale trailer re-applies that work, and a file that upstream then
+          # edited too fails to apply (2026-10-26: r7813-r7824 vs Martin's
+          # merges, #278). So start from the newest $HG_BRANCH changeset at
+          # which main already has every change since the trailer. A file has
+          # it if it matches Hg there, or if Hg's diff for it reverse-applies:
+          # main can carry git-only hunks in the same file (the careditdlg.c
+          # snprintf hardening). The checkout is main, so test the work tree.
+          # If no changeset qualifies, keep the trailer, and a real drift
+          # still fails below.
+          main_has_changes_to() {
+            local f
+            while IFS= read -r f; do
+              case "$f" in .github/*) continue ;; esac
+              if $HG cat -r "$1" "path:$f" > "$RUNNER_TEMP/hgfile" 2> /dev/null; then
+                [ -f "$f" ] && cmp -s "$RUNNER_TEMP/hgfile" "$f" && continue
+              else
+                [ ! -e "$f" ] && continue
+              fi
+              $HG diff --git -r "$last" -r "$1" "path:$f" |
+                git apply -R --check 2> /dev/null || return 1
+            done < <($HG status --rev "$last" --rev "$1" -T '{path}\n')
+          }
+          trailer="$last"
+          for n in $($HG log -r "reverse(only($tip, $last) and branch($HG_BRANCH))" -T '{node}\n'); do
+            if main_has_changes_to "$n"; then
+              last="$n"
+              echo "$GIT_BRANCH already has every change up to Hg $($HG log -r "$n" -T '{rev}:{node|short}'), not just the trailer's ${trailer:0:12}; starting there."
+              break
+            fi
+          done
+
+          echo "trailer=$trailer" >> "$GITHUB_OUTPUT"
           echo "last=$last" >> "$GITHUB_OUTPUT"
           echo "tip=$tip" >> "$GITHUB_OUTPUT"
           if [ "$last" = "$tip" ]; then
@@ -163,6 +200,7 @@ jobs:
         id: apply
         if: steps.find.outputs.new == 'true'
         env:
+          TRAILER: ${{ steps.find.outputs.trailer }}
           LAST: ${{ steps.find.outputs.last }}
           TIP: ${{ steps.find.outputs.tip }}
           COUNT: ${{ steps.find.outputs.count }}
@@ -215,6 +253,11 @@ jobs:
             echo
             head -60 "$RUNNER_TEMP/changesets.txt"
             [ "$COUNT" -le 60 ] || echo "... and $((COUNT - 60)) more"
+            if [ "$LAST" != "$TRAILER" ]; then
+              echo
+              echo "Diffed from ${LAST:0:12}, not the last Hg-Node ${TRAILER:0:12}:"
+              echo "$GIT_BRANCH already had every change up to there (landed git first)."
+            fi
             if [ -s "$RUNNER_TEMP/already.txt" ]; then
               echo
               echo "Already on $GIT_BRANCH (landed git first), skipped:"
