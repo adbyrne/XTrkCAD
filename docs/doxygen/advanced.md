@@ -86,7 +86,10 @@ A job from a reusable workflow shows in the checks list as `<caller job> / <job 
 
 On `%main`, `hg-sync-default.yml` also mirrors SourceForge Hg `default` into git `%main` every
 day. It diffs from the last synced Hg node, which is recorded as an `Hg-Node:` commit trailer,
-and applies the result to a `test/upstream-default-*` branch. It runs `ci-gtk3.yml` there and
+or from a later `default` changeset when `%main` already has every change up to it. Work that
+lands in git first reaches Hg only after its pull request merged, so no trailer can name its
+changeset; for each file changed since the trailer, the workflow accepts the newer start if the
+file matches Hg there or if Hg's diff for it reverse-applies to `%main`. It applies the result to a `test/upstream-default-*` branch. It runs `ci-gtk3.yml` there and
 fast-forwards `%main` only if CI passes; a conflict or failure opens a GitHub issue instead.
 It applies the diff file by file. Changes usually land in git first, so a file that already
 matches Hg (its content on `%main` equals Hg's at the synced changeset) is skipped and listed in

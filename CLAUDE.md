@@ -58,7 +58,12 @@ If it's behind and `hg -R $H status` is clean, `hg -R $H pull && hg -R $H update
 **Hg `default` → git `main` is synced on GitHub, not locally.**
 `.github/workflows/hg-sync-default.yml` runs daily at 10:23 UTC. It clones Hg `default`
 anonymously from SF's read-only URL and diffs from the last synced node, which is the newest
-`Hg-Node:` commit trailer on `main` (PR #240's merge commit carries r7752). It applies the diff
+`Hg-Node:` commit trailer on `main` (PR #240's merge commit carries r7752). Our git-first work
+can't carry a trailer, since its Hg changeset doesn't exist yet when the PR merges. So the
+workflow moves the start to the newest later `default` changeset whose changes `main` already
+has: each changed file matches Hg there, or Hg's diff for it reverse-applies to `main`. Without
+that, r7813–r7824 were re-diffed and collided with Martin's edits to the same files (#278,
+2026-10-26). It applies the diff
 to a `test/upstream-default-*` branch and runs `ci-gtk3.yml` there. If CI passes, it
 fast-forwards `main`, runs `main`'s CI, and deletes the test branch together with its runs. If
 a file's change is already on `main` (our git-first changes, once they land in Hg), it's skipped
