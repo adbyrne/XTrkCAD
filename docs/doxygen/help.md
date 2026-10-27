@@ -84,11 +84,14 @@ all), and whether step 4 opens the page by hand.
 
 # Testing it {#help-testing}
 
-The package install tests open Help on every Linux package (Development Issues #58):
-`tools/package-install-test.sh` registers a fake browser for `text/html` and
-`application/xhtml+xml` that writes down what it's given, plays
-`tools/package-install-test-help.xtr` with `-T`, and checks that each topic arrived as the
-installed `html/<topic>.html`. The script uses the `HELP <topic>` playback command, which opens
+The package install tests open Help on every Linux package and on the Windows ZIP and installer
+(Development Issues #58). A fake browser that writes down what it's given is registered as the
+handler for the help pages: on Linux for `text/html` and `application/xhtml+xml`
+(`tools/package-install-test.sh`), on Windows for `.html`
+(`tools/package-install-test-windows.ps1`, see \ref package-install-test-windows). The test
+plays `tools/package-install-test-help.xtr` with `-T` and checks that each topic arrived as the
+installed `html/<topic>.html`. With no fake browser, a Windows runner opens the page in Edge, at
+the right path, so the hand-over works there. The script uses the `HELP <topic>` playback command, which opens
 a topic the way the Help menu does; under `-T` a missing topic counts as a regression failure
 instead of stopping at the error notice. `-T` takes the path of a playback script as well as a
 demo name, so a test script doesn't have to be in the Demo menu. See \ref package-install-tests.

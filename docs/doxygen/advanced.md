@@ -394,6 +394,13 @@ that:
 - the program plays the `dmintro` and `dmstrtrk` demos from the unpacked data. On Windows the
   log goes to a file rather than stdout (`lprintf.c`), so the script passes `/l` and reads
   `Regression Tests Pass` from it;
+- Help opens the installed help pages (Development Issues #58, see \ref help-testing). A fake
+  `.html` handler, a `.cmd` file registered under `HKCU\Software\Classes`, records what
+  `ShellExecute()` gives it. The runner has a `UserChoice` default for `.html` (Edge's
+  `MSEdgeHTM`), which wins over that registration and which Windows won't let a script remove,
+  so in CI the script also registers the fake under `HKCU\Software\Classes\MSEdgeHTM`: HKCU's
+  open command for a ProgId wins over HKLM's. It removes both afterwards, and on a developer's
+  machine it leaves the `UserChoice` ProgId alone;
 - it warns when running the program writes into its install directory, which is read-only
   under `Program Files`.
 
