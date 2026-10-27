@@ -21,6 +21,9 @@
 #   - the data directory the app computes (wGetAppLibDir(): ../share/<bin>
 #     next to the binary) holds params, demos, examples and the help HTML
 #   - the installed binary plays demos from the installed data under Xvfb
+#   - Help opens the installed help pages in the browser (a fake one that
+#     records what it's given; tools/package-install-test-help.xtr,
+#     Development Issues #58)
 #   - the system-wide menu entry, icons and MIME type are installed, valid
 #     and registered by the distribution's triggers (Development Issues #39)
 #   - removal deletes the binary, the data directory and the desktop files
@@ -123,6 +126,54 @@ echo "$OUT" | tail -20
 [ $RC -eq 0 ] || fail "demo run exited $RC"
 echo "$OUT" | grep -q '^Regression Tests Pass' ||
 	fail "demo run did not report 'Regression Tests Pass'"
+
+step "Help opens in the browser"
+# A fake browser, registered for the help pages' MIME types in this HOME,
+# writes down what it's asked to open. GIO sees Doxygen's pages as
+# application/xhtml+xml, not text/html, so it needs both. The playback
+# script opens help like the Help menu does (Development Issues #58).
+HELPXTR=$(dirname "$0")/package-install-test-help.xtr
+URLS=$HOME/help-urls.txt
+mkdir -p "$HOME/bin" "$HOME/.config" "$HOME/.local/share/applications"
+cat > "$HOME/bin/fake-browser" <<EOF
+#!/bin/sh
+printf '%s\n' "\$@" >> "$URLS"
+EOF
+chmod 755 "$HOME/bin/fake-browser"
+cat > "$HOME/.local/share/applications/fake-browser.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Fake browser
+Exec=$HOME/bin/fake-browser %u
+MimeType=text/html;application/xhtml+xml;
+NoDisplay=true
+EOF
+cat > "$HOME/.config/mimeapps.list" <<EOF
+[Default Applications]
+text/html=fake-browser.desktop
+application/xhtml+xml=fake-browser.desktop
+EOF
+OUT=$(timeout 300 xvfb-run -a "$BIN" -T"$HELPXTR" 2>&1)
+RC=$?
+echo "$OUT" | tail -10
+[ $RC -eq 0 ] || fail "help run exited $RC"
+echo "$OUT" | grep -q '^Regression Tests Pass' ||
+	fail "help run did not report 'Regression Tests Pass'"
+sleep 2	# the browser is started, not waited for
+sed -n 's/^HELP //p' "$HELPXTR" > "$HOME/help-topics.txt"
+while read -r topic; do
+	# The browser may get a file:// URL or a path; wHelp() writes
+	# file:///<absolute path>, so allow extra slashes.
+	got=$(grep "/html/$topic\.html\$" "$URLS" 2>/dev/null | head -1)
+	if [ -z "$got" ]; then
+		fail "help topic $topic was not opened in the browser"
+		continue
+	fi
+	echo "$topic: $got"
+	path=$(echo "$got" | sed 's|^file:||; s|^//*|/|')
+	[ "$(readlink -f "$path")" = "$(readlink -f "$SHARE/html/$topic.html")" ] ||
+		fail "help topic $topic opened $got, not $SHARE/html/$topic.html"
+done < "$HOME/help-topics.txt"
 
 step "Desktop integration"
 # The test tools above include desktop-file-utils and shared-mime-info, so

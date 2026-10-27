@@ -1893,7 +1893,9 @@ error:
 /**
  * Filter demoList_da down to just the demo(s) named in target, matched
  * case-insensitively against each demo's file basename, with or without
- * the .xtr extension. target may name more than one demo, comma-separated;
+ * the .xtr extension. A name that matches no demo but is a readable file is
+ * played as a script, so a test can run an .xtr that isn't in the Demo menu.
+ * target may name more than one demo, comma-separated;
  * matches run in the order given. Exits the process with an error listing
  * the valid names if nothing matches, rather than silently falling back to
  * running everything.
@@ -1922,6 +1924,13 @@ static void FilterDemoList(const char *target)
 				DYNARR_LAST(demoList_t, filtered) = demoList(i);
 				matched = TRUE;
 			}
+		}
+		if (!matched && access(name, R_OK) == 0) {
+			// not a demo name but a playback script's path, e.g. a CI test
+			DYNARR_APPEND(demoList_t, filtered, 5);
+			DYNARR_LAST(demoList_t, filtered).title = MyStrdup(name);
+			DYNARR_LAST(demoList_t, filtered).fileName = MyStrdup(name);
+			matched = TRUE;
 		}
 		if (!matched) {
 			lprintf("-T: no demo matches '%s'\n", name);
@@ -2674,12 +2683,34 @@ void ParamDlgProc(wControl_p win, winProcEvent e, void *refresh,
 	}
 }
 
+/**
+ * Playback: HELP followed by a topic opens it, the same as the Help menu or
+ * a dialog's Help button. A missing topic counts as a regression failure
+ * and isn't opened, so a -T run doesn't stop at the "Help Error" notice.
+ *
+ * \param line IN the topic, e.g. "index" or "cmdStraight"
+ */
+static void HelpPlayback(char *line)
+{
+	if (*line == '\0') {
+		return;
+	}
+	if (!CheckHelpTopicExists(line)) {
+		lprintf("HELP %s: topic not found in %s/html\n", line, wGetAppLibDir());
+		nRegressionFail++;
+		return;
+	}
+	lprintf("HELP %s\n", line);
+	wHelp(line);
+}
+
 EXPORT BOOL_T MacroInit(void)
 {
 	AddParam("DEMOGROUP ", ReadDemo);
 	AddParam("DEMO ", ReadDemo);
 	AddPlaybackProc("PARAMETER", ParamPlayback, NULL);
 	AddPlaybackProc("PARAMCHECK", ParamCheck, NULL);
+	AddPlaybackProc("HELP ", HelpPlayback, NULL);
 
 	recordMouseMoves = (getenv("XTRKCADNORECORDMOUSEMOVES") == NULL);
 

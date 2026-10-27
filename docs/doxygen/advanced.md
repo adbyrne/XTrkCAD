@@ -346,6 +346,10 @@ The script checks that:
   `wGetAppLibDir()`) holds `params`, `demos`, `examples` and the help HTML;
 - the installed binary plays the `dmintro` and `dmstrtrk` demos from the installed data under
   Xvfb, with an empty `HOME`;
+- Help opens the installed help pages: a fake browser registered in that `HOME` records what
+  `tools/package-install-test-help.xtr` opens with the `HELP` playback command, and each topic
+  must arrive as `<data directory>/html/<topic>.html` (Development Issues #58, see
+  \ref help-testing);
 - the menu entry (`share/applications/<binary name>.desktop`, which must pass
   `desktop-file-validate`), the icons (`share/icons/hicolor`) and the MIME type
   (`share/mime/packages`) are installed system-wide, and the distribution's triggers have

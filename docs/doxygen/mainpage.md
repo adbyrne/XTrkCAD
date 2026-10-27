@@ -144,6 +144,9 @@ See the \subpage building "Building and Testing" page for local build steps per 
 the CMake presets, CI details, tool-version pins, and advanced checks (sanitizers, valgrind, the regression
 demo-playback suite, debug logging).
 
+See the \subpage help-troubleshooting page for what to check when Help doesn't open a
+build's help pages, on any platform, and how the install tests check it.
+
 See the \subpage development-process page for how Mercurial branches and the SF
 trackers are used during development: release, feature, and bugfix branches, and where bugs
 and feature requests are filed.
