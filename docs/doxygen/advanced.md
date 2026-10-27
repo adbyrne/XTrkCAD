@@ -346,6 +346,10 @@ The script checks that:
   `wGetAppLibDir()`) holds `params`, `demos`, `examples` and the help HTML;
 - the installed binary plays the `dmintro` and `dmstrtrk` demos from the installed data under
   Xvfb, with an empty `HOME`;
+- Help opens the installed help pages: a fake browser registered in that `HOME` records what
+  `tools/package-install-test-help.xtr` opens with the `HELP` playback command, and each topic
+  must arrive as `<data directory>/html/<topic>.html` (Development Issues #58, see
+  \ref help-testing);
 - the menu entry (`share/applications/<binary name>.desktop`, which must pass
   `desktop-file-validate`), the icons (`share/icons/hicolor`) and the MIME type
   (`share/mime/packages`) are installed system-wide, and the distribution's triggers have
@@ -390,6 +394,13 @@ that:
 - the program plays the `dmintro` and `dmstrtrk` demos from the unpacked data. On Windows the
   log goes to a file rather than stdout (`lprintf.c`), so the script passes `/l` and reads
   `Regression Tests Pass` from it;
+- Help opens the installed help pages (Development Issues #58, see \ref help-testing). A fake
+  `.html` handler, a `.cmd` file registered under `HKCU\Software\Classes`, records what
+  `ShellExecute()` gives it. The runner has a `UserChoice` default for `.html` (Edge's
+  `MSEdgeHTM`), which wins over that registration and which Windows won't let a script remove,
+  so in CI the script also registers the fake under `HKCU\Software\Classes\MSEdgeHTM`: HKCU's
+  open command for a ProgId wins over HKLM's. It removes both afterwards, and on a developer's
+  machine it leaves the `UserChoice` ProgId alone;
 - it warns when running the program writes into its install directory, which is read-only
   under `Program Files`.
 

@@ -1,0 +1,9 @@
+VERSION 13
+# Playback script for the package install tests (Development Issues #58):
+# opens help topics the way the Help menu and a command's Help button do.
+# Run with -T<path to this file>; a missing topic is a regression failure.
+# The install test registers a fake browser and checks the URLs it got.
+# DEMOINIT as in every demo: without it -T aborts on an unset scale.
+DEMOINIT
+HELP index
+HELP cmdStraight

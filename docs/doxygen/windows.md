@@ -65,7 +65,8 @@ example when reading `Regression Tests Pass` after a `/T` run.
 ## Help {#windows-help}
 
 Help topics are `file:///<data directory>/html/<topic>.html` (`browserhelp.c`), opened with
-`ShellExecute()` in the user's default browser (`opendocument.c`).
+`ShellExecute()` in the user's default browser (`opendocument.c`). If Help doesn't open, see
+\ref help-troubleshooting.
 
 ## Harmless messages {#windows-harmless}
 

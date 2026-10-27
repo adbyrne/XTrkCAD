@@ -19,6 +19,8 @@
 #     '/' on Windows)
 #   - share\<binary name> holds params, demos, examples and the help HTML
 #   - the binary plays demos from the unpacked data
+#   - Help opens the installed help pages (a fake .html handler records
+#     what ShellExecute() gives it; Development Issues #58)
 #   - running it writes nothing into the install directory, which may be
 #     read-only (Program Files)
 #
@@ -179,6 +181,95 @@ foreach ($f in $out, "$out.err", $log) {
 if ($rc -ne 0) { Fail "demo run failed: $(Show-Exit $rc)" }
 if (-not ((Test-Path $log) -and (Select-String -Quiet -Path $log -Pattern '^Regression Tests Pass'))) {
 	Fail "demo run did not report 'Regression Tests Pass'"
+}
+
+Step 'Help opens in the browser'
+# wHelp() hands file:///<data dir>/html/<topic>.html to ShellExecute(),
+# which opens it with the .html file association. A fake browser
+# registered for .html under HKCU writes down what it's given; the
+# playback script opens help like the Help menu does (Development Issues
+# #58). If the fake browser got nothing, the process list shows what
+# opened the page instead.
+$helpXtr = Join-Path $PSScriptRoot 'package-install-test-help.xtr'
+$urls = Join-Path $Work 'help-urls.txt'
+$fake = Join-Path $Work 'fake-browser.cmd'
+Set-Content -Path $fake -Encoding ascii -Value @(
+	'@echo off',
+	">>`"$urls`" echo %~1"
+)
+$cls = 'HKCU:\Software\Classes'
+$cmd = "`"$fake`" `"%1`""
+# Put back whatever a developer's own machine had for .html afterwards.
+$hadHtml = Test-Path "$cls\.html"
+$oldHtml = if ($hadHtml) { (Get-Item "$cls\.html").GetValue('') } else { $null }
+if (-not $hadHtml) { New-Item "$cls\.html" | Out-Null }
+Set-Item "$cls\.html" 'XTrkCADTest.html'
+$progIds = @('XTrkCADTest.html')
+# A UserChoice default for .html (the runner has Edge's, MSEdgeHTM) wins
+# over the .html key above, and Windows won't let us remove it. It only
+# names a ProgId, though, and HKCU's open command for a ProgId wins over
+# HKLM's. So in CI, point that ProgId at the fake browser too; never on a
+# developer's machine.
+$choice = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.html'
+foreach ($k in 'UserChoice', 'UserChoiceLatest') {
+	if (Test-Path "$choice\$k") {
+		$id = (Get-ItemProperty "$choice\$k").ProgId
+		Write-Output "$k for .html: $id"
+		if ($id -and $env:GITHUB_ACTIONS -eq 'true' -and -not (Test-Path "$cls\$id")) {
+			$progIds += $id
+		}
+	}
+}
+foreach ($id in $progIds) {
+	New-Item -Force "$cls\$id\shell\open\command" | Out-Null
+	Set-Item "$cls\$id\shell\open\command" $cmd
+}
+$started = Get-Date
+$log = Join-Path $Work 'xtclog-help.txt'
+$out = Join-Path $Work 'help.txt'
+$rc = Invoke-XTrkCAD @('/l', "`"$log`"", "/T$helpXtr") 300 $out
+Write-Output "help run: $(Show-Exit $rc)"
+if (Test-Path $log) { Get-Content $log -Tail 10 }
+if ($rc -ne 0) { Fail "help run failed: $(Show-Exit $rc)" }
+if (-not ((Test-Path $log) -and (Select-String -Quiet -Path $log -Pattern '^Regression Tests Pass'))) {
+	Fail "help run did not report 'Regression Tests Pass'"
+}
+Start-Sleep -Seconds 3	# the browser is started, not waited for
+$got = @()
+if (Test-Path $urls) { $got = @(Get-Content $urls) }
+$topics = @(Select-String -Path $helpXtr -Pattern '^HELP (.+)$' |
+	ForEach-Object { $_.Matches[0].Groups[1].Value.Trim() })
+foreach ($topic in $topics) {
+	$want = [IO.Path]::GetFullPath((Join-Path $Share "html\$topic.html"))
+	$hit = $got | Where-Object { $_ -match "[\\/]html[\\/]$topic\.html$" } |
+		Select-Object -First 1
+	if (-not $hit) {
+		Fail "help topic $topic was not opened in the fake browser"
+		continue
+	}
+	Write-Output "${topic}: $hit"
+	# A file:// URL or a path; wHelp() writes file:///C:\...\html/<topic>.html
+	$path = ($hit -replace '^file:/*', '') -replace '/', '\'
+	if ([IO.Path]::GetFullPath($path) -ne $want) {
+		Fail "help topic $topic opened $hit, not $want"
+	}
+}
+if ($got.Count -eq 0) {
+	# Show what else was started with a help page, e.g. Edge by UserChoice.
+	Get-CimInstance Win32_Process |
+		Where-Object { $_.CreationDate -ge $started -and $_.CommandLine -match '\.html' } |
+		ForEach-Object { Write-Output "started instead: $($_.Name): $($_.CommandLine)" }
+}
+Get-Process msedge, chrome, firefox -ErrorAction SilentlyContinue | Stop-Process -Force
+foreach ($id in $progIds) {
+	Remove-Item -Recurse -Force "$cls\$id" -ErrorAction SilentlyContinue
+}
+if (-not $hadHtml) {
+	Remove-Item -Force "$cls\.html" -ErrorAction SilentlyContinue
+} elseif ($null -ne $oldHtml) {
+	Set-Item "$cls\.html" $oldHtml
+} else {
+	Remove-ItemProperty "$cls\.html" -Name '(default)' -ErrorAction SilentlyContinue
 }
 
 Step 'Install directory left unchanged'
