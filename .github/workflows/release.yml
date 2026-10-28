@@ -70,8 +70,8 @@ jobs:
   # "github.event_name != 'workflow_dispatch' || inputs.<x>": main and tag
   # runs always build and test everything.
   #
-  # check-inputs runs on every event (it does nothing on push) so the build
-  # jobs can need it; on a dispatch it rejects combinations that would run
+  # check-inputs runs on every event (it does nothing on push) so the build,
+  # report and docs jobs can need it; on a dispatch it rejects combinations that would run
   # nothing or publish a partial temp release, and checks the source run.
   check-inputs:
     runs-on: ubuntu-24.04
@@ -105,7 +105,7 @@ jobs:
           esac
           INFO=$(gh run view "$FROM_RUN" --repo "$GITHUB_REPOSITORY" \
             --json workflowName,headBranch,headSha,conclusion,createdAt \
-            --jq '"\(.workflowName)|\(.headBranch) \(.headSha[0:8]), \(.status)/\(.conclusion), \(.createdAt)"')
+            --jq '"\(.workflowName)|\(.headBranch) \(.headSha[0:8]), \(.conclusion | if . == "" or . == null then "in progress" else . end), \(.createdAt)"')
           case "$INFO" in
           Release\|*) echo "install-testing packages from run $FROM_RUN: ${INFO#Release|}" ;;
           *)
@@ -808,12 +808,14 @@ jobs:
   # xtrkcad-<tool>-html artifacts, from the same job definitions ci-gtk3.yml
   # runs on every PR (gtk3-qa-reports.yml). deploy-pages unpacks them.
   qa-reports:
+    needs: [check-inputs]
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.packages_from_run == '' }}
     uses: ./.github/workflows/gtk3-qa-reports.yml
     with:
       html: true
 
   package-suppress-inventory:
+    needs: [check-inputs]
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.packages_from_run == '' }}
     # Inventory of every cppcheck-suppress/NOLINT(NEXTLINE) comment in
     # app/bin (+ app/wlib/gtk3lib, added 2026-09-02 once cppcheck's own
@@ -856,6 +858,7 @@ jobs:
   # their SF review window and merge into main -- this job tracks
   # whatever's on the git mirror right now.
   package-docs:
+    needs: [check-inputs]
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.packages_from_run == '' }}
     runs-on: ubuntu-24.04
     steps:
