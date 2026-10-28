@@ -1,0 +1,230 @@
+name: Install tests
+
+# Reusable workflow: installs packages on clean systems and checks they work
+# (dependencies, version, data, demos, Help; see each tools/package-install-
+# test* script). The packages are the calling run's artifacts, or, with
+# packages_from_run, those of an earlier release.yml run; the test scripts
+# always come from the calling commit.
+#
+# Called by release.yml once per platform, each call waiting only for its
+# own platform's packages, and by install-tests-only.yml when a test script
+# changes. Runners are pinned as in the packages-*.yml workflows.
+
+on:
+  workflow_call:
+    inputs:
+      linux:
+        description: Test the Linux DEB/RPM packages.
+        type: boolean
+        default: false
+      windows:
+        description: Test the Windows ZIP.
+        type: boolean
+        default: false
+      macos:
+        description: Test the macOS archives.
+        type: boolean
+        default: false
+      include_nsis:
+        description: Also test the NSIS installer (with windows).
+        type: boolean
+        default: false
+      packages_from_run:
+        description: Run ID of a release.yml run whose packages to test; empty for the calling run's.
+        type: string
+        default: ''
+
+jobs:
+  # ── Install tests — Linux packages on clean systems ───────────────────────
+  # Installs each Linux package in a fresh container of the release it's
+  # for, with that release's own package manager, and runs
+  # tools/package-install-test.sh: dependencies resolve, the binary runs and
+  # plays demos from the installed data, removal is clean. Until these
+  # existed, no CI job ever installed a package.
+  #
+  # They don't hold back latest-main, but github-release needs them, so a
+  # release is only drafted when every install test passed (Development
+  # Issues #48).
+  install-test-linux:
+    name: install-test-linux (${{ matrix.target }}, ${{ matrix.arch }})
+    if: ${{ inputs.linux }}
+    permissions:
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {target: ubuntu2404, arch: amd64, image: 'ubuntu:24.04', package: '*-ubuntu2404.deb', artifact: packages-linux-ubuntu2404-amd64}
+          - {target: ubuntu2404, arch: arm64, image: 'ubuntu:24.04', package: '*-ubuntu2404.deb', artifact: packages-linux-ubuntu2404-arm64}
+          - {target: ubuntu2604, arch: amd64, image: 'ubuntu:26.04', package: '*-ubuntu2604.deb', artifact: packages-linux-ubuntu2604-amd64}
+          - {target: ubuntu2604, arch: arm64, image: 'ubuntu:26.04', package: '*-ubuntu2604.deb', artifact: packages-linux-ubuntu2604-arm64}
+          - {target: debian12, arch: amd64, image: 'debian:bookworm', package: '*-debian12.deb', artifact: packages-linux-debian12-amd64}
+          - {target: debian12, arch: arm64, image: 'debian:bookworm', package: '*-debian12.deb', artifact: packages-linux-debian12-arm64}
+          - {target: debian13, arch: amd64, image: 'debian:trixie', package: '*-debian13.deb', artifact: packages-linux-debian13-amd64}
+          - {target: debian13, arch: arm64, image: 'debian:trixie', package: '*-debian13.deb', artifact: packages-linux-debian13-arm64}
+          - {target: fedora44, arch: amd64, image: 'fedora:44', package: '*-fedora44.rpm', artifact: packages-linux-fedora44-amd64, options: --privileged}
+          - {target: fedora44, arch: arm64, image: 'fedora:44', package: '*-fedora44.rpm', artifact: packages-linux-fedora44-arm64, options: --privileged}
+          - {target: fedora45, arch: amd64, image: 'fedora:45', package: '*-fedora45.rpm', artifact: packages-linux-fedora45-amd64, options: --privileged}
+          - {target: fedora45, arch: arm64, image: 'fedora:45', package: '*-fedora45.rpm', artifact: packages-linux-fedora45-arm64, options: --privileged}
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    # options: Fedora needs --privileged for glycin's bwrap sandbox, see
+    # package-linux-fedora.
+    container:
+      image: ${{ matrix.image }}
+      options: ${{ matrix.options || '' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download package
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ matrix.artifact }}
+          path: pkg
+          # packages_from_run: that run's artifacts (needs the token);
+          # otherwise the calling run's.
+          run-id: ${{ inputs.packages_from_run || github.run_id }}
+          github-token: ${{ inputs.packages_from_run && github.token || '' }}
+
+      - name: Install test
+        env:
+          PATTERN: ${{ matrix.package }}
+        run: |
+          # shellcheck disable=SC2086 # PATTERN is a glob
+          set -- pkg/$PATTERN
+          [ $# -eq 1 ] && [ -f "$1" ] || { echo "expected one $PATTERN in pkg/, found: $*"; exit 1; }
+          sh tools/package-install-test.sh "$1"
+
+  # ── Install test — Windows ZIP on a clean runner ──────────────────────────
+  # Unpacks the ZIP into a path with a space in it and runs
+  # tools/package-install-test-windows.ps1 with only the Windows system
+  # directories on PATH, so a DLL the package forgot can't be found in the
+  # runner's MSYS2, Git or Perl. Like install-test-linux, it gates
+  # github-release but not latest-main.
+  install-test-windows:
+    if: ${{ inputs.windows }}
+    permissions:
+      actions: read
+      contents: read
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download package
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-windows-x64-zip
+          path: pkg
+          # packages_from_run: that run's artifacts (needs the token);
+          # otherwise the calling run's.
+          run-id: ${{ inputs.packages_from_run || github.run_id }}
+          github-token: ${{ inputs.packages_from_run && github.token || '' }}
+
+      - name: Install test
+        shell: pwsh
+        run: |
+          $zips = @(Get-ChildItem pkg -Filter 'xtrkcad-*-windows-x64.zip')
+          if ($zips.Count -ne 1) { throw "expected one ZIP in pkg/, found $($zips.Count)" }
+          ./tools/package-install-test-windows.ps1 $zips[0].FullName -ArtifactDir "$env:RUNNER_TEMP/install-test-windows"
+
+      - name: Upload screenshots of hung runs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: install-test-windows-screenshots
+          path: ${{ runner.temp }}/install-test-windows
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # ── Install test — Windows NSIS installer on a clean runner ───────────────
+  # Runs only when the installer was built (tags, include_nsis).
+  # tools/package-install-test-nsis.ps1 installs it silently into the
+  # default Program Files folder, runs the ZIP test's checks on the
+  # installed tree, checks the uninstall entry, Start menu shortcuts and
+  # .xtc association, installs again over the first install (the upgrade
+  # path, Development Issues #48), then uninstalls and checks nothing is
+  # left behind.
+  install-test-windows-nsis:
+    if: ${{ inputs.windows && inputs.include_nsis }}
+    permissions:
+      actions: read
+      contents: read
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download installer
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-windows-x64-nsis
+          path: pkg
+          # packages_from_run: that run's artifacts (needs the token);
+          # otherwise the calling run's.
+          run-id: ${{ inputs.packages_from_run || github.run_id }}
+          github-token: ${{ inputs.packages_from_run && github.token || '' }}
+
+      - name: Install test
+        shell: pwsh
+        run: |
+          $exes = @(Get-ChildItem pkg -Filter 'xtrkcad-setup-*.exe')
+          if ($exes.Count -ne 1) { throw "expected one installer in pkg/, found $($exes.Count)" }
+          ./tools/package-install-test-nsis.ps1 $exes[0].FullName -ArtifactDir "$env:RUNNER_TEMP/install-test-windows-nsis"
+
+      - name: Upload screenshots of hung runs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: install-test-windows-nsis-screenshots
+          path: ${{ runner.temp }}/install-test-windows-nsis
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # ── Install tests — macOS archives on clean runners ───────────────────────
+  # Follows README-INSTALL.txt on a fresh runner of each architecture
+  # (brew install the prerequisites, unpack, run by full path from $HOME)
+  # with tools/package-install-test-macos.sh. Like install-test-linux, it
+  # gates github-release but not latest-main.
+  install-test-macos:
+    name: install-test-macos (${{ matrix.arch }})
+    if: ${{ inputs.macos }}
+    permissions:
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-26
+          - arch: x86_64
+            runner: macos-26-intel
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download package
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-macos-${{ matrix.arch }}
+          path: pkg
+          # packages_from_run: that run's artifacts (needs the token);
+          # otherwise the calling run's.
+          run-id: ${{ inputs.packages_from_run || github.run_id }}
+          github-token: ${{ inputs.packages_from_run && github.token || '' }}
+
+      - name: Install test
+        env:
+          SCREENSHOT_DIR: ${{ runner.temp }}/install-test-macos
+        run: |
+          set -- pkg/xtrkcad-*-macos-${{ matrix.arch }}.tar.gz
+          [ $# -eq 1 ] && [ -f "$1" ] || { echo "expected one archive in pkg/, found: $*"; exit 1; }
+          sh tools/package-install-test-macos.sh "$1"
+
+      - name: Upload screenshot of a failed Help check
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: install-test-macos-${{ matrix.arch }}-screenshots
+          path: ${{ runner.temp }}/install-test-macos
+          if-no-files-found: ignore
+          retention-days: 14

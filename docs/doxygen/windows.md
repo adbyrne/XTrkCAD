@@ -81,7 +81,7 @@ session D-Bus at startup, there is none on Windows, and nothing in XTrackCAD nee
 
 # The Windows package {#windows-package}
 
-`release.yml`'s `package-windows` job builds in MSYS2 MINGW64 on `windows-2025` and publishes
+`packages-windows.yml`'s `package-windows` job (called by `release.yml`) builds in MSYS2 MINGW64 on `windows-2025` and publishes
 `xtrkcad-<version>-windows-x64.zip`. Users unpack it anywhere and run `bin\xtrkcad-<version>.exe`,
 or `bin\xtrkcad.exe` in a release (\ref release-defaults "Defaults for Release"). The job installs
 MSYS2's own `git` so that `ProgramVersion.cmake` sees the commit hash and the release tag; on a

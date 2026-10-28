@@ -14,7 +14,7 @@ CI install test, see the \ref package-install-test-macos "macOS install test" se
 
 # The macOS package {#macos-package}
 
-`release.yml`'s `package-macos` job builds on `macos-26` (arm64) and `macos-26-intel` (x86_64)
+`packages-macos.yml`'s `package-macos` job (called by `release.yml`) builds on `macos-26` (arm64) and `macos-26-intel` (x86_64)
 and publishes `xtrkcad-<version>-macos-<arch>.tar.gz`: the `cmake --install` tree plus
 `README-INSTALL.txt` (from `distribution/osx/README-INSTALL.txt.in`). The binary links Homebrew's
 GTK3 and its dependencies by absolute path, so users must install the prerequisites first:

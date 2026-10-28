@@ -1,0 +1,103 @@
+name: Packages (macOS)
+
+# Reusable workflow, called by release.yml: builds the Homebrew-dependent
+# macOS archives for arm64 and x86_64 (packages-macos-<arch> artifacts of the
+# calling run) and, with include_dmg, tries the experimental DMG.
+#
+# Runners and compilers are pinned as in ci-gtk3.yml (see its header):
+# ubuntu-24.04(-arm), ubuntu-26.04(-arm) for the Ubuntu 26.04 DEB, macos-26
+# and macos-26-intel with .github/actions/select-xcode, windows-2025 with
+# .github/actions/msys2-pin-gcc.
+
+on:
+  workflow_call:
+    inputs:
+      include_dmg:
+        description: Also try the self-contained DMG (needs gtk-mac-bundler, may fail).
+        type: boolean
+        default: false
+
+jobs:
+  # ── macOS ARM64 + Intel x86-64 — tar.gz (Homebrew-dependent) + DMG ────────
+  # Intel Macs stay in use (macOS 26 is their last release, but they keep
+  # running it; Oct 2026 user poll: 6 Intel vs 10 Apple Silicon), so both
+  # architectures get a package. Same macOS and Xcode on both runners.
+  package-macos:
+    name: package-macos (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-26
+          - arch: x86_64
+            runner: macos-26-intel
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/select-xcode
+
+      - name: Install dependencies
+        run: brew install ninja gtk+3 cmocka libzip librsvg doxygen
+
+      - name: Configure (Release)
+        run: |
+          GTK_PREFIX=$(brew --prefix gtk+3)
+          export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON \
+            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
+            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
+            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Get version
+        run: |
+          MAJOR=$(awk -F'"' '/set\(XTRKCAD_MAJOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MINOR=$(awk -F'"' '/set\(XTRKCAD_MINOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          PATCH=$(awk -F'"' '/set\(XTRKCAD_RELEASE_VERSION/{print $2; exit}' ProgramVersion.cmake)
+          MODIFIER=$(awk -F'"' '/set\(XTRKCAD_VERSION_MODIFIER/{print $2; exit}' ProgramVersion.cmake)
+          echo "XTRKCAD_VERSION=${MAJOR}.${MINOR}.${PATCH}${MODIFIER}" >> "$GITHUB_ENV"
+
+      - name: Create Homebrew-dependent archive
+        # Installs to a staging dir and tars it. Users must have the Homebrew
+        # prerequisites: brew install gtk+3 libzip librsvg
+        run: |
+          cmake --install build --prefix staging
+          tar -czf "xtrkcad-${XTRKCAD_VERSION}-macos-${{ matrix.arch }}.tar.gz" -C staging .
+
+      - name: Upload Homebrew archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-macos-${{ matrix.arch }}
+          path: xtrkcad-*-macos-${{ matrix.arch }}.tar.gz
+          retention-days: 14
+
+      - name: Build self-contained DMG
+        # Only with include_dmg (a release.yml dispatch input).
+        # The DMG is unsigned; a volunteer with an Apple Developer account can
+        # sign and notarize it. gtk-mac-bundler is not a standard Homebrew
+        # formula so this step may fail even when opted in.
+        if: ${{ inputs.include_dmg }}
+        continue-on-error: true
+        run: |
+          brew install gtk-mac-bundler || true
+          cmake --install build --prefix bundle-staging
+          cd distribution/osx/gtk-bundle
+          bash xtrkcad-bundler.sh -i "${{ github.workspace }}/bundle-staging" \
+            -v "${XTRKCAD_VERSION}"
+
+      - name: Upload DMG (if built)
+        uses: actions/upload-artifact@v7
+        if: ${{ inputs.include_dmg }}
+        with:
+          name: packages-macos-${{ matrix.arch }}-dmg
+          path: "distribution/osx/gtk-bundle/xtrkcad-OSX-*.dmg"
+          retention-days: 14
