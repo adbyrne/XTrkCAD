@@ -39,10 +39,10 @@ else()
 endif()
 
 # Find unit testing framework
+# Tests link the CMocka::cmocka imported target, which carries the include
+# directory, so nothing is added to every target's include path.
 find_package(CMocka)
 if(CMOCKA_FOUND)
-    include_directories(${CMOCKA_INCLUDE_DIR})
-    set(LIBS ${LIBS} ${CMOCKA_LIBRARIES})
     option(XTRKCAD_TESTING "Build unittests" ON)
 endif()
 
@@ -75,6 +75,10 @@ find_package(Pandoc)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET GLOBAL "gtk+-3.0")
 pkg_check_modules(FREETYPE REQUIRED IMPORTED_TARGET GLOBAL "freetype2")
+# GTK's native Unix print dialog; Windows prints through GTK's own dialog
+if(UNIX)
+    pkg_check_modules(GTK_UNIX_PRINT3 REQUIRED IMPORTED_TARGET GLOBAL "gtk+-unix-print-3.0")
+endif()
 
 # Flatpak
 find_package(Flatpak)

@@ -59,3 +59,10 @@ find_package_handle_standard_args(CMocka DEFAULT_MSG CMOCKA_LIBRARY CMOCKA_INCLU
 
 # show the CMOCKA_INCLUDE_DIR and CMOCKA_LIBRARIES variables only in the advanced view
 mark_as_advanced(CMOCKA_INCLUDE_DIR CMOCKA_LIBRARY CMOCKA_LIBRARIES CMOCKA_DLL)
+
+# Target CMocka::cmocka carries the library and its include directory
+if(CMOCKA_FOUND AND NOT TARGET CMocka::cmocka)
+  add_library(CMocka::cmocka UNKNOWN IMPORTED)
+  set_property(TARGET CMocka::cmocka PROPERTY IMPORTED_LOCATION ${CMOCKA_LIBRARY})
+  target_include_directories(CMocka::cmocka INTERFACE ${CMOCKA_INCLUDE_DIR})
+endif()
