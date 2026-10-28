@@ -16,32 +16,32 @@ start
 packages_from_run);
 if (packages_from_run set?) then (no)
   fork
-    :package-linux-ubuntu
-    package-linux-debian
-    package-linux-fedora;
+    :packages-linux
+    (packages-linux.yml);
+    :install-tests-linux
+    (install-tests.yml);
   fork again
-    :package-windows
-    (NSIS: tags, include_nsis);
+    :packages-windows
+    (packages-windows.yml,
+    NSIS: tags, include_nsis);
+    :install-tests-windows
+    (install-tests.yml);
   fork again
-    :package-macos
-    (DMG: include_dmg);
+    :packages-macos
+    (packages-macos.yml,
+    DMG: include_dmg);
+    :install-tests-macos
+    (install-tests.yml);
   end fork
 else (yes)
-  :reuse that run's
-  package artifacts;
+  :install-tests-* only,
+  on that run's packages;
 endif
-fork
-  :install-test-linux;
-fork again
-  :install-test-windows
-  install-test-windows-nsis;
-fork again
-  :install-test-macos;
-end fork
 note right
-  Per platform: skipped when the
-  dispatch turned that platform off.
-  Not needed by latest-main.
+  Each platform's install tests wait
+  only for its own packages. A platform
+  turned off in a dispatch is skipped.
+  latest-main doesn't wait for them.
 end note
 fork
   if (push to main?) then (yes)

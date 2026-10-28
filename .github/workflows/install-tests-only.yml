@@ -1,0 +1,82 @@
+name: Install tests (scripts changed)
+
+# When an install-test script changes, test it right away against packages
+# that already exist: the newest successful release.yml run on main, or the
+# run named in a dispatch. Nothing is built, so it takes minutes instead of
+# a full release.yml run. On main itself release.yml runs the same tests on
+# fresh packages, so this only runs for pull requests, test/** branches and
+# dispatches. The NSIS installer isn't built on main, so it's tested only
+# when a dispatch names a run that built it.
+
+on:
+  push:
+    branches:
+      - test/**
+    paths:
+      - 'tools/package-install-test*'
+      - '.github/workflows/install-tests.yml'
+      - '.github/workflows/install-tests-only.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'tools/package-install-test*'
+      - '.github/workflows/install-tests.yml'
+      - '.github/workflows/install-tests-only.yml'
+  workflow_dispatch:
+    inputs:
+      packages_from_run:
+        description: 'Run ID of the release.yml run whose packages to test (default: newest successful run on main)'
+        type: string
+        default: ''
+      include_nsis:
+        description: 'Also test the NSIS installer (that run must have built it)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  find-packages:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+    outputs:
+      run_id: ${{ steps.find.outputs.run_id }}
+    steps:
+      - name: Find the packages to test
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FROM_RUN: ${{ inputs.packages_from_run }}
+        run: |
+          RUN=$FROM_RUN
+          if [ -z "$RUN" ]; then
+            RUN=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow release.yml \
+              --branch main --event push --status success --limit 1 \
+              --json databaseId --jq '.[0].databaseId // empty')
+          fi
+          case "$RUN" in
+          ''|*[!0-9]*)
+            echo "::error::no release.yml run to take packages from (got '$RUN')"
+            exit 1
+            ;;
+          esac
+          gh run view "$RUN" --repo "$GITHUB_REPOSITORY" \
+            --json workflowName,headBranch,headSha,createdAt \
+            --jq '"testing packages from run '"$RUN"': \(.workflowName), \(.headBranch) \(.headSha[0:8]), \(.createdAt)"'
+          echo "run_id=$RUN" >> "$GITHUB_OUTPUT"
+
+  install-tests:
+    needs: [find-packages]
+    uses: ./.github/workflows/install-tests.yml
+    permissions:
+      actions: read
+      contents: read
+    with:
+      linux: true
+      windows: true
+      macos: true
+      include_nsis: ${{ inputs.include_nsis == true }}
+      packages_from_run: ${{ needs.find-packages.outputs.run_id }}

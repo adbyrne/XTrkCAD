@@ -70,8 +70,9 @@ packages to a temporary prerelease named after the branch for someone to review;
 | `ci-mcp.yml` | the same, only when `mcp/` or the workflow changed | yes, for `mcp/` |
 | `codeql.yml` | push to `%main`, PR into `%main`, weekly (Monday) | yes |
 | `release.yml` | push to `%main`, `v*.*.*` tag, dispatch | see \ref release-workflow "release.yml" |
+| `install-tests-only.yml` | an install-test script changes (PR into `%main`, `test/**`), dispatch | yes |
 | `hg-sync-default.yml` | daily 10:23 UTC, dispatch | opens an issue instead |
-| `gtk3-toolchain.yml`, `gtk3-qa-reports.yml` | only when another workflow calls them | as the caller's jobs |
+| `gtk3-toolchain.yml`, `gtk3-qa-reports.yml`, `packages-linux.yml`, `packages-macos.yml`, `packages-windows.yml`, `install-tests.yml` | only when another workflow calls them | as the caller's jobs |
 
 A push to any other branch runs nothing, and neither does a PR into a branch other than `%main`,
 e.g. a feature branch's PR into another feature branch. Run CI on such a branch by hand:
@@ -93,6 +94,10 @@ The shared pieces:
 - **`gtk3-qa-reports.yml`** (a reusable workflow) holds the report-only analysis jobs. `ci-gtk3.yml`
   calls it for plain-text PR artifacts, `release.yml` for the published HTML reports, and
   `ci-gtk3-preview.yml` on the next Ubuntu.
+- **`packages-linux.yml`, `packages-macos.yml`, `packages-windows.yml`** and
+  **`install-tests.yml`** (reusable workflows) hold the packaging and install-test jobs that
+  `release.yml` calls; `install-tests-only.yml` reuses `install-tests.yml`. See
+  \ref release-workflow "release.yml".
 - **`.github/actions/`** holds composite actions for repeated steps: `apt-deps` (the Linux package
   list), `select-xcode`, `msys2-pin-gcc`, `setup-doxygen` and `setup-cmake`. Each pinned version
   is set once, as the action's default.
@@ -301,6 +306,24 @@ it publishes depends on how it was started:
 - **Dispatch** (`gh workflow run release.yml --ref <branch>`): what the inputs below choose.
   Nothing is published unless `publish_temp_release` is set.
 
+`release.yml` itself only orchestrates and publishes. The platform work is in reusable workflows,
+so each can be read on its own:
+
+| File | Jobs | Called by |
+|---|---|---|
+| `packages-linux.yml` | `package-linux-ubuntu`, `package-linux-debian`, `package-linux-fedora` | `release.yml` (`packages-linux`) |
+| `packages-macos.yml` | `package-macos` (arm64, x86_64), DMG with `include_dmg` | `release.yml` (`packages-macos`) |
+| `packages-windows.yml` | `package-windows` (ZIP), NSIS with `include_nsis` | `release.yml` (`packages-windows`) |
+| `install-tests.yml` | `install-test-linux`, `install-test-windows`, `install-test-windows-nsis`, `install-test-macos` | `release.yml` once per platform (`install-tests-linux`, `-windows`, `-macos`); `install-tests-only.yml` |
+| `gtk3-qa-reports.yml` | the analysis reports | `release.yml` (`qa-reports`), `ci-gtk3.yml` |
+
+In the run's job list a called job shows as `<caller job> / <job>`, e.g.
+`packages-windows / package-windows`. Artifacts uploaded by a called workflow belong to the
+calling run, which is how the publish jobs and `packages_from_run` find them. Packages and
+install tests are separate files on purpose: `publish-latest-release` waits for the packages
+only, and an install test failing on one platform doesn't stop `latest-main` (it does stop
+`github-release`). Each platform's install tests wait only for that platform's packages.
+
 \image html release-flow.svg "release.yml job flow"
 
 The diagram's source is `docs/doxygen/images/ci/release-flow.puml`. After changing it,
@@ -324,15 +347,21 @@ branch and commit.
 
 ## Recipes {#release-recipes}
 
-**Changed an install-test script** (`tools/package-install-test*`): test it against packages
-that already exist, e.g. the last `%main` run's:
+**Changed an install-test script** (`tools/package-install-test*`): nothing to do.
+`install-tests-only.yml` runs on the pull request (and on `test/**` pushes) and tests the newest
+successful `%main` packages with your scripts, in minutes and without building anything. To pick
+the packages, or to include the NSIS installer from a run that built it:
+
+```sh
+gh workflow run install-tests-only.yml --ref <branch> -f packages_from_run=<run id> -f include_nsis=true
+```
+
+To test one platform only, use `release.yml`'s inputs instead:
 
 ```sh
 RUN=$(gh run list -w release.yml -b main -L 1 --json databaseId --jq '.[0].databaseId')
 gh workflow run release.yml --ref <branch> -f packages_from_run=$RUN -f linux=false -f macos=false
 ```
-
-Add `-f include_nsis=true` for the NSIS script; the source run must have built the installer.
 
 **Changed packaging for one platform** (e.g. `distribution/` files for Windows):
 
@@ -340,8 +369,15 @@ Add `-f include_nsis=true` for the NSIS script; the source run must have built t
 gh workflow run release.yml --ref <branch> -f linux=false -f macos=false
 ```
 
-**Changed `release.yml` itself:** run it with every platform on, as `%main` will, before merging
-(`gh workflow run release.yml --ref <branch>`). Pull-request CI never runs it.
+**Changed `release.yml` or a workflow it calls** (`packages-*.yml`, `install-tests.yml`): run
+it with every platform on, as `%main` will, before merging
+(`gh workflow run release.yml --ref <branch>`). Pull-request CI never runs it. A change to the
+tag-only jobs (`check-release-tag`, `github-release`) needs a trial tag; see
+\ref cutting-a-release "Cutting a release".
+
+**Adding a platform or package:** add its job to the matching `packages-*.yml` (artifact name
+`packages-<platform>-...`), its install test to `install-tests.yml` behind that platform's input,
+and nothing else: the publish jobs take every artifact of the run.
 
 **A review build for testers:** `-f publish_temp_release=true`.
 
@@ -804,7 +840,7 @@ tool's message alone.
   `/fonts/xtrackcad-10.bdf`, but on Windows it gives `/\fonts/\xtrackcad-10.bdf`, the lookup
   failed, and `wFTLabelLoadFontFromResource()` aborted every Windows build at startup. Nothing
   caught it, since CI ran no Windows binary past its unit tests. The Windows ZIP install test
-  (`install-test-windows` in `release.yml`) found it. Build resource paths with `/` explicitly
+  (`install-test-windows` in `install-tests.yml`) found it. Build resource paths with `/` explicitly
   (`DynStringPrintf(&path, "%sfonts/%s", XTRKCAD_SYMBOLS_PATH, name)`).
 
 ## Confirmed-safe codebase conventions (not bugs, but non-obvious enough to document)

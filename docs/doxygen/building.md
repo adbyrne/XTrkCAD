@@ -453,16 +453,16 @@ XTRKCADGTKLIB=/tmp/xtrkcad-scratch/share/xtrkcad-gtk /tmp/xtrkcad-scratch/bin/xt
 CI pins its runner images and the compilers that gate a build. Every Linux job in
 `ci-gtk3.yml`, `release.yml` and `codeql.yml` runs on `ubuntu-24.04` (or `ubuntu-24.04-arm`)
 rather than `ubuntu-latest`, which GitHub moved to Ubuntu 26.04 on 2026-10-19. The one exception
-is `release.yml`'s `package-linux-ubuntu`, which also builds the Ubuntu 26.04 `.deb` on
+is `packages-linux.yml`'s `package-linux-ubuntu`, which also builds the Ubuntu 26.04 `.deb` on
 `ubuntu-26.04` (and `ubuntu-26.04-arm`), because a `.deb` built on 24.04 doesn't install on 26.04
 (Development Issues #37). The Ubuntu image
 fixes cppcheck, clang-tidy, GCC and Clang, so they only change when we move the runners on
 purpose. macOS jobs run on `macos-26` (Apple Silicon), plus `macos-26-intel` for the Intel
-package in `release.yml`, with Xcode selected through `DEVELOPER_DIR` (which fixes AppleClang), and Windows jobs run on `windows-2025` with MinGW GCC installed at an exact MSYS2
+package in `packages-macos.yml`, with Xcode selected through `DEVELOPER_DIR` (which fixes AppleClang), and Windows jobs run on `windows-2025` with MinGW GCC installed at an exact MSYS2
 package version. Homebrew and the rest of MSYS2 (GTK, CMake, libzip and so on) can't be pinned
 and still update on their own schedule. `ci-gtk3-preview.yml` runs the toolchain-sensitive jobs
 on the next images ahead of a move (see \ref ci-tooling-overview "CI tooling overview"). The
-`c-tests-debian` jobs and `release.yml`'s `package-linux-debian` jobs build inside
+`c-tests-debian` jobs and `packages-linux.yml`'s `package-linux-debian` jobs build inside
 `debian:bookworm` and `debian:trixie` containers, so they get those releases' own GCC 12/14,
 CMake and GTK; `package-linux-fedora` does the same in `fedora:44` and `fedora:45` containers. The AStyle pin exists specifically because an unpinned version once produced
 different formatting output for identical input (SF #638) — if you're chasing a formatting or

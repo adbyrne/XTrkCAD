@@ -50,12 +50,16 @@ on:
         type: string
         default: ''
 
-# Runners and compilers are pinned the same way as ci-gtk3.yml (see its
-# header): ubuntu-24.04(-arm), plus ubuntu-26.04(-arm) for the Ubuntu
-# 26.04 DEB, macos-26 and macos-26-intel with
-# .github/actions/select-xcode, windows-2025 with
-# .github/actions/msys2-pin-gcc. The report jobs come from
-# gtk3-qa-reports.yml, shared with ci-gtk3.yml, so they can't drift apart.
+# This file orchestrates; the work is in reusable workflows:
+#   packages-linux.yml, packages-macos.yml, packages-windows.yml
+#                         build each platform's packages (artifacts of this run)
+#   install-tests.yml     installs them on clean systems, called once per
+#                         platform (install-tests-only.yml reuses it when a
+#                         test script changes)
+#   gtk3-qa-reports.yml   the analysis reports, shared with ci-gtk3.yml
+# Artifacts uploaded by a called workflow belong to this run, so the publish
+# jobs below download them as before. Runners and compilers are pinned in
+# the called workflows, the same way as ci-gtk3.yml.
 
 jobs:
   # ── Dispatch inputs (Development Issues #59) ─────────────────────────────
@@ -114,705 +118,66 @@ jobs:
             ;;
           esac
 
-  # ── Linux — DEB (Ubuntu 24.04/26.04) + STGZ + source ───────────────────
-  # One DEB per Ubuntu LTS. A DEB built on 24.04 does not install on 26.04
-  # (it depends on libzip4t64; 26.04 only has libzip5, Development Issues
-  # #37), so each release gets its own, named *-ubuntu2404.deb and
-  # *-ubuntu2604.deb like the Debian ones. The 24.04 amd64 entry also builds
-  # the STGZ installer and the source archives. The RPMs come from
-  # package-linux-fedora.
-  #
-  # The runners are pinned to exact Ubuntu releases, never ubuntu-latest
-  # (Ubuntu 26.04 from 2026-10-19), so a runner image change can't quietly
-  # change which release a package is for.
-  package-linux-ubuntu:
+  # ── Packages, one reusable workflow per platform ────────────────────────
+  # Each needs check-inputs, and is skipped when a dispatch turns its platform
+  # off or reuses an earlier run's packages (packages_from_run).
+  packages-linux:
     needs: [check-inputs]
     if: ${{ github.event_name != 'workflow_dispatch' || (inputs.linux && inputs.packages_from_run == '') }}
-    name: package-linux-ubuntu (${{ matrix.ubuntu }}, ${{ matrix.arch }})
-    strategy:
-      fail-fast: false
-      matrix:
-        ubuntu: ['24.04', '26.04']
-        arch: [amd64, arm64]
-        include:
-          - ubuntu: '24.04'
-            suffix: ubuntu2404
-          - ubuntu: '26.04'
-            suffix: ubuntu2604
-          - arch: amd64
-            runner-suffix: ''
-          - arch: arm64
-            runner-suffix: '-arm'
-          - ubuntu: '24.04'
-            arch: amd64
-            extra-packages: true
-    runs-on: ubuntu-${{ matrix.ubuntu }}${{ matrix.runner-suffix }}
-    steps:
-      - uses: actions/checkout@v7
+    uses: ./.github/workflows/packages-linux.yml
 
-      - uses: ./.github/actions/apt-deps
-        with:
-          extra: doxygen dpkg-dev
-
-      - name: Configure (Release)
-        run: |
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DXTRKCAD_TESTING=ON
-
-      - name: Build
-        run: cmake --build build
-
-      - name: Test
-        # The ~47 individual per-demo regression tests (XTRKCAD_REGRESSION_TESTING's
-        # auto-detect default is ON here) are for local dev targeting only and are
-        # not self-contained standalone -- see app/bin/RegressionTests.cmake. Mirror
-        # ci-gtk3.yml: run everything else, then gate separately on the single-process
-        # RegressionSuite (label regression-ci).
-        run: |
-          xvfb-run ctest --test-dir build --output-on-failure -LE regression
-          ctest --test-dir build --output-on-failure -L regression-ci
-
-      - name: Package (DEB)
-        run: |
-          cd build && cpack -G DEB
-          for f in xtrkcad-setup-*.deb; do
-            mv "$f" "${f%.deb}-${{ matrix.suffix }}.deb"
-          done
-
-      - name: Package (STGZ + source archives)
-        if: matrix.extra-packages
-        run: |
-          cd build
-          cpack -G STGZ
-          cpack --config CPackSourceConfig.cmake -G TGZ
-          cpack --config CPackSourceConfig.cmake -G ZIP
-
-      - name: Upload packages
-        uses: actions/upload-artifact@v7
-        with:
-          name: packages-linux-${{ matrix.suffix }}-${{ matrix.arch }}
-          path: |
-            build/*.deb
-            build/*.sh
-            build/xtrkcad-source-*
-          retention-days: 14
-
-  # ── Linux — DEB (Debian 12/13, Raspberry Pi OS Bookworm/Trixie) ─────────
-  # Built inside a debian container so each DEB declares that release's own
-  # dependency versions.  Ubuntu 24.04 renames packages with a "t64" suffix
-  # (libgtk-3-0t64, libzip4t64, …) that do not exist on Debian 12 /
-  # Raspberry Pi OS Bookworm, causing "unmet dependencies" errors there.
-  # The arm64 builds cover Raspberry Pi 3/4/5 on 64-bit Pi OS; the amd64
-  # builds cover plain Debian.
-  package-linux-debian:
-    needs: [check-inputs]
-    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.linux && inputs.packages_from_run == '') }}
-    name: package-linux-debian (${{ matrix.debian }}, ${{ matrix.arch }})
-    strategy:
-      fail-fast: false
-      matrix:
-        debian: [bookworm, trixie]
-        arch: [amd64, arm64]
-        include:
-          - debian: bookworm
-            suffix: debian12
-          - debian: trixie
-            suffix: debian13
-          - arch: amd64
-            runner: ubuntu-24.04
-          - arch: arm64
-            runner: ubuntu-24.04-arm
-    runs-on: ${{ matrix.runner }}
-    container: debian:${{ matrix.debian }}
-    steps:
-      - name: Install git (required by actions/checkout)
-        run: apt-get update -q && apt-get install -y git
-
-      - uses: actions/checkout@v7
-
-      - name: Trust the checkout
-        # The container runs as root but the workspace belongs to the runner
-        # user, so git rejects it as "dubious ownership" and ProgramVersion.cmake
-        # silently loses the source hash (the Debian 12 DEB used to be named
-        # xtrkcad-setup-5.4.0-1-debian12.deb, with no hash).
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - uses: ./.github/actions/apt-deps
-        with:
-          extra: doxygen dpkg-dev file
-
-      - name: Configure (Release)
-        run: |
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DXTRKCAD_TESTING=ON
-
-      - name: Build
-        run: cmake --build build
-
-      - name: Test
-        # See package-linux's Test step comment: the per-demo regression tests
-        # aren't self-contained standalone, so gate separately on RegressionSuite.
-        run: |
-          xvfb-run ctest --test-dir build --output-on-failure -LE regression
-          ctest --test-dir build --output-on-failure -L regression-ci
-
-      - name: Package (DEB)
-        run: |
-          cd build && cpack -G DEB
-          for f in xtrkcad-setup-*.deb; do
-            mv "$f" "${f%.deb}-${{ matrix.suffix }}.deb"
-          done
-
-      - name: Upload package
-        uses: actions/upload-artifact@v7
-        with:
-          name: packages-linux-${{ matrix.suffix }}-${{ matrix.arch }}
-          path: build/*.deb
-          retention-days: 14
-
-  # ── Linux — RPM (Fedora 44/45) ────────────────────────────────────────
-  # Built inside a fedora container, so each RPM requires that release's own
-  # sonames. The RPM used to be built on Ubuntu and required Ubuntu's
-  # libzip.so.4, which no Fedora release has (Development Issues #38).
-  # Named *-fedora44.rpm and *-fedora45.rpm, like the DEBs.
-  #
-  # --privileged: Fedora's gdk-pixbuf loads images through glycin, which runs
-  # each loader in a bwrap sandbox. bwrap can't create its namespaces in an
-  # unprivileged container, so the SVG loader dies and GTK aborts on its
-  # first icon, failing RegressionSuite. On a real system bwrap works.
-  package-linux-fedora:
-    needs: [check-inputs]
-    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.linux && inputs.packages_from_run == '') }}
-    name: package-linux-fedora (${{ matrix.fedora }}, ${{ matrix.arch }})
-    strategy:
-      fail-fast: false
-      matrix:
-        fedora: ['44', '45']
-        arch: [amd64, arm64]
-        include:
-          - arch: amd64
-            runner: ubuntu-24.04
-          - arch: arm64
-            runner: ubuntu-24.04-arm
-    runs-on: ${{ matrix.runner }}
-    container:
-      image: fedora:${{ matrix.fedora }}
-      options: --privileged
-    steps:
-      - name: Install build dependencies (dnf)
-        # git is for actions/checkout and the source hash; rpm-build and file
-        # are for CPack RPM. retries covers a slow or flaky mirror.
-        run: |
-          dnf -y --setopt=retries=10 install git cmake ninja-build gcc \
-            gtk3-devel libcmocka-devel zlib-devel libzip-devel mxml-devel \
-            librsvg2-tools gettext doxygen rpm-build file \
-            xorg-x11-server-Xvfb xauth
-
-      - uses: actions/checkout@v7
-
-      - name: Trust the checkout
-        # As in package-linux-debian: the container runs as root, the
-        # workspace belongs to the runner user, and without this git refuses
-        # it and the package loses its source hash.
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Configure (Release)
-        run: |
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DXTRKCAD_TESTING=ON
-
-      - name: Build
-        run: cmake --build build
-
-      - name: Test
-        # See package-linux-ubuntu's Test step comment: the per-demo regression
-        # tests aren't self-contained standalone, so gate separately on
-        # RegressionSuite.
-        run: |
-          xvfb-run -a ctest --test-dir build --output-on-failure -LE regression
-          ctest --test-dir build --output-on-failure -L regression-ci
-
-      - name: Package (RPM)
-        run: |
-          cd build && cpack -G RPM
-          for f in xtrkcad-setup-*.rpm; do
-            mv "$f" "${f%.rpm}-fedora${{ matrix.fedora }}.rpm"
-          done
-
-      - name: Upload package
-        uses: actions/upload-artifact@v7
-        with:
-          name: packages-linux-fedora${{ matrix.fedora }}-${{ matrix.arch }}
-          path: build/*.rpm
-          retention-days: 14
-
-  # ── macOS ARM64 + Intel x86-64 — tar.gz (Homebrew-dependent) + DMG ────────
-  # Intel Macs stay in use (macOS 26 is their last release, but they keep
-  # running it; Oct 2026 user poll: 6 Intel vs 10 Apple Silicon), so both
-  # architectures get a package. Same macOS and Xcode on both runners.
-  package-macos:
+  packages-macos:
     needs: [check-inputs]
     if: ${{ github.event_name != 'workflow_dispatch' || (inputs.macos && inputs.packages_from_run == '') }}
-    name: package-macos (${{ matrix.arch }})
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: arm64
-            runner: macos-26
-          - arch: x86_64
-            runner: macos-26-intel
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/select-xcode
+    uses: ./.github/workflows/packages-macos.yml
+    with:
+      include_dmg: ${{ github.event_name == 'workflow_dispatch' && inputs.include_dmg }}
 
-      - name: Install dependencies
-        run: brew install ninja gtk+3 cmocka libzip librsvg doxygen
-
-      - name: Configure (Release)
-        run: |
-          GTK_PREFIX=$(brew --prefix gtk+3)
-          export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
-          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DXTRKCAD_TESTING=ON \
-            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
-            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
-            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
-
-      - name: Build
-        run: cmake --build build
-
-      - name: Test
-        run: ctest --test-dir build --output-on-failure
-
-      - name: Get version
-        run: |
-          MAJOR=$(awk -F'"' '/set\(XTRKCAD_MAJOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
-          MINOR=$(awk -F'"' '/set\(XTRKCAD_MINOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
-          PATCH=$(awk -F'"' '/set\(XTRKCAD_RELEASE_VERSION/{print $2; exit}' ProgramVersion.cmake)
-          MODIFIER=$(awk -F'"' '/set\(XTRKCAD_VERSION_MODIFIER/{print $2; exit}' ProgramVersion.cmake)
-          echo "XTRKCAD_VERSION=${MAJOR}.${MINOR}.${PATCH}${MODIFIER}" >> "$GITHUB_ENV"
-
-      - name: Create Homebrew-dependent archive
-        # Installs to a staging dir and tars it. Users must have the Homebrew
-        # prerequisites: brew install gtk+3 libzip librsvg
-        run: |
-          cmake --install build --prefix staging
-          tar -czf "xtrkcad-${XTRKCAD_VERSION}-macos-${{ matrix.arch }}.tar.gz" -C staging .
-
-      - name: Upload Homebrew archive
-        uses: actions/upload-artifact@v7
-        with:
-          name: packages-macos-${{ matrix.arch }}
-          path: xtrkcad-*-macos-${{ matrix.arch }}.tar.gz
-          retention-days: 14
-
-      - name: Build self-contained DMG
-        # Skipped on normal pushes — opt in via workflow_dispatch input.
-        # The DMG is unsigned; a volunteer with an Apple Developer account can
-        # sign and notarize it. gtk-mac-bundler is not a standard Homebrew
-        # formula so this step may fail even when opted in.
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_dmg == true }}
-        continue-on-error: true
-        run: |
-          brew install gtk-mac-bundler || true
-          cmake --install build --prefix bundle-staging
-          cd distribution/osx/gtk-bundle
-          bash xtrkcad-bundler.sh -i "${{ github.workspace }}/bundle-staging" \
-            -v "${XTRKCAD_VERSION}"
-
-      - name: Upload DMG (if built)
-        uses: actions/upload-artifact@v7
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.include_dmg == true }}
-        with:
-          name: packages-macos-${{ matrix.arch }}-dmg
-          path: "distribution/osx/gtk-bundle/xtrkcad-OSX-*.dmg"
-          retention-days: 14
-
-  # ── Windows x86-64 — ZIP (DLLs bundled) + NSIS installer ──────────────────
-  package-windows:
+  packages-windows:
     needs: [check-inputs]
     if: ${{ github.event_name != 'workflow_dispatch' || (inputs.windows && inputs.packages_from_run == '') }}
-    runs-on: windows-2025
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - uses: actions/checkout@v7
+    uses: ./.github/workflows/packages-windows.yml
+    with:
+      include_nsis: ${{ github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.include_nsis) }}
 
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: false
-          install: >-
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-pkg-config
-            mingw-w64-x86_64-gtk3
-            mingw-w64-x86_64-zlib
-            mingw-w64-x86_64-libzip
-            mingw-w64-x86_64-mxml
-            mingw-w64-x86_64-librsvg
-            mingw-w64-x86_64-gettext
-            mingw-w64-x86_64-cmocka
-            mingw-w64-x86_64-doxygen
-            mingw-w64-x86_64-nsis
-            git
-
-      - uses: ./.github/actions/msys2-pin-gcc
-
-      # ProgramVersion.cmake needs git to see the commit hash and the
-      # v<version> tag. Without it a tagged release still installed under
-      # the versioned name xtrkcad-<version> (Development Issues #48).
-      # The checkout belongs to another Windows account than MSYS2's git
-      # expects, so allow it explicitly.
-      - name: Let MSYS2 git read the checkout
-        run: |
-          git config --global --add safe.directory '*'
-          git describe --tags --always
-
-      # MSYS2's doxygen package is rolling: 1.18.0-3 (landed between the
-      # 2026-09-19 and 2026-10-05 runs) aborts on the User Guide build with
-      # "terminate called after throwing an instance of 'std::system_error'
-      # what(): Invalid argument". Pin the last version that built cleanly
-      # here, the same way the Linux doxygen jobs pin theirs
-      # (.github/actions/setup-doxygen).
-      - name: Pin MSYS2 Doxygen package
-        env:
-          MSYS2_DOXYGEN_PKG_VERSION: 1.16.1-4
-        run: |
-          pacman -U --noconfirm "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-doxygen-${MSYS2_DOXYGEN_PKG_VERSION}-any.pkg.tar.zst"
-          doxygen --version
-
-      # ntldd collects the DLLs for the ZIP (below). Installed from its URL
-      # rather than through setup-msys2: on 2026-10-25 MSYS2 changed the
-      # ntldd-r19.7fb9365-4 entry in its package database without changing
-      # the version, so the runner image's database expected a different
-      # signature and pacman rejected the download as corrupted. pacman -U
-      # checks the file against its own .sig instead.
-      - name: Install ntldd
-        env:
-          MSYS2_NTLDD_PKG: mingw-w64-x86_64-ntldd-r19.7fb9365-4-any.pkg.tar.zst
-        run: |
-          pacman -U --noconfirm "https://repo.msys2.org/mingw/mingw64/${MSYS2_NTLDD_PKG}"
-          command -v ntldd
-
-      - name: Get version
-        run: |
-          MAJOR=$(awk -F'"' '/set\(XTRKCAD_MAJOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
-          MINOR=$(awk -F'"' '/set\(XTRKCAD_MINOR_VERSION/{print $2; exit}' ProgramVersion.cmake)
-          PATCH=$(awk -F'"' '/set\(XTRKCAD_RELEASE_VERSION/{print $2; exit}' ProgramVersion.cmake)
-          MODIFIER=$(awk -F'"' '/set\(XTRKCAD_VERSION_MODIFIER/{print $2; exit}' ProgramVersion.cmake)
-          echo "XTRKCAD_VERSION=${MAJOR}.${MINOR}.${PATCH}${MODIFIER}" >> "$GITHUB_ENV"
-
-      - name: Configure (Release)
-        run: |
-          set -o pipefail
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DXTRKCAD_TESTING=ON \
-            -DXTRKCAD_USE_GETTEXT=OFF | tee configure.log
-          # A release tag must give the unversioned install name.
-          if [ "${{ github.ref_type }}" = tag ]; then
-            grep -q 'install identity: xtrkcad (' configure.log ||
-              { echo "::error::tagged build did not configure an unversioned install"; exit 1; }
-          fi
-
-      - name: Build
-        run: cmake --build build --parallel
-
-      - name: Test
-        run: ctest --test-dir build --output-on-failure
-
-      - name: Install to staging directory
-        run: cmake --install build --prefix "$(pwd)/staging"
-
-      - name: Collect GTK3 runtime DLLs
-        # Copy the GTK3 runtime data (pixbuf loaders, GSettings schemas, icon
-        # theme), then every MinGW64 DLL the binary or a loader needs.
-        # Errors fail the step: until 2026-10-24 this used
-        # `xargs cp ... || true`, xargs ate the backslashes in ntldd's
-        # Windows paths, every copy failed silently, and no ZIP ever
-        # shipped a DLL (found by install-test-windows).
-        run: |
-          set -eo pipefail
-          STAGING="$(pwd)/staging"
-          # xtrkcad-<version>.exe, or plain xtrkcad.exe on a tagged release
-          # (unversioned install, XTRKCAD_VERSIONED_INSTALL).
-          set -- "$STAGING"/bin/xtrkcad*.exe
-          [ $# -eq 1 ] && [ -f "$1" ] || { echo "::error::expected one xtrkcad binary in bin/, found: $*"; exit 1; }
-          BINARY=$1
-          MINGW=/mingw64
-
-          # GTK3 pixbuf loaders (needed for SVG icons and PNG images)
-          GDK_VER=$(ls $MINGW/lib/gdk-pixbuf-2.0/)
-          LOADERS="$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/loaders"
-          mkdir -p "$LOADERS"
-          cp "$MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders.cache" \
-             "$STAGING/lib/gdk-pixbuf-2.0/$GDK_VER/"
-          cp "$MINGW/lib/gdk-pixbuf-2.0/$GDK_VER/loaders/"*.dll "$LOADERS/"
-
-          # GSettings compiled schemas (required by GTK3 on Windows)
-          mkdir -p "$STAGING/share/glib-2.0/schemas"
-          cp "$MINGW/share/glib-2.0/schemas/gschemas.compiled" \
-             "$STAGING/share/glib-2.0/schemas/"
-
-          # Hicolor icon theme (GTK3 fallback icons)
-          mkdir -p "$STAGING/share/icons"
-          cp -r "$MINGW/share/icons/hicolor" "$STAGING/share/icons/"
-
-          # DLL dependencies of the binary and the loaders, MinGW64 only.
-          # ntldd prints "name => D:\...\mingw64\bin\name.dll (0x...)";
-          # cygpath turns the Windows path into one cp can use.
-          ntldd -R "$BINARY" "$LOADERS"/*.dll \
-            | awk '$3 ~ /[\\\/]mingw64[\\\/]/ {print $3}' \
-            | cygpath -u -f - | sort -u > dlls.txt
-          [ -s dlls.txt ] || { echo "::error::ntldd found no MinGW64 DLLs"; exit 1; }
-          while IFS= read -r dll; do
-            cp -n "$dll" "$STAGING/bin/"
-          done < dlls.txt
-          echo "copied $(wc -l < dlls.txt) DLLs into bin/"
-
-      - name: Create ZIP archive
-        run: |
-          cd staging
-          cmake -E tar cf "../xtrkcad-${XTRKCAD_VERSION}-windows-x64.zip" \
-            --format=zip .
-
-      - name: Upload ZIP
-        uses: actions/upload-artifact@v7
-        with:
-          name: packages-windows-x64-zip
-          path: xtrkcad-*-windows-x64.zip
-          retention-days: 14
-
-      - name: Package NSIS installer
-        # Built on version tags, and on request (include_nsis) otherwise.
-        # cmake --install doesn't collect the MinGW DLLs (the step above
-        # does, into staging/), so the installer is built from staging/ as
-        # well: CPACK_INSTALLED_DIRECTORIES adds it to what CPack installs
-        # from the build, and the installer ends up holding the same files
-        # as the ZIP (Development Issues #49).
-        if: ${{ github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.include_nsis == true) }}
-        run: |
-          STAGING=$(cygpath -m "$(pwd)/staging")
-          cd build
-          cpack -G NSIS -D "CPACK_INSTALLED_DIRECTORIES=$STAGING;."
-          ls -l xtrkcad-setup-*.exe
-
-      - name: Upload NSIS installer
-        uses: actions/upload-artifact@v7
-        if: ${{ github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.include_nsis == true) }}
-        with:
-          name: packages-windows-x64-nsis
-          path: build/xtrkcad-setup-*.exe
-          if-no-files-found: error
-          retention-days: 14
-
-  # ── Install tests — Linux packages on clean systems ───────────────────────
-  # Installs each Linux package in a fresh container of the release it's
-  # for, with that release's own package manager, and runs
-  # tools/package-install-test.sh: dependencies resolve, the binary runs and
-  # plays demos from the installed data, removal is clean. Until these
-  # existed, no CI job ever installed a package.
-  #
-  # They don't hold back latest-main, but github-release needs them, so a
-  # release is only drafted when every install test passed (Development
-  # Issues #48).
-  install-test-linux:
-    name: install-test-linux (${{ matrix.target }}, ${{ matrix.arch }})
-    needs: [check-inputs, package-linux-ubuntu, package-linux-debian, package-linux-fedora]
+  # ── Install tests, one call per platform ────────────────────────────────
+  # Each waits only for its own platform's packages. They don't hold back
+  # latest-main, but github-release needs them, so a release is only drafted
+  # when every install test passed (Development Issues #48). !cancelled()
+  # lets them run when packages-* was skipped for packages_from_run.
+  install-tests-linux:
+    needs: [check-inputs, packages-linux]
     if: ${{ !cancelled() && needs.check-inputs.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.linux) }}
+    uses: ./.github/workflows/install-tests.yml
     permissions:
       actions: read
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - {target: ubuntu2404, arch: amd64, image: 'ubuntu:24.04', package: '*-ubuntu2404.deb', artifact: packages-linux-ubuntu2404-amd64}
-          - {target: ubuntu2404, arch: arm64, image: 'ubuntu:24.04', package: '*-ubuntu2404.deb', artifact: packages-linux-ubuntu2404-arm64}
-          - {target: ubuntu2604, arch: amd64, image: 'ubuntu:26.04', package: '*-ubuntu2604.deb', artifact: packages-linux-ubuntu2604-amd64}
-          - {target: ubuntu2604, arch: arm64, image: 'ubuntu:26.04', package: '*-ubuntu2604.deb', artifact: packages-linux-ubuntu2604-arm64}
-          - {target: debian12, arch: amd64, image: 'debian:bookworm', package: '*-debian12.deb', artifact: packages-linux-debian12-amd64}
-          - {target: debian12, arch: arm64, image: 'debian:bookworm', package: '*-debian12.deb', artifact: packages-linux-debian12-arm64}
-          - {target: debian13, arch: amd64, image: 'debian:trixie', package: '*-debian13.deb', artifact: packages-linux-debian13-amd64}
-          - {target: debian13, arch: arm64, image: 'debian:trixie', package: '*-debian13.deb', artifact: packages-linux-debian13-arm64}
-          - {target: fedora44, arch: amd64, image: 'fedora:44', package: '*-fedora44.rpm', artifact: packages-linux-fedora44-amd64, options: --privileged}
-          - {target: fedora44, arch: arm64, image: 'fedora:44', package: '*-fedora44.rpm', artifact: packages-linux-fedora44-arm64, options: --privileged}
-          - {target: fedora45, arch: amd64, image: 'fedora:45', package: '*-fedora45.rpm', artifact: packages-linux-fedora45-amd64, options: --privileged}
-          - {target: fedora45, arch: arm64, image: 'fedora:45', package: '*-fedora45.rpm', artifact: packages-linux-fedora45-arm64, options: --privileged}
-    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-    # options: Fedora needs --privileged for glycin's bwrap sandbox, see
-    # package-linux-fedora.
-    container:
-      image: ${{ matrix.image }}
-      options: ${{ matrix.options || '' }}
-    steps:
-      - uses: actions/checkout@v7
+    with:
+      linux: true
+      packages_from_run: ${{ inputs.packages_from_run || '' }}
 
-      - name: Download package
-        uses: actions/download-artifact@v8
-        with:
-          name: ${{ matrix.artifact }}
-          path: pkg
-          # packages_from_run: that run's artifacts (needs the token);
-          # otherwise this run's.
-          run-id: ${{ inputs.packages_from_run || github.run_id }}
-          github-token: ${{ inputs.packages_from_run && github.token || '' }}
-
-      - name: Install test
-        env:
-          PATTERN: ${{ matrix.package }}
-        run: |
-          # shellcheck disable=SC2086 # PATTERN is a glob
-          set -- pkg/$PATTERN
-          [ $# -eq 1 ] && [ -f "$1" ] || { echo "expected one $PATTERN in pkg/, found: $*"; exit 1; }
-          sh tools/package-install-test.sh "$1"
-
-  # ── Install test — Windows ZIP on a clean runner ──────────────────────────
-  # Unpacks the ZIP into a path with a space in it and runs
-  # tools/package-install-test-windows.ps1 with only the Windows system
-  # directories on PATH, so a DLL the package forgot can't be found in the
-  # runner's MSYS2, Git or Perl. Like install-test-linux, it gates
-  # github-release but not latest-main.
-  install-test-windows:
-    needs: [check-inputs, package-windows]
+  install-tests-windows:
+    needs: [check-inputs, packages-windows]
     if: ${{ !cancelled() && needs.check-inputs.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.windows) }}
+    uses: ./.github/workflows/install-tests.yml
     permissions:
       actions: read
       contents: read
-    runs-on: windows-2025
-    steps:
-      - uses: actions/checkout@v7
+    with:
+      windows: true
+      include_nsis: ${{ github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.include_nsis) }}
+      packages_from_run: ${{ inputs.packages_from_run || '' }}
 
-      - name: Download package
-        uses: actions/download-artifact@v8
-        with:
-          name: packages-windows-x64-zip
-          path: pkg
-          # packages_from_run: that run's artifacts (needs the token);
-          # otherwise this run's.
-          run-id: ${{ inputs.packages_from_run || github.run_id }}
-          github-token: ${{ inputs.packages_from_run && github.token || '' }}
-
-      - name: Install test
-        shell: pwsh
-        run: |
-          $zips = @(Get-ChildItem pkg -Filter 'xtrkcad-*-windows-x64.zip')
-          if ($zips.Count -ne 1) { throw "expected one ZIP in pkg/, found $($zips.Count)" }
-          ./tools/package-install-test-windows.ps1 $zips[0].FullName -ArtifactDir "$env:RUNNER_TEMP/install-test-windows"
-
-      - name: Upload screenshots of hung runs
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: install-test-windows-screenshots
-          path: ${{ runner.temp }}/install-test-windows
-          if-no-files-found: ignore
-          retention-days: 14
-
-  # ── Install test — Windows NSIS installer on a clean runner ───────────────
-  # Runs only when the installer was built (tags, include_nsis).
-  # tools/package-install-test-nsis.ps1 installs it silently into the
-  # default Program Files folder, runs the ZIP test's checks on the
-  # installed tree, checks the uninstall entry, Start menu shortcuts and
-  # .xtc association, installs again over the first install (the upgrade
-  # path, Development Issues #48), then uninstalls and checks nothing is
-  # left behind.
-  install-test-windows-nsis:
-    needs: [check-inputs, package-windows]
-    if: ${{ !cancelled() && needs.check-inputs.result == 'success' && (github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.windows && inputs.include_nsis)) }}
-    permissions:
-      actions: read
-      contents: read
-    runs-on: windows-2025
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Download installer
-        uses: actions/download-artifact@v8
-        with:
-          name: packages-windows-x64-nsis
-          path: pkg
-          # packages_from_run: that run's artifacts (needs the token);
-          # otherwise this run's.
-          run-id: ${{ inputs.packages_from_run || github.run_id }}
-          github-token: ${{ inputs.packages_from_run && github.token || '' }}
-
-      - name: Install test
-        shell: pwsh
-        run: |
-          $exes = @(Get-ChildItem pkg -Filter 'xtrkcad-setup-*.exe')
-          if ($exes.Count -ne 1) { throw "expected one installer in pkg/, found $($exes.Count)" }
-          ./tools/package-install-test-nsis.ps1 $exes[0].FullName -ArtifactDir "$env:RUNNER_TEMP/install-test-windows-nsis"
-
-      - name: Upload screenshots of hung runs
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: install-test-windows-nsis-screenshots
-          path: ${{ runner.temp }}/install-test-windows-nsis
-          if-no-files-found: ignore
-          retention-days: 14
-
-  # ── Install tests — macOS archives on clean runners ───────────────────────
-  # Follows README-INSTALL.txt on a fresh runner of each architecture
-  # (brew install the prerequisites, unpack, run by full path from $HOME)
-  # with tools/package-install-test-macos.sh. Like install-test-linux, it
-  # gates github-release but not latest-main.
-  install-test-macos:
-    name: install-test-macos (${{ matrix.arch }})
-    needs: [check-inputs, package-macos]
+  install-tests-macos:
+    needs: [check-inputs, packages-macos]
     if: ${{ !cancelled() && needs.check-inputs.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.macos) }}
+    uses: ./.github/workflows/install-tests.yml
     permissions:
       actions: read
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: arm64
-            runner: macos-26
-          - arch: x86_64
-            runner: macos-26-intel
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Download package
-        uses: actions/download-artifact@v8
-        with:
-          name: packages-macos-${{ matrix.arch }}
-          path: pkg
-          # packages_from_run: that run's artifacts (needs the token);
-          # otherwise this run's.
-          run-id: ${{ inputs.packages_from_run || github.run_id }}
-          github-token: ${{ inputs.packages_from_run && github.token || '' }}
-
-      - name: Install test
-        env:
-          SCREENSHOT_DIR: ${{ runner.temp }}/install-test-macos
-        run: |
-          set -- pkg/xtrkcad-*-macos-${{ matrix.arch }}.tar.gz
-          [ $# -eq 1 ] && [ -f "$1" ] || { echo "expected one archive in pkg/, found: $*"; exit 1; }
-          sh tools/package-install-test-macos.sh "$1"
-
-      - name: Upload screenshot of a failed Help check
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: install-test-macos-${{ matrix.arch }}-screenshots
-          path: ${{ runner.temp }}/install-test-macos
-          if-no-files-found: ignore
-          retention-days: 14
+    with:
+      macos: true
+      packages_from_run: ${{ inputs.packages_from_run || '' }}
 
   # ── Analysis reports for GitHub Pages ─────────────────────────────────────
   # coverage, cppcheck-deep, clang-tidy, codespell and compiler-warnings as
@@ -1036,7 +401,7 @@ jobs:
   # (which may opt into experimental NSIS/DMG builds) are excluded so those
   # can't silently replace the normal rolling-release assets.
   publish-latest-release:
-    needs: [package-linux-ubuntu, package-linux-debian, package-linux-fedora, package-macos, package-windows]
+    needs: [packages-linux, packages-macos, packages-windows]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     concurrency:
@@ -1100,7 +465,7 @@ jobs:
   # delete the tag once the branch merges or is abandoned (github-release
   # and publish-latest-release are both unaffected by this job).
   publish-temp-release:
-    needs: [package-linux-ubuntu, package-linux-debian, package-linux-fedora, package-macos, package-windows]
+    needs: [packages-linux, packages-macos, packages-windows]
     if: github.event_name == 'workflow_dispatch' && inputs.publish_temp_release == true
     runs-on: ubuntu-24.04
     concurrency:
@@ -1186,7 +551,7 @@ jobs:
   # Waits for the install tests as well as the packages: a release is only
   # drafted from packages that installed and ran on clean systems.
   github-release:
-    needs: [check-release-tag, package-linux-ubuntu, package-linux-debian, package-linux-fedora, package-macos, package-windows, package-docs, install-test-linux, install-test-windows, install-test-windows-nsis, install-test-macos]
+    needs: [check-release-tag, packages-linux, packages-macos, packages-windows, package-docs, install-tests-linux, install-tests-windows, install-tests-macos]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
     permissions:

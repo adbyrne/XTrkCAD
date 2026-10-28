@@ -1,0 +1,245 @@
+name: Packages (Linux)
+
+# Reusable workflow, called by release.yml: builds the Linux packages and
+# uploads them as packages-linux-<distro>-<arch> artifacts (14 days) of the
+# calling run. Each job also runs the unit tests and, where the image allows,
+# the regression suite on the build it packages. install-tests.yml installs
+# the packages on clean systems.
+#
+# Runners and compilers are pinned as in ci-gtk3.yml (see its header):
+# ubuntu-24.04(-arm), ubuntu-26.04(-arm) for the Ubuntu 26.04 DEB, macos-26
+# and macos-26-intel with .github/actions/select-xcode, windows-2025 with
+# .github/actions/msys2-pin-gcc.
+
+on:
+  workflow_call:
+
+jobs:
+  # ── Linux — DEB (Ubuntu 24.04/26.04) + STGZ + source ───────────────────
+  # One DEB per Ubuntu LTS. A DEB built on 24.04 does not install on 26.04
+  # (it depends on libzip4t64; 26.04 only has libzip5, Development Issues
+  # #37), so each release gets its own, named *-ubuntu2404.deb and
+  # *-ubuntu2604.deb like the Debian ones. The 24.04 amd64 entry also builds
+  # the STGZ installer and the source archives. The RPMs come from
+  # package-linux-fedora.
+  #
+  # The runners are pinned to exact Ubuntu releases, never ubuntu-latest
+  # (Ubuntu 26.04 from 2026-10-19), so a runner image change can't quietly
+  # change which release a package is for.
+  package-linux-ubuntu:
+    name: package-linux-ubuntu (${{ matrix.ubuntu }}, ${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu: ['24.04', '26.04']
+        arch: [amd64, arm64]
+        include:
+          - ubuntu: '24.04'
+            suffix: ubuntu2404
+          - ubuntu: '26.04'
+            suffix: ubuntu2604
+          - arch: amd64
+            runner-suffix: ''
+          - arch: arm64
+            runner-suffix: '-arm'
+          - ubuntu: '24.04'
+            arch: amd64
+            extra-packages: true
+    runs-on: ubuntu-${{ matrix.ubuntu }}${{ matrix.runner-suffix }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: doxygen dpkg-dev
+
+      - name: Configure (Release)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        # The ~47 individual per-demo regression tests (XTRKCAD_REGRESSION_TESTING's
+        # auto-detect default is ON here) are for local dev targeting only and are
+        # not self-contained standalone -- see app/bin/RegressionTests.cmake. Mirror
+        # ci-gtk3.yml: run everything else, then gate separately on the single-process
+        # RegressionSuite (label regression-ci).
+        run: |
+          xvfb-run ctest --test-dir build --output-on-failure -LE regression
+          ctest --test-dir build --output-on-failure -L regression-ci
+
+      - name: Package (DEB)
+        run: |
+          cd build && cpack -G DEB
+          for f in xtrkcad-setup-*.deb; do
+            mv "$f" "${f%.deb}-${{ matrix.suffix }}.deb"
+          done
+
+      - name: Package (STGZ + source archives)
+        if: matrix.extra-packages
+        run: |
+          cd build
+          cpack -G STGZ
+          cpack --config CPackSourceConfig.cmake -G TGZ
+          cpack --config CPackSourceConfig.cmake -G ZIP
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-linux-${{ matrix.suffix }}-${{ matrix.arch }}
+          path: |
+            build/*.deb
+            build/*.sh
+            build/xtrkcad-source-*
+          retention-days: 14
+
+  # ── Linux — DEB (Debian 12/13, Raspberry Pi OS Bookworm/Trixie) ─────────
+  # Built inside a debian container so each DEB declares that release's own
+  # dependency versions.  Ubuntu 24.04 renames packages with a "t64" suffix
+  # (libgtk-3-0t64, libzip4t64, …) that do not exist on Debian 12 /
+  # Raspberry Pi OS Bookworm, causing "unmet dependencies" errors there.
+  # The arm64 builds cover Raspberry Pi 3/4/5 on 64-bit Pi OS; the amd64
+  # builds cover plain Debian.
+  package-linux-debian:
+    name: package-linux-debian (${{ matrix.debian }}, ${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        debian: [bookworm, trixie]
+        arch: [amd64, arm64]
+        include:
+          - debian: bookworm
+            suffix: debian12
+          - debian: trixie
+            suffix: debian13
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container: debian:${{ matrix.debian }}
+    steps:
+      - name: Install git (required by actions/checkout)
+        run: apt-get update -q && apt-get install -y git
+
+      - uses: actions/checkout@v7
+
+      - name: Trust the checkout
+        # The container runs as root but the workspace belongs to the runner
+        # user, so git rejects it as "dubious ownership" and ProgramVersion.cmake
+        # silently loses the source hash (the Debian 12 DEB used to be named
+        # xtrkcad-setup-5.4.0-1-debian12.deb, with no hash).
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - uses: ./.github/actions/apt-deps
+        with:
+          extra: doxygen dpkg-dev file
+
+      - name: Configure (Release)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        # See package-linux's Test step comment: the per-demo regression tests
+        # aren't self-contained standalone, so gate separately on RegressionSuite.
+        run: |
+          xvfb-run ctest --test-dir build --output-on-failure -LE regression
+          ctest --test-dir build --output-on-failure -L regression-ci
+
+      - name: Package (DEB)
+        run: |
+          cd build && cpack -G DEB
+          for f in xtrkcad-setup-*.deb; do
+            mv "$f" "${f%.deb}-${{ matrix.suffix }}.deb"
+          done
+
+      - name: Upload package
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-linux-${{ matrix.suffix }}-${{ matrix.arch }}
+          path: build/*.deb
+          retention-days: 14
+
+  # ── Linux — RPM (Fedora 44/45) ────────────────────────────────────────
+  # Built inside a fedora container, so each RPM requires that release's own
+  # sonames. The RPM used to be built on Ubuntu and required Ubuntu's
+  # libzip.so.4, which no Fedora release has (Development Issues #38).
+  # Named *-fedora44.rpm and *-fedora45.rpm, like the DEBs.
+  #
+  # --privileged: Fedora's gdk-pixbuf loads images through glycin, which runs
+  # each loader in a bwrap sandbox. bwrap can't create its namespaces in an
+  # unprivileged container, so the SVG loader dies and GTK aborts on its
+  # first icon, failing RegressionSuite. On a real system bwrap works.
+  package-linux-fedora:
+    name: package-linux-fedora (${{ matrix.fedora }}, ${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        fedora: ['44', '45']
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: fedora:${{ matrix.fedora }}
+      options: --privileged
+    steps:
+      - name: Install build dependencies (dnf)
+        # git is for actions/checkout and the source hash; rpm-build and file
+        # are for CPack RPM. retries covers a slow or flaky mirror.
+        run: |
+          dnf -y --setopt=retries=10 install git cmake ninja-build gcc \
+            gtk3-devel libcmocka-devel zlib-devel libzip-devel mxml-devel \
+            librsvg2-tools gettext doxygen rpm-build file \
+            xorg-x11-server-Xvfb xauth
+
+      - uses: actions/checkout@v7
+
+      - name: Trust the checkout
+        # As in package-linux-debian: the container runs as root, the
+        # workspace belongs to the runner user, and without this git refuses
+        # it and the package loses its source hash.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Configure (Release)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DXTRKCAD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        # See package-linux-ubuntu's Test step comment: the per-demo regression
+        # tests aren't self-contained standalone, so gate separately on
+        # RegressionSuite.
+        run: |
+          xvfb-run -a ctest --test-dir build --output-on-failure -LE regression
+          ctest --test-dir build --output-on-failure -L regression-ci
+
+      - name: Package (RPM)
+        run: |
+          cd build && cpack -G RPM
+          for f in xtrkcad-setup-*.rpm; do
+            mv "$f" "${f%.rpm}-fedora${{ matrix.fedora }}.rpm"
+          done
+
+      - name: Upload package
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-linux-fedora${{ matrix.fedora }}-${{ matrix.arch }}
+          path: build/*.rpm
+          retention-days: 14
