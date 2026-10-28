@@ -64,7 +64,8 @@ example when reading `Regression Tests Pass` after a `/T` run.
 
 GLib's and GTK's own warnings, criticals and errors go there too, once the log is open
 (`wSetLogCallBack()` in wlib's `main.c`, registered by `LogOpen()`). They still go to stderr as
-well. A program that closes at startup without a word, with exit code `0xC0000409`, has usually
+well. Linux and macOS do the same when `-l` names a log file; without it the log is stdout, so
+the messages are only on stderr. A program that closes at startup without a word, with exit code `0xC0000409`, has usually
 had a `g_error()` from GTK, and its text is now the last line of the log.
 
 ## Help {#windows-help}

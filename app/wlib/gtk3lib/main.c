@@ -46,7 +46,7 @@ char *wExecutableName; /**< full path to executable, taken from argv[0] */
 static GtkApplication *app;
 static int myargc;    /**< count of command line options */
 static char **myargv; /**< command line options */
-static wLogCallBack_p logCallBack; /**< gets GLib's messages, see wSetLogCallBack() */
+static wLogCallBack_p logCallBack; /**< see wSetLogCallBack() */
 
 /**
  * Initialize the application name for later use

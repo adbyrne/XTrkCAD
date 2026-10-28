@@ -1,8 +1,10 @@
 /** \file msvccompat.h
- * GCC/POSIX compatibility for the MSVC (gvsbuild) build.
+ * GCC/POSIX compatibility for Windows builds, mainly MSVC (gvsbuild).
  *
- * Force-included into every C translation unit with /FI by
- * PlatformSettings.cmake, so no source file includes it directly.
+ * Under MSVC, PlatformSettings.cmake force-includes it into every C
+ * translation unit with /FI. common.h includes it on every Windows build,
+ * so a source file only includes it directly if it uses strcasecmp() on
+ * Windows without common.h. It is the one place these aliases are defined.
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -25,6 +27,15 @@
 #ifndef HAVE_MSVCCOMPAT_H
 #define HAVE_MSVCCOMPAT_H
 
+#ifdef _WIN32
+
+/* <strings.h> doesn't exist under MSVC; MinGW has it, but common.h has
+ * always used the CRT names on every Windows build */
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+
+#endif /* _WIN32 */
+
 #ifdef _MSC_VER
 
 /* __attribute__((fallthrough)) and friends are GCC/Clang syntax that cl.exe
@@ -32,10 +43,6 @@
 #ifndef __clang__
 #define __attribute__(x)
 #endif
-
-/* <strings.h> doesn't exist; these match the aliases in common.h */
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
 
 /* same arguments, Microsoft's name */
 #define strtok_r strtok_s

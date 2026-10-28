@@ -379,7 +379,8 @@ bug:
 path, a mouse-driven command) actually behaves correctly. For that, run the real app with its
 built-in per-module debug logging: `-d <category>=<level>` (repeat the flag once per category;
 `-d <category>` alone defaults to level 1), optionally with `-l <file>` to redirect output to a
-file instead of stdout. There's no `-d help`/discovery flag — see the \ref log "Log Commands"
+file instead of stdout. A log file also gets GLib's and GTK's warnings and errors, so it shows what
+GTK reported before a failure. There's no `-d help`/discovery flag — see the \ref log "Log Commands"
 page for the full catalog of category names and which file registers each one. That page is
 generated from `@logcmd` doc comments next to each category's registration in the source (the
 same `\xrefitem`-based mechanism Doxygen uses for its own Todo/Bug/Deprecated lists), so it stays
