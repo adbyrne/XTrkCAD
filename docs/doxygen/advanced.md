@@ -66,6 +66,7 @@ packages to a temporary prerelease named after the branch for someone to review;
 |---|---|---|
 | `ci-gtk3.yml` | push to `%main` or `test/**`, PR into `%main`, dispatch | yes: the gate |
 | `ci-gtk3-preview.yml` | push to `%main` or `test/**`, PR into `%main` | no, advisory |
+| `ci-windows-msvc.yml` | push to `%main` or `test/**`, PR into `%main`, dispatch | no, advisory while MSVC is experimental |
 | `ci-mcp.yml` | the same, only when `mcp/` or the workflow changed | yes, for `mcp/` |
 | `codeql.yml` | push to `%main`, PR into `%main`, weekly (Monday) | yes |
 | `release.yml` | push to `%main`, `v*.*.*` tag, dispatch | see \ref release-workflow "release.yml" |

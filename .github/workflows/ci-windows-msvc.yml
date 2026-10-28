@@ -1,0 +1,140 @@
+name: CI (Windows MSVC)
+
+# Experimental MSVC build (Development Issues #60): Visual Studio's cl.exe
+# against gvsbuild's prebuilt GTK3, through the windows-gvsbuild-release
+# preset, packaged as a ZIP and checked with the same install test as
+# release.yml's Windows ZIP (tools/package-install-test-windows.ps1).
+#
+# Its own workflow, not a job in ci-gtk3.yml: while the toolchain is being
+# proven a failure here is advisory and doesn't touch the gate's status.
+#
+# gvsbuild's GTK3 bundle has everything the preset needs (pkgconf.exe, GTK3,
+# freetype, librsvg's SVG loader, loaders.cache, compiled GLib schemas,
+# Adwaita and hicolor icons) except libzip, which is built here against the
+# bundle's own zlib and installed into the same tree. Both are cached; the
+# key changes with either version. Downloads are checked against pinned
+# SHA-256 sums.
+
+on:
+  push:
+    branches:
+      - main
+      - test/**
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GVSBUILD_VERSION: '2026.8.0'
+  GVSBUILD_SHA256: 9be43d9029749062d2637070c856e73f8a1327a72259d08326b38155c139ecdc
+  LIBZIP_VERSION: '1.11.4'
+  LIBZIP_SHA256: 82e9f2f2421f9d7c2466bbc3173cd09595a88ea37db0d559a9d0a2dc60dc722e
+  # Read by the windows-gvsbuild presets
+  GVSBUILD: C:\gvsbuild
+
+jobs:
+  build-windows-msvc:
+    runs-on: windows-2025
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Restore gvsbuild GTK3 + libzip
+        id: cache
+        uses: actions/cache@v6
+        with:
+          path: C:\gvsbuild
+          key: gvsbuild-${{ env.GVSBUILD_VERSION }}-libzip-${{ env.LIBZIP_VERSION }}
+
+      - name: Download gvsbuild GTK3
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $zip = "$env:RUNNER_TEMP\gtk3.zip"
+          $url = "https://github.com/wingtk/gvsbuild/releases/download/$env:GVSBUILD_VERSION/GTK3_Gvsbuild_${env:GVSBUILD_VERSION}_x64.zip"
+          Invoke-WebRequest $url -OutFile $zip
+          $sum = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+          if ($sum -ne $env:GVSBUILD_SHA256) { throw "gvsbuild bundle checksum $sum, expected $env:GVSBUILD_SHA256" }
+          New-Item -ItemType Directory -Force $env:GVSBUILD | Out-Null
+          # tar (bsdtar) unpacks the 6700-file zip much faster than Expand-Archive
+          tar -xf $zip -C $env:GVSBUILD
+
+      - name: Build libzip against gvsbuild's zlib
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          for /f "usebackq delims=" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do set "VSINSTALL=%%i"
+          call "%VSINSTALL%\VC\Auxiliary\Build\vcvars64.bat" || exit /b 1
+          set "PATH=%ProgramFiles%\CMake\bin;%PATH%"
+          cd /d "%RUNNER_TEMP%"
+          curl -sSfL -o libzip.tar.gz https://github.com/nih-at/libzip/releases/download/v%LIBZIP_VERSION%/libzip-%LIBZIP_VERSION%.tar.gz || exit /b 1
+          for /f %%h in ('certutil -hashfile libzip.tar.gz SHA256 ^| findstr /v ":"') do set "SUM=%%h"
+          if /i not "%SUM%"=="%LIBZIP_SHA256%" (echo libzip checksum %SUM%, expected %LIBZIP_SHA256% & exit /b 1)
+          tar -xzf libzip.tar.gz || exit /b 1
+          cmake -S libzip-%LIBZIP_VERSION% -B libzip-build -G Ninja -DCMAKE_BUILD_TYPE=Release ^
+            -DCMAKE_PREFIX_PATH=%GVSBUILD% -DCMAKE_INSTALL_PREFIX=%GVSBUILD% ^
+            -DENABLE_BZIP2=OFF -DENABLE_LZMA=OFF -DENABLE_ZSTD=OFF ^
+            -DENABLE_COMMONCRYPTO=OFF -DENABLE_GNUTLS=OFF -DENABLE_MBEDTLS=OFF ^
+            -DENABLE_OPENSSL=OFF -DENABLE_WINDOWS_CRYPTO=OFF ^
+            -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_OSSFUZZ=OFF ^
+            -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF || exit /b 1
+          cmake --build libzip-build || exit /b 1
+          cmake --install libzip-build || exit /b 1
+
+      - name: Configure, build and install (windows-gvsbuild-release)
+        shell: cmd
+        run: |
+          for /f "usebackq delims=" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do set "VSINSTALL=%%i"
+          call "%VSINSTALL%\VC\Auxiliary\Build\vcvars64.bat" || exit /b 1
+          rem The presets need CMake 4.0; Visual Studio's bundled CMake comes
+          rem first on the path after vcvars and is usually older.
+          set "PATH=%ProgramFiles%\CMake\bin;%PATH%"
+          cmake --version
+          cl 2>&1 | findstr /c:"Version"
+          cmake --preset windows-gvsbuild-release || exit /b 1
+          cmake --build --preset windows-gvsbuild-release || exit /b 1
+          cmake --install build\windows-gvsbuild-release --prefix "%RUNNER_TEMP%\staging" || exit /b 1
+
+      - name: Create ZIP
+        shell: pwsh
+        run: |
+          $staging = "$env:RUNNER_TEMP\staging"
+          $exes = @(Get-ChildItem "$staging\bin" -Filter 'xtrkcad*.exe')
+          if ($exes.Count -ne 1) { throw "expected one xtrkcad*.exe in staging\bin, found $($exes.Count)" }
+          # Same name as release.yml's ZIP; the install test reads the
+          # version from it
+          $version = $exes[0].BaseName -replace '^xtrkcad-?', ''
+          if (-not $version) { throw "no version in $($exes[0].Name)" }
+          Push-Location $staging
+          cmake -E tar cf "$env:GITHUB_WORKSPACE\xtrkcad-$version-windows-x64.zip" --format=zip .
+          Pop-Location
+          Get-Item "$env:GITHUB_WORKSPACE\xtrkcad-*-windows-x64.zip" | Format-Table Name, Length
+
+      - name: Install test
+        shell: pwsh
+        run: |
+          $zips = @(Get-ChildItem . -Filter 'xtrkcad-*-windows-x64.zip')
+          if ($zips.Count -ne 1) { throw "expected one ZIP, found $($zips.Count)" }
+          ./tools/package-install-test-windows.ps1 $zips[0].FullName -ArtifactDir "$env:RUNNER_TEMP/install-test-msvc"
+
+      - name: Upload ZIP
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-windows-msvc-zip
+          path: xtrkcad-*-windows-x64.zip
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload screenshots of hung runs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: install-test-msvc-screenshots
+          path: ${{ runner.temp }}/install-test-msvc
+          if-no-files-found: ignore
+          retention-days: 14
