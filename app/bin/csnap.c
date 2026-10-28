@@ -588,7 +588,7 @@ static void RedrawGrid( void )
 }
 
 
-static void GridOk( void * unused )
+static void GridOk( const void * unused )
 {
 	long changes;
 

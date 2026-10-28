@@ -382,7 +382,7 @@ static paramData_t sensorEditPLs[] = {
 static paramGroup_t sensorEditPG = { "sensoredit", PGO_FULLDIALOGFROMBUILDER, sensorEditPLs, COUNT( sensorEditPLs ) };
 static wControl_p sensorEditW;
 
-static void SensorEditOk ( void * junk )
+static void SensorEditOk ( const void * junk )
 {
 	track_p trk;
 	sensorData_p xx;

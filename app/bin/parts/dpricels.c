@@ -35,7 +35,7 @@
 #define FLEXTRACKCOST "flex cost"
 
 static void PriceEdited(int row, char* newvalue);
-static void PriceListOk(void* action);
+static void PriceListOk(const void* action);
 static void PriceListSave(void);
 
 static wControl_p priceListW;
@@ -215,7 +215,7 @@ FlexSaveCost(const char* scale)
 }
 
 
-static void PriceListOk( void * action )
+static void PriceListOk( const void * action )
 {
 	/* Done acts on button press, before focus leaves a price cell still
 	 * being edited: move focus first so that edit is committed (see

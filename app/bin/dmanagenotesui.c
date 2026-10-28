@@ -136,7 +136,7 @@ static paramGroup_t manageNotesNamePG = { "managenotesname", 0, manageNotesNameP
  *
  * \param junk IN unused, required by the PD_BUTTON/FormButton signature
  */
-static void ManageNotesNameOk(void *junk)
+static void ManageNotesNameOk(const void *junk)
 {
 	/* FormUpdate() is required to pull the live widget text into
 	 * manageNoteNameBuf before use -- see dlayergroupui.c's
@@ -295,7 +295,7 @@ static void RefreshNameList(void)
  *
  * \param junk IN unused, required by the FormCreateDialog() Ok-action signature
  */
-static void ManageNotesDone(void *junk)
+static void ManageNotesDone(const void *junk)
 {
 	/* FormUpdate() pulls the live widget values (color buttons, shape
 	 * drop-lists) into the bound manageNotes*Color/manageNotes*Shape

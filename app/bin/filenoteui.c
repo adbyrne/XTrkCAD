@@ -209,7 +209,7 @@ FileDlgUpdate(
  */
 
 static void
-FileEditOK(void *junk)
+FileEditOK(const void *junk)
 {
 	track_p trk = fileNoteData.trk;
 	if ( trk == NULL ) {

@@ -47,7 +47,7 @@ void ClearNote(void)
 	}
 }
 
-static void NoteOk(void * unused)
+static void NoteOk(const void * unused)
 {
 	if (wTextGetModified(noteT)) {
 		int len;

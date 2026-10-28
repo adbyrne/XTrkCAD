@@ -559,7 +559,7 @@ static track_p FindSwitchMotor (const track_p trk)
 	return NULL;
 }
 
-static void SwitchMotorOk ( void * junk )
+static void SwitchMotorOk ( const void * junk )
 {
 	switchmotorData_p xx;
 	track_p trk,trk1;
@@ -648,7 +648,7 @@ static STATUS_T CmdSwitchMotorCreate( wAction_t action, coOrd pos )
 	}
 }
 
-static void SwitchMotorEditOk ( void * junk )
+static void SwitchMotorEditOk ( const void * junk )
 {
 	switchmotorData_p xx;
 	track_p trk;

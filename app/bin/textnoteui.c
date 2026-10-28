@@ -87,7 +87,7 @@ TextDlgUpdate(paramGroup_p pg,
  */
 
 static void
-TextEditOK(void *junk)
+TextEditOK(const void *junk)
 {
 	track_p trk = textNoteData.trk;
 	if ( trk == NULL ) {

@@ -376,7 +376,7 @@ UpdateBitmapDialog( void )
  * \param [in,out] unused If non-null, the junk.
  */
 
-static void OutputBitMapOk( void * unused )
+static void OutputBitMapOk( const void * unused )
 {
 	wHide( outputBitMapW );
 

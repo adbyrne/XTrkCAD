@@ -140,7 +140,7 @@ static void MenuPlayback(char * line)
 static wControl_p addElevW;
 #define addElevF (wFloat_p)addElevPD.control
 static DIST_T addElevValueV;
-static void DoAddElev(void * unused);
+static void DoAddElev(const void * unused);
 
 static paramFloatRange_t rn1000_1000 = { -1000.0, 1000.0 };
 static paramData_t addElevPLs[] = { {
@@ -150,7 +150,7 @@ static paramData_t addElevPLs[] = { {
 };
 static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, COUNT( addElevPLs ) };
 
-static void DoAddElev(void * unused)
+static void DoAddElev(const void * unused)
 {
 	FormFetchData(&addElevPG);
 	AddElevations(addElevValueV);
@@ -188,14 +188,14 @@ static rotateDialogCallBack_t rotateDialogCallBack;
 static indexDialogCallBack_t indexDialogCallBack;
 static moveDialogCallBack_t moveDialogCallBack;
 
-static void RotateEnterOk(void * unused);
+static void RotateEnterOk(const void * unused);
 
 static paramFloatRange_t rn360_360 = { -360.0, 360.0, 20 };
 static paramGroup_t rotatePG;
 static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_NOPREF|PDO_ANGLE|PDO_NORECORD, &rn360_360, N_("Angle:"), .group = &rotatePG } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, COUNT( rotatePLs ) };
 
-static void IndexEnterOk(void * unused);
+static void IndexEnterOk(const void * unused);
 
 static paramGroup_t indexPG;
 static paramData_t indexPLs[] = {
@@ -204,7 +204,7 @@ static paramData_t indexPLs[] = {
 static paramGroup_t indexPG = { "index", 0, indexPLs, COUNT( indexPLs ) };
 
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 20 };
-static void MoveEnterOk(void * unused);
+static void MoveEnterOk(const void * unused);
 
 static paramGroup_t movePG;
 static paramData_t movePLs[] = {
@@ -252,7 +252,7 @@ static void StartMoveDialog(void * funcVP)
 	wShow(moveW);
 }
 
-static void MoveEnterOk(void * unused)
+static void MoveEnterOk(const void * unused)
 {
 	FormFetchData(&movePG);
 	if ( moveValue.x != 0.0 ||
@@ -262,14 +262,14 @@ static void MoveEnterOk(void * unused)
 	wHide(moveW);
 }
 
-static void IndexEnterOk(void * unused)
+static void IndexEnterOk(const void * unused)
 {
 	FormFetchData(&indexPG);
 	indexDialogCallBack(trackIndex);
 	wHide(indexW);
 }
 
-static void RotateEnterOk(void * unused)
+static void RotateEnterOk(const void * unused)
 {
 	FormFetchData(&rotatePG);
 	if ( rotateValue != 0.0 ) {
@@ -428,7 +428,7 @@ static paramData_t stickyPLs[] = { {
 };
 static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,COUNT( stickyPLs )};
 
-static void StickyOk(void * unused)
+static void StickyOk(const void * unused)
 {
 	long changes = GetChanges( &stickyPG );
 
@@ -475,7 +475,7 @@ static wControl_p debugW;
 
 static int debugCnt = 0;
 static paramIntegerRange_t r0_100 = { 0, 100, 80 };
-static void DebugOk(void * unused);
+static void DebugOk(const void * unused);
 static paramData_t debugPLs[30];
 static paramData_t p0[] = {
 	{ PD_BUTTON, TestMallocs, "test", PDO_DLGHORZ, NULL, N_("Test Mallocs") }
@@ -487,7 +487,7 @@ static int debug_index[MAX_ACTIVE_LOGS];
 
 static paramGroup_t debugPG = { "debug", 0, debugPLs, 0 };
 
-static void DebugOk(void * unused)
+static void DebugOk(const void * unused)
 {
 	for (int i = 0; i<debugCnt; i++) {
 		logTable(debug_index[i]).level = debug_values[i];

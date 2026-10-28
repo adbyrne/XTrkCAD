@@ -538,7 +538,7 @@ static paramGroup_t aspectEditPG = { "aspectedit", PGO_FULLDIALOGFROMBUILDER, as
 static wControl_p aspectEditW;
 
 
-static void SignalEditOk ( void * junk )
+static void SignalEditOk ( const void * junk )
 {
 	track_p trk;
 	signalData_p xx;
@@ -630,7 +630,7 @@ static wBool_t SignalEditDlgUpdate (paramGroup_p pg, int inx, void *valueP )
 	return TRUE;
 }
 
-static void aspectEditOK ( void * junk )
+static void aspectEditOK ( const void * junk )
 {
 	FormFetchData( &aspectEditPG );
 

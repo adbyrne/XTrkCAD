@@ -109,7 +109,7 @@ static paramGroup_t layerGroupNamePG = { "layergroupname", 0, layerGroupNamePLs,
  *
  * \param junk IN unused, required by the PD_BUTTON/FormButton signature
  */
-static void LayerGroupNameOk(void *junk)
+static void LayerGroupNameOk(const void *junk)
 {
 	/* FormCheckInputs() (called by the generic ButtonOk() before this
 	 * callback runs) only checks pre-existing p->bInvalid flags -- it does
@@ -491,7 +491,7 @@ static wBool_t LayerGroupDlgUpdate(paramGroup_p pg, int inx, void *valueP)
  *
  * \param junk IN unused, required by the FormCreateDialog() Ok-action signature
  */
-static void LayerGroupDone(void *junk)
+static void LayerGroupDone(const void *junk)
 {
 	wHide(layerGroupPG.win);
 }

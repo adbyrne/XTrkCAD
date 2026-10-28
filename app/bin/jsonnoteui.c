@@ -775,7 +775,7 @@ JsonDlgUpdate(paramGroup_p pg, int inx, void *valueP)
  * \param junk unused
  */
 static void
-JsonEditOK(void *junk)
+JsonEditOK(const void *junk)
 {
 	/* Defensive re-validation, not just relying on the disabled-OK-button
 	 * mechanism (filenoteui.c's precedent this was originally modeled on):
@@ -789,7 +789,7 @@ JsonEditOK(void *junk)
 	 * directly (never clicking Validate first) could save invalid JSON. */
 	const char *errMsg = NULL;
 	if (!JsonNoteIsValid(&errMsg, NULL)) {
-		JsonNoteValidate(junk);
+		JsonNoteValidate(NULL);
 		return;
 	}
 

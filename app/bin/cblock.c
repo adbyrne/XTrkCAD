@@ -572,7 +572,7 @@ static track_p FindBlock (track_p trk)
 	return NULL;
 }
 
-static void BlockOk ( void * junk )
+static void BlockOk ( const void * junk )
 {
 	track_p trk,trk1;
 
@@ -811,7 +811,7 @@ void CheckDeleteBlock(track_p t)
 	DeleteTrack(blk,FALSE);
 }
 
-static void BlockEditOk ( void * junk )
+static void BlockEditOk ( const void * junk )
 {
 	blockData_p xx;
 	track_p trk;

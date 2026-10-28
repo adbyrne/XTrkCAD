@@ -103,7 +103,7 @@ static paramData_t displayPLs[] = {
 static paramGroup_t displayPG = { "display", PGO_FULLDIALOGFROMBUILDER |PGO_RECORD, displayPLs, COUNT( displayPLs ) };
 
 
-static void DisplayOk( void * junk )
+static void DisplayOk( const void * junk )
 {
 	long changes;
 	changes = GetChanges( &displayPG );
@@ -179,7 +179,7 @@ static paramGroup_t colorPG = { "rgbcolor", PGO_RECORD|PGO_FULLDIALOGFROMBUILDER
 
 
 
-static void ColorOk( void * junk )
+static void ColorOk( const void * junk )
 {
 	long changes;
 	changes = GetChanges( &colorPG );

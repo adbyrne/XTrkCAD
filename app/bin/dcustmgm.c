@@ -38,7 +38,7 @@ static int log_dcustmgm = -1;
 static void CustomEdit( void * action );
 static void CustomDelete( void * action );
 static void CustomExport( void * action );
-static void CustomDone( void * action );
+static void CustomDone( const void * action );
 static void SelectNew(void *context );
 
 #ifdef TODO_UNUSED
@@ -224,7 +224,7 @@ static paramData_t custMgmContentsPLs[] = {
 };
 static paramGroup_t custMgmContentsPG = { "contents", 0, custMgmContentsPLs, COUNT( custMgmContentsPLs ) };
 
-static void CustMgmContentsOk( void * junk )
+static void CustMgmContentsOk( const void * junk )
 {
 	FormFetchData( &custMgmContentsPG );
 	custMgmProceed = TRUE;
@@ -358,7 +358,7 @@ static void CustomExport( void * junk )
 }
 
 
-static void CustomDone( void * action )
+static void CustomDone( const void * action )
 {
 	FILE * f = OpenCustom("w");
 

@@ -72,7 +72,7 @@
 
 static void ControlEdit( void * action );
 static void ControlDelete( void * action );
-static void ControlDone( void * action );
+static void ControlDone( const void * action );
 
 static paramData_t controlPLs[] = {
 #define I_CONTROLLIST	(0)
@@ -214,7 +214,7 @@ static void ControlUnHilightAll( void )
 	}
 }
 
-static void ControlDone( void * action )
+static void ControlDone( const void * action )
 {
 	ControlUnHilightAll();
 	wHide( controlPG.win );
