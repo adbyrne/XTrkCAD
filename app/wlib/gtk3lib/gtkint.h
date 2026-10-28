@@ -411,18 +411,6 @@ enum columns {
 	LISTCOL_TEXT,        /**< starting point for text columns */
 };
 
-struct wList_t {
-	wType_e type;
-	GtkWidget *widget;
-	GtkListStore *listStore;
-	GtkTreeView *treeView;
-	long *valueP;
-	void *attributes;
-	int editted;
-	int last;
-	wListCallBack_p action;
-	int recursion;
-};
 
 /* entry.c */
 
@@ -511,14 +499,6 @@ void wlibSetTrigger(wControl_p b, setTriggerCallback_p trigger);
 void wlibToggleGroupsInit(void);
 void wlibToggleGroupConnect(const gchar *group_name, GCallback callback,
                             wControl_p  user_data);
-struct wChoice_t {
-	wType_e type;
-	GtkWidget *widget;
-	long *valueP;
-	wChoiceCallBack_p action;
-	char *labelStr;
-	void *attributes;
-};
 
 /* toolbarctrl.c */
 GtkWidget *wlibToolbarCreate(GtkWidget *container);

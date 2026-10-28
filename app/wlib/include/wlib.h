@@ -49,26 +49,25 @@ typedef int wIndex_t;
 typedef struct _DataStore DataStore;
 /*
  * Opaque Pointers
+ *
+ * Every control is a struct control in the toolkit layer; the control
+ * handle types only say which kind of control a variable holds, so they
+ * all name struct control and convert to and from wControl_p.
  */
 typedef struct control *wControl_p;
-typedef struct wButton_t *wButton_p;
-typedef struct wEntry_t *wEntry_p;
-//typedef struct wInteger_t *wInteger_p;
-typedef struct wFloat_t *wFloat_p;
-typedef struct wList_t *wList_p;
-typedef struct wChoice_t *wChoice_p;
-// typedef struct wDraw_t *wDraw_p;
+typedef struct control *wButton_p;
+typedef struct control *wEntry_p;
+typedef struct control *wFloat_p;
+typedef struct control *wList_p;
+typedef struct control *wChoice_p;
 #define wDraw_p wControl_p
-typedef struct wMenu_t *wMenu_p;
-#define wMenu_p wControl_p
-typedef struct wText_t *wText_p;
-typedef struct wMessage_t *wMessage_p;
-//typedef struct wMenuList_t *wMenuList_p;
-typedef struct wMenuPush_t *wMenuPush_p;
-typedef struct wMenuRadio_t *wMenuRadio_p;
-// typedef struct wMenuToggle_t* wMenuToggle_p;
+typedef struct control *wMenu_p;
+typedef struct control *wText_p;
+typedef struct control *wMessage_p;
+typedef struct control *wMenuPush_p;
+typedef struct control *wMenuRadio_p;
 #define wMenuToggle_p wControl_p
-typedef struct wBox_t *wBox_p;
+typedef struct control *wBox_p;
 typedef struct wIcon_t *wIcon_p;
 typedef struct wDrawBitMap_t *wDrawBitMap_p;
 typedef struct wFont_t *wFont_p;
