@@ -5,11 +5,11 @@ target_link_libraries(preftest
     PRIVATE
 	xtrkcad-wlib
 	${CMOCKA_LIBRARIES}
+	PkgConfig::GTK3
 	${GTK_UNIX_PRINT3_LIBRARIES}
 )
 target_include_directories(preftest
 	PRIVATE
-	${GTK3_INCLUDE_DIRS}
 	${GTK_UNIX_PRINT3_INCLUDE_DIRS}
 	"../../include"
 	"../../../bin"
@@ -28,11 +28,11 @@ target_link_libraries(mrulisttest
     PRIVATE
 	xtrkcad-wlib
 	${CMOCKA_LIBRARIES}
+	PkgConfig::GTK3
 	${GTK_UNIX_PRINT3_LIBRARIES}
 )
 target_include_directories(mrulisttest
 	PRIVATE
-	${GTK3_INCLUDE_DIRS}
 	${GTK_UNIX_PRINT3_INCLUDE_DIRS}
 	"../../include"
 	"../../../bin"
@@ -51,11 +51,10 @@ add_executable(fileselectortest fileselectortest.c)
 target_link_libraries(fileselectortest
     PRIVATE
 	${CMOCKA_LIBRARIES}
-	${GTK3_LIBRARIES}
+	PkgConfig::GTK3
 )
 target_include_directories(fileselectortest
 	PRIVATE
-	${GTK3_INCLUDE_DIRS}
 	"../../include"
 	"../../../bin"
 )

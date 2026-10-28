@@ -474,6 +474,9 @@ typedef struct {
 
 void wInitAppName(char *appName);
 
+typedef void (*wLogCallBack_p)(const char *message);
+void wSetLogCallBack(wLogCallBack_p logCallBack);
+
 const char *wGetAppLibDir(void);
 const char *wGetAppWorkDir(void);
 const char *wGetUserHomeDir(void);

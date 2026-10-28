@@ -46,6 +46,7 @@ char *wExecutableName; /**< full path to executable, taken from argv[0] */
 static GtkApplication *app;
 static int myargc;    /**< count of command line options */
 static char **myargv; /**< command line options */
+static wLogCallBack_p logCallBack; /**< see wSetLogCallBack() */
 
 /**
  * Initialize the application name for later use
@@ -69,6 +70,55 @@ GtkApplication *
 wlibGetApp()
 {
 	return(app);
+}
+
+/**
+ * Pass GLib's and GTK's messages (warnings and worse) to the application
+ * too. On Windows nobody sees stderr, so the application puts them in its
+ * log file.
+ *
+ * \param _logCallBack IN gets each message as one formatted line, NULL to stop
+ */
+
+void
+wSetLogCallBack(wLogCallBack_p _logCallBack)
+{
+	logCallBack = _logCallBack;
+}
+
+/**
+ * GLib log writer: hand the message to the application's log callback, then
+ * to GLib's default writer. Aborting on fatal messages stays with GLib.
+ *
+ * \param logLevel IN level of the message
+ * \param fields IN the message's fields
+ * \param nFields IN number of fields
+ * \param userData IN not used
+ * \return result of GLib's default writer
+ */
+
+static GLogWriterOutput
+LogWriter(GLogLevelFlags logLevel, const GLogField *fields, gsize nFields,
+          gpointer userData)
+{
+	static GRecMutex mutex;
+	static gboolean busy; /* writing to the log may cause messages itself */
+
+	if (logCallBack && (logLevel & (G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL |
+	                                G_LOG_LEVEL_WARNING | G_LOG_LEVEL_MESSAGE))) {
+		g_rec_mutex_lock(&mutex);
+		if (!busy) {
+			gchar *line = g_log_writer_format_fields(logLevel, fields, nFields,
+			              FALSE);
+			busy = TRUE;
+			logCallBack(line);
+			busy = FALSE;
+			g_free(line);
+		}
+		g_rec_mutex_unlock(&mutex);
+	}
+
+	return g_log_writer_default(logLevel, fields, nFields, userData);
 }
 
 /**
@@ -188,6 +238,8 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 	}
+
+	g_log_set_writer_func(LogWriter, NULL, NULL);
 
 	gtk_init(&argc, &argv);
 

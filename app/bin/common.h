@@ -53,6 +53,7 @@
 #include <io.h>
 #include <process.h>
 #include "win32/dirent.h"
+#include "win32/msvccompat.h"
 #include "direct.h"
 #include "getopt.h"
 
@@ -72,8 +73,6 @@
 #define open(name, flag, mode) _open((name), (flag), (mode))
 #define close(file) _close((file))
 #define getpid() _getpid()
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
 #define mkdir( DIR, MODE ) _mkdir( (DIR) )
 #if _MSC_VER >1300
 #define strnicmp _strnicmp

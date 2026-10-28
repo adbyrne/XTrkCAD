@@ -120,7 +120,21 @@ if(WIN32)
 	endif ()
 
 	if(MSVC)
+		# install(TARGETS ... RUNTIME_DEPENDENCIES) in app/bin
+		if(CMAKE_VERSION VERSION_LESS 3.21)
+			message(FATAL_ERROR "The MSVC build needs CMake 3.21 or newer")
+		endif()
 		add_compile_options("$<$<CONFIG:DEBUG>:/W3>")
+		# Sources are UTF-8; the compat header stands in for GCC attributes
+		# and POSIX names (C only: rc.exe doesn't know these switches).
+		# C4828 (not valid UTF-8) comes from Latin-1 characters in a comment
+		# of the vendored app/wlib/include/getline.h, which wlib.h includes
+		# everywhere.
+		add_compile_options(
+			"$<$<COMPILE_LANGUAGE:C>:/utf-8>"
+			"$<$<COMPILE_LANGUAGE:C>:/FI${CMAKE_SOURCE_DIR}/app/bin/include/win32/msvccompat.h>"
+			"$<$<COMPILE_LANGUAGE:C>:/wd4828>"
+		)
 	else()
 		add_compile_options("$<$<CONFIG:DEBUG>:-Wall>")
 		# GCC 14 (MSYS2 MinGW) promotes this to a hard error; GTK3 type-system
