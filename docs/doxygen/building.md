@@ -127,6 +127,13 @@ Things to check in the installed tree, where failures usually show up:
   `share\glib-2.0\schemas\gschemas.compiled`, create it with its `glib-compile-schemas` and
   install again.
 
+CI builds this way in `ci-windows-msvc.yml` (advisory for now, Development Issues #60). Instead
+of running gvsbuild it unpacks gvsbuild's prebuilt GTK3 bundle (`GTK3_Gvsbuild_<version>_x64.zip`
+from its GitHub releases), which has everything above except libzip; the job builds libzip
+against the bundle's zlib into the same tree and caches both. It then packs the installed tree
+into a ZIP like `release.yml`'s and runs the same install test,
+`tools/package-install-test-windows.ps1`, so the checks in the list above are automated.
+
 # CMake presets {#cmake-presets}
 
 With CMake 4.0 or newer, `CMakePresets.json` at the top of the source tree replaces the configure

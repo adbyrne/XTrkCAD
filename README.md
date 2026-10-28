@@ -1,6 +1,9 @@
 # XTrkCAD
 
 [![CI](../../actions/workflows/ci-gtk3.yml/badge.svg?branch=main)](../../actions/workflows/ci-gtk3.yml)
+[![Packages and install tests](../../actions/workflows/release.yml/badge.svg?branch=main)](../../actions/workflows/release.yml?query=branch%3Amain)
+[![CodeQL](../../actions/workflows/codeql.yml/badge.svg?branch=main)](../../actions/workflows/codeql.yml)
+[![Latest development build](https://img.shields.io/badge/download-latest--main-orange.svg)](../../releases/tag/latest-main)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 XTrkCAD is an open-source CAD tool for designing model railroad track layouts.
