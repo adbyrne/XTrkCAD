@@ -152,8 +152,13 @@ authors, not just presence of a diff) rather than assuming every FAIL entry need
   prerelease packages and redeploys GitHub Pages. PR CI never runs `release.yml`, so check that
   the post-merge Release run finishes green. Its packaging jobs use rolling OS packages that can
   break with no change on our side (2026-10-05: MSYS2 doxygen 1.18.0-3 crashed
-  `package-windows`, fixed by pinning 1.16.1-4). When a PR changes `release.yml`, validate it
-  before merging with `gh workflow run release.yml --ref <branch>`. Any workflow change also
+  `package-windows`, fixed by pinning 1.16.1-4). Since #294 `release.yml` only orchestrates:
+  the packaging is in `packages-linux.yml`, `packages-macos.yml` and `packages-windows.yml`, the
+  install tests in `install-tests.yml` (called once per platform). When a PR changes any of
+  them, validate it before merging with `gh workflow run release.yml --ref <branch>`, and with a
+  trial tag (`v5.4.0-testN`, delete the draft and tag after) if it touches the tag-only jobs. A
+  change to a `tools/package-install-test*` script is tested on the PR by
+  `install-tests-only.yml`, against the newest `main` packages. Any workflow change also
   needs a matching dev-guide update (`docs/doxygen/building.md`, `advanced.md`).
 
 ---
@@ -166,6 +171,7 @@ docs/                      Project documentation not required in any repo
 xtrkcad-hg/                Hg working copy — default branch (GTK3) and our topic branches, remote = SourceForge
 xtrkcad-git/               Git repo — main branch (GTK3), pushed to github.com/adbyrne/XTrkCAD
 build/                     Out-of-source CMake build (source: xtrkcad-hg)
+build-install/             RelWithDebInfo build for the local install in ~/.local (see Build)
 CLAUDE.md                  This file — also committed into xtrkcad-git (main)
 ```
 
@@ -245,6 +251,22 @@ With CMake 4.0+, `CMakePresets.json` (SF #626) covers the standard configuration
 out-of-tree `build/` and `-DXTRKCAD_APPEND_SRC_HASH=ON`, stay the way to build here. CI's
 `cmake-presets` jobs run the Linux (pinned CMake 4.0.7), macOS and Windows workflows.
 
+**Local install (end of each session, user 2026-10-28):** after the final Hg push and a
+verify-sync PASS, install Hg `default` into `~/.local`, so the program you use matches what was
+pushed. Skip it when no app code changed (`~/.local/bin/xtrkcad -V` already shows
+`hg -R xtrkcad-hg id -i -r default`). The version option is `-V`; there is no `--version`, which
+opens the GUI with an "Unrecognized Option" dialog instead.
+
+```sh
+cmake -B build-install -S xtrkcad-hg -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DXTRKCAD_TESTING=ON -DXTRKCAD_APPEND_SRC_HASH=OFF -DCMAKE_INSTALL_PREFIX=$HOME/.local
+cmake --build build-install && ctest --test-dir build-install -LE regression
+cmake --install build-install && ~/.local/bin/xtrkcad -V
+```
+
+The hash stays OFF here so each install overwrites the same `xtrkcad-5.4.0`; reconfigure every
+time (the `cmake -B` line) so the version hash is current.
+
 Useful CMake options:
 - `-DXTRKCAD_TESTING=ON` — build unit tests (auto-enabled when CMocka is found)
 - `-DXTRKCAD_USE_DOXYGEN=ON` — generate Doxygen internals docs
@@ -266,8 +288,8 @@ Useful CMake options:
 ## Tests
 
 Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and
-`app/dynstring/unittest/`. Hg `default` has 79 tests, 21 of them outside the `regression` label
-(r7777, `ctest -N`, 2026-10-21; Layer Groups and JSON Note added 4).
+`app/dynstring/unittest/`. Hg `default` has 81 tests, 23 of them outside the `regression` label
+(r7884, `ctest -N`, 2026-10-28).
 The full run including the regression demo-playback suite takes ~10 minutes; run it in the
 background.
 
