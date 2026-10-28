@@ -291,7 +291,7 @@ static wBool_t OptionDlgUpdate(
 	return TRUE;
 }
 
-static void PrefOk(void* junk)
+static void PrefOk(const void* junk)
 {
 	wBool_t resetValuesLow = FALSE, resetValuesHigh = FALSE;
 	long changes;

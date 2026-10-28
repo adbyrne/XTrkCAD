@@ -708,7 +708,7 @@ static wControl_p profileW;
 static BOOL_T profileUndo = FALSE;
 static void DoProfileChange(void *junk);
 static void DoProfileReset(void *junk);
-static void DoProfileDone(void * junk);
+static void DoProfileDone(const void * junk);
 static void DoProfileClear(void * junk);
 static void DoProfilePrint(void * junk);
 static void DoProfileCancel(paramGroup_cp pg);
@@ -898,7 +898,7 @@ DoProfileChange(void *junk)
 }
 
 
-static void DoProfileDone(void * junk)
+static void DoProfileDone(const void * junk)
 {
 	Reset();
 }

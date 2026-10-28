@@ -688,7 +688,7 @@ static void GetMargins()
  * Save updates margins
  * Recalc page size and update dialog items
  */
-static void DoPrintMarginOk( void * context )
+static void DoPrintMarginOk( const void * context )
 {
 	wHide( customMarginWin );
 	sprintf( message, "%s-marginT", sPrinterName );
@@ -1386,7 +1386,7 @@ static wBool_t RenderOnePage( int pageNr, void * data )
 	return PrintPage( printPageList[pageNr].x, printPageList[pageNr].y );
 }
 
-static void DoPrintPrint( void * junk )
+static void DoPrintPrint( const void * junk )
 /*
  * Called when print:print button is clicked.
  * Print all the printable pages and mark them

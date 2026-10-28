@@ -44,7 +44,7 @@ struct sToolbarState {
 // local function prototypes
 static void InitializeToolbarDialog(void);
 static void ToolbarChange(long changes);
-static void ToolbarOk(void* unused);
+static void ToolbarOk(const void* unused);
 static wBool_t ToolbarButtonPlace(struct sToolbarState* tbState, wIndex_t inx);
 static void SaveToolbarConfig(void);
 
@@ -195,7 +195,7 @@ static void InvertSelection(void* unused)
  * \param unused
  */
 
-static void ToolbarOk(void* unused)
+static void ToolbarOk(const void* unused)
 {
 	toolbarSet = 0;
 
@@ -207,7 +207,7 @@ static void ToolbarOk(void* unused)
 
 
 	SaveToolbarConfig();
-	ToolbarLayout(unused);
+	ToolbarLayout(NULL);
 	//MainProc(mainW, wResize_e, NULL, NULL);
 	wHide(toolbarW);
 }

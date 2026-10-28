@@ -908,7 +908,7 @@ static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
 
 
 static void RescaleDlgOk(
-        void * unused )
+        const void * unused )
 {
 	coOrd center, size;
 	DIST_T d;

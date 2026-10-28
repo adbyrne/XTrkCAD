@@ -2743,7 +2743,7 @@ static BOOL_T CarDlgCommitSave( void *ctx )
 	return CarDlgSaveCustom();
 }
 
-static void CarDlgOk( void * unused )
+static void CarDlgOk( const void * unused )
 {
 	long options = 0;
 	tabString_t tabs[7];

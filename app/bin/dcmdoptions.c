@@ -36,7 +36,7 @@ static paramData_t cmdoptPLs[] = {
 };
 static paramGroup_t cmdoptPG = { "cmdopt", PGO_RECORD | PGO_PREFMISC | PGO_FULLDIALOGFROMBUILDER, cmdoptPLs, COUNT(cmdoptPLs) };
 
-static void CmdoptOk(void* junk)
+static void CmdoptOk(const void* junk)
 {
 	long changes;
 	changes = GetChanges(&cmdoptPG);

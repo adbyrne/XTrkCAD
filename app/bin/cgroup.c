@@ -1108,7 +1108,7 @@ static void LogSeg(
  * 11 - optionally replace grouped tracks with new defn
  */
 
-static void GroupOk( void * unused )
+static void GroupOk( const void * unused )
 {
 	turnoutInfo_t * to;
 	coOrd orig, size;

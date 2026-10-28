@@ -726,7 +726,7 @@ static tieData_t layerTieData;
 
 /* PD_MESSAGE shows its valueP as text, so the count is kept formatted */
 static char layerObjectCountStr[24];
-static void LayerOk(void *unused);
+static void LayerOk(const void *unused);
 static BOOL_T layerRedrawMap = FALSE;
 
 #define ENUMLAYER_RELOAD (1)
@@ -2487,7 +2487,7 @@ BOOL_T WriteLayers(FILE *f)
  *
  * \param unused unused
  */
-static void LayerOk(void *unused)
+static void LayerOk(const void *unused)
 {
 	LayerSelect(layerSelected);
 

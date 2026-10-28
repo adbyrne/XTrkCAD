@@ -61,7 +61,7 @@
 static struct wFilSel_t* importDxf_fs;
 static char* nameOfFile;
 
-static void ImportDxfFileSel(void* unused);
+static void ImportDxfFileSel(const void* unused);
 static int ImportDxf(int cnt, char** fileName, void* data);
 static void ProcessDxfFile(char** filePath, char* fileName,
                            BOOL_T complain);
@@ -96,7 +96,7 @@ EXPORT void DoImportDxf(void* unused)
 }
 
 /* Called from Param Dialog above */
-static void ImportDxfFileSel(void* unused)
+static void ImportDxfFileSel(const void* unused)
 {
 	wHide(importDxfW);
 

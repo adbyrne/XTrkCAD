@@ -129,7 +129,7 @@ LinkDlgUpdate(
  */
 
 static void
-LinkEditOK(void *junk)
+LinkEditOK(const void *junk)
 {
 	track_p trk = linkNoteData.trk;
 	if ( trk == NULL ) {

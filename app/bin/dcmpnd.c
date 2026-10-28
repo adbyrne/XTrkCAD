@@ -162,7 +162,7 @@ static paramData_t refreshSpecialPLs[] = {
 };
 static paramGroup_t refreshSpecialPG = { "refreshSpecial", PGO_FULLDIALOGFROMBUILDER, refreshSpecialPLs, COUNT( refreshSpecialPLs ) };
 static void RefreshSpecialOk(
-        void * junk )
+        const void * junk )
 {
 	wHide( refreshSpecialPG.win );
 }
@@ -374,7 +374,7 @@ EXPORT BOOL_T CompoundCustomSave(
 }
 
 
-static void RenameOk( void * junk )
+static void RenameOk( const void * junk )
 {
 	FormFetchData( &renamePG );
 	sprintf( message, "%s\t%s\t%s", renameManuf, renameDesc, renamePartno );

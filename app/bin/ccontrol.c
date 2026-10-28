@@ -420,7 +420,7 @@ static paramData_t controlEditPLs[] = {
 static paramGroup_t controlEditPG = { "controledit", PGO_FULLDIALOGFROMBUILDER, controlEditPLs, COUNT( controlEditPLs ) };
 static wControl_p controlEditW;
 
-static void ControlEditOk ( void * junk )
+static void ControlEditOk ( const void * junk )
 {
 	track_p trk;
 	controlData_p xx;

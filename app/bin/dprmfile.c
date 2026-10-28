@@ -371,9 +371,9 @@ static void ParamFileSelectAll(void *junk)
 	UpdateParamFileButton();
 }
 
-static void ParamFileOk(void * junk)
+static void ParamFileOk(const void * junk)
 {
-	SearchUiOk(junk);
+	SearchUiOk(NULL);
 
 	DoChangeNotification(CHANGE_PARAMS);
 	//wHide(paramFileW);

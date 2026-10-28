@@ -2901,7 +2901,7 @@ static void OutputTurnoutDef(
 	}
 }
 
-static void NewTurnOk( void * context )
+static void NewTurnOk( const void * context )
 {
 	FILE * f;
 	toDesignSchema_t * pp;

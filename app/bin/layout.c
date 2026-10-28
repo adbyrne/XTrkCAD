@@ -783,7 +783,7 @@ static void ChangeLayout()
 * \param unused IN unused
 */
 
-static void LayoutOk(void * unused)
+static void LayoutOk(const void * unused)
 {
 	ChangeLayout();
 	if(file_changed) {
