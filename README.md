@@ -27,10 +27,34 @@ whichever fork's Actions did the deploying. See
 
 ---
 
+## Downloads
+
+Every push to `main` builds packages and publishes them as the
+[`latest-main`](../../releases/tag/latest-main) prerelease, after the build and unit tests
+passed. Each package is also installed and tested on a clean system of its kind (it starts,
+plays demos from the installed data, and Help opens the right page); the badge above shows
+whether the last run passed.
+
+| System | File |
+|--------|------|
+| Ubuntu 24.04 / 26.04 | `*-ubuntu2404.deb` / `*-ubuntu2604.deb` (x86_64, aarch64) |
+| Debian 12 / 13, Raspberry Pi OS 64-bit | `*-debian12.deb` / `*-debian13.deb` (x86_64, aarch64) |
+| Fedora 44 / 45 | `*-fedora44.rpm` / `*-fedora45.rpm` (x86_64, aarch64) |
+| Other Linux (x86_64) | `*.x86_64.sh` self-extracting archive, or build from `xtrkcad-source-*` |
+| Windows 10/11 x64 | `*-windows-x64.zip`: unpack anywhere and run `bin\xtrkcad-<version>.exe` |
+| macOS (Apple Silicon / Intel) | `*-macos-arm64.tar.gz` / `*-macos-x86_64.tar.gz`; needs Homebrew's GTK3, see `README-INSTALL.txt` inside |
+
+These are development builds: they install as `xtrkcad-<version>` with their own settings, next
+to an installed release. A tagged release installs as plain `xtrkcad`, replaces the previous
+release and keeps its settings; its Windows installer (NSIS) is built for tags only.
+
+---
+
 ## Goals of this Fork
 
 - **GitHub Actions CI** — automated build and test on every push, across Linux/macOS/Windows,
-  ARM64, with sanitizer and Valgrind coverage.
+  ARM64, with sanitizer and Valgrind coverage, and install tests of every package on clean
+  systems.
 - **Modern toolchain support** — build fixes for GCC 15, `rsvg-convert`
   (replaces Inkscape for bitmap generation), CMocka shared library, and
   forward compatibility with CMake 4.x.
@@ -39,22 +63,31 @@ whichever fork's Actions did the deploying. See
   2026-10-20.
 - **New features** — improvements and fixes worth contributing back upstream,
   developed here first.
+- **MSVC on Windows** — an experimental Visual Studio build against gvsbuild's GTK3, next to
+  the MSYS2/MinGW one (`ci-windows-msvc.yml`).
+
+The fork also carries an MCP server for layout analysis and reports (`mcp/`, Python, see
+[`mcp/README.md`](mcp/README.md)). It is git-only and not part of the upstream program.
 
 ---
 
 ## Building
 
-Requires CMake ≥ 3.20, GCC, GTK+ 3.0, and `rsvg-convert`.
+Requires CMake ≥ 3.20, GCC or Clang, GTK+ 3.0, `pkg-config` and `rsvg-convert`. Doxygen builds
+the User Guide; without it the build succeeds but has no help pages.
 
 ```sh
 # Fedora / RHEL
 sudo dnf install gtk3-devel libcmocka-devel zlib-devel libzip-devel \
-                 mxml-devel astyle librsvg2-tools
+                 mxml-devel librsvg2-tools doxygen pkgconf ninja-build
 
-# Ubuntu 22.04+
+# Ubuntu 24.04+ / Debian 12+
 sudo apt-get install libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev \
-                     libmxml-dev librsvg2-bin gcc make cmake
+                     libmxml-dev librsvg2-bin doxygen pkg-config gcc cmake ninja-build
 ```
+
+macOS (Homebrew) and Windows (MSYS2, or the experimental MSVC build) are covered in the
+developer guide's Building and Testing page (`docs/doxygen/building.md`).
 
 Out-of-source build (mandatory):
 
@@ -66,9 +99,12 @@ ctest --test-dir build --output-on-failure
 
 The debug build sets `-DCMAKE_BUILD_TYPE=Debug`. With CMake 4.0 or newer,
 `cmake --workflow --preset linux-debug` does all three steps from `CMakePresets.json`; see
-the developer guide's Building and Testing page for the other presets. The binary is `xtrkcad-<version>`
-(version-qualified so successive dev builds can install side by side — see
-`ProgramVersion.cmake`).
+the developer guide's Building and Testing page for the other presets.
+
+A build from an untagged commit is named `xtrkcad-<version>` and keeps its own settings, so it
+installs next to a release; a build from a release tag is plain `xtrkcad`. Pass
+`-DXTRKCAD_VERSIONED_INSTALL=OFF` or `ON` to choose (see `ProgramVersion.cmake` and the
+developer guide's "Defaults for Release").
 
 ---
 
