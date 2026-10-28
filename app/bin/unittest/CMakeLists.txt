@@ -13,7 +13,7 @@ target_include_directories(dxfformattest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 target_link_libraries(dxfformattest
                       PRIVATE
                       dynstring
-					 ${LIBS})
+					 CMocka::cmocka)
 
 add_test(DXFOutputTest dxfformattest)
 
@@ -86,7 +86,7 @@ elseif(NOT WIN32)
 	target_link_options(getargstest PRIVATE -Wl,--gc-sections)
 endif()
 
-target_link_libraries(getargstest ${LIBS})
+target_link_libraries(getargstest CMocka::cmocka)
 
 add_test(GetArgsTest getargstest)
 
@@ -114,7 +114,7 @@ target_link_libraries(pathstest
                       PRIVATE
                       dynstring
 					  xtrkcad-wlib
-					  ${LIBS})
+					  CMocka::cmocka)
 
 add_test(PathsTest pathstest)
 
@@ -127,7 +127,7 @@ target_include_directories(shortentest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 target_link_libraries(shortentest
 					PRIVATE
-					${LIBS})
+					CMocka::cmocka)
 
 add_test(ShortenTest shortentest)
 
@@ -144,7 +144,7 @@ target_include_directories(defaultstest PRIVATE
 )
 
 target_link_libraries(defaultstest
-					  ${LIBS})
+					  CMocka::cmocka)
 
 add_test(DefaultsTest defaultstest)
 
@@ -160,7 +160,7 @@ target_include_directories(utilitytest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(utilitytest ${LIBS})
+target_link_libraries(utilitytest CMocka::cmocka)
 if(UNIX)
     target_link_libraries(utilitytest m)
 endif()
@@ -179,7 +179,7 @@ target_include_directories(beziertest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(beziertest ${LIBS})
+target_link_libraries(beziertest CMocka::cmocka)
 if(UNIX)
     target_link_libraries(beziertest m)
 endif()
@@ -198,7 +198,7 @@ target_include_directories(cornutest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(cornutest ${LIBS})
+target_link_libraries(cornutest CMocka::cmocka)
 if(UNIX)
     target_link_libraries(cornutest m)
 endif()
@@ -217,7 +217,7 @@ target_include_directories(undostreamtest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(undostreamtest ${LIBS})
+target_link_libraries(undostreamtest CMocka::cmocka)
 
 add_test(UndoStreamTest undostreamtest)
 
@@ -236,7 +236,7 @@ target_include_directories(carstest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(carstest PRIVATE ${LIBS})
+target_link_libraries(carstest PRIVATE CMocka::cmocka)
 if(UNIX)
 	target_link_libraries(carstest PRIVATE m)
 endif()
@@ -261,7 +261,7 @@ target_include_directories(carregistrytest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(carregistrytest PRIVATE ${LIBS})
+target_link_libraries(carregistrytest PRIVATE CMocka::cmocka)
 if(UNIX)
 	target_link_libraries(carregistrytest PRIVATE m)
 endif()
@@ -285,7 +285,7 @@ target_include_directories(careditlogictest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(careditlogictest PRIVATE ${LIBS})
+target_link_libraries(careditlogictest PRIVATE CMocka::cmocka)
 if(UNIX)
 	target_link_libraries(careditlogictest PRIVATE m)
 endif()
@@ -312,7 +312,7 @@ target_include_directories(reportstest PRIVATE
 # ReportsFormatNoteList()'s cJSON-based kind-lookup helpers (SF #799) are
 # the first thing in this target to need cJSON -- everything else here is
 # libc + dynstring only.
-target_link_libraries(reportstest PRIVATE dynstring cJSON ${LIBS})
+target_link_libraries(reportstest PRIVATE dynstring cJSON CMocka::cmocka)
 
 add_test(ReportsTest reportstest)
 
@@ -331,7 +331,7 @@ target_include_directories(elevjointest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(elevjointest PRIVATE ${LIBS})
+target_link_libraries(elevjointest PRIVATE CMocka::cmocka)
 if(UNIX)
 	target_link_libraries(elevjointest PRIVATE m)
 endif()
@@ -354,7 +354,7 @@ target_include_directories(layergrouptest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(layergrouptest PRIVATE ${LIBS})
+target_link_libraries(layergrouptest PRIVATE CMocka::cmocka)
 
 add_test(LayerGroupTest layergrouptest)
 
@@ -373,7 +373,7 @@ target_include_directories(notenamestest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-target_link_libraries(notenamestest PRIVATE ${LIBS})
+target_link_libraries(notenamestest PRIVATE CMocka::cmocka)
 
 add_test(NoteNamesTest notenamestest)
 
@@ -390,7 +390,7 @@ target_include_directories(jsonnoteerrortest PRIVATE
     ${CMAKE_SOURCE_DIR}/app/cJSON
 )
 
-target_link_libraries(jsonnoteerrortest PRIVATE cJSON ${LIBS})
+target_link_libraries(jsonnoteerrortest PRIVATE cJSON CMocka::cmocka)
 
 add_test(JsonNoteErrorTest jsonnoteerrortest)
 

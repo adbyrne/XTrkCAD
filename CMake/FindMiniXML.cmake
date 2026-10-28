@@ -80,7 +80,7 @@ if(MiniXML_FOUND)
 	)
 endif()
 
-if (MiniXML_FOUND AND NOT TARGET MiniXML::MiniXML)
+if (MiniXML_FOUND AND NOT TARGET MiniXML::mxml)
   add_library(MiniXML::mxml UNKNOWN IMPORTED)
   set_property(TARGET MiniXML::mxml PROPERTY IMPORTED_LOCATION ${MINIXML_LIBRARY})
   target_include_directories(MiniXML::mxml INTERFACE ${MINIXML_INCLUDE_PATH})

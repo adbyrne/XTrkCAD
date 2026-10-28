@@ -132,34 +132,12 @@ target_link_libraries(xtrkcad-wlib
  PkgConfig::GTK3
 )
 
-# configure for GTK's native Unix print
+# GTK's native Unix print (PkgConfig::GTK_UNIX_PRINT3 comes from the top level)
 if(UNIX)
-    find_package (GTKUnixPrint3 REQUIRED)
-
-    target_include_directories(xtrkcad-wlib
-  PRIVATE
-  ${GTK_UNIX_PRINT3_INCLUDE_DIRS}
- )
-
     target_link_libraries(xtrkcad-wlib
   PRIVATE
-  ${GTK_UNIX_PRINT3_LIBRARIES}
+  PkgConfig::GTK_UNIX_PRINT3
  )
-endif()
-
-# add dependency to webkit if configured
-if (APPLE)
-    if(NOT XTRKCAD_USE_APPLEHELP)
-        if(NOT XTRKCAD_USE_BROWSER)
-            target_include_directories(xtrkcad-wlib
-    ${GTK_WEBKIT_INCLUDE_DIRS}
-   )
-            target_link_libraries(xtrkcad-wlib
-    PRIVATE
-    ${GTK_WEBKIT_LIBRARIES}
-   )
-        endif()
-    endif()
 endif()
 
 # copy the glade ui definitions into the build tree

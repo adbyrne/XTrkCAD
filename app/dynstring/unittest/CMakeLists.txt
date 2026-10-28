@@ -4,7 +4,7 @@ add_executable(dynstringtest DynStringTest.c)
 target_link_libraries(dynstringtest 
     PRIVATE
 		  dynstring
-      ${CMOCKA_LIBRARIES}
+      CMocka::cmocka
 )
 
 add_test(DynStringTest dynstringtest)
