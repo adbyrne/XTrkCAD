@@ -54,11 +54,28 @@ gh workflow run release.yml --ref your-branch-name
 ```
 
 This runs every packaging, install-test and report job against your branch without publishing
-anything. Its
-optional `publish_temp_release` input publishes the packages to a temporary prerelease named
-after the branch, for someone to review.
+anything. Its inputs choose the platforms, reuse an earlier run's packages, or publish the
+packages to a temporary prerelease named after the branch for someone to review; see
+\ref release-workflow "release.yml".
 
 # CI tooling overview {#ci-tooling-overview}
+
+## Workflows at a glance {#ci-workflows-at-a-glance}
+
+| Workflow | Runs on | Fails the run? |
+|---|---|---|
+| `ci-gtk3.yml` | push to `%main` or `test/**`, PR into `%main`, dispatch | yes: the gate |
+| `ci-gtk3-preview.yml` | push to `%main` or `test/**`, PR into `%main` | no, advisory |
+| `ci-mcp.yml` | the same, only when `mcp/` or the workflow changed | yes, for `mcp/` |
+| `codeql.yml` | push to `%main`, PR into `%main`, weekly (Monday) | yes |
+| `release.yml` | push to `%main`, `v*.*.*` tag, dispatch | see \ref release-workflow "release.yml" |
+| `hg-sync-default.yml` | daily 10:23 UTC, dispatch | opens an issue instead |
+| `gtk3-toolchain.yml`, `gtk3-qa-reports.yml` | only when another workflow calls them | as the caller's jobs |
+
+A push to any other branch runs nothing, and neither does a PR into a branch other than `%main`,
+e.g. a feature branch's PR into another feature branch. Run CI on such a branch by hand:
+`gh workflow run ci-gtk3.yml --ref <branch>`. A `test/**` branch gets the full PR set without a
+PR.
 
 The main CI is `.github/workflows/ci-gtk3.yml` (`ci-gtk3-preview.yml`,
 `codeql.yml`, `release.yml` and `hg-sync-default.yml` are separate workflows — see below). Read the workflow file
@@ -268,6 +285,64 @@ The large-volume cppcheck/clang-tidy categories that Phase 13 sampled and decide
 bulk-suppress (`variableScope`, `bugprone-narrowing-conversions`, and others) are deliberately
 left visible in the `cppcheck-deep`/`clang-tidy` report-only artifacts instead — see
 \ref code-quality-process-and-patterns "Code quality: process and patterns" below for why.
+
+# release.yml {#release-workflow}
+
+`release.yml` builds the packages, install-tests them on clean systems, and publishes them. What
+it publishes depends on how it was started:
+
+- **Push to `%main`:** every package and install test. `publish-latest-release` refreshes the
+  rolling `latest-main` prerelease as soon as the packages are built, without waiting for the
+  install tests, and `deploy-pages` redeploys GitHub Pages.
+- **`v*.*.*` tag:** the same, plus the NSIS installer and its test. `github-release` drafts the
+  release only once `check-release-tag` passed and every package **and** every install test
+  passed (see \ref cutting-a-release "Cutting a release").
+- **Dispatch** (`gh workflow run release.yml --ref <branch>`): what the inputs below choose.
+  Nothing is published unless `publish_temp_release` is set.
+
+\image html release-flow.svg "release.yml job flow"
+
+The diagram's source is `docs/doxygen/images/ci/release-flow.puml`. After changing it,
+regenerate the committed SVG with `plantuml -tsvg docs/doxygen/images/ci/release-flow.puml`.
+
+## Dispatch inputs {#release-dispatch-inputs}
+
+| Input | Default | Effect |
+|---|---|---|
+| `linux`, `windows`, `macos` | on | Build and install-test that platform's packages. Turn a platform off to save the runners when your change only affects the others. |
+| `packages_from_run` | empty | The run ID of an earlier `release.yml` run (`gh run list -w release.yml`). No packages are built: the install tests download that run's artifacts and test them with *this* branch's `tools/package-install-test*` scripts. The artifacts expire after 14 days. The report and docs jobs are skipped too. |
+| `include_nsis` | off | Also build and test the Windows NSIS installer. Tags always do. |
+| `include_dmg` | off | Also try the experimental self-contained macOS DMG. |
+| `publish_temp_release` | off | Publish the packages to a temporary prerelease named after the branch. Delete it once the branch merges or is dropped. |
+
+Push and tag runs ignore the inputs and always build everything. `check-inputs` rejects a
+dispatch that turns every platform off, a `packages_from_run` that isn't the ID of a
+`release.yml` run, and a `publish_temp_release` combined with a reduced platform set or reused
+packages: a temp release always holds a fresh build of every package. It logs the source run's
+branch and commit.
+
+## Recipes {#release-recipes}
+
+**Changed an install-test script** (`tools/package-install-test*`): test it against packages
+that already exist, e.g. the last `%main` run's:
+
+```sh
+RUN=$(gh run list -w release.yml -b main -L 1 --json databaseId --jq '.[0].databaseId')
+gh workflow run release.yml --ref <branch> -f packages_from_run=$RUN -f linux=false -f macos=false
+```
+
+Add `-f include_nsis=true` for the NSIS script; the source run must have built the installer.
+
+**Changed packaging for one platform** (e.g. `distribution/` files for Windows):
+
+```sh
+gh workflow run release.yml --ref <branch> -f linux=false -f macos=false
+```
+
+**Changed `release.yml` itself:** run it with every platform on, as `%main` will, before merging
+(`gh workflow run release.yml --ref <branch>`). Pull-request CI never runs it.
+
+**A review build for testers:** `-f publish_temp_release=true`.
 
 # Packaging and versioning {#packaging-and-versioning}
 

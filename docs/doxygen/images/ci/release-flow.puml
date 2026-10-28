@@ -1,0 +1,69 @@
+' release.yml job flow (dev guide, advanced.md "release.yml").
+' Rendered by hand, the SVG is committed next to this file:
+'   plantuml -tsvg docs/doxygen/images/ci/release-flow.puml
+@startuml release-flow
+skinparam defaultFontName sans-serif
+skinparam shadowing false
+skinparam ArrowColor #555555
+skinparam ActivityBorderColor #555555
+skinparam ActivityBackgroundColor #F4F6F8
+skinparam ActivityDiamondBorderColor #555555
+skinparam ActivityDiamondBackgroundColor #FFFFFF
+
+start
+:check-inputs
+(dispatch: validate inputs and
+packages_from_run);
+if (packages_from_run set?) then (no)
+  fork
+    :package-linux-ubuntu
+    package-linux-debian
+    package-linux-fedora;
+  fork again
+    :package-windows
+    (NSIS: tags, include_nsis);
+  fork again
+    :package-macos
+    (DMG: include_dmg);
+  end fork
+else (yes)
+  :reuse that run's
+  package artifacts;
+endif
+fork
+  :install-test-linux;
+fork again
+  :install-test-windows
+  install-test-windows-nsis;
+fork again
+  :install-test-macos;
+end fork
+note right
+  Per platform: skipped when the
+  dispatch turned that platform off.
+  Not needed by latest-main.
+end note
+fork
+  if (push to main?) then (yes)
+    :publish-latest-release
+    (needs the packages,
+    not the install tests);
+    :deploy-pages
+    (docs + QA reports);
+  endif
+fork again
+  if (version tag?) then (yes)
+    :check-release-tag;
+    :github-release (draft)
+    needs every package
+    AND every install test;
+  endif
+fork again
+  if (dispatch with
+  publish_temp_release?) then (yes)
+    :publish-temp-release
+    (all platforms, fresh build);
+  endif
+end fork
+stop
+@enduml

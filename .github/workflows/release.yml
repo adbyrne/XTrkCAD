@@ -33,6 +33,22 @@ on:
         description: 'Attempt self-contained DMG build (requires gtk-mac-bundler, may fail)'
         type: boolean
         default: false
+      linux:
+        description: 'Linux: build and install-test the DEB/RPM packages'
+        type: boolean
+        default: true
+      windows:
+        description: 'Windows: build and install-test the ZIP (and NSIS, if chosen)'
+        type: boolean
+        default: true
+      macos:
+        description: 'macOS: build and install-test the archives (and DMG, if chosen)'
+        type: boolean
+        default: true
+      packages_from_run:
+        description: 'Run ID of an earlier Release run: install-test its packages instead of building new ones (artifacts last 14 days)'
+        type: string
+        default: ''
 
 # Runners and compilers are pinned the same way as ci-gtk3.yml (see its
 # header): ubuntu-24.04(-arm), plus ubuntu-26.04(-arm) for the Ubuntu
@@ -42,6 +58,62 @@ on:
 # gtk3-qa-reports.yml, shared with ci-gtk3.yml, so they can't drift apart.
 
 jobs:
+  # ── Dispatch inputs (Development Issues #59) ─────────────────────────────
+  # linux/windows/macos choose the platforms a workflow_dispatch run builds
+  # and install-tests. packages_from_run skips every build job and runs the
+  # install tests on that earlier run's packages, with this run's checkout
+  # of the tools/package-install-test* scripts. Use it after changing an
+  # install-test script.
+  #
+  # Push and tag runs have no inputs, and an unset input compares equal to
+  # false, so every condition below reads
+  # "github.event_name != 'workflow_dispatch' || inputs.<x>": main and tag
+  # runs always build and test everything.
+  #
+  # check-inputs runs on every event (it does nothing on push) so the build,
+  # report and docs jobs can need it; on a dispatch it rejects combinations that would run
+  # nothing or publish a partial temp release, and checks the source run.
+  check-inputs:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+    steps:
+      - name: Check dispatch inputs
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINUX: ${{ inputs.linux }}
+          WINDOWS: ${{ inputs.windows }}
+          MACOS: ${{ inputs.macos }}
+          FROM_RUN: ${{ inputs.packages_from_run }}
+          TEMP_RELEASE: ${{ inputs.publish_temp_release }}
+        run: |
+          if [ "$LINUX$WINDOWS$MACOS" = falsefalsefalse ]; then
+            echo "::error::no platform selected"
+            exit 1
+          fi
+          if [ "$TEMP_RELEASE" = true ] && { [ -n "$FROM_RUN" ] || [ "$LINUX$WINDOWS$MACOS" != truetruetrue ]; }; then
+            echo "::error::publish_temp_release needs freshly built packages for every platform"
+            exit 1
+          fi
+          [ -n "$FROM_RUN" ] || exit 0
+          case "$FROM_RUN" in
+          *[!0-9]*)
+            echo "::error::packages_from_run must be a run ID, got '$FROM_RUN'"
+            exit 1
+            ;;
+          esac
+          INFO=$(gh run view "$FROM_RUN" --repo "$GITHUB_REPOSITORY" \
+            --json workflowName,headBranch,headSha,conclusion,createdAt \
+            --jq '"\(.workflowName)|\(.headBranch) \(.headSha[0:8]), \(.conclusion | if . == "" or . == null then "in progress" else . end), \(.createdAt)"')
+          case "$INFO" in
+          Release\|*) echo "install-testing packages from run $FROM_RUN: ${INFO#Release|}" ;;
+          *)
+            echo "::error::run $FROM_RUN is not a Release run (${INFO%%|*})"
+            exit 1
+            ;;
+          esac
+
   # ── Linux — DEB (Ubuntu 24.04/26.04) + STGZ + source ───────────────────
   # One DEB per Ubuntu LTS. A DEB built on 24.04 does not install on 26.04
   # (it depends on libzip4t64; 26.04 only has libzip5, Development Issues
@@ -54,6 +126,8 @@ jobs:
   # (Ubuntu 26.04 from 2026-10-19), so a runner image change can't quietly
   # change which release a package is for.
   package-linux-ubuntu:
+    needs: [check-inputs]
+    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.linux && inputs.packages_from_run == '') }}
     name: package-linux-ubuntu (${{ matrix.ubuntu }}, ${{ matrix.arch }})
     strategy:
       fail-fast: false
@@ -132,6 +206,8 @@ jobs:
   # The arm64 builds cover Raspberry Pi 3/4/5 on 64-bit Pi OS; the amd64
   # builds cover plain Debian.
   package-linux-debian:
+    needs: [check-inputs]
+    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.linux && inputs.packages_from_run == '') }}
     name: package-linux-debian (${{ matrix.debian }}, ${{ matrix.arch }})
     strategy:
       fail-fast: false
@@ -207,6 +283,8 @@ jobs:
   # unprivileged container, so the SVG loader dies and GTK aborts on its
   # first icon, failing RegressionSuite. On a real system bwrap works.
   package-linux-fedora:
+    needs: [check-inputs]
+    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.linux && inputs.packages_from_run == '') }}
     name: package-linux-fedora (${{ matrix.fedora }}, ${{ matrix.arch }})
     strategy:
       fail-fast: false
@@ -276,6 +354,8 @@ jobs:
   # running it; Oct 2026 user poll: 6 Intel vs 10 Apple Silicon), so both
   # architectures get a package. Same macOS and Xcode on both runners.
   package-macos:
+    needs: [check-inputs]
+    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.macos && inputs.packages_from_run == '') }}
     name: package-macos (${{ matrix.arch }})
     strategy:
       fail-fast: false
@@ -357,6 +437,8 @@ jobs:
 
   # ── Windows x86-64 — ZIP (DLLs bundled) + NSIS installer ──────────────────
   package-windows:
+    needs: [check-inputs]
+    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.windows && inputs.packages_from_run == '') }}
     runs-on: windows-2025
     defaults:
       run:
@@ -546,8 +628,11 @@ jobs:
   # Issues #48).
   install-test-linux:
     name: install-test-linux (${{ matrix.target }}, ${{ matrix.arch }})
-    needs: [package-linux-ubuntu, package-linux-debian, package-linux-fedora]
-    if: ${{ !cancelled() }}
+    needs: [check-inputs, package-linux-ubuntu, package-linux-debian, package-linux-fedora]
+    if: ${{ !cancelled() && needs.check-inputs.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.linux) }}
+    permissions:
+      actions: read
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -578,6 +663,10 @@ jobs:
         with:
           name: ${{ matrix.artifact }}
           path: pkg
+          # packages_from_run: that run's artifacts (needs the token);
+          # otherwise this run's.
+          run-id: ${{ inputs.packages_from_run || github.run_id }}
+          github-token: ${{ inputs.packages_from_run && github.token || '' }}
 
       - name: Install test
         env:
@@ -595,8 +684,11 @@ jobs:
   # runner's MSYS2, Git or Perl. Like install-test-linux, it gates
   # github-release but not latest-main.
   install-test-windows:
-    needs: [package-windows]
-    if: ${{ !cancelled() }}
+    needs: [check-inputs, package-windows]
+    if: ${{ !cancelled() && needs.check-inputs.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.windows) }}
+    permissions:
+      actions: read
+      contents: read
     runs-on: windows-2025
     steps:
       - uses: actions/checkout@v7
@@ -606,6 +698,10 @@ jobs:
         with:
           name: packages-windows-x64-zip
           path: pkg
+          # packages_from_run: that run's artifacts (needs the token);
+          # otherwise this run's.
+          run-id: ${{ inputs.packages_from_run || github.run_id }}
+          github-token: ${{ inputs.packages_from_run && github.token || '' }}
 
       - name: Install test
         shell: pwsh
@@ -632,8 +728,11 @@ jobs:
   # path, Development Issues #48), then uninstalls and checks nothing is
   # left behind.
   install-test-windows-nsis:
-    needs: [package-windows]
-    if: ${{ !cancelled() && (github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.include_nsis == true)) }}
+    needs: [check-inputs, package-windows]
+    if: ${{ !cancelled() && needs.check-inputs.result == 'success' && (github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.windows && inputs.include_nsis)) }}
+    permissions:
+      actions: read
+      contents: read
     runs-on: windows-2025
     steps:
       - uses: actions/checkout@v7
@@ -643,6 +742,10 @@ jobs:
         with:
           name: packages-windows-x64-nsis
           path: pkg
+          # packages_from_run: that run's artifacts (needs the token);
+          # otherwise this run's.
+          run-id: ${{ inputs.packages_from_run || github.run_id }}
+          github-token: ${{ inputs.packages_from_run && github.token || '' }}
 
       - name: Install test
         shell: pwsh
@@ -667,8 +770,11 @@ jobs:
   # gates github-release but not latest-main.
   install-test-macos:
     name: install-test-macos (${{ matrix.arch }})
-    needs: [package-macos]
-    if: ${{ !cancelled() }}
+    needs: [check-inputs, package-macos]
+    if: ${{ !cancelled() && needs.check-inputs.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.macos) }}
+    permissions:
+      actions: read
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -686,6 +792,10 @@ jobs:
         with:
           name: packages-macos-${{ matrix.arch }}
           path: pkg
+          # packages_from_run: that run's artifacts (needs the token);
+          # otherwise this run's.
+          run-id: ${{ inputs.packages_from_run || github.run_id }}
+          github-token: ${{ inputs.packages_from_run && github.token || '' }}
 
       - name: Install test
         run: |
@@ -698,11 +808,15 @@ jobs:
   # xtrkcad-<tool>-html artifacts, from the same job definitions ci-gtk3.yml
   # runs on every PR (gtk3-qa-reports.yml). deploy-pages unpacks them.
   qa-reports:
+    needs: [check-inputs]
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.packages_from_run == '' }}
     uses: ./.github/workflows/gtk3-qa-reports.yml
     with:
       html: true
 
   package-suppress-inventory:
+    needs: [check-inputs]
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.packages_from_run == '' }}
     # Inventory of every cppcheck-suppress/NOLINT(NEXTLINE) comment in
     # app/bin (+ app/wlib/gtk3lib, added 2026-09-02 once cppcheck's own
     # scope widened there -- see tools/scan-suppressions.sh's usage
@@ -744,6 +858,8 @@ jobs:
   # their SF review window and merge into main -- this job tracks
   # whatever's on the git mirror right now.
   package-docs:
+    needs: [check-inputs]
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.packages_from_run == '' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
