@@ -528,8 +528,6 @@ const char *wMemStats(void);
 #define WKEY_CTRL (1 << 2)
 #define WKEY_ALT (1 << 3)
 int wGetKeyState(void);
-int wGetKeyStateFromButton(void);
-void wResetKeyStateFromButton(void);
 
 void wGetDisplaySize(wWinPix_t *, wWinPix_t *);
 

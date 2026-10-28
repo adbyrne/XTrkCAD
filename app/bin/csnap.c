@@ -545,9 +545,9 @@ static paramData_t gridPLs[] = {
 #define gridHorzEnableT ((wControl_p)gridPLs[I_HORZENABLE].control)
 	{	PD_TOGGLE, &grid.Horz.Enable, "horzenable", 0, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
 #define I_VERTSPACING	(3)
-	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_NOPSHUPD|PDO_DIM, &r0_999999, NULL },
+	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_DIM, &r0_999999, NULL },
 #define I_VERTDIVISION	(4)
-	{	PD_LONG, &grid.Vert.Division, "vertdivision", PDO_NOPSHUPD, &i0_1000, NULL },
+	{	PD_LONG, &grid.Vert.Division, "vertdivision", 0, &i0_1000, NULL },
 #define I_VERTENABLE	(5)
 #define gridVertEnableT ((wControl_p)gridPLs[I_VERTENABLE].control)
 	{	PD_TOGGLE, &grid.Vert.Enable, "vertenable", 0, NULL, NULL, BC_HORIZONTAL|BC_NOBORDER },
@@ -592,7 +592,7 @@ static void GridOk( void * unused )
 {
 	long changes;
 
-	FormLoadControls( &gridPG );
+	FormFetchData( &gridPG );
 	if ( ( grid.Horz.Enable && grid.Horz.Spacing <= 0.0) ||
 	     ( grid.Vert.Enable && grid.Vert.Spacing <= 0.0) ) {
 		NoticeMessage( MSG_GRID_ENABLE_SPACE_GTR_0, _("Ok"), NULL );
@@ -698,7 +698,7 @@ static wBool_t GridDlgUpdate(
 		GridButtonUpdate( CHK_SHOW );
 		break;
 	default:
-		FormLoadControls( &gridPG );
+		FormFetchData( &gridPG );
 		GridButtonUpdate( 0 );
 		MainRedraw(); // GridDlgUpdate
 	}

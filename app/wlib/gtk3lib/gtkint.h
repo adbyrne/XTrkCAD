@@ -137,6 +137,8 @@ struct button {
 	int recursion;
 	wBool_t commitFirst;	/**< commit the focused field before the action */
 	int quiet;	/**< >0 while wlib itself changes the pressed state */
+	wBool_t repeatPress;	/**< BO_REPEAT: the press already acted */
+	int repeatEmit;	/**< >0 while the autorepeat emits "clicked" */
 };
 
 struct choice {
@@ -547,7 +549,6 @@ void wlibTreeSelectionChanged(GtkTreeSelection *selection, void *context);
 
 /* window.c */
 wBool_t UpdateModifierKeyState(GdkEventKey *event);
-wBool_t UpdateModifierKeyStateFromButton(GdkEventButton *event);
 void wlibBasicGridAttach(wControl_p parent, GtkWidget *widget, unsigned xPos,
                          unsigned yPos, unsigned colSpan, unsigned rowSpan);
 /* wpref.c */

@@ -37,8 +37,6 @@
 #include "xtrkcad-config.h"
 
 static void buttonClick(GtkWidget *widget, gpointer value);
-static gboolean buttonPress(GtkWidget *widget, GdkEventButton *event,
-                            gpointer value);
 /* Forward declarations */
 static void splitButtonDropdownClick(GtkWidget *widget, gpointer data);
 static void ApplySplitButtonStyle(GtkWidget *splitButton);
@@ -100,9 +98,12 @@ void wlibButtonDoAction(wControl_p bb)
 }
 
 /**
- * Signal handler for button click. For dialog buttons this is the keyboard
- * path (Space/Enter on the button, mnemonic): mouse presses are handled
- * completely in buttonPress() and never get here.
+ * Signal handler for button click, from the mouse (on release), the keyboard
+ * (Space/Enter, mnemonic) and the autorepeat of BO_REPEAT buttons. A mouse
+ * press has already moved the focus to the button, so the field being edited
+ * is committed and validated before the click; if that made the button
+ * insensitive, GTK doesn't emit the click at all. Cancel buttons don't take
+ * the focus on a click, Cancel must not commit a pending edit.
  *
  * \param widget IN the button
  * \param value IN the button control
@@ -122,6 +123,11 @@ static void buttonClick(GtkWidget *widget, gpointer value)
 		b->quiet++;
 		gtk_toggle_button_set_active(tb, !gtk_toggle_button_get_active(tb));
 		b->quiet--;
+	}
+	if (b->repeatPress && !b->repeatEmit) {
+		/* end of a press the autorepeat already acted on */
+		b->repeatPress = FALSE;
+		return;
 	}
 	if (b->commitFirst && !gtk_widget_has_focus(widget)) {
 		/* mnemonic: commit the field being edited first */
@@ -145,47 +151,6 @@ static void buttonClick(GtkWidget *widget, gpointer value)
 	}
 }
 
-/**
- * Signal handler for button press. The action runs on press (not on
- * "clicked": wButtonSetBusy() emits "clicked" when it changes a button's
- * pressed state). Before the action, a dialog button takes the focus, so
- * the field being edited is committed and validated first; if that made
- * the button insensitive, the action is skipped. Cancel buttons don't
- * take the focus: Cancel must not commit a pending edit.
- *
- * \param widget IN the button
- * \param event IN the press event
- * \param value IN the button control
- * \return TRUE, the press is fully handled here
- */
-
-static gboolean buttonPress(GtkWidget *widget, GdkEventButton *event,
-                            gpointer value)
-{
-	UpdateModifierKeyStateFromButton(event);
-	struct button *b = CONTROL_GET_ATTRIBUTES_PTR(((wControl_p)value), button);
-	if (b->recursion) {
-		if (wlibRecursionTrace) {
-			printf("Recursion: buttonPress\n");
-		}
-		return TRUE;
-	}
-
-	if (b->commitFirst && !gtk_widget_has_focus(widget)) {
-		gtk_widget_grab_focus(widget);
-		if (!gtk_widget_is_sensitive(widget)) {
-			return TRUE;
-		}
-	}
-
-	if (b->action) {
-		b->recursion++;
-		b->action(((wControl_p)value)->context);
-		b->recursion--;
-	}
-	return TRUE;
-}
-
 #define REPEAT_INITIAL_DELAY 500
 #define REPEAT_DELAY 150
 
@@ -205,12 +170,14 @@ static gboolean on_button_repeat(gpointer user_data)
 		        g_timeout_add(REPEAT_DELAY, on_button_repeat, button);
 	}
 
+	button->attributes.button.repeatEmit++;
 	g_signal_emit_by_name(button->widget, "clicked");
+	button->attributes.button.repeatEmit--;
 
 	return G_SOURCE_CONTINUE;
 }
 
-// Callback for Button-Press-Event
+// Callback for Button-Press-Event: act at once, then repeat while pressed
 static gboolean on_button_press(GtkWidget *widget, GdkEventButton *event,
                                 gpointer user_data)
 {
@@ -218,6 +185,10 @@ static gboolean on_button_press(GtkWidget *widget, GdkEventButton *event,
 
 	if (event->button == GDK_BUTTON_PRIMARY) {
 		button->attributes.button.is_pressed = TRUE;
+		button->attributes.button.repeatPress = TRUE;
+		button->attributes.button.repeatEmit++;
+		g_signal_emit_by_name(button->widget, "clicked");
+		button->attributes.button.repeatEmit--;
 
 		// start first timeout after initial delay
 		button->attributes.button.timeout_id =
@@ -361,19 +332,16 @@ wControl_p wButtonCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
 
 	if (GTK_IS_MENU_BUTTON(b->widget) &&
 	    gtk_menu_button_get_popup(GTK_MENU_BUTTON(b->widget)) != NULL) {
-		/* A GtkMenuButton with a builder-defined popup opens it from its
-		 * own default button-press handling; stealing the event here
-		 * (as done below for plain buttons) would stop that from firing
-		 * and the popup would never appear. */
+		/* A GtkMenuButton with a builder-defined popup only opens it */
 	} else {
-		g_signal_connect(G_OBJECT(b->widget), "button-press-event",
-		                 G_CALLBACK(buttonPress), b);
-		/* keyboard activation only, see buttonClick() */
 		g_signal_connect(G_OBJECT(b->widget), "clicked",
 		                 G_CALLBACK(buttonClick), b);
 	}
 	button->commitFirst = (parent->type == W_DIALOG) &&
 	                      !(option & BB_CANCEL);
+	if (option & BB_CANCEL) {
+		gtk_widget_set_focus_on_click(b->widget, FALSE);
+	}
 
 	if (option & BO_REPEAT) {
 		SetAutoRepeat(b);

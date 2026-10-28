@@ -127,7 +127,7 @@ FindTooltip(const char* field)
 	}
 
 	res = binarySearch(tooltipsTexts, 0,
-	                   tooltipsCount,
+	                   tooltipsCount - 1,
 	                   field);
 
 	if (res == -1) {
