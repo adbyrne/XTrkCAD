@@ -9,8 +9,11 @@ The help pages are the User Guide, HTML that Doxygen builds from `app/doc` (targ
 
     file:///<data directory>/html/<topic>.html
 
-and hands it to the default browser: `ShellExecute()` on Windows, `gtk_show_uri_on_window()`
-on Linux and macOS (`opendocument.c`). The data directory is the folder the parameter files
+and hands it to the default browser (`wOpenFileExternal()` in `opendocument.c`):
+`ShellExecute()` on Windows, `open(1)` on macOS and `gtk_show_uri_on_window()` on Linux. macOS
+used `gtk_show_uri_on_window()` too until Development Issues #58: GLib's macOS launcher opened
+nothing, an empty Finder window or a *"(null)" does not have permission* dialog on GitHub's
+macOS runners, while `open` with the same URL worked every time. The data directory is the folder the parameter files
 come from (`wGetAppLibDir()`). If the hand-over fails, XTrackCAD shows *"Help Error - help
 information cannot be found"* with the full path it tried. Note that path down first: it tells
 you which of the steps below applies.
@@ -72,7 +75,8 @@ the error notice into the address bar.
     `text/html`. Check with `gio mime application/xhtml+xml`; set it with
     `xdg-mime default firefox.desktop application/xhtml+xml` (or your browser's `.desktop`).
   - On macOS, the program set to open `.html` files in Finder (Get Info > Open with) is the
-    one that opens.
+    one that opens. `open <the path from the notice>` in Terminal does exactly what XTrackCAD
+    does.
   - On Linux, a snap or Flatpak browser may not be allowed to read `/usr/share`; try one
     installed as a normal package.
 
@@ -84,14 +88,22 @@ all), and whether step 4 opens the page by hand.
 
 # Testing it {#help-testing}
 
-The package install tests open Help on every Linux package and on the Windows ZIP and installer
-(Development Issues #58). A fake browser that writes down what it's given is registered as the
+The package install tests open Help on every Linux package, the Windows ZIP and installer, and
+the macOS archives (Development Issues #58). A fake browser that writes down what it's given is registered as the
 handler for the help pages: on Linux for `text/html` and `application/xhtml+xml`
 (`tools/package-install-test.sh`), on Windows for `.html`
 (`tools/package-install-test-windows.ps1`, see \ref package-install-test-windows). The test
 plays `tools/package-install-test-help.xtr` with `-T` and checks that each topic arrived as the
 installed `html/<topic>.html`. With no fake browser, a Windows runner opens the page in Edge, at
-the right path, so the hand-over works there. The script uses the `HELP <topic>` playback command, which opens
+the right path, so the hand-over works there.
+
+macOS can't take a fake browser: making one the default for HTML pops up a confirmation dialog
+nobody can answer on a runner, and AppleScript to Safari is refused. So on CI
+`tools/package-install-test-macos.sh` quits Safari, the runner's default browser, plays the
+script, and checks that Safari started and that one of its windows is titled with the last
+topic's page title (read from the window list). If the titles can't be read it only warns; on a
+failure it saves a screenshot, which `install-test-macos` uploads. Off CI it only plays the
+script, so it never quits your Safari. The script uses the `HELP <topic>` playback command, which opens
 a topic the way the Help menu does; under `-T` a missing topic counts as a regression failure
 instead of stopping at the error notice. `-T` takes the path of a playback script as well as a
 demo name, so a test script doesn't have to be in the Demo menu. See \ref package-install-tests.

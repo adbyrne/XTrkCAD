@@ -798,10 +798,21 @@ jobs:
           github-token: ${{ inputs.packages_from_run && github.token || '' }}
 
       - name: Install test
+        env:
+          SCREENSHOT_DIR: ${{ runner.temp }}/install-test-macos
         run: |
           set -- pkg/xtrkcad-*-macos-${{ matrix.arch }}.tar.gz
           [ $# -eq 1 ] && [ -f "$1" ] || { echo "expected one archive in pkg/, found: $*"; exit 1; }
           sh tools/package-install-test-macos.sh "$1"
+
+      - name: Upload screenshot of a failed Help check
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: install-test-macos-${{ matrix.arch }}-screenshots
+          path: ${{ runner.temp }}/install-test-macos
+          if-no-files-found: ignore
+          retention-days: 14
 
   # ── Analysis reports for GitHub Pages ─────────────────────────────────────
   # coverage, cppcheck-deep, clang-tidy, codespell and compiler-warnings as

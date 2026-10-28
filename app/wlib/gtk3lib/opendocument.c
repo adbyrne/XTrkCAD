@@ -33,7 +33,8 @@
 #else
 
 #if defined(__APPLE__) && defined(__MACH__)
-#define DEFAULTOPENCOMMAND "open"
+#include <sys/wait.h>
+#define DEFAULTOPENCOMMAND "/usr/bin/open"
 #endif
 
 #endif
@@ -63,6 +64,27 @@ unsigned wOpenFileExternal(char * filename)
 		result = 0;
 	} else {
 		result = (unsigned)(long long)handle;
+	}
+
+#elif defined(DEFAULTOPENCOMMAND)
+	/*
+	 * GLib's macOS launcher, behind gtk_show_uri_on_window(), opens
+	 * nothing, an empty Finder window or a "(null)" permission dialog on
+	 * GitHub's macOS runners; open(1) reliably hands both paths and URIs to Launch
+	 * Services (Development Issues #58).
+	 */
+	unsigned int result = 0;
+	GError *error = NULL;
+	gint status;
+	gchar *argv[] = { (gchar *)DEFAULTOPENCOMMAND, filename, NULL };
+
+	if (!g_spawn_sync(NULL, argv, NULL,
+	                  G_SPAWN_STDOUT_TO_DEV_NULL, NULL, NULL,
+	                  NULL, NULL, &status, &error)) {
+		result = error->code ? error->code : 1;
+		g_error_free(error);
+	} else if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+		result = WIFEXITED(status) ? WEXITSTATUS(status) : 1;
 	}
 
 #else
