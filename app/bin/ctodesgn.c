@@ -137,7 +137,6 @@ static paramFloatRange_t r_10000_10000 = { -1000, 10000, 80 };
 static paramFloatRange_t r0d001_90 = { 0.001, 90, 80 };
 static paramFloatRange_t r_90_90 = { -90, 90, 80 };
 static paramFloatRange_t r0_100 = { 0, 100, 80 };
-static paramIntegerRange_t i0_100 = { 0, 100, 40 };
 
 static FLOAT_T tdVal[20];
 
@@ -252,7 +251,7 @@ paramData_t turnDesignPLs[] = {
 	{ PD_MESSAGE, NULL, "partno2_label", 0, NULL },
 #define I_TOROADBED			(I_TORDESC + 4 )
 	{ PD_FLOAT, &newTurnRoadbedWidth, "roadbedWidth", PDO_DIM, &r0_100, N_("Roadbed Width") },
-	{ PD_LONG, &newTurnRoadbedLineWidth, "roadbedLineWidth", PDO_DLGHORZ, &i0_100, N_("Line Width") },
+	{ PD_FLOAT, &newTurnRoadbedLineWidth, "roadbedLineWidth", PDO_DIM | PDO_DLGHORZ, &r0_100, N_("Line Width") },
 	{ PD_COLORLIST, &newTurnRoadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Color") },
 #define I_TOPRINT			(I_TOROADBED + 3 )
 	{ PD_BUTTON, NewTurnPrint, "print", PDO_DLGCMDBUTTON, NULL, N_("Print") },

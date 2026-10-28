@@ -36,7 +36,6 @@
 #include <wlib.h>
 
 static int keyState;
-static int keyStateFromButton;
 
 /**
  * Get current state of shift, ctrl or alt keys.
@@ -46,8 +45,6 @@ static int keyStateFromButton;
  */
 
 int wGetKeyState(void) { return keyState; }
-int wGetKeyStateFromButton(void) { return keyStateFromButton; }
-void wResetKeyStateFromButton(void) { keyStateFromButton = 0; }
 
 wBool_t UpdateModifierKeyState(GdkEventKey *event)
 {
@@ -84,30 +81,4 @@ wBool_t UpdateModifierKeyState(GdkEventKey *event)
 		return TRUE;
 	}
 	return FALSE;
-}
-
-wBool_t UpdateModifierKeyStateFromButton(GdkEventButton *event)
-{
-	int state = 0;
-
-	if (event->state & GDK_SHIFT_MASK) {
-		state |= WKEY_SHIFT;
-	}
-
-	if (event->state & GDK_CONTROL_MASK) {
-		state |= WKEY_CTRL;
-	}
-
-	if (event->state & GDK_MOD1_MASK) {
-		state |= WKEY_ALT;
-	}
-
-	if (event->state & GDK_META_MASK) {
-		state |= WKEY_ALT;        /* or WKEY_META if you have it */
-	}
-
-	// may need to use different static variable and function to return it for
-	// buttons pressed with modifiers
-	keyStateFromButton = state;
-	return state != 0;
 }

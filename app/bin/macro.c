@@ -869,7 +869,6 @@ static void PlaybackQuit(void)
 	playbackSpeed = playbackSpeed1;
 	UndoResume();
 	wWinBlockEnable(TRUE);
-	wResetKeyStateFromButton();
 }
 
 static int documentEnable = 0;

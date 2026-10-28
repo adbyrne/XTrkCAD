@@ -1377,6 +1377,10 @@ static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 			curLayer = 0;
 		}
 	}
+
+	/* the layers have just been (re)initialized: any CHANGE_SCALE seen
+	 * before this showed the scale of a not yet initialized layer */
+	LayerInfoScale();
 }
 
 /**
@@ -2278,7 +2282,7 @@ void ReadLayers(char *line)
 
 	if (inx < NUM_BUTTONS && !layers[inx].button_off && layer_btns[inx]) {
 		if (strlen(name) > 0) {
-			wTooltipSet((wControl_p)layer_btns[(int)inx], NULL, layers[inx].name);
+			wTooltipSetText((wControl_p)layer_btns[(int)inx], layers[inx].name);
 		}
 		wButtonSetBusy(layer_btns[(int)inx], visible);
 	}
