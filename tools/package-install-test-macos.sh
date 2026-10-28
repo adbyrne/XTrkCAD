@@ -15,6 +15,8 @@
 #   - -V prints the version in the package file name
 #   - share/<binary name> holds params, demos, examples and the help HTML
 #   - the binary plays demos from the unpacked data
+#   - Help opens the unpacked help pages: in CI, Safari starts and shows
+#     the last topic's page (Development Issues #58)
 #
 # Hard failures exit 1. Warnings are printed as GitHub Actions ::warning::
 # annotations and don't change the exit status.
@@ -36,6 +38,7 @@ run_timeout() {
 }
 
 PKG=$(cd "$(dirname "$PKG")" && pwd)/$(basename "$PKG")
+HELPXTR=$(cd "$(dirname "$0")" && pwd)/package-install-test-help.xtr
 WORK=$(mktemp -d)
 ROOT="$WORK/XTrkCAD install test"
 mkdir -p "$ROOT"
@@ -169,6 +172,78 @@ if [ $RC -gt 128 ] && [ $RC -ne 142 ]; then
 		fi
 	done
 	echo "crashed $CRASHES of 5 runs"
+fi
+
+step "Help opens in the browser"
+# wOpenFileExternal() hands help pages to open(1), which opens them in the
+# default browser. A fake browser can't be made the default here: macOS asks the
+# user to confirm a new handler for HTML. So in CI the check is that Safari
+# (the runner's default) wasn't running before and starts after Help, and
+# that its window shows the last topic's page; the window list gives window
+# titles because the runner may record the screen. Off CI it would quit the
+# user's Safari, so there the playback only checks the topics exist.
+CI_CHECK=false
+[ "${GITHUB_ACTIONS:-}" = true ] && CI_CHECK=true
+safari_pid() {
+	ps -axo pid,comm | awk '/\/Safari\.app\/Contents\/MacOS\/Safari$/ {print $1; exit}'
+}
+safari_titles() {
+	cat > "$WORK/titles.swift" <<'EOF'
+import CoreGraphics
+let opts = CGWindowListOption(arrayLiteral: .optionOnScreenOnly)
+let list = CGWindowListCopyWindowInfo(opts, kCGNullWindowID) as? [[String: Any]] ?? []
+for w in list where (w["kCGWindowOwnerName"] as? String) == "Safari" {
+	if let name = w["kCGWindowName"] as? String, !name.isEmpty { print(name) }
+}
+EOF
+	xcrun swift "$WORK/titles.swift" 2>/dev/null
+}
+if $CI_CHECK; then
+	osascript -e 'tell application "Safari" to quit' >/dev/null 2>&1
+	pkill -x Safari 2>/dev/null
+	sleep 3
+	[ -z "$(safari_pid)" ] || warn "Safari is still running before the help run"
+fi
+TESTHOME=$(mktemp -d)
+OUT=$(HOME=$TESTHOME run_timeout 300 "$BIN" -T"$HELPXTR" 2>&1)
+RC=$?
+echo "$OUT" | tail -10
+[ $RC -eq 0 ] || fail "help run exited $RC"
+echo "$OUT" | grep -q '^Regression Tests Pass' ||
+	fail "help run did not report 'Regression Tests Pass'"
+if $CI_CHECK; then
+	# Doxygen titles its pages "<project>: <page>"; Safari shows the page
+	# part. The last topic's page is the one in front.
+	LAST=$(sed -n 's/^HELP //p' "$HELPXTR" | tail -1)
+	PAGE=$(sed -n 's|.*<title>\(.*\)</title>.*|\1|p' "$SHARE/html/$LAST.html" |
+		head -1 | sed 's/^[^:]*: //; s/&#39;/'"'"'/g; s/&amp;/\&/g')
+	echo "expecting a Safari window showing: $PAGE"
+	PID= TITLES=
+	for i in $(seq 30); do
+		PID=$(safari_pid)
+		if [ -n "$PID" ]; then
+			TITLES=$(safari_titles)
+			echo "$TITLES" | grep -qF "$PAGE" && break
+		fi
+		sleep 2
+	done
+	if [ -z "$PID" ]; then
+		fail "Help did not start Safari, the default browser"
+	elif [ -z "$TITLES" ]; then
+		# No window titles: the session may not allow reading them.
+		# Safari starting is all that can be checked then.
+		warn "Safari started (pid $PID) but its window titles can't be read; page not checked"
+	elif echo "$TITLES" | grep -qF "$PAGE"; then
+		echo "Safari (pid $PID) shows: $(echo "$TITLES" | grep -F "$PAGE" | head -1)"
+	else
+		fail "Safari started but shows '$(echo "$TITLES" | head -1)', not '$PAGE'"
+	fi
+	if [ $FAIL -ne 0 ] && [ -n "${SCREENSHOT_DIR:-}" ]; then
+		mkdir -p "$SCREENSHOT_DIR"
+		screencapture -x "$SCREENSHOT_DIR/help.png" && echo "screenshot: $SCREENSHOT_DIR/help.png"
+	fi
+	osascript -e 'tell application "Safari" to quit' >/dev/null 2>&1
+	pkill -x Safari 2>/dev/null
 fi
 
 rm -rf "$WORK" "$TESTHOME"

@@ -537,7 +537,9 @@ checks that:
 - `-V` prints the version in the archive's name;
 - `share/<binary name>` holds `params`, `demos`, `examples` and the help HTML;
 - the program plays the `dmintro` and `dmstrtrk` demos from the unpacked data, with an empty
-  `HOME`.
+  `HOME`;
+- Help opens: on CI, Safari starts and shows the last help topic's page (see
+  \ref help-testing).
 
 Starting from `$HOME` matters: the program has to find its data from its own location. Before
 Development Issues #43, macOS looked for it relative to the current directory. macOS has no
