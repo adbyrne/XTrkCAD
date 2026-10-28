@@ -69,12 +69,12 @@ option(XTRKCAD_FUZZ "Build libFuzzer harnesses (Clang only, requires -fsanitize=
 find_package(Pandoc)
 
 # check for GTK+ 3.0
-if(NOT WIN32)
-    pkg_check_modules(GTK3 QUIET "gtk+-3.0")
-    if(NOT GTK3_FOUND)
-        message(FATAL_ERROR "ERROR: GTK3 not found found!")
-    endif()
-endif()
+# Imported targets carry full library paths, which MSVC's linker needs (it
+# has no default search path for the gvsbuild tree). GLOBAL because static
+# libraries in subdirectories pass them on to the executable.
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET GLOBAL "gtk+-3.0")
+pkg_check_modules(FREETYPE REQUIRED IMPORTED_TARGET GLOBAL "freetype2")
 
 # Flatpak
 find_package(Flatpak)
@@ -184,17 +184,12 @@ if(XTRKCAD_USE_GETTEXT)
     # Find the GnuWin32 installation directory, the gettext include should be located in subdir include
     #
     if(WIN32)
-        if(MSVC)
-            # use supplied gettext library for Visual Studio
-            message( STATUS "Use simple_gettext module included with XTrackCAD" )
-            add_definitions(-DUSE_SIMPLE_GETTEXT )
-        else()
-            # for mingw & co. find libintl.h and use it
-            find_path ( INTL_PATH libintl.h )
-            if(INTL_PATH)
-                message( STATUS "Use installed gettext module" )
-                include_directories(${INTL_PATH})
-            endif()
+        # find libintl.h and use it (MinGW, or gvsbuild's gettext for MSVC);
+        # the library itself comes with GLib's link flags in PkgConfig::GTK3
+        find_path ( INTL_PATH libintl.h )
+        if(INTL_PATH)
+            message( STATUS "Use installed gettext module" )
+            include_directories(${INTL_PATH})
         endif()
     endif()
     if(APPLE)

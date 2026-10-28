@@ -89,6 +89,76 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "XTRKCAD_USE_GETTEXT": "OFF"
       }
+    },
+    {
+      "name": "windows-gvsbuild-common",
+      "hidden": true,
+      "$comment": [
+        "Experimental: MSVC against a gvsbuild GTK3 tree, with GVSBUILD set to gvsbuild's",
+        "output (e.g. C:/gtk-build/gtk/x64/release). Use a release build of gvsbuild: every",
+        "configuration here links the release CRT (/MD). No unit tests, gvsbuild has no CMocka.",
+        "No generator here: windows-gvsbuild adds Ninja, windows-gvsbuild-vs takes Visual Studio."
+      ],
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "environment": {
+        "PKG_CONFIG_PATH": "$env{GVSBUILD}/lib/pkgconfig",
+        "PKG_CONFIG_LIBDIR": "$env{GVSBUILD}/lib/pkgconfig"
+      },
+      "cacheVariables": {
+        "PKG_CONFIG_EXECUTABLE": "$env{GVSBUILD}/bin/pkgconf.exe",
+        "CMAKE_PREFIX_PATH": "$env{GVSBUILD}",
+        "XTRKCAD_TESTING": "OFF",
+        "XTRKCAD_USE_GETTEXT": "OFF"
+      }
+    },
+    {
+      "name": "windows-gvsbuild",
+      "hidden": true,
+      "$comment": "Ninja: run from a x64 Native Tools Command Prompt for VS.",
+      "inherits": "windows-gvsbuild-common",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl"
+      }
+    },
+    {
+      "name": "windows-gvsbuild-release",
+      "displayName": "Windows Release (MSVC + gvsbuild, experimental)",
+      "inherits": "windows-gvsbuild",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "windows-gvsbuild-relwithdebinfo",
+      "displayName": "Windows RelWithDebInfo (MSVC + gvsbuild, experimental)",
+      "inherits": "windows-gvsbuild",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "windows-gvsbuild-vs",
+      "displayName": "Windows Visual Studio solution (MSVC + gvsbuild, experimental)",
+      "$comment": [
+        "Writes build/windows-gvsbuild-vs/XTrkCAD.sln for the newest Visual Studio installed.",
+        "No Debug configuration: it would link the debug CRT, gvsbuild's GTK uses the release one.",
+        "The INSTALL project installs below build/, Program Files would need admin rights."
+      ],
+      "inherits": "windows-gvsbuild-common",
+      "architecture": {
+        "value": "x64",
+        "strategy": "set"
+      },
+      "installDir": "${sourceDir}/build/install-${presetName}",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Release;RelWithDebInfo"
+      }
     }
   ],
   "buildPresets": [
@@ -143,6 +213,22 @@
       "name": "windows-debug",
       "inherits": "windows-build",
       "configurePreset": "windows-debug"
+    },
+    {
+      "name": "windows-gvsbuild-release",
+      "inherits": "windows-build",
+      "configurePreset": "windows-gvsbuild-release"
+    },
+    {
+      "name": "windows-gvsbuild-relwithdebinfo",
+      "inherits": "windows-build",
+      "configurePreset": "windows-gvsbuild-relwithdebinfo"
+    },
+    {
+      "name": "windows-gvsbuild-vs",
+      "inherits": "windows-build",
+      "configurePreset": "windows-gvsbuild-vs",
+      "configuration": "RelWithDebInfo"
     }
   ],
   "testPresets": [
@@ -287,6 +373,14 @@
         {"type": "configure", "name": "windows-debug"},
         {"type": "build", "name": "windows-debug"},
         {"type": "test", "name": "windows-debug"}
+      ]
+    },
+    {
+      "name": "windows-gvsbuild-release",
+      "displayName": "Windows Release (MSVC + gvsbuild): configure, build",
+      "steps": [
+        {"type": "configure", "name": "windows-gvsbuild-release"},
+        {"type": "build", "name": "windows-gvsbuild-release"}
       ]
     }
   ]

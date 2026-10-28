@@ -1,5 +1,3 @@
-find_package(GTK3 REQUIRED)
-
 add_library(wrapbox)
 
 target_sources(wrapbox
@@ -7,14 +5,9 @@ target_sources(wrapbox
 	eggwrapbox.c	
 )
 
-target_include_directories(wrapbox
+target_link_libraries(wrapbox
 	PRIVATE
-	${GTK3_INCLUDE_DIRS}
-)
-	
-target_link_libraries(wrapbox 
-	PRIVATE 
-	${GTK3_LIBRARIES}
+	PkgConfig::GTK3
 )
 
 add_executable(testwrapbox)
@@ -27,11 +20,7 @@ target_sources(testwrapbox
 target_link_libraries(testwrapbox
 	PRIVATE
 	wrapbox
-)
-
-target_include_directories(testwrapbox
-	PRIVATE
-	${GTK3_INCLUDE_DIRS}
+	PkgConfig::GTK3
 )
 
 # Vendored code (Gtk+ eggwrapbox): predates the project's warning ratchet

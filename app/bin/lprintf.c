@@ -52,11 +52,27 @@ static void LogInit( void )
 	logTable(inx).level = 0;
 }
 
+#ifdef WINDOWS
+/**
+ * Put a GLib/GTK message into the log: on Windows stderr isn't visible, and
+ * without this an abort from GTK leaves no trace.
+ *
+ * \param message IN the formatted message
+ */
+static void LogGLibMessage( const char * message )
+{
+	LogPrintf( "%s\n", message );
+}
+#endif
+
 EXPORT void LogOpen( char * filename )
 {
 	time( &logClock );
 	logFileName = filename;
 	LogInit();
+#ifdef WINDOWS
+	wSetLogCallBack( LogGLibMessage );
+#endif
 }
 
 

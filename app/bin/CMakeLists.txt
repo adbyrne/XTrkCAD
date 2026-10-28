@@ -346,12 +346,6 @@ target_link_libraries(xtrkcad-lib
     PRIVATE
     Libzip::Libzip
     ZLIB::ZLIB)
-
-if(MSVC)
-    target_link_libraries(xtrkcad-lib
-        PRIVATE
-        FreeImage::FreeImage)
-endif()
 #
 # Start building the main program itself
 #
@@ -418,17 +412,15 @@ if(NOT WIN32)
 else()
     set(ENV{path} "${CMAKE_CURRENT_BINARY_DIR};$ENV{PATH}")
 
-    if(NOT MINGW)
-        # MSVC build: install explicit DLLs (libzip, zlib)
-        install(FILES ${LIBZIP_SHAREDLIB} DESTINATION ${XTRKCAD_BIN_INSTALL_DIR})
-        install(FILES ${ZLIB_SHAREDLIB} DESTINATION ${XTRKCAD_BIN_INSTALL_DIR})
-        if(MSVC)
-            install(
-                FILES $<TARGET_PDB_FILE:xtrkcad>
-                DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-                OPTIONAL
-            )
-        endif()
+    if(MSVC)
+        # main() stays the entry point of the WIN32 executable (MinGW does
+        # this by itself)
+        target_link_options(${XTRKCAD_BIN} PRIVATE /ENTRY:mainCRTStartup)
+        install(
+            FILES $<TARGET_PDB_FILE:${XTRKCAD_BIN}>
+            DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+            OPTIONAL
+        )
     endif()
     # MinGW/MSYS2: GTK3 runtime DLLs are collected by the release workflow
     # (ntldd-based script) before packaging. NSIS DLL bundling via CMake
@@ -448,10 +440,29 @@ if(APPLE)
   )
 endif()
 
-install(
-    TARGETS ${XTRKCAD_BIN}
-    RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-)
+if(MSVC)
+    # gvsbuild: install the DLLs the executable needs from the GTK prefix,
+    # and libzip's from its own tree (XTCEXTERNALROOT, see FindLibzip).
+    # $<TARGET_RUNTIME_DLLS> can't do this, pkg-config targets only know
+    # the import libraries.
+    # RUNTIME_DEPENDENCIES must come before RUNTIME DESTINATION, after it
+    # CMake rejects it as an unknown argument
+    get_filename_component(_libzip_libdir "${LIBZIP_LIBRARY}" DIRECTORY)
+    install(
+        TARGETS ${XTRKCAD_BIN}
+        RUNTIME_DEPENDENCIES
+            DIRECTORIES "${GTK3_PREFIX}/bin" "${_libzip_libdir}/../bin"
+                "${_libzip_libdir}"
+            PRE_EXCLUDE_REGEXES "api-ms-.*" "ext-ms-.*"
+            POST_EXCLUDE_REGEXES ".*[Ss]ystem32/.*\\.dll"
+        RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+    )
+else()
+    install(
+        TARGETS ${XTRKCAD_BIN}
+        RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+    )
+endif()
 
 if (XTRKCAD_BUILD_FLATPAK)
     install(

@@ -62,8 +62,9 @@ ctest --test-dir build --output-on-failure
 For how Windows differs at run time (options start with `/`, file locations, the ZIP's
 contents, pitfalls), see \subpage windows.
 
-Run from an MSYS2 MINGW64 shell. This is the only supported Windows path — the older
+Run from an MSYS2 MINGW64 shell. This is the supported Windows path — the older
 MSVC/`mswlib` build was removed (SF r6508) and `app/wlib/mswlib/` is gone from the source tree.
+An experimental MSVC build on the GTK3 backend is described further down.
 
 ```sh
 pacman -S --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja \
@@ -74,6 +75,57 @@ cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
+
+## Experimental: MSVC with gvsbuild {#windows-msvc-gvsbuild}
+
+A second Windows toolchain, still being tried out: Visual Studio's compiler (`cl.exe`) against a
+GTK3 tree built by [gvsbuild](https://github.com/wingtk/gvsbuild). It uses the same wlib backend as
+MinGW; only the compiler and where the libraries come from differ.
+
+1. Build GTK3 and the other libraries with gvsbuild, in its release configuration:
+   `gvsbuild build gtk3 adwaita-icon-theme hicolor-icon-theme librsvg zlib`. librsvg brings
+   the gdk-pixbuf loader for SVG icons, gtk3 alone doesn't. Keep GTK4 out of this output
+   directory, the two clash. libzip is found either in the gvsbuild tree (add
+   `libzip` to that command) or, as for the old MSVC build, in `%XTCEXTERNALROOT%\x64\libzip`
+   with `include` and `lib` below it.
+2. Set `GVSBUILD` to gvsbuild's output directory, usually `C:\gtk-build\gtk\x64\release`.
+3. Install a current CMake (4.0 or newer, e.g. `winget install Kitware.CMake`). The CMake bundled
+   with Visual Studio is usually too old for the presets, and the Developer prompt puts it first
+   on the path: check with `where cmake` and put the new one in front if needed.
+4. From a *x64 Native Tools Command Prompt for VS*, which puts `cl.exe` and Ninja on the path:
+
+```bat
+cmake --preset windows-gvsbuild-release
+cmake --build --preset windows-gvsbuild-release
+cmake --install build\windows-gvsbuild-release --prefix C:\xtrkcad-msvc
+```
+
+For a Visual Studio solution, `cmake --preset windows-gvsbuild-vs` (from any prompt with
+`GVSBUILD` set) writes `build\windows-gvsbuild-vs\XTrkCAD.sln` for the newest Visual Studio
+installed. It has Release and RelWithDebInfo but no Debug configuration, for the C runtime reason
+below. Building its `INSTALL` project installs to `build\install-windows-gvsbuild-vs`; run and
+debug the program from there, since it only finds its data files in the installed layout.
+
+Everything comes from gvsbuild's `pkgconf.exe`: the preset points CMake at it, and the build
+takes the GTK prefix from it for the DLLs and the GTK runtime data that `cmake --install` copies
+(GLib schemas, gdk-pixbuf loaders with the DLLs they need, such as librsvg and libxml2, the
+hicolor and Adwaita icons, `etc\gtk-3.0`). There is no
+Debug preset: GTK from gvsbuild links the release C runtime, and a Debug build would link the debug
+one. `windows-gvsbuild-relwithdebinfo` gives you something to debug instead. gvsbuild has no CMocka,
+so these presets build no unit tests. Translations are off, as in `windows-debug`.
+
+The source files need nothing special for MSVC: `app/bin/include/win32/msvccompat.h` is
+force-included with `/FI` and covers what `cl.exe` doesn't understand (`__attribute__`,
+`strcasecmp`).
+
+Things to check in the installed tree, where failures usually show up:
+
+- the program starts from Explorer, not only from the command prompt (no DLL missing);
+- toolbar icons and PNG images show (gdk-pixbuf loaders; if not, the `loaders.cache` paths may
+  point into the gvsbuild tree and need regenerating with `gdk-pixbuf-query-loaders`);
+- the file and colour dialogs open (GLib schemas, icon theme). If gvsbuild left no
+  `share\glib-2.0\schemas\gschemas.compiled`, create it with its `glib-compile-schemas` and
+  install again.
 
 # CMake presets {#cmake-presets}
 
@@ -89,6 +141,9 @@ clear error, and plain `cmake -B build ...` keeps working without them. Each pre
 | `linux-clang-debug` | Linux | Debug with `clang`, tests on |
 | `macos-debug` | macOS | Debug with the Homebrew paths and help options from the macOS section |
 | `windows-debug` | MSYS2 MINGW64 | Debug with gettext off, as in the Windows section |
+| `windows-gvsbuild-release` | Windows, MSVC | Experimental: Release against gvsbuild, tests off (see \ref windows-msvc-gvsbuild) |
+| `windows-gvsbuild-relwithdebinfo` | Windows, MSVC | The same with debug information |
+| `windows-gvsbuild-vs` | Windows, MSVC | A Visual Studio solution with Release and RelWithDebInfo |
 
 `cmake --list-presets=all` shows the ones that apply to your host. A workflow preset of the same
 name runs configure, build and the unit tests in one command:

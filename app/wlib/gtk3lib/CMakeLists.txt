@@ -123,25 +123,14 @@ else()
     endif()
 endif()
 
-# GTK
-find_package (GTK3 REQUIRED)
-
-target_include_directories(xtrkcad-wlib
- PRIVATE
- ${GTK3_INCLUDE_DIRS}
-)
-
-message(STATUS "Include Dirs: ${GTK3_INCLUDE_DIRS}")
-
+# GTK (PkgConfig::GTK3 and PkgConfig::FREETYPE come from the top level)
 target_link_libraries(xtrkcad-wlib
  PRIVATE
  dynstring
  wrapbox
- freetype
- ${GTK3_LIBRARIES}
+ PkgConfig::FREETYPE
+ PkgConfig::GTK3
 )
-
-message(STATUS "Libraries: ${GTK3_LIBRARIES}")
 
 # configure for GTK's native Unix print
 if(UNIX)
