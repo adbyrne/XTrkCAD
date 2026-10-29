@@ -349,8 +349,10 @@ branch and commit.
 
 **Changed an install-test script** (`tools/package-install-test*`): nothing to do.
 `install-tests-only.yml` runs on the pull request (and on `test/**` pushes) and tests the newest
-successful `%main` packages with your scripts, in minutes and without building anything. To pick
-the packages, or to include the NSIS installer from a run that built it:
+successful `%main` packages with your scripts, in minutes and without building anything. The
+UCRT64 Windows packages are tested only when that run has them (`install-tests.yml`'s
+`windows_ucrt` input). To pick the packages, or to include the NSIS installer from a run that
+built it:
 
 ```sh
 gh workflow run install-tests-only.yml --ref <branch> -f packages_from_run=<run id> -f include_nsis=true

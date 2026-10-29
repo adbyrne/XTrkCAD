@@ -29,6 +29,10 @@ on:
         description: Also test the NSIS installer (with windows).
         type: boolean
         default: false
+      windows_ucrt:
+        description: Also test the UCRT64 Windows packages (with windows); off when packages_from_run has none.
+        type: boolean
+        default: true
       packages_from_run:
         description: Run ID of a release.yml run whose packages to test; empty for the calling run's.
         type: string
@@ -108,12 +112,9 @@ jobs:
       fail-fast: false
       matrix:
         # one per package variant of packages-windows.yml (Development
-        # Issues #34): MINGW64 has no suffix, UCRT64 ends in -ucrt
-        include:
-          - variant: MINGW64
-            suffix: ''
-          - variant: UCRT64
-            suffix: -ucrt
+        # Issues #34): MINGW64 has no suffix, UCRT64 ends in -ucrt.
+        # windows_ucrt drops UCRT64 for a packages_from_run without it.
+        include: ${{ fromJSON(inputs.windows_ucrt && '[{"variant":"MINGW64","suffix":""},{"variant":"UCRT64","suffix":"-ucrt"}]' || '[{"variant":"MINGW64","suffix":""}]') }}
     permissions:
       actions: read
       contents: read
@@ -161,11 +162,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - variant: MINGW64
-            suffix: ''
-          - variant: UCRT64
-            suffix: -ucrt
+        include: ${{ fromJSON(inputs.windows_ucrt && '[{"variant":"MINGW64","suffix":""},{"variant":"UCRT64","suffix":"-ucrt"}]' || '[{"variant":"MINGW64","suffix":""}]') }}
     permissions:
       actions: read
       contents: read
