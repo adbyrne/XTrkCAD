@@ -85,8 +85,8 @@ void wSameRowAdd(void *samerow, wControl_p ctl)
  * \param name      name of window
  */
 
-static void
-RestoreWindowSizePos(GtkWidget* window, const char* name)
+void
+wlibRestoreWindowSizePos(GtkWidget* window, const char* name)
 {
 	const char *winSize = wPrefGetStringBasic(name, "size");
 	const char* winPos = wPrefGetStringBasic(name, "pos");
@@ -121,8 +121,15 @@ RestoreWindowSizePos(GtkWidget* window, const char* name)
 	}
 }
 
-static void
-SaveWindowSizePos(const GtkWidget* window, const char *name)
+/**
+ * Save the window size and position to the INI file.
+ *
+ * \param window    window handle
+ * \param name      name of window
+ */
+
+void
+wlibSaveWindowSizePos(const GtkWidget* window, const char *name)
 {
 	gint width;
 	gint height;
@@ -146,7 +153,7 @@ SaveWindowSizePos(const GtkWidget* window, const char *name)
 void
 wDialogSaveSizePos(wControl_p dialog)
 {
-	SaveWindowSizePos(dialog->widget, dialog->name);
+	wlibSaveWindowSizePos(dialog->widget, dialog->name);
 }
 
 /**
@@ -283,7 +290,7 @@ wWinDialogCreate(wControl_p parent,
 		parentWindow = parent->widget;
 	}
 
-	RestoreWindowSizePos(dialog, nameStr);
+	wlibRestoreWindowSizePos(dialog, nameStr);
 
 	if (option & F_CENTER) {
 		gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER_ON_PARENT);

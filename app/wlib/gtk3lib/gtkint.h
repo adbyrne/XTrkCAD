@@ -402,6 +402,8 @@ wControl_p wlibControlNew(wType_e type, wControl_p parent, const char *name,
 /* dialog.c */
 void wlibBasicGridAttach(wControl_p parent, GtkWidget *widget, unsigned xPos,
                          unsigned yPos, unsigned colSpan, unsigned rowSpan);
+void wlibRestoreWindowSizePos(GtkWidget *window, const char *name);
+void wlibSaveWindowSizePos(const GtkWidget *window, const char *name);
 
 /* lists */
 enum columns {

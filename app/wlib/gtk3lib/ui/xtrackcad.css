@@ -5,6 +5,22 @@
     color: white;
     min-height: 24px;
 }
+/* compact controls in the status bar: the theme's entry/button minimum
+   height and vertical padding set the height of the whole bar */
+box.statusbar entry,
+box.statusbar button {
+    min-height: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+box.statusbar checkbutton {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
 /*
 entry.statusbar {
     background-color:rgb(192, 192, 192);
@@ -31,6 +47,12 @@ entry.statusbar {
     background: lightblue;
     border-style: solid;
     border-color: blue;
+}
+
+/* inside a split button (.linked) the theme drops the right border of the
+   action button; keep it dropped on hover so the dropdown doesn't shift */
+.linked > .toolbar-button:hover:not(:last-child) {
+    border-right-style: none;
 }
 
 /* the following rule reduces the height of
