@@ -282,8 +282,8 @@ bool MainProc(wControl_p window, winProcEvent event, void *refresh,
 void InitInfoBar(void);
 void InitColor(void);
 void DrawInit(int);
-void DoZoomUp(const void * modeVP);
-void DoZoomDown(const void * modeVP);
+void DoZoomUp(void * modeVP);
+void DoZoomDown(void * modeVP);
 void DoZoomExtents( void * modeVP);
 void DoNewScale(DIST_T scale);
 int DoPanKeyAction(wAction_t action);
