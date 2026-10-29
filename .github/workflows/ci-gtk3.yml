@@ -311,8 +311,8 @@ jobs:
             --overwrite "MemoryCheckCommandOptions=--error-exitcode=1 --track-origins=yes --leak-check=full"
 
   qa:
-    # coverage, cppcheck-deep, clang-tidy, codespell and compiler-warnings,
-    # as plain-text PR artifacts. Never fails the run.
+    # coverage, cppcheck-deep, clang-tidy, codespell and compiler-warnings
+    # (Linux, macOS, Windows), as plain-text PR artifacts. Never fails the run.
     uses: ./.github/workflows/gtk3-qa-reports.yml
 
   docs-drift-check:
@@ -481,91 +481,3 @@ jobs:
           cmake --build build --target fuzz_getargs
       - name: Run fuzz_getargs (bounded time budget)
         run: ./build/app/bin/fuzz/fuzz_getargs -max_total_time=120
-
-  compiler-warnings-macos:
-    # Report-only: captures -Wall -Wextra output on macOS/clang as an artifact.
-    runs-on: macos-26
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/select-xcode
-      - name: Install dependencies
-        run: brew install ninja gtk+3 cmocka libzip librsvg
-      - name: Configure with -Wall -Wextra
-        run: |
-          GTK_PREFIX=$(brew --prefix gtk+3)
-          PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
-          export PKG_CONFIG_PATH
-          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
-            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
-            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
-            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON \
-            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
-      - name: Build (warnings captured, non-fatal)
-        run: cmake --build build 2>&1 | tee build/warnings.txt || true
-      - name: Summarise warnings
-        run: |
-          COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
-          echo "Total warnings: $COUNT"
-          echo ""
-          echo "=== By warning flag ==="
-          grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true
-          echo ""
-          echo "=== By file (top 20) ==="
-          grep ': warning:' build/warnings.txt | grep -oE '^[^:]+' | sed 's|.*/||' | sort | uniq -c | sort -rn | head -20 || true
-      - name: Upload warning log
-        uses: actions/upload-artifact@v7
-        with:
-          name: compiler-warnings-gtk3-macos
-          path: build/warnings.txt
-
-  compiler-warnings-windows:
-    # Report-only: captures -Wall -Wextra output on Windows/MinGW64 as an artifact.
-    runs-on: windows-2025
-    timeout-minutes: 30
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: false
-          install: >-
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-pkg-config
-            mingw-w64-x86_64-gtk3
-            mingw-w64-x86_64-zlib
-            mingw-w64-x86_64-libzip
-            mingw-w64-x86_64-mxml
-            mingw-w64-x86_64-librsvg
-            mingw-w64-x86_64-cmocka
-      - uses: ./.github/actions/msys2-pin-gcc
-      - name: Configure with -Wall -Wextra
-        run: |
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DXTRKCAD_TESTING=ON \
-            -DXTRKCAD_USE_GETTEXT=OFF \
-            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
-      - name: Build (warnings captured, non-fatal)
-        run: cmake --build build --parallel 2>&1 | tee build/warnings.txt || true
-      - name: Summarise warnings
-        run: |
-          COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
-          echo "Total warnings: $COUNT"
-          echo ""
-          echo "=== By warning flag ==="
-          grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true
-          echo ""
-          echo "=== By file (top 20) ==="
-          grep ': warning:' build/warnings.txt | grep -oE '^[^:]+' | sed 's|.*/||' | sort | uniq -c | sort -rn | head -20 || true
-      - name: Upload warning log
-        uses: actions/upload-artifact@v7
-        with:
-          name: compiler-warnings-gtk3-windows
-          path: build/warnings.txt
