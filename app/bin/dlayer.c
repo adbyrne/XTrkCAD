@@ -641,7 +641,7 @@ static void SetLayerColor(unsigned int inx, wDrawColor color)
 	if (color != layers[inx].color) {
 		if (inx < NUM_BUTTONS && show_layer_bmps[inx] && layer_btns[inx]) {
 			wIconSetColor(show_layer_bmps[inx], color);
-			wButtonSetIcon(layer_btns[inx], (char *)show_layer_bmps[inx]);
+			wButtonSetIcon(layer_btns[inx], show_layer_bmps[inx]);
 		}
 
 		// cppcheck-suppress arrayIndexOutOfBoundsCond

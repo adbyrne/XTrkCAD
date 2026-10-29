@@ -2636,7 +2636,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		trainHighlighted = NULL;
 		DYNARR_SET(trkSeg_t, tempSegs_da, 8);
 		RestartTrains();
-		wButtonSetIcon(trainPauseB, (char*)goB);
+		wButtonSetIcon(trainPauseB, goB);
 		trainTime0 = 0;
 		AttachTrains();
 		curTrainDlg->train = NULL;
@@ -2959,7 +2959,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		/*trainEnable = FALSE;*/
 		if (trainsState != TRAINS_STOP) {
 			trainsState = TRAINS_STOP;
-			wButtonSetIcon(trainPauseB, (char*)stopI);
+			wButtonSetIcon(trainPauseB, stopI);
 			TrainTimeEndPause();
 		}
 
@@ -3006,7 +3006,7 @@ static void CmdTrainStopGo(void * unused)
 	}
 
 	ControllerDialogSync(curTrainDlg);
-	wButtonSetIcon(trainPauseB, (char*)icon);
+	wButtonSetIcon(trainPauseB, icon);
 
 	if (recordF) {
 		fprintf(recordF, "TRAINSTOPGO %s\n", trainsState==TRAINS_STOP?"STOP":"GO");
