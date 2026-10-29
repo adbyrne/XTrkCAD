@@ -963,11 +963,6 @@ static int SaveTracks(
 
 EXPORT void SaveState(void)
 {
-	wWinPix_t width, height;
-
-	wWinGetSize(mainW, &width, &height);
-	wPrefSetInteger("draw", "mainwidth", (int)width);
-	wPrefSetInteger("draw", "mainheight", (int)height);
 	SaveParamFileList();
 	FormUpdatePrefs();
 

@@ -653,8 +653,6 @@ bool MainProc(wControl_p win, winProcEvent e, void *refresh, void *data)
 			LOG(log_pan, 2,
 			    ("PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y));
 			MainLayout(!refresh, constrainMain != 0); /* MainProc: wResize_e event */
-			wPrefSetInteger("draw", "mainwidth", (int)width);
-			wPrefSetInteger("draw", "mainheight", (int)height);
 			wDrawSetTempModeNoClear(mainD.d, bTemp);
 		} else {
 			MapDrawBoundingBox(TRUE);

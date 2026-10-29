@@ -149,6 +149,35 @@ on_widget_deleted(GtkWidget* window, GdkEvent* event, gpointer userData)
 }
 
 /**
+ * Remember the main window's state in the preferences: maximized or not
+ * and, while it is neither maximized nor fullscreen, its size and position.
+ * wPrefFlush() at exit writes them to the INI file.
+ *
+ * \param widget IN the main window
+ * \param event IN the configure or window-state event
+ * \param win IN the main window control
+ * \return FALSE, let other handlers see the event
+ */
+
+static gboolean
+on_window_state_changed(GtkWidget *widget, GdkEvent *event, wControl_p win)
+{
+	GdkWindow *gdkWindow = gtk_widget_get_window(widget);
+	GdkWindowState state = gdkWindow ? gdk_window_get_state(gdkWindow) : 0;
+
+	if (event->type == GDK_WINDOW_STATE) {
+		state = event->window_state.new_window_state;
+		wPrefSetInteger(win->name, "maximized",
+		                (state & GDK_WINDOW_STATE_MAXIMIZED) != 0);
+	}
+
+	if (!(state & (GDK_WINDOW_STATE_MAXIMIZED | GDK_WINDOW_STATE_FULLSCREEN))) {
+		wlibSaveWindowSizePos(widget, win->name);
+	}
+	return FALSE;
+}
+
+/**
  * Initialize the application's main window. This function does the necessary
  * initialization of the application including creation of the main window.
  *
@@ -238,6 +267,21 @@ wControl_p wWinMainCreate(
 	                 "delete-event", G_CALLBACK(on_widget_deleted), NULL);
 	g_signal_connect(G_OBJECT(appMainWindow->widget),
 	                 "size-allocate", G_CALLBACK(on_size_allocate), appMainWindow);
+
+	gtk_window_set_default_size(GTK_WINDOW(appMainWindow->widget), x, y);
+	if (option & (F_RECALLSIZE | F_RECALLPOS)) {
+		long maximized;
+
+		wlibRestoreWindowSizePos(appMainWindow->widget, nameStr);
+		wPrefGetIntegerBasic(nameStr, "maximized", &maximized, 0);
+		if (maximized) {
+			gtk_window_maximize(GTK_WINDOW(appMainWindow->widget));
+		}
+		g_signal_connect(G_OBJECT(appMainWindow->widget), "configure-event",
+		                 G_CALLBACK(on_window_state_changed), appMainWindow);
+		g_signal_connect(G_OBJECT(appMainWindow->widget), "window-state-event",
+		                 G_CALLBACK(on_window_state_changed), appMainWindow);
+	}
 
 	gtk_widget_show_all(appMainWindow->widget);
 	return appMainWindow;

@@ -293,23 +293,23 @@ wBasicDrawString (wControl_p bd, wDrawPix_t x, wDrawPix_t y, double a,
 	int baseline;
 
 	cairo_t *cr;
-	cairo_matrix_t matrix;
 	PangoLayout* layout;
 	cr = draw->cr;
 
 	layout = CreateLayoutForText(draw, cr, s, fp, fs);
 	baseline = pango_layout_get_baseline(layout) / PANGO_SCALE;
 
-	// get the current transformation matrix and transform the starting
-	// point of the string
+	// move to the starting point of the string, then undo only our own
+	// y-flip and scale_adjust. Resetting to the identity matrix would also
+	// drop the device scale the target set up: on Windows GTK scales the
+	// print context by printer dpi / 72, and text came out that much too
+	// small. Bitmap export and CUPS printing have no such scale, so the
+	// result there is unchanged.
 
 	cairo_save (cr);
 
-	cairo_get_matrix (cr, &matrix);
-	cairo_matrix_transform_point (&matrix, &x0, &y0);
-	cairo_identity_matrix (cr);
-
 	cairo_translate (cr, x0, y0);
+	cairo_scale (cr, 1.0 / draw->scale_adjust, -1.0 / draw->scale_adjust);
 	cairo_rotate (cr, -a * M_PI / 180.0);
 	/* Order matters: the offset translate must come BEFORE move_to(0,0), so the
 	 * layout's origin is set in the already-offset frame. Cairo bakes the CTM
