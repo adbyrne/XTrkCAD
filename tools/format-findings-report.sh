@@ -90,6 +90,12 @@ fi
 grep -v $'\t[^\t]*\t0\t' "$WORKDIR/findings.tsv" > "$WORKDIR/findings-clean.tsv" 2>/dev/null || true
 mv "$WORKDIR/findings-clean.tsv" "$WORKDIR/findings.tsv" 2>/dev/null || true
 
+# A warning in a header comes once per file that includes it (on Windows,
+# win32/dirent.h's 5 warnings 156 times each). Keep the first of each
+# identical finding, so the page lists sites, not compiler invocations.
+awk '!seen[$0]++' "$WORKDIR/findings.tsv" > "$WORKDIR/findings-uniq.tsv"
+mv "$WORKDIR/findings-uniq.tsv" "$WORKDIR/findings.tsv"
+
 TOTAL=$(wc -l < "$WORKDIR/findings.tsv" | tr -d ' ')
 UNPARSED=$(($(wc -l < "$IN") - TOTAL))
 

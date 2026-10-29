@@ -257,7 +257,8 @@ against your own checkout, or omit meaningful linking entirely by passing any pl
 just want the grouped local HTML view. Compilers print absolute paths, so pass the checkout's
 root as `[source-root]` (`"$PWD"` from the repository root; in MSYS2, `"$(cygpath -m "$PWD")"`)
 to make them repository-relative; it handles Windows paths written with `/` or `\`, whose
-drive colon would otherwise keep the line from parsing. The `coverage` report doesn't go through this script — `genhtml`
+drive colon would otherwise keep the line from parsing. Identical findings are listed once: a
+warning in a header otherwise repeats for every file that includes it. The `coverage` report doesn't go through this script — `genhtml`
 already produces its own linked, per-line HTML.
 
 The gating `cppcheck` job (default/error-only severity, distinct from the report-only
