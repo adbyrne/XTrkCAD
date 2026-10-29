@@ -313,7 +313,7 @@ so each can be read on its own:
 |---|---|---|
 | `packages-linux.yml` | `package-linux-ubuntu`, `package-linux-debian`, `package-linux-fedora` | `release.yml` (`packages-linux`) |
 | `packages-macos.yml` | `package-macos` (arm64, x86_64), DMG with `include_dmg` | `release.yml` (`packages-macos`) |
-| `packages-windows.yml` | `package-windows` (ZIP), NSIS with `include_nsis` | `release.yml` (`packages-windows`) |
+| `packages-windows.yml` | `package-windows` (MINGW64, UCRT64: ZIP, NSIS with `include_nsis`) | `release.yml` (`packages-windows`) |
 | `install-tests.yml` | `install-test-linux`, `install-test-windows`, `install-test-windows-nsis`, `install-test-macos` | `release.yml` once per platform (`install-tests-linux`, `-windows`, `-macos`); `install-tests-only.yml` |
 | `gtk3-qa-reports.yml` | the analysis reports | `release.yml` (`qa-reports`), `ci-gtk3.yml` |
 
@@ -491,8 +491,9 @@ podman run --rm -v "$PWD:/src:ro,z" ubuntu:26.04 \
 
 Background on Windows' run-time differences and the ZIP's layout: \ref windows.
 
-The Windows package is the ZIP from `package-windows`. Users install it by unpacking it
-anywhere. The `install-test-windows` job runs `tools/package-install-test-windows.ps1` on a
+The Windows packages are the ZIPs from `package-windows`, one per MSYS2 environment (MINGW64
+and UCRT64, \ref windows-package). Users install one by unpacking it anywhere. The
+`install-test-windows` job runs once per variant: `tools/package-install-test-windows.ps1` on a
 fresh `windows-2025` runner. The script unpacks the ZIP into a directory whose name contains a
 space and runs the program with only the Windows system directories on `PATH`. Without that,
 a DLL the package forgot could still be found in the runner's MSYS2, Git or Perl. It checks
@@ -517,8 +518,8 @@ that:
   under `Program Files`.
 
 `package-windows` builds the ZIP by installing to a staging directory and copying in the GTK3
-runtime: pixbuf loaders, GSettings schemas, the hicolor icon theme, and every MinGW64 DLL that
-`ntldd -R` finds for the binary and the loaders. Before this test existed, that copy failed
+runtime: pixbuf loaders, GSettings schemas, the hicolor icon theme, and every DLL from its MSYS2
+environment that `ntldd -R` finds for the binary and the loaders. Before this test existed, that copy failed
 without anyone noticing (`xargs` dropped the backslashes in `ntldd`'s Windows paths, and
 `|| true` hid the errors), so no ZIP had ever shipped a DLL. The step now fails on any error.
 
@@ -533,8 +534,8 @@ pwsh tools/package-install-test-windows.ps1 xtrkcad-5.4.0-windows-x64.zip
 
 ## Windows installer test {#package-install-test-nsis}
 
-When the NSIS installer is built (version tags, or `include_nsis`), the
-`install-test-windows-nsis` job runs `tools/package-install-test-nsis.ps1` on a fresh
+When the NSIS installers are built (version tags, or `include_nsis`), the
+`install-test-windows-nsis` job runs once per variant: `tools/package-install-test-nsis.ps1` on a fresh
 `windows-2025` runner. It does what a user does with the installer and checks the result:
 
 - it installs silently (`/S`) into the default folder, which must be under `Program Files`,

@@ -102,7 +102,18 @@ jobs:
   # runner's MSYS2, Git or Perl. Like install-test-linux, it gates
   # github-release but not latest-main.
   install-test-windows:
+    name: install-test-windows (${{ matrix.variant }})
     if: ${{ inputs.windows }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # one per package variant of packages-windows.yml (Development
+        # Issues #34): MINGW64 has no suffix, UCRT64 ends in -ucrt
+        include:
+          - variant: MINGW64
+            suffix: ''
+          - variant: UCRT64
+            suffix: -ucrt
     permissions:
       actions: read
       contents: read
@@ -113,7 +124,7 @@ jobs:
       - name: Download package
         uses: actions/download-artifact@v8
         with:
-          name: packages-windows-x64-zip
+          name: packages-windows-x64${{ matrix.suffix }}-zip
           path: pkg
           # packages_from_run: that run's artifacts (needs the token);
           # otherwise the calling run's.
@@ -123,7 +134,7 @@ jobs:
       - name: Install test
         shell: pwsh
         run: |
-          $zips = @(Get-ChildItem pkg -Filter 'xtrkcad-*-windows-x64.zip')
+          $zips = @(Get-ChildItem pkg -Filter 'xtrkcad-*-windows-x64${{ matrix.suffix }}.zip')
           if ($zips.Count -ne 1) { throw "expected one ZIP in pkg/, found $($zips.Count)" }
           ./tools/package-install-test-windows.ps1 $zips[0].FullName -ArtifactDir "$env:RUNNER_TEMP/install-test-windows"
 
@@ -131,7 +142,7 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v7
         with:
-          name: install-test-windows-screenshots
+          name: install-test-windows${{ matrix.suffix }}-screenshots
           path: ${{ runner.temp }}/install-test-windows
           if-no-files-found: ignore
           retention-days: 14
@@ -145,7 +156,16 @@ jobs:
   # path, Development Issues #48), then uninstalls and checks nothing is
   # left behind.
   install-test-windows-nsis:
+    name: install-test-windows-nsis (${{ matrix.variant }})
     if: ${{ inputs.windows && inputs.include_nsis }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: MINGW64
+            suffix: ''
+          - variant: UCRT64
+            suffix: -ucrt
     permissions:
       actions: read
       contents: read
@@ -156,7 +176,7 @@ jobs:
       - name: Download installer
         uses: actions/download-artifact@v8
         with:
-          name: packages-windows-x64-nsis
+          name: packages-windows-x64${{ matrix.suffix }}-nsis
           path: pkg
           # packages_from_run: that run's artifacts (needs the token);
           # otherwise the calling run's.
@@ -174,7 +194,7 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v7
         with:
-          name: install-test-windows-nsis-screenshots
+          name: install-test-windows-nsis${{ matrix.suffix }}-screenshots
           path: ${{ runner.temp }}/install-test-windows-nsis
           if-no-files-found: ignore
           retention-days: 14
