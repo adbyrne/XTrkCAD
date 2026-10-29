@@ -11,20 +11,12 @@ if(XTRKCAD_USE_GTK3)
 	message(STATUS "Plattform settings for GTK3")
 endif()
 
-# Pointers passed or assigned through incompatible types are suppressed
-# below: there are hundreds of them, most harmless (wlib handle subtypes,
-# const-only callback differences), a few real bugs. They're being fixed in
-# stages (Development Issues #52, #53, #54). XTRKCAD_REPORT_POINTER_TYPES
-# reports them as warnings instead, for the compiler-warnings report, so the
-# count can be followed and new ones noticed.
-option(XTRKCAD_REPORT_POINTER_TYPES
-    "Report -Wincompatible-pointer-types as warnings instead of suppressing them"
-    OFF)
-if(XTRKCAD_REPORT_POINTER_TYPES)
-    set(XTRKCAD_POINTER_TYPES_FLAG -Wno-error=incompatible-pointer-types)
-else()
-    set(XTRKCAD_POINTER_TYPES_FLAG -Wno-incompatible-pointer-types)
-endif()
+# Pointers passed or assigned through incompatible types are an error, as
+# GCC 14 and later make them by default; Clang only warns unless told. The
+# 333 sites this used to suppress were fixed in Development Issues #52-#54.
+# The rules that keep it at zero are in the dev guide (advanced.md, "The
+# warning-count ratchet").
+set(XTRKCAD_POINTER_TYPES_FLAG -Werror=incompatible-pointer-types)
 
 if(UNIX)
     include(FindPkgConfig)
@@ -132,9 +124,7 @@ if(WIN32)
 		)
 	else()
 		add_compile_options("$<$<CONFIG:DEBUG>:-Wall>")
-		# GCC 14 (MSYS2 MinGW) promotes this to a hard error; GTK3 type-system
-		# pointer casts throughout the codebase rely on the same suppression
-		# that the UNIX build already applies unconditionally.
+		# incompatible pointer types are an error, as on UNIX (see the top)
 		add_compile_options(${XTRKCAD_POINTER_TYPES_FLAG})
 		add_compile_options(-Wno-deprecated-declarations)
 		# paramData_t/descData_t positional aggregate literals (dialog control tables
