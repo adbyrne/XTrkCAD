@@ -116,7 +116,8 @@ wTagCreate(
 		}
 		if(GTK_IS_BUTTON(current->data)) {
 			privateTag->button = current->data;
-			g_signal_connect(privateTag->button, "clicked", TagButtonClicked, newTag);
+			g_signal_connect(privateTag->button, "clicked", G_CALLBACK(TagButtonClicked),
+			                 newTag);
 			continue;
 		}
 

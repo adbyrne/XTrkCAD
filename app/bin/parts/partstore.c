@@ -45,7 +45,7 @@ PartListStoreNew(void *selectChange, const char *editRenderer,
 
 	store->selectionChanged = selectChange;
 	store->editable = editRenderer;
-	store->edited = edited;
+	store->edited = G_CALLBACK(edited);
 	return store;
 }
 

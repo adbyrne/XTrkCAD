@@ -549,7 +549,7 @@ wMenuGetLabel(wControl_p menuitem)
 {
 	g_assert( menuitem != NULL);
 
-	return gtk_menu_item_get_label(menuitem->widget);
+	return gtk_menu_item_get_label(GTK_MENU_ITEM(menuitem->widget));
 }
 
 /**
