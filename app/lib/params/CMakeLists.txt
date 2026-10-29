@@ -33,11 +33,15 @@ foreach(infile ${infiles})
                 "xtp"
                 OUTPUT_VARIABLE outfile
     )
-    # Custom command to do the processing
+    # Custom command to do the processing. The echo runs only when
+    # mkcarpart exited successfully, so a build log that stops before
+    # "done" shows the generator itself hung or failed, not a later step.
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
         DEPENDS "${infile}" mkcarpart
         COMMAND $<TARGET_FILE:mkcarpart> "${infile}" "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
+        COMMAND ${CMAKE_COMMAND} -E echo "mkcarpart: ${outfile} done"
+        COMMENT "mkcarpart: ${infile} -> ${outfile}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
     target_sources(xtpfiles
@@ -74,9 +78,13 @@ foreach(infile ${infiles})
                 BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
+    # as for mkcarpart above: "done" only after mkstruct succeeded
+    cmake_path(GET outfile FILENAME outname)
     add_custom_command(
         OUTPUT "${outfile}"
         COMMAND $<TARGET_FILE:mkstruct> "${infile}" "${outfile}"
+        COMMAND ${CMAKE_COMMAND} -E echo "mkstruct: ${outname} done"
+        COMMENT "mkstruct: ${infile} -> ${outname}"
         DEPENDS "${infile}" mkstruct
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
