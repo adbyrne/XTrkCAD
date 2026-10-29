@@ -2959,7 +2959,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		/*trainEnable = FALSE;*/
 		if (trainsState != TRAINS_STOP) {
 			trainsState = TRAINS_STOP;
-			wButtonSetIcon(trainPauseB, stopI);
+			wButtonSetIcon(trainPauseB, stopB);
 			TrainTimeEndPause();
 		}
 
