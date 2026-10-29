@@ -38,7 +38,7 @@ EXPORT void FormOk_Null(
 }
 
 void FormDialogOkActive(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int active)
 {
 	if (pg->okB) {

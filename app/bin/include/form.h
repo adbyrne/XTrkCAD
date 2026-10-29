@@ -251,8 +251,8 @@ wControl_p FormCreateDialog(
 
 void FormCreateControls(paramGroup_p group);
 void FormLoadControls(paramGroup_p pg);
-void FormLoadSingleControl(paramGroup_p pg, int inx);
-void FormLoadMessage(paramGroup_p pg, int inx, char* message);
+void FormLoadSingleControl(paramGroup_cp pg, int inx);
+void FormLoadMessage(paramGroup_cp pg, int inx, char* message);
 void FormMenuPush(void* dp);
 
 void FormStartRecord(FILE* fileHandle);
@@ -266,7 +266,7 @@ wBool_t FormStringCheckValue(paramData_p data, char* value);
 wBool_t FormCheckInputs(paramGroup_p group, wControl_p b);
 long FormUpdate(paramGroup_p pg);
 
-void FormDialogOkActive(paramGroup_p pg, int active);
+void FormDialogOkActive(paramGroup_cp pg, int active);
 void FormOk_Null(const void *group);
 void FormCancel_Undo(paramGroup_cp group );
 void FormCancel_Current(paramGroup_cp group);
@@ -276,7 +276,7 @@ void FormCancel_Null(paramGroup_cp group);
 
 #define FormCancel_Custom( PROC ) PROC
 
-void FormControlActive(paramGroup_p pg, int inx, BOOL_T active);
+void FormControlActive(paramGroup_cp pg, int inx, BOOL_T active);
 void FormControlShow(paramGroup_p pg, int inx, BOOL_T bShow);
 EXPORT void FormHilite( wControl_p win, wControl_p control, BOOL_T hilite );
 void FormGroupReveal(paramGroup_p pg, const char *id, BOOL_T reveal);
@@ -284,7 +284,7 @@ typedef void (*paramExpanderToggleProc)(paramGroup_p pg, const char *id,
                                         BOOL_T revealed, void *context);
 
 void FormGroupExpanderShow(paramGroup_p pg, const char *id, BOOL_T reveal);
-void FormGroupExpanderSetSummary(paramGroup_p pg, const char *id,
+void FormGroupExpanderSetSummary(paramGroup_cp pg, const char *id,
                                  const char *summary);
 void FormGroupSetShadow(paramGroup_p pg, const char *id, BOOL_T shown);
 void FormResetInvalid( wControl_p win );

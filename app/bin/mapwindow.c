@@ -412,7 +412,7 @@ EXPORT void MapWindowShow(int state)
 // FormCreateDialog's (group, index, value) arguments arrived shifted; it
 // ignores them, which is the only reason that worked (Development Issues #53).
 static wBool_t
-MapWindowEventProc(paramGroup_p pg, int inx, void *valueP)
+MapWindowEventProc(paramGroup_cp pg, int inx, void *valueP)
 {
 	wToggleGroupSetActive(TOGGLEGRP_MAP_VISIBLE, FALSE);
 	mapVisible = FALSE;

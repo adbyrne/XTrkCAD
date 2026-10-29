@@ -30,7 +30,7 @@
 
 
 EXPORT void FormControlActive(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         BOOL_T active)
 {
@@ -101,7 +101,7 @@ EXPORT void FormGroupSetShadow(
 
 
 static wControl_p
-FormGroupExpanderFind(paramGroup_p pg, const char *id)
+FormGroupExpanderFind(paramGroup_cp pg, const char *id)
 {
 	for (int inx = 0; inx < pg->paramCnt; inx++) {
 		paramData_p p = pg->paramPtr + inx;
@@ -121,7 +121,7 @@ FormGroupExpanderShow(paramGroup_p pg, const char *id, BOOL_T reveal)
 }
 
 void
-FormGroupExpanderSetSummary(paramGroup_p pg, const char *id,
+FormGroupExpanderSetSummary(paramGroup_cp pg, const char *id,
                             const char *summary)
 {
 	wControl_p b = FormGroupExpanderFind(pg, id);

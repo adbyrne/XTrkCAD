@@ -62,7 +62,7 @@ static wControl_p textNoteW;
  * \param valueP IN unused
  */
 static wBool_t
-TextDlgUpdate(paramGroup_p pg,
+TextDlgUpdate(paramGroup_cp pg,
               int inx,
               void * valueP)
 {

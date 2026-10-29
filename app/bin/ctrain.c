@@ -1236,7 +1236,7 @@ static void SetTrainDirection(
 
 
 static wBool_t ControllerDialogUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP)
 {

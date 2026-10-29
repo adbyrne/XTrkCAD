@@ -89,7 +89,7 @@ typedef struct {
 
 
 static wBool_t CustomDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void *valueP )
 {

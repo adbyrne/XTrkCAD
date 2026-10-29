@@ -94,7 +94,7 @@ static void NoteLinkOpen(char *url)
 
 static wBool_t
 LinkDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP)
 {

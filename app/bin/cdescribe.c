@@ -130,7 +130,7 @@ static void SetDescHiliteBox(track_p trk)
 
 
 static wBool_t DescribeUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * data)
 {

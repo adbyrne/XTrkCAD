@@ -2494,7 +2494,7 @@ static void LayerOk(const void *unused)
 	wHide(layerW);
 }
 
-static wBool_t LayerDlgUpdate(paramGroup_p pg, int inx, void *valueP)
+static wBool_t LayerDlgUpdate(paramGroup_cp pg, int inx, void *valueP)
 {
 	if (layerSelecting) {           // we're in a programmatic reload — ignore
 		return TRUE;

@@ -390,7 +390,7 @@ static void SearchUiApply(wControl_p junk)
  */
 
 static wBool_t SearchUiDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP)
 {

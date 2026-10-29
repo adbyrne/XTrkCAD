@@ -381,7 +381,7 @@ static void ParamFileOk(const void * junk)
 
 
 static wBool_t ParamFileDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP)
 {

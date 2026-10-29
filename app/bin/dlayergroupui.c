@@ -471,7 +471,7 @@ static void GroupShowAll(void *action)
  * \param valueP IN new value (unused)
  * \return always FALSE (no further generic handling needed)
  */
-static wBool_t LayerGroupDlgUpdate(paramGroup_p pg, int inx, void *valueP)
+static wBool_t LayerGroupDlgUpdate(paramGroup_cp pg, int inx, void *valueP)
 {
 	if (inx == I_GROUPLIST) {
 		int selectedGroup = wListGetIndex(groupsL);

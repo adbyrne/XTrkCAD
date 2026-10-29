@@ -683,7 +683,7 @@ static void GridChange( long changes )
 
 
 static wBool_t GridDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP )
 {

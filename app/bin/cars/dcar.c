@@ -162,7 +162,7 @@ static paramData_t newCarPLs[] = {
 	{ PD_MESSAGE, NULL, "newcardesc", 0, NULL }
 };
 static wBool_t CarItemHotbarUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void* data);
 static paramGroup_t newCarPG = {
@@ -309,7 +309,7 @@ static char* CarItemHotbarProc(
 
 
 static wBool_t CarItemHotbarUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void* data)
 {
