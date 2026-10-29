@@ -659,28 +659,26 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 		return C_CONTINUE;
 
 
-	case C_DOWN:
-		trk = OnTrack(&pos, FALSE, FALSE);
-		if (trk == NULL) {
+	case C_DOWN: {
+		// Work on a local copy (SF #605). DescribeDone() and DescribeTrack()
+		// can let GTK process pending mouse motion, and wActionMove then
+		// overwrites the static trk: with NULL (crash in GetTrkType), or with
+		// another object, which became descTrk while the dialog was set up
+		// for the first one (assertion in its update function on Close).
+		track_p clicked = OnTrack(&pos, FALSE, FALSE);
+		if (clicked == NULL) {
 			// Not a track - ignore
 			return C_CONTINUE;
 		}
 #ifdef TODO_CANCEL
-		if ( trk == descTrk ) {
+		if ( clicked == descTrk ) {
 			// Same track - ignore
 			return C_CONTINUE;
 		}
 #endif
 		InfoMessage( "" );
 		DescribeDone( NULL );
-		if ( trk == NULL ) {
-			// This should not happen.
-			// Somebody is stomping on trk
-			// Unreproducible.
-			printf( "CmdDescribe: trk is NULL!\n" );
-			return C_CONTINUE;
-		}
-		if (GetLayerFrozen(GetTrkLayer(trk)) && !(MyGetKeyState()& WKEY_SHIFT)) {
+		if (GetLayerFrozen(GetTrkLayer(clicked)) && !(MyGetKeyState()& WKEY_SHIFT)) {
 			InfoMessage(_("Track is Frozen, Add Shift to Describe"));
 			trk = NULL;
 			return C_CONTINUE;
@@ -692,19 +690,20 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 		}
 
 		inDescribeCmd = TRUE;
-		SetDescHiliteBox(trk);
+		SetDescHiliteBox(clicked);
 		descNeedDrawHilite = TRUE;
-		DescribeTrack(trk, msg, 255);
+		DescribeTrack(clicked, msg, 255);
 		inDescribeCmd = FALSE;
 		InfoMessage(msg);
 		// Ugly code: but Describe Notes do not continue like other objects
-		if ( GetTrkType( trk ) != T_NOTE ) {
-			descTrk = trk;
+		if ( GetTrkType( clicked ) != T_NOTE ) {
+			descTrk = clicked;
 		} else {
 			descTrk = NULL;
 		}
 		trk = NULL;
 		return C_CONTINUE;
+	}
 
 	case C_REDRAW:
 
