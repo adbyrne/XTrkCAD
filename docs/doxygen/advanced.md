@@ -174,13 +174,9 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
   formatting drift — that's what the gating `astyle-check` job is for). The Windows job checks out
   with `core.autocrlf` off, so astyle sees the same LF line endings as on Linux.
 - **`compiler-warnings`, `compiler-warnings-macos`, `compiler-warnings-windows`** — captures
-  `-Wall -Wextra` build output as an artifact on each platform. The Linux job also configures
-  with `-DXTRKCAD_REPORT_POINTER_TYPES=ON`, which turns `PlatformSettings.cmake`'s
-  `-Wno-incompatible-pointer-types` into `-Wno-error=incompatible-pointer-types`, and prints the
-  number of distinct `-Wincompatible-pointer-types` sites in the job summary. Normal builds still
-  suppress them: there were 333 on 2026-10-25, a few real bugs among mostly harmless type
-  differences, and they're being fixed in stages (Development Issues #52, #53, #54). The count
-  should only go down; a PR that raises it has added one.
+  `-Wall -Wextra` build output as an artifact on each platform. The Linux report is also
+  published as the "Compiler warnings" page of the GitHub Pages site; look there for current
+  counts rather than in this guide.
 - **`coverage`** — generates an lcov HTML report and uploads it as an artifact.
 
 ## Toolchain preview (advisory)
@@ -286,6 +282,25 @@ permanently-accepted non-ratchetable noise (SF #662) rather than ratcheted like 
 `implicit-fallthrough` reached universal (GCC+Clang) status the same way: 73 genuine sites were
 standardized on `__attribute__((fallthrough))`, recognized identically by both compilers, before
 the Clang-only guard was dropped (SF #663).
+
+`incompatible-pointer-types` is an error on GCC and Clang, on every platform. Until Development
+Issues #52-#54 it was suppressed, and fixing the sites turned up real bugs (a layer's frozen flag
+written through the wrong type, an uninitialized result for an empty list, an icon from the
+wrong set). To keep new code clean:
+
+- **Define a callback with exactly the signature of its typedef.** A `paramChangeProc` takes
+  `paramGroup_cp`; wlib's button and menu callbacks take `void *`, not `const void *`; list
+  callbacks take `wIndex_t`. Don't cast a function to make it fit: a call through the wrong
+  type is undefined behaviour, which Clang's `-fsanitize=function` (in the UBSan run) reports.
+- **A helper that only reads a group, or writes through its controls, takes `paramGroup_cp`.**
+  Writing through `pg->paramPtr` is allowed on a const group.
+- **wlib control handles are all `struct control`** (`wControl_p`, `wButton_p`, `wList_p`, ...),
+  so they pass to each other without casts.
+- **Convert GTK and GLib types with their macros, not casts or nothing:** `GTK_WINDOW()`,
+  `GTK_WIDGET()`, `GTK_TOGGLE_BUTTON()`, `G_OBJECT()`, and `G_CALLBACK()` for signal handlers.
+  In debug GLib the widget macros also check the type at run time.
+- **Give a pointer its real type** rather than casting it at each use (a file name is a
+  `const char *`, an icon a `wIcon_p`).
 
 The large-volume cppcheck/clang-tidy categories that Phase 13 sampled and decided *not* to
 bulk-suppress (`variableScope`, `bugprone-narrowing-conversions`, and others) are deliberately
