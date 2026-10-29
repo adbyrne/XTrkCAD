@@ -471,8 +471,8 @@ in this table.
 
 | Tool | Pin status | Currently tested (as of 2026-10-18 — unpinned rows drift as packages update) |
 |------|-----------|------------------------------------------|
-| Doxygen | pinned | 1.15.0 (upstream Linux binary, `.github/actions/setup-doxygen`) for the dev-guide jobs (`ci-gtk3.yml`'s `doxygen` and `help-links-check`, `release.yml`'s `package-docs`). The packaging jobs build the User Guide with the OS package instead: apt/Homebrew (unpinned) on Linux/macOS; MSYS2 `mingw-w64-x86_64-doxygen` pinned to 1.16.1-4 in `package-windows`, since 1.18.0-3 aborts on the User Guide build (`std::system_error`, 2026-10-05) |
-| ntldd | pinned | `mingw-w64-x86_64-ntldd-r19.7fb9365-4`, installed with `pacman -U` from its URL in `package-windows` (it collects the DLLs for the ZIP and installer). On 2026-10-25 MSYS2 changed that package's database entry without a version bump, and installing it through `setup-msys2` failed the signature check against the runner image's older database |
+| Doxygen | pinned | 1.15.0 (upstream Linux binary, `.github/actions/setup-doxygen`) for the dev-guide jobs (`ci-gtk3.yml`'s `doxygen` and `help-links-check`, `release.yml`'s `package-docs`). The packaging jobs build the User Guide with the OS package instead: apt/Homebrew (unpinned) on Linux/macOS; MSYS2 doxygen pinned to 1.16.1-4 in `package-windows` (`mingw-w64-x86_64-` and `mingw-w64-ucrt-x86_64-`), since 1.18.0-3 aborts on the User Guide build (`std::system_error`, 2026-10-05) |
+| ntldd | pinned | `ntldd-r19.7fb9365-4` (MINGW64 and UCRT64 packages), installed with `pacman -U` from its URL in `package-windows` (it collects the DLLs for the ZIP and installer). On 2026-10-25 MSYS2 changed that package's database entry without a version bump, and installing it through `setup-msys2` failed the signature check against the runner image's older database |
 | AStyle | pinned | 3.6.13, all platforms (built from source, not the OS package; version set in `tools/astyle-check.sh`) |
 | CMake | floor/ceiling only (`3.20`–`4.0`) | 3.28.3 (Linux), 4.4.x (Windows/MSYS2), Homebrew current (macOS) |
 | cppcheck | pinned (runner) | 2.13.0 (Ubuntu 24.04) |

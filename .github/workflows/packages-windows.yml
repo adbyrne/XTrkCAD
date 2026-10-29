@@ -1,9 +1,16 @@
 name: Packages (Windows)
 
-# Reusable workflow, called by release.yml: builds the Windows x64 ZIP with
-# MSYS2 MINGW64 (packages-windows-x64-zip artifact of the calling run) and,
-# with include_nsis, the NSIS installer (packages-windows-x64-nsis).
+# Reusable workflow, called by release.yml: builds the Windows x64 ZIP
+# (packages-windows-x64<suffix>-zip artifact of the calling run) and, with
+# include_nsis, the NSIS installer (packages-windows-x64<suffix>-nsis).
 # release.yml asks for the installer on version tags and on request.
+#
+# Two variants (Development Issues #34), built from the same source:
+#   MINGW64  the standard package, file names without a suffix
+#   UCRT64   the same program linked against Microsoft's Universal C
+#            Runtime, file names ending in -ucrt
+# MSYS2 deprecates MINGW64, but the Windows developers want to keep it until
+# after the 5.4.0 release; many users run older Windows versions.
 #
 # Runners and compilers are pinned as in ci-gtk3.yml (see its header):
 # ubuntu-24.04(-arm), ubuntu-26.04(-arm) for the Ubuntu 26.04 DEB, macos-26
@@ -21,7 +28,18 @@ on:
 jobs:
   # ── Windows x86-64 — ZIP (DLLs bundled) + NSIS installer ──────────────────
   package-windows:
+    name: package-windows (${{ matrix.msystem }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - msystem: MINGW64
+            suffix: ''
+          - msystem: UCRT64
+            suffix: -ucrt
     runs-on: windows-2025
+    env:
+      PKG_SUFFIX: ${{ matrix.suffix }}
     defaults:
       run:
         shell: msys2 {0}
@@ -30,23 +48,25 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: ${{ matrix.msystem }}
           update: false
-          install: >-
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-pkg-config
-            mingw-w64-x86_64-gtk3
-            mingw-w64-x86_64-zlib
-            mingw-w64-x86_64-libzip
-            mingw-w64-x86_64-mxml
-            mingw-w64-x86_64-librsvg
-            mingw-w64-x86_64-gettext
-            mingw-w64-x86_64-cmocka
-            mingw-w64-x86_64-doxygen
-            mingw-w64-x86_64-nsis
-            git
+          # pacboy's ":p" adds the environment's package prefix
+          # (mingw-w64-x86_64-*, mingw-w64-ucrt-x86_64-*).
+          pacboy: >-
+            gcc:p
+            cmake:p
+            ninja:p
+            pkg-config:p
+            gtk3:p
+            zlib:p
+            libzip:p
+            mxml:p
+            librsvg:p
+            gettext:p
+            cmocka:p
+            doxygen:p
+            nsis:p
+          install: git
 
       - uses: ./.github/actions/msys2-pin-gcc
 
@@ -70,7 +90,7 @@ jobs:
         env:
           MSYS2_DOXYGEN_PKG_VERSION: 1.16.1-4
         run: |
-          pacman -U --noconfirm "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-doxygen-${MSYS2_DOXYGEN_PKG_VERSION}-any.pkg.tar.zst"
+          pacman -U --noconfirm "https://repo.msys2.org/mingw/${MSYSTEM,,}/${MINGW_PACKAGE_PREFIX}-doxygen-${MSYS2_DOXYGEN_PKG_VERSION}-any.pkg.tar.zst"
           doxygen --version
 
       # ntldd collects the DLLs for the ZIP (below). Installed from its URL
@@ -81,9 +101,9 @@ jobs:
       # checks the file against its own .sig instead.
       - name: Install ntldd
         env:
-          MSYS2_NTLDD_PKG: mingw-w64-x86_64-ntldd-r19.7fb9365-4-any.pkg.tar.zst
+          MSYS2_NTLDD_PKG_VERSION: r19.7fb9365-4
         run: |
-          pacman -U --noconfirm "https://repo.msys2.org/mingw/mingw64/${MSYS2_NTLDD_PKG}"
+          pacman -U --noconfirm "https://repo.msys2.org/mingw/${MSYSTEM,,}/${MINGW_PACKAGE_PREFIX}-ntldd-${MSYS2_NTLDD_PKG_VERSION}-any.pkg.tar.zst"
           command -v ntldd
 
       - name: Get version
@@ -118,7 +138,8 @@ jobs:
 
       - name: Collect GTK3 runtime DLLs
         # Copy the GTK3 runtime data (pixbuf loaders, GSettings schemas, icon
-        # theme), then every MinGW64 DLL the binary or a loader needs.
+        # theme), then every DLL from the MSYS2 environment the binary or a
+        # loader needs.
         # Errors fail the step: until 2026-10-24 this used
         # `xargs cp ... || true`, xargs ate the backslashes in ntldd's
         # Windows paths, every copy failed silently, and no ZIP ever
@@ -131,7 +152,8 @@ jobs:
           set -- "$STAGING"/bin/xtrkcad*.exe
           [ $# -eq 1 ] && [ -f "$1" ] || { echo "::error::expected one xtrkcad binary in bin/, found: $*"; exit 1; }
           BINARY=$1
-          MINGW=/mingw64
+          MINGW=$MSYSTEM_PREFIX     # /mingw64 or /ucrt64
+          ENVDIR=${MSYSTEM_PREFIX#/}
 
           # GTK3 pixbuf loaders (needed for SVG icons and PNG images)
           GDK_VER=$(ls $MINGW/lib/gdk-pixbuf-2.0/)
@@ -150,13 +172,15 @@ jobs:
           mkdir -p "$STAGING/share/icons"
           cp -r "$MINGW/share/icons/hicolor" "$STAGING/share/icons/"
 
-          # DLL dependencies of the binary and the loaders, MinGW64 only.
-          # ntldd prints "name => D:\...\mingw64\bin\name.dll (0x...)";
+          # DLL dependencies of the binary and the loaders, from this
+          # environment only. ntldd prints
+          # "name => D:\...\mingw64\bin\name.dll (0x...)" (ucrt64 for UCRT64);
           # cygpath turns the Windows path into one cp can use.
           ntldd -R "$BINARY" "$LOADERS"/*.dll \
-            | awk '$3 ~ /[\\\/]mingw64[\\\/]/ {print $3}' \
+            | awk -v env="$ENVDIR" '{ p = tolower($3); gsub(/\\/, "/", p) }
+                p ~ ("/" env "/") {print $3}' \
             | cygpath -u -f - | sort -u > dlls.txt
-          [ -s dlls.txt ] || { echo "::error::ntldd found no MinGW64 DLLs"; exit 1; }
+          [ -s dlls.txt ] || { echo "::error::ntldd found no $MSYSTEM DLLs"; exit 1; }
           while IFS= read -r dll; do
             cp -n "$dll" "$STAGING/bin/"
           done < dlls.txt
@@ -165,14 +189,14 @@ jobs:
       - name: Create ZIP archive
         run: |
           cd staging
-          cmake -E tar cf "../xtrkcad-${XTRKCAD_VERSION}-windows-x64.zip" \
+          cmake -E tar cf "../xtrkcad-${XTRKCAD_VERSION}-windows-x64${PKG_SUFFIX}.zip" \
             --format=zip .
 
       - name: Upload ZIP
         uses: actions/upload-artifact@v7
         with:
-          name: packages-windows-x64-zip
-          path: xtrkcad-*-windows-x64.zip
+          name: packages-windows-x64${{ matrix.suffix }}-zip
+          path: xtrkcad-*-windows-x64${{ matrix.suffix }}.zip
           retention-days: 14
 
       - name: Package NSIS installer
@@ -187,13 +211,21 @@ jobs:
           STAGING=$(cygpath -m "$(pwd)/staging")
           cd build
           cpack -G NSIS -D "CPACK_INSTALLED_DIRECTORIES=$STAGING;."
+          # CPack names it xtrkcad-setup-<version>-x64.exe; the UCRT64
+          # installer gets the -ucrt suffix like its ZIP. Both install into
+          # the same XTrkCAD folder, so installing one replaces the other.
+          set -- xtrkcad-setup-*.exe
+          [ $# -eq 1 ] || { echo "::error::expected one installer, found: $*"; exit 1; }
+          if [ -n "$PKG_SUFFIX" ]; then
+            mv "$1" "${1%.exe}${PKG_SUFFIX}.exe"
+          fi
           ls -l xtrkcad-setup-*.exe
 
       - name: Upload NSIS installer
         uses: actions/upload-artifact@v7
         if: ${{ inputs.include_nsis }}
         with:
-          name: packages-windows-x64-nsis
+          name: packages-windows-x64${{ matrix.suffix }}-nsis
           path: build/xtrkcad-setup-*.exe
           if-no-files-found: error
           retention-days: 14
