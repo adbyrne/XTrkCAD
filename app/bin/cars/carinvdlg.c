@@ -495,7 +495,7 @@ static void FormatDisplayItem(carItem_p item)
 }
 
 static wBool_t CarInvDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void* valueP)
 {

@@ -48,7 +48,7 @@ long GetChanges( paramGroup_p pg )
 }
 
 static wBool_t OptionDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void* valueP)
 {

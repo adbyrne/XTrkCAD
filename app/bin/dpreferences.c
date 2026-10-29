@@ -244,7 +244,7 @@ static void PrefRestore(void)
 }
 
 static wBool_t OptionDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void* valueP)
 {

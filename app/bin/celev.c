@@ -179,7 +179,7 @@ static int GetElevMode( void )
 
 
 
-static wBool_t DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
+static wBool_t DoElevUpdate( paramGroup_cp pg, int inx, void * valueP )
 {
 	int oldMode, newMode;
 	DIST_T elevNewValue;

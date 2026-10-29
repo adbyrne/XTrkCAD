@@ -104,7 +104,7 @@ static void SettingsRead( void  );
 static void ImageFileClear(void* unused);
 static void ImageFileBrowse(void* unused);
 
-static wBool_t LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
+static wBool_t LayoutDlgUpdate(paramGroup_cp pg, int inx, void * valueP);
 
 /**
 * Update the full file name. Do not do anything if the new filename is identical to the old one.
@@ -928,7 +928,7 @@ EXPORT addButtonCallBack_t LayoutInit(void)
 
 static wBool_t
 LayoutDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP)
 {

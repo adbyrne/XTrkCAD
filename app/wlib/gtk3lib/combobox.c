@@ -406,7 +406,7 @@ static gboolean ComboBoxFocusOut(
 }
 
 static void
-disable_combo_button_focus (GtkComboBox *widget, gpointer data)
+disable_combo_button_focus (GtkWidget *widget, gpointer data)
 {
 	if (GTK_IS_TOGGLE_BUTTON (widget)) {
 		gtk_widget_set_can_focus (widget, FALSE);

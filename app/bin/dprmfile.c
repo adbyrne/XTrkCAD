@@ -56,7 +56,7 @@ static void ParamFileBrowse(void * junk);
 static void ParamFileSelectAll(void * junk);
 
 static wWinPix_t paramFileWidths[] = {20, 40};
-static char* paramFileTitles[] = {N_("Content"), N_("Path")};
+static const char* paramFileTitles[] = {N_("Content"), N_("Path")};
 
 static paramListData_t paramFileListData = { 15, 370, 2, paramFileWidths, paramFileTitles };
 #ifdef TODO_UNUSED
@@ -381,7 +381,7 @@ static void ParamFileOk(const void * junk)
 
 
 static wBool_t ParamFileDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP)
 {

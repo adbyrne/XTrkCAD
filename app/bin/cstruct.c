@@ -633,7 +633,7 @@ static void RedrawStructure( wControl_p d, void * context, wWinPix_t x,
 
 
 static wBool_t StructureDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP )
 {

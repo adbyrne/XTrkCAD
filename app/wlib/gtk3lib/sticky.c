@@ -60,10 +60,10 @@ void wStickySetBusy(wControl_p bb, int newState)
 	gboolean currentState;
 
 
-	currentState = gtk_toggle_button_get_active(targetButton);
+	currentState = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(targetButton));
 	if (currentState != newState) {
 		bb->attributes.button.quiet++;
-		gtk_toggle_button_set_active(targetButton, newState);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(targetButton), newState);
 		bb->attributes.button.quiet--;
 	}
 }

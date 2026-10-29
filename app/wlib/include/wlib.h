@@ -617,7 +617,7 @@ void wControlSetCustomTooltip(wControl_p control,
  */
 
 /* Creation CallBacks */
-typedef void (*wListCallBack_p)(unsigned int, const char *, unsigned int,
+typedef void (*wListCallBack_p)(wIndex_t, const char *, wIndex_t,
                                 void *, void *);
 
 /* Creation Options */

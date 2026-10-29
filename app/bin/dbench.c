@@ -41,7 +41,7 @@ static char *benchTypeS[] = { "", N_(" L-Girder"), N_(" T-Girder") };
 typedef struct {
 	char * name;
 	// cppcheck-suppress unusedStructMember
-	char** xpm;
+	const char * file;
 	// cppcheck-suppress unusedStructMember
 	wIcon_p icon;
 } orientData_t;
@@ -91,7 +91,7 @@ EXPORT void BenchUpdateOrientationList(
 	for (cnt=orientD[type].cnt-1; cnt>=0; cnt--,op++) {
 #ifdef WINDOWS
 		if (op->icon == NULL) {
-			op->icon = wIconCreatePixBufFromResource( XTRKCAD_SYMBOLS_PATH, op->xpm);
+			op->icon = wIconCreatePixBufFromResource( XTRKCAD_SYMBOLS_PATH, op->file);
 		}
 		wComboBoxAddValue( list, op->icon, op );
 #else

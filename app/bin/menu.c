@@ -86,7 +86,7 @@ typedef struct {
 static dynArr_t menuTrace_da;
 #define menuTrace(N) DYNARR_N( menuTrace_t, menuTrace_da, N )
 
-static void DoMenuTrace(wMenu_p menu, const char * label, const void * data)
+static void DoMenuTrace(wMenu_p menu, const char * label, void * data)
 {
 	if (recordF) {
 		fprintf(recordF, "MOUSE 1 %0.3f %0.3f\n", oldMarker.x, oldMarker.y);

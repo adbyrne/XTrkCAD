@@ -49,7 +49,7 @@ static struct wFilSel_t * documentFile_fs;
 static void NoteFileOpenExternal(void * junk);
 static void NoteFileBrowse(void * junk);
 static wBool_t FileDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP);
 
@@ -175,7 +175,7 @@ NoteFileOpenExternal(void * junk)
  */
 static wBool_t
 FileDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP)
 {

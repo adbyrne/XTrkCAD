@@ -205,7 +205,7 @@ wControl_p wEntryCreate(
 	// link into help
 	wlibAddTooltip(b->widget, parent->name, helpStr);
 
-	gtk_widget_set_can_focus( G_OBJECT(b->widget), TRUE );
+	gtk_widget_set_can_focus( b->widget, TRUE );
 	gtk_widget_add_events(b->widget, GDK_FOCUS_CHANGE_MASK);
 	g_signal_connect(G_OBJECT(b->widget), "focus-out-event",
 	                 G_CALLBACK(entryFocusOutEvent), b);

@@ -129,8 +129,8 @@ void ClearTracks(void) { }
 int ConfirmReset(BOOL_T b) { (void)b; return 0; }
 void DoLayout(void *unused) { (void)unused; }
 void DoSave(void *doAfterSaveVP) { (void)doAfterSaveVP; }
-void DoZoomDown(const void *modeVP) { (void)modeVP; }
-void DoZoomUp(const void *modeVP) { (void)modeVP; }
+void DoZoomDown(void *modeVP) { (void)modeVP; }
+void DoZoomUp(void *modeVP) { (void)modeVP; }
 void EditCopy(void *unused) { (void)unused; }
 void EditCut(void *unused) { (void)unused; }
 void EditPaste(void *unused) { (void)unused; }

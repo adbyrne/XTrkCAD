@@ -925,7 +925,7 @@ void DoNewScale(DIST_T scale)
  * popup or mousewheel
  */
 
-EXPORT void DoZoomUp(const void *mode)
+EXPORT void DoZoomUp(void *mode)
 {
 	long newScale;
 
@@ -1041,7 +1041,7 @@ EXPORT void DoZoomExtents(void *mode)
  * popup or mousewheel
  */
 
-EXPORT void DoZoomDown(const void *mode)
+EXPORT void DoZoomDown(void *mode)
 {
 	long newScale;
 
