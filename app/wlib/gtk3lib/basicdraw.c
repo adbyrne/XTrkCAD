@@ -241,6 +241,12 @@ CreateLayoutForText(const struct draw *bd, cairo_t *cr, const char *text,
 
 	layout = pango_cairo_create_layout(cr);
 
+	// one font point = one point on paper (print) or one pixel at the
+	// bitmap's dpi, instead of Pango's default 96 dpi
+	pango_cairo_context_set_resolution(pango_layout_get_context(layout),
+	                                   bd->dpi * bd->scale_adjust);
+	pango_layout_context_changed(layout);
+
 	// set the correct font and size
 	// \todo use a getter function instead of double conversion
 	desc = pango_font_description_from_string(wlibFontTranslate(font));
