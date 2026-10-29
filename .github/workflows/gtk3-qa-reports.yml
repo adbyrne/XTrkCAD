@@ -5,8 +5,9 @@ name: GTK3 QA reports (reusable)
 #   - release.yml (html: true): grouped, linked HTML for GitHub Pages, via
 #     tools/format-findings-report.sh. deploy-pages unpacks the
 #     xtrkcad-*-html artifacts these jobs upload.
-#   - ci-gtk3-preview.yml (on the next Ubuntu): previews what newer cppcheck,
-#     clang-tidy and GCC versions report before ci-gtk3.yml moves over.
+#   - ci-gtk3-preview.yml (on the next Ubuntu, other-platforms: false):
+#     previews what newer cppcheck, clang-tidy and GCC versions report before
+#     ci-gtk3.yml moves over.
 # These used to be hand-copied twins in ci-gtk3.yml and release.yml, and the
 # copies drifted more than once (the published reports missed scope
 # widenings for weeks). None of these jobs ever fails the run.
@@ -30,6 +31,10 @@ on:
         description: Appended to the plain-text artifact names, e.g. -ubuntu2604.
         type: string
         default: ''
+      other-platforms:
+        description: Also run the macOS and Windows compiler-warnings jobs.
+        type: boolean
+        default: true
 
 jobs:
   coverage:
@@ -431,8 +436,9 @@ jobs:
 
   compiler-warnings:
     # Captures -Wall -Wextra output (Linux GCC). Does NOT fail the build --
-    # legacy code has pre-existing warnings. The macOS and Windows variants
-    # stay in ci-gtk3.yml as PR artifacts only.
+    # legacy code has pre-existing warnings. compiler-warnings-macos and
+    # compiler-warnings-windows below do the same with AppleClang and MinGW
+    # GCC, which see platform-only code this build never compiles.
     #
     # gettext (in the apt-deps base set) matters: without msgfmt the build
     # stalled generating locale .mo files and ran into the timeout instead of
@@ -475,8 +481,9 @@ jobs:
         run: |
           mkdir -p report
           tools/format-findings-report.sh build/warnings.txt report/index.html \
-            "Compiler warnings, -Wall -Wextra (Linux)" bracketed \
-            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/"
+            "Compiler warnings, -Wall -Wextra (Linux, GCC)" bracketed \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/" \
+            "$GITHUB_WORKSPACE"
           tar -czf xtrkcad-compiler-warnings.tar.gz -C report .
       - name: Upload report (HTML)
         if: inputs.html
@@ -484,4 +491,136 @@ jobs:
         with:
           name: xtrkcad-compiler-warnings-html
           path: xtrkcad-compiler-warnings.tar.gz
+          retention-days: 14
+
+  compiler-warnings-macos:
+    # As compiler-warnings, on macOS with AppleClang. Moved here from
+    # ci-gtk3.yml so release.yml can publish it too. continue-on-error: a
+    # Homebrew or runner problem here must not hold up deploy-pages, which
+    # needs this workflow to succeed.
+    if: inputs.other-platforms
+    runs-on: macos-26
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/select-xcode
+      - name: Install dependencies
+        run: brew install ninja gtk+3 cmocka libzip librsvg
+      - name: Configure with -Wall -Wextra
+        run: |
+          GTK_PREFIX=$(brew --prefix gtk+3)
+          PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          export PKG_CONFIG_PATH
+          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
+            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
+            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON \
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
+      - name: Build (warnings captured, non-fatal)
+        run: cmake --build build 2>&1 | tee build/warnings.txt || true
+      - name: Summarise warnings
+        run: |
+          COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
+          echo "Total warnings: $COUNT"
+          echo ""
+          echo "=== By warning flag ==="
+          grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true
+          echo ""
+          echo "=== By file (top 20) ==="
+          grep ': warning:' build/warnings.txt | grep -oE '^[^:]+' | sed 's|.*/||' | sort | uniq -c | sort -rn | head -20 || true
+      - name: Upload warning log
+        if: ${{ !inputs.html }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: compiler-warnings-gtk3-macos${{ inputs.artifact-suffix }}
+          path: build/warnings.txt
+      - name: Format as HTML
+        if: inputs.html
+        run: |
+          mkdir -p report
+          tools/format-findings-report.sh build/warnings.txt report/index.html \
+            "Compiler warnings, -Wall -Wextra (macOS, AppleClang)" bracketed \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/" \
+            "$GITHUB_WORKSPACE"
+          tar -czf xtrkcad-compiler-warnings-macos.tar.gz -C report .
+      - name: Upload report (HTML)
+        if: inputs.html
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-compiler-warnings-macos-html
+          path: xtrkcad-compiler-warnings-macos.tar.gz
+          retention-days: 14
+
+  compiler-warnings-windows:
+    # As compiler-warnings, on Windows with MSYS2 MINGW64 GCC (the standard
+    # package's environment). Moved here from ci-gtk3.yml; continue-on-error
+    # as for compiler-warnings-macos.
+    if: inputs.other-platforms
+    runs-on: windows-2025
+    timeout-minutes: 30
+    continue-on-error: true
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-gtk3
+            mingw-w64-x86_64-zlib
+            mingw-w64-x86_64-libzip
+            mingw-w64-x86_64-mxml
+            mingw-w64-x86_64-librsvg
+            mingw-w64-x86_64-cmocka
+      - uses: ./.github/actions/msys2-pin-gcc
+      - name: Configure with -Wall -Wextra
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_USE_GETTEXT=OFF \
+            -DCMAKE_C_FLAGS="-Wall -Wextra -Wno-unused-parameter"
+      - name: Build (warnings captured, non-fatal)
+        run: cmake --build build --parallel 2>&1 | tee build/warnings.txt || true
+      - name: Summarise warnings
+        run: |
+          COUNT=$(grep -c ': warning:' build/warnings.txt || echo 0)
+          echo "Total warnings: $COUNT"
+          echo ""
+          echo "=== By warning flag ==="
+          grep ': warning:' build/warnings.txt | grep -oE '\[-W[^]]+\]' | sort | uniq -c | sort -rn || true
+          echo ""
+          echo "=== By file (top 20) ==="
+          grep ': warning:' build/warnings.txt | grep -oE '^[^:]+' | sed 's|.*/||' | sort | uniq -c | sort -rn | head -20 || true
+      - name: Upload warning log
+        if: ${{ !inputs.html }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: compiler-warnings-gtk3-windows${{ inputs.artifact-suffix }}
+          path: build/warnings.txt
+      - name: Format as HTML
+        if: inputs.html
+        run: |
+          mkdir -p report
+          # GCC prints D:/a/... paths; the script strips the checkout root.
+          tools/format-findings-report.sh build/warnings.txt report/index.html \
+            "Compiler warnings, -Wall -Wextra (Windows, MinGW GCC)" bracketed \
+            "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/" \
+            "$(cygpath -m "$GITHUB_WORKSPACE")"
+          tar -czf xtrkcad-compiler-warnings-windows.tar.gz -C report .
+      - name: Upload report (HTML)
+        if: inputs.html
+        uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-compiler-warnings-windows-html
+          path: xtrkcad-compiler-warnings-windows.tar.gz
           retention-days: 14

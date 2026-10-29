@@ -93,7 +93,8 @@ The shared pieces:
   with the pinned runners and `ci-gtk3-preview.yml` with the next ones.
 - **`gtk3-qa-reports.yml`** (a reusable workflow) holds the report-only analysis jobs. `ci-gtk3.yml`
   calls it for plain-text PR artifacts, `release.yml` for the published HTML reports, and
-  `ci-gtk3-preview.yml` on the next Ubuntu.
+  `ci-gtk3-preview.yml` on the next Ubuntu (Linux only: `other-platforms: false` leaves out the
+  macOS and Windows warnings jobs).
 - **`packages-linux.yml`, `packages-macos.yml`, `packages-windows.yml`** and
   **`install-tests.yml`** (reusable workflows) hold the packaging and install-test jobs that
   `release.yml` calls; `install-tests-only.yml` reuses `install-tests.yml`. See
@@ -173,10 +174,13 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
   astyle output against Linux's, to catch astyle itself behaving differently per OS (not code
   formatting drift — that's what the gating `astyle-check` job is for). The Windows job checks out
   with `core.autocrlf` off, so astyle sees the same LF line endings as on Linux.
-- **`compiler-warnings`, `compiler-warnings-macos`, `compiler-warnings-windows`** — captures
-  `-Wall -Wextra` build output as an artifact on each platform. The Linux report is also
-  published as the "Compiler warnings" page of the GitHub Pages site; look there for current
-  counts rather than in this guide.
+- **`compiler-warnings`, `compiler-warnings-macos`, `compiler-warnings-windows`** (in
+  `gtk3-qa-reports.yml`, so they show as `qa / ...`) — capture `-Wall -Wextra` build output on
+  Linux (GCC), macOS (AppleClang) and Windows (MSYS2 MINGW64 GCC). Each compiler sees code the
+  others don't (platform-only branches) and reports different warnings, so all three are
+  published as "Compiler warnings" pages on the GitHub Pages site; look there for current counts
+  rather than in this guide. The macOS and Windows jobs are `continue-on-error`, so a runner
+  problem doesn't hold up the Pages deploy; the site then says that report is missing.
 - **`coverage`** — generates an lcov HTML report and uploads it as an artifact.
 
 ## Toolchain preview (advisory)
@@ -203,8 +207,8 @@ page (Actions tab → the run → Artifacts); each job's own "Upload findings"/"
 step names it. **CodeQL** is a separate workflow (`codeql.yml`) — it runs on push/PR and a weekly
 Monday cron, and its results show up in the repo's Security tab rather than as an artifact.
 
-Five of these (`coverage`, `cppcheck-deep`, `clang-tidy`, `codespell`, `compiler-warnings`) are
-additionally published as permanent, browsable HTML at
+Five of these (`coverage`, `cppcheck-deep`, `clang-tidy`, `codespell`, and `compiler-warnings` with
+its macOS and Windows variants) are additionally published as permanent, browsable HTML at
 `$GITHUB_USER.github.io/XTrkCAD` (GitHub Pages' default project-page URL for whichever fork's
 Actions is doing the deploying), redeployed on every push to
 `%main` by `release.yml`'s `qa-reports` job. That job calls `gtk3-qa-reports.yml` with
@@ -242,7 +246,7 @@ codespell's), turn it into the same grouped, GitHub-linked HTML the published si
 `tools/format-findings-report.sh`:
 
 ```sh
-tools/format-findings-report.sh <input.txt> <output.html> "<title>" <bracketed|codespell> <blob-base-url>
+tools/format-findings-report.sh <input.txt> <output.html> "<title>" <bracketed|codespell> <blob-base-url> [source-root]
 ```
 
 `bracketed` handles cppcheck/clang-tidy/compiler-warning lines ending in `[category]`;
@@ -250,7 +254,10 @@ tools/format-findings-report.sh <input.txt> <output.html> "<title>" <bracketed|c
 prepended to each finding's `file#Lline` to build its link — pass a real GitHub blob URL (e.g.
 `https://github.com/$GITHUB_USER/XTrkCAD/blob/$(git rev-parse HEAD)/`) to get working links
 against your own checkout, or omit meaningful linking entirely by passing any placeholder if you
-just want the grouped local HTML view. The `coverage` report doesn't go through this script — `genhtml`
+just want the grouped local HTML view. Compilers print absolute paths, so pass the checkout's
+root as `[source-root]` (`"$PWD"` from the repository root; in MSYS2, `"$(cygpath -m "$PWD")"`)
+to make them repository-relative; it handles Windows paths written with `/` or `\`, whose
+drive colon would otherwise keep the line from parsing. The `coverage` report doesn't go through this script — `genhtml`
 already produces its own linked, per-line HTML.
 
 The gating `cppcheck` job (default/error-only severity, distinct from the report-only

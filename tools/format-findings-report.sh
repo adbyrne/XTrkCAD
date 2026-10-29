@@ -5,7 +5,12 @@
 # GitHub at the commit that produced the report.
 #
 # Usage: format-findings-report.sh <input.txt> <output.html> <title> \
-#            <format: bracketed|codespell> <github-blob-base-url>
+#            <format: bracketed|codespell> <github-blob-base-url> [source-root]
+#
+# source-root: a prefix removed from file paths before linking, so absolute
+# paths from a compiler (/home/runner/work/..., D:/a/... on Windows, with /
+# or \) become repository-relative. Give the checkout's root, e.g.
+# "$GITHUB_WORKSPACE" (on MSYS2, "$(cygpath -m "$GITHUB_WORKSPACE")").
 #
 # bracketed  -- cppcheck/clang-tidy/gcc-warning style lines ending in a
 #               bracketed category, e.g. "file.c:12:3: warning: msg [flag]"
@@ -19,6 +24,8 @@ OUT="$2"
 TITLE="$3"
 FORMAT="$4"
 BLOB_BASE="$5"
+SRC_ROOT="${6:-}"
+IN_NAME="$IN"
 
 html_escape() {
 	sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g'
@@ -34,6 +41,28 @@ link_for() {
 
 WORKDIR=$(mktemp -d)
 trap 'rm -rf "$WORKDIR"' EXIT
+
+# Make paths repository-relative: drop SRC_ROOT (written with / or \) from
+# the start of each line, then turn the rest of the path's \ into /. Without
+# this a Windows path's drive colon ("D:") keeps the line from parsing.
+if [ -n "$SRC_ROOT" ]; then
+	awk -v root="${SRC_ROOT%/}/" '
+		BEGIN { broot = root; gsub(/\//, "\\", broot) }
+		{
+			if (index($0, root) == 1) {
+				$0 = substr($0, length(root) + 1)
+			} else if (index($0, broot) == 1) {
+				$0 = substr($0, length(broot) + 1)
+				p = index($0, ":")
+				if (p > 0) {
+					path = substr($0, 1, p - 1); gsub(/\\/, "/", path)
+					$0 = path substr($0, p)
+				}
+			}
+			print
+		}' "$IN" > "$WORKDIR/input.txt"
+	IN="$WORKDIR/input.txt"
+fi
 
 # Normalize every finding line into: category<TAB>file<TAB>line<TAB>message
 # (message already HTML-escaped). Non-matching lines (blank lines, tool
@@ -127,4 +156,4 @@ HTMLHEAD
 	echo '</body></html>'
 } > "$OUT"
 
-echo "Wrote $OUT ($TOTAL findings parsed from $IN)"
+echo "Wrote $OUT ($TOTAL findings parsed from $IN_NAME)"
