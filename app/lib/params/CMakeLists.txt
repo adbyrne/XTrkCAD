@@ -54,51 +54,6 @@ foreach(infile ${infiles})
 	)
 endforeach()
 
-# create param files from  structure definitions
-
-add_executable( mkstruct mkstruct.c )
-set_target_properties(
-   mkstruct
-   PROPERTIES FOLDER "Param Files"
-)
-
-set(infiles
-    "revell.struct"
-)
-
-# define build commands for all struct files
-foreach(infile ${infiles})
-    # Generate output file name
-    cmake_path(REPLACE_EXTENSION infile
-                "xtp"
-                OUTPUT_VARIABLE outfile
-    )
-    cmake_path(ABSOLUTE_PATH
-                outfile
-                BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-
-    # as for mkcarpart above: "done" only after mkstruct succeeded
-    cmake_path(GET outfile FILENAME outname)
-    add_custom_command(
-        OUTPUT "${outfile}"
-        COMMAND $<TARGET_FILE:mkstruct> "${infile}" "${outfile}"
-        COMMAND ${CMAKE_COMMAND} -E echo "mkstruct: ${outname} done"
-        COMMENT "mkstruct: ${infile} -> ${outname}"
-        DEPENDS "${infile}" mkstruct
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    )
-
-    target_sources(xtpfiles
-       PRIVATE
-       "${outfile}"
-    )
-    install(
-        FILES "${outfile}"
-        DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/params"
-    )
-endforeach()
-
 install(
 	FILES t-trak-notes.txt
 	DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/params"
