@@ -312,16 +312,6 @@ static void MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
 }
 
 
-#ifdef TODO_UNUSED
-/*
- * Set mapW size to fit the rescaled map
- *
- * \param reset IN
- */
-static int mapBorderH = 24;
-static int mapBorderW = 24;
-#endif
-
 void MapChangeScale()
 {
 	wWinPix_t w, h;

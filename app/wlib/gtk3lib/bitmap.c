@@ -244,9 +244,6 @@ wBool_t wBitmapDelete(wControl_p d)
 		drawArea->cr = NULL;
 		cairo_surface_destroy(drawArea->surface);
 		drawArea->surface = NULL;
-	} else {
-		g_object_unref(drawArea->pixbuf);
-		drawArea->pixbuf = NULL;
 	}
 
 	return TRUE;

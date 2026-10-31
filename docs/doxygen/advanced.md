@@ -157,8 +157,8 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
 - **`astyle-check`** — AStyle 3.6.13 (built from source, pinned — an unpinned version once
   produced different formatting for identical input, SF #638) dry-run conformance to
   `app/lib/astylerc`, scoped to `app/bin`, `app/wlib`, `app/help`, and `app/tools`. Vendored code
-  (`app/wlib/gtk3lib/wrapbox/`, the `app/tools/dirent.c`/`dirent.h` Win32 shim, and
-  `app/bin/uthash.h`, an unmodified upstream uthash release) and `unittest/` directories are
+  (`app/wlib/gtk3lib/wrapbox/` and the `app/tools/dirent.c`/`dirent.h` Win32 shim) and
+  `unittest/` directories are
   excluded by design. The command, version and exclude list live in `tools/astyle-check.sh`;
   run it locally before pushing.
 - **`fuzz-getargs`** — a bounded-time libFuzzer regression run of the `fuzz_getargs` harness (not

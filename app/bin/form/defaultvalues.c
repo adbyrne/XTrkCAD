@@ -85,10 +85,6 @@ FormatWidthsList(unsigned count, wWinPix_t* widths, DynString *output)
 static void
 SaveListColumnWidths(const char *section, const char *key, paramData_p listData)
 {
-#ifdef TODO_UNUSED
-	paramListData_t *listDataP = (paramListData_t*)listData->winData;
-#endif
-
 	if (listData->control) {
 		DynString columnWidthString;
 		wWinPix_t* colWidths = NULL;

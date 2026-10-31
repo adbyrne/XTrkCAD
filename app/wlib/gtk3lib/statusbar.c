@@ -87,10 +87,8 @@ wControl_p wStatusCreate(
 /**
  * Set height of message text
  *
- * \todo Are text properties actually used? remove parameter flags if not
- *
  * \param label IN text label
- * \param flags IN text properties (large or small size)
+ * \param flags IN unused
  *
  * \return text height
  */

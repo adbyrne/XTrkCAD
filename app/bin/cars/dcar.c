@@ -174,9 +174,6 @@ static paramGroup_t newCarPG = {
 };
 EXPORT wControl_p newCarControls[2];
 static char newCarLabel1[STR_SIZE];
-#ifdef TODO_UNUSED
-static char* newCarLabels[2] = { newCarLabel1, NULL };
-#endif
 
 /**
  * Format a car item's Description and Manufacturer, separated by a slash,

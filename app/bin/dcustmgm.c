@@ -41,9 +41,6 @@ static void CustomExport( void * action );
 static void CustomDone( const void * action );
 static void SelectNew(void *context );
 
-#ifdef TODO_UNUSED
-static const char * customTypes[] = { "Car Part", "Car Prototype", NULL };
-#endif
 static wIndex_t selectedType;
 
 /* Guards CustomDlgUpdate against GTK's synchronous selection-changed signal,
@@ -463,10 +460,6 @@ static void CustMgmChange( long changes )
 
 static void DoCustomMgr( void * junk )
 {
-#ifdef TODO_UNUSED
-	int i = 0;
-#endif
-
 	if (customPG.win == NULL) {
 		FormCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")),
 		                  _("Done"), CustomDone,

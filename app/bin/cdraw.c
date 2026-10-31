@@ -3118,10 +3118,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 static STATUS_T
 HandleStartCommand(wAction_t action, BOOL_T* infoSubst)
 {
-#ifdef TODO_UNUSED
-	static char objectLabel[OBJECT_LABEL_SIZE];
-#endif
-
 	// \todo needs work to be activated
 	//if (!magneticSnap) {
 	//	InfoMessage(_("+Alt for Magnetic Snap"));

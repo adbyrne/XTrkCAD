@@ -175,12 +175,11 @@ struct draw {
 	long option; //< creation options
 	unsigned drawDestination;
 	unsigned delayUpdate;
-	GdkPixbuf *pixbuf; /** \todo Check necessity */
 	GdkPixbuf *background;
 	GdkPixbuf *pixbufBackup; //< snapshot saved by wDrawSaveImage/wDrawRestoreImage
 	cairo_t *cr;
-	double scale_adjust; /** \todo Check necessity */
-	double scale_text;   /** \todo Check necessity */
+	double scale_adjust; //< print scale for coordinates and line widths
+	double scale_text;   //< print scale for text size
 	struct rect *clipregion;
 
 	// state of Cairo context
@@ -425,7 +424,7 @@ wlibFontCreatePangoLayout(GtkWidget *widget, void *cairo, wFont_p fp,
                           wDrawPix_t *height_p, wDrawPix_t *ascent_p,
                           wDrawPix_t *descent_p, wDrawPix_t *baseline_p);
 void wlibFontDestroyPangoLayout(PangoLayout *layout);
-const char *wlibFontTranslate(wFont_p fp);
+const PangoFontDescription *wlibFontGetDescription(wFont_p fp);
 
 /* freetypelabel.c */
 void wlibFTLabelChangeColor(wIcon_p button, wDrawColor newColor);

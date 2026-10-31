@@ -242,8 +242,7 @@ CreateLayoutForText(const struct draw *bd, cairo_t *cr, const char *text,
 	layout = pango_cairo_create_layout(cr);
 
 	// set the correct font and size
-	// \todo use a getter function instead of double conversion
-	desc = pango_font_description_from_string(wlibFontTranslate(font));
+	desc = pango_font_description_copy(wlibFontGetDescription(font));
 
 	pango_font_description_set_size(desc,
 	                                (gint)lround(size * PANGO_SCALE * bd->scale_text));
@@ -257,7 +256,7 @@ CreateLayoutForText(const struct draw *bd, cairo_t *cr, const char *text,
 	pango_layout_set_width(layout, -1);
 	pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
 
-	g_free(desc);
+	pango_font_description_free(desc);
 
 	return(layout);
 }

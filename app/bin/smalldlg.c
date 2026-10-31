@@ -215,8 +215,8 @@ void ShowTip( void * flagsVP )
 		"\nParameter Files by: Ralph Boyd, Dwyane Ward\n" \
 		"\nThe following software is distributed with XTrackCAD\n\n" \
 		"Cornu Algorithm and Implementation by: Raph Levien" \
-		"\n\nuthash, utlist Copyright notice:" \
-		"\nCopyright (c) 2003-2026, Troy D. Hanson https://troydhanson.github.io/uthash/" \
+		"\n\nutlist Copyright notice:" \
+		"\nCopyright (c) 2007-2026, Troy D. Hanson https://troydhanson.github.io/uthash/" \
 		"\nAll rights reserved." \
 		"\n\ncJSON: Copyright (c) 2009-2017 Dave Gamble and cJSON contributors" \
 		"\n\nlibzip:  Copyright(C) 1999 - 2024 Dieter Baron and Thomas Klausner\n" \

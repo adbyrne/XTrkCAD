@@ -67,11 +67,6 @@ static wBool_t OptionDlgUpdate(
 static wControl_p displayW;
 
 
-#ifdef TODO_UNUSED
-static char * hotBarLabelsLabels[] = { N_("Part No"), N_("Descr"), NULL };
-static char * listLabelsLabels[] = { N_("Manuf"), N_("Part No"), N_("Descr"), NULL };
-#endif
-
 
 static paramData_t displayPLs[] = {
 	{ PD_RADIO, &colorTrack, "color-track", PDO_NOPSHUPD|PDO_DRAW, NULL, NULL, BC_HORIZONTAL, I2VP(CHANGE_MAIN) },

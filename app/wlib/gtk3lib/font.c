@@ -108,11 +108,6 @@ static void fontSelectionDialogCallback(GtkFontChooserDialog
 
 static wBool_t fontInitted = FALSE;
 
-/**
- * \todo F_TIMES and F_HELV are serif respective sans serif fonts. Change define to make names consistent
- * with meaning.
- */
-
 #define DEFAULTFONTSANS "Sans 18"
 
 static wBool_t fontInit()
@@ -416,23 +411,18 @@ void wSetSelectedFontSize(wFontSize_t size)
 }
 
 /**
- * get the Pango font description as a string from a font definition.
+ * get the Pango font description from a font definition.
  * If the font definition is NULL, a default font is return. This is
  * the current font if one is set. If not the first font from the font
  * list is returned.
  *
  * \param fp IN the font definition
- * \return    the font description
+ * \return    the font description, owned by the font definition. Use
+ *            pango_font_description_copy() before modifying it.
  */
 
-const char *wlibFontTranslate(wFont_p fp)
+const PangoFontDescription *wlibFontGetDescription(wFont_p fp)
 {
-	static gchar *fontName = NULL;
-
-	if (fontName != NULL) {
-		g_free(fontName);
-	}
-
 	if (!fontInitted) {
 		fontInit();
 	}
@@ -445,12 +435,7 @@ const char *wlibFontTranslate(wFont_p fp)
 		fp = standardFonts[0][FW_MEDIUM][FS_REGULAR];
 	}
 
-	fontName = pango_font_description_to_string(fp->fontDescription);
-#if WLIB_FONT_DEBUG >= 2
-	fprintf(stderr, "font translation: ");
-	fprintf(stderr, "  \"%s\"\n", fontName);
-#endif
-	return (const char *) fontName;
+	return fp->fontDescription;
 }
 
 /**

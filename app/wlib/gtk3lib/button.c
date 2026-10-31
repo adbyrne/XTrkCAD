@@ -67,8 +67,6 @@ bool IsNewIcon(wIcon_p new, wIcon_p old)
  *
  * \param bb		IN button handle
  * \param labelStr	IN new label string
- *
- * \todo icons in XBM format
  */
 
 void wButtonSetLabel(wControl_p bb, const char *labelStr)
