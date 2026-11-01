@@ -90,7 +90,7 @@ void DoSaveAs(void *doAfterSaveVP)
  * functions, which this test has no need to link just to prove the
  * quote-doubling escape logic under test here; a no-op is behaviorally
  * fine since every fixture string below is already plain ASCII/UTF-8. */
-void ConvertUTF8ToSystem(unsigned char *in)
+void ConvertUTF8ToSystem(char *in)
 {
 	(void)in;
 }

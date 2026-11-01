@@ -275,6 +275,8 @@ void SetFileChanged(void);
 extern long adjTimer;
 int RegressionTestAll(const char *target);
 extern FILE * recordF;
+void RecordPrintf(const char *format, ...);
+void RecordVPrintf(const char *format, va_list args);
 extern wBool_t inPlayback;
 extern wBool_t inPlaybackQuit;
 extern wControl_p demoW;

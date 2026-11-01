@@ -29,6 +29,7 @@
 
 #include <form.h>
 #include "formprivate.h"
+#include "misc.h"
 
 static FILE* macroFile;
 
@@ -71,8 +72,8 @@ void FormGroupRecord(
 		case PD_LONG:
 		case PD_RADIO:
 		case PD_TOGGLE:
-			fprintf(macroFile, "PARAMETER %s %s %ld\n", pg->nameStr, p->nameStr,
-			        *(long*)p->valueP);
+			RecordPrintf("PARAMETER %s %s %ld\n", pg->nameStr, p->nameStr,
+			             *(long*)p->valueP);
 			break;
 		case PD_LIST:
 		case PD_DROPLIST:
@@ -82,21 +83,21 @@ void FormGroupRecord(
 			} else {
 				message[0] = '\0';
 			}
-			fprintf(macroFile, "PARAMETER %s %s %d %s\n", pg->nameStr, p->nameStr,
-			        *(wIndex_t*)p->valueP, message);
+			RecordPrintf("PARAMETER %s %s %d %s\n", pg->nameStr, p->nameStr,
+			             *(wIndex_t*)p->valueP, message);
 			break;
 		case PD_COLORLIST:
 			rgb = wDrawGetRGB(*(wDrawColor*)p->valueP);
-			fprintf(macroFile, "PARAMETER %s %s %ld\n",
-			        pg->nameStr, p->nameStr, rgb);
+			RecordPrintf("PARAMETER %s %s %ld\n",
+			             pg->nameStr, p->nameStr, rgb);
 			break;
 		case PD_FLOAT:
-			fprintf(macroFile, "PARAMETER %s %s %0.3f\n", pg->nameStr, p->nameStr,
-			        *(FLOAT_T*)p->valueP);
+			RecordPrintf("PARAMETER %s %s %0.3f\n", pg->nameStr, p->nameStr,
+			             *(FLOAT_T*)p->valueP);
 			break;
 		case PD_STRING:
-			fprintf(macroFile, "PARAMETER %s %s %s\n", pg->nameStr, p->nameStr,
-			        (char*)p->valueP);
+			RecordPrintf("PARAMETER %s %s %s\n", pg->nameStr, p->nameStr,
+			             (char*)p->valueP);
 			break;
 		case PD_MESSAGE:
 		case PD_BUTTON:
@@ -110,7 +111,7 @@ void FormGroupRecord(
 		}
 	}
 	if (pg->nameStr) {
-		fprintf(macroFile, "PARAMETER GROUP %s\n", pg->nameStr);
+		RecordPrintf("PARAMETER GROUP %s\n", pg->nameStr);
 	}
 	fflush(macroFile);
 }
@@ -123,7 +124,7 @@ FormMacroRecord(char* format, ...)
 		va_list args;
 
 		va_start(args, format);
-		vfprintf(macroFile, format, args);
+		RecordVPrintf(format, args);
 		va_end(args);
 
 		fflush(macroFile);

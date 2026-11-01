@@ -20,5 +20,5 @@
 #include <stdbool.h>
 char *Convert2UTF8(char *string);
 bool RequiresConvToUTF8(char *string);
-void ConvertUTF8ToSystem(unsigned char *in);
+void ConvertUTF8ToSystem(char *in);
 #endif // HAVE_UTF8CONVERT_H

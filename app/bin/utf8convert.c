@@ -41,7 +41,7 @@ Convert2UTF8( char *string )
 {
 	if (RequiresConvToUTF8(string)) {
 		size_t cnt = strlen(string) * 2 + 2;
-		unsigned char *out = MyMalloc(cnt);
+		char *out = MyMalloc(cnt);
 		wSystemToUTF8(string, out, (unsigned int)cnt);
 		MyFree(string);
 		return(out);
@@ -59,11 +59,11 @@ Convert2UTF8( char *string )
  */
 
 void
-ConvertUTF8ToSystem(unsigned char *in)
+ConvertUTF8ToSystem(char *in)
 {
 	if (wIsUTF8(in)) {
 		size_t cnt = strlen(in) * 2 + 2;
-		unsigned char *out = MyMalloc(cnt);
+		char *out = MyMalloc(cnt);
 		wUTF8ToSystem(in, out, (unsigned int)cnt);
 		strcpy(in, out);
 		MyFree(out);

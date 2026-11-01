@@ -89,9 +89,9 @@ static dynArr_t menuTrace_da;
 static void DoMenuTrace(wMenu_p menu, const char * label, void * data)
 {
 	if (recordF) {
-		fprintf(recordF, "MOUSE 1 %0.3f %0.3f\n", oldMarker.x, oldMarker.y);
-		fprintf(recordF, "MENU %0.3f %0.3f \"%s\" \"%s\"\n", oldMarker.x,
-		        oldMarker.y, (char*) data, label);
+		RecordPrintf("MOUSE 1 %0.3f %0.3f\n", oldMarker.x, oldMarker.y);
+		RecordPrintf("MENU %0.3f %0.3f \"%s\" \"%s\"\n", oldMarker.x,
+		             oldMarker.y, (char*) data, label);
 	}
 }
 

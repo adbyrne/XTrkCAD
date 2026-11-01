@@ -881,7 +881,6 @@ static int NearestScaleInx(DIST_T scale, BOOL_T larger)
 
 void DoNewScale(DIST_T scale)
 {
-	char tmp[20];
 
 	static BOOL_T in_use = 0; /* lock for recursion to avoid additional setting */
 
@@ -909,11 +908,10 @@ void DoNewScale(DIST_T scale)
 	SetMainSize();
 	PanHere(I2VP(1));
 	LOG(log_zoom, 1, ("center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y))
-	snprintf(tmp, sizeof(tmp), "%0.3f", mainD.scale);
-	wPrefSetString("draw", "zoom", tmp);
+	wPrefSetFloat("draw", "zoom", mainD.scale);
 	if (recordF) {
-		fprintf(recordF, "ORIG %0.3f %0.3f %0.3f\n", mainD.scale, mainD.orig.x,
-		        mainD.orig.y);
+		RecordPrintf("ORIG %0.3f %0.3f %0.3f\n", mainD.scale, mainD.orig.x,
+		             mainD.orig.y);
 	}
 	in_use = 0; /* release lock */
 }
