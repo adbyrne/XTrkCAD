@@ -49,6 +49,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.msystem }}
+          suppress-deprecation-warnings: msystem-mingw64
           update: false
           # pacboy's ":p" adds the environment's package prefix
           # (mingw-w64-x86_64-*, mingw-w64-ucrt-x86_64-*).

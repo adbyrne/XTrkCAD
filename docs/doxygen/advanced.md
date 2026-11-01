@@ -517,7 +517,10 @@ podman run --rm -v "$PWD:/src:ro,z" ubuntu:26.04 \
 Background on Windows' run-time differences and the ZIP's layout: \ref windows.
 
 The Windows packages are the ZIPs from `package-windows`, one per MSYS2 environment (MINGW64
-and UCRT64, \ref windows-package). Users install one by unpacking it anywhere. The
+and UCRT64, \ref windows-package). MSYS2 deprecates MINGW64, but it stays the standard
+package until after 5.4.0 (Development Issues #34), so every `setup-msys2` step that can run it
+passes `suppress-deprecation-warnings: msystem-mingw64` to keep that warning out of the run
+annotations. Drop the input together with MINGW64. Users install one by unpacking it anywhere. The
 `install-test-windows` job runs once per variant: `tools/package-install-test-windows.ps1` on a
 fresh `windows-2025` runner. The script unpacks the ZIP into a directory whose name contains a
 space and runs the program with only the Windows system directories on `PATH`. Without that,
