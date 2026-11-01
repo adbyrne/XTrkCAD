@@ -37,6 +37,7 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           queries: security-extended
+          build-mode: manual
 
       - name: Configure and build
         run: |

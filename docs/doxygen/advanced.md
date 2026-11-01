@@ -206,6 +206,8 @@ Every report-only job's findings land as a downloadable artifact on the workflow
 page (Actions tab → the run → Artifacts); each job's own "Upload findings"/"Upload warning log"
 step names it. **CodeQL** is a separate workflow (`codeql.yml`) — it runs on push/PR and a weekly
 Monday cron, and its results show up in the repo's Security tab rather than as an artifact.
+It sets `build-mode: manual` because it builds the tree itself with CMake; leaving the mode
+unset made CodeQL warn on every run that it couldn't build an overlay database.
 
 Five of these (`coverage`, `cppcheck-deep`, `clang-tidy`, `codespell`, and `compiler-warnings` with
 its macOS and Windows variants) are additionally published as permanent, browsable HTML at
@@ -517,7 +519,10 @@ podman run --rm -v "$PWD:/src:ro,z" ubuntu:26.04 \
 Background on Windows' run-time differences and the ZIP's layout: \ref windows.
 
 The Windows packages are the ZIPs from `package-windows`, one per MSYS2 environment (MINGW64
-and UCRT64, \ref windows-package). Users install one by unpacking it anywhere. The
+and UCRT64, \ref windows-package). MSYS2 deprecates MINGW64, but it stays the standard
+package until after 5.4.0 (Development Issues #34), so every `setup-msys2` step that can run it
+passes `suppress-deprecation-warnings: msystem-mingw64` to keep that warning out of the run
+annotations. Drop the input together with MINGW64. Users install one by unpacking it anywhere. The
 `install-test-windows` job runs once per variant: `tools/package-install-test-windows.ps1` on a
 fresh `windows-2025` runner. The script unpacks the ZIP into a directory whose name contains a
 space and runs the program with only the Windows system directories on `PATH`. Without that,
