@@ -206,8 +206,6 @@ Every report-only job's findings land as a downloadable artifact on the workflow
 page (Actions tab → the run → Artifacts); each job's own "Upload findings"/"Upload warning log"
 step names it. **CodeQL** is a separate workflow (`codeql.yml`) — it runs on push/PR and a weekly
 Monday cron, and its results show up in the repo's Security tab rather than as an artifact.
-It sets `build-mode: manual` because it builds the tree itself with CMake; leaving the mode
-unset made CodeQL warn on every run that it couldn't build an overlay database.
 
 Five of these (`coverage`, `cppcheck-deep`, `clang-tidy`, `codespell`, and `compiler-warnings` with
 its macOS and Windows variants) are additionally published as permanent, browsable HTML at
