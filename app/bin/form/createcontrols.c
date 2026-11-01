@@ -98,7 +98,7 @@ static void ChoicePush(long valL, void* dp)
 	paramData_p p = (paramData_p)dp;
 
 	if (DO_MACRO_RECORD(p)) {
-		FormMacroRecord("PARAMETER %s %s\n",
+		FormMacroRecord("PARAMETER %s %s %ld\n",
 		                p->group->nameStr, p->nameStr, valL);
 	}
 

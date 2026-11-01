@@ -93,6 +93,39 @@ static paramGroup_t recordPG = {"record", PGO_FULLDIALOGFROMBUILDER, recordPLs,
                                 COUNT(recordPLs)
                                };
 
+/**
+ * Write to the recording. Numbers are formatted in the C locale so the
+ * recording plays back regardless of the user's locale.
+ *
+ * \param format IN printf style format
+ * \param args IN arguments for format
+ */
+
+EXPORT void RecordVPrintf(const char *format, va_list args)
+{
+	if (recordF == NULL) {
+		return;
+	}
+	SetCLocale();
+	vfprintf(recordF, format, args);
+	SetUserLocale();
+}
+
+/**
+ * Write to the recording, see RecordVPrintf().
+ *
+ * \param format IN printf style format
+ */
+
+EXPORT void RecordPrintf(const char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	RecordVPrintf(format, args);
+	va_end(args);
+}
+
 #ifndef WINDOWS
 #include <sys/time.h>
 
@@ -112,7 +145,7 @@ static void ComputePause(void)
 		msecs = 5000;
 	}
 	if (msecs > 1) {
-		fprintf(recordF, "PAUSE %ld\n", msecs);
+		RecordPrintf("PAUSE %ld\n", msecs);
 	}
 	lastTim = tim;
 }
@@ -141,7 +174,7 @@ static void ComputePause(void)
 		msecs = 5000;
 	}
 	if (msecs > 1) {
-		fprintf(recordF, "PAUSE %ld\n", msecs);
+		RecordPrintf("PAUSE %ld\n", msecs);
 	}
 	lastTim = tim;
 }
@@ -163,9 +196,9 @@ EXPORT void RecordMouse(const char *name, wAction_t action, POS_T px, POS_T py)
 	}
 	keyState = wGetKeyState();
 	if (keyState) {
-		fprintf(recordF, "KEYSTATE %d\n", keyState);
+		RecordPrintf("KEYSTATE %d\n", keyState);
 	}
-	fprintf(recordF, "%s %d %0.3f %0.3f\n", name, (int)action, px, py);
+	RecordPrintf("%s %d %0.3f %0.3f\n", name, (int)action, px, py);
 	fflush(recordF);
 }
 
@@ -184,23 +217,25 @@ EXPORT int StartRecord(int cnt, char **pathName, void *context)
 		return FALSE;
 	}
 	time(&clock);
-	fprintf(recordF, "# %s Version: %s, Date: %s\n", sProdName, sVersion,
-	        ctime(&clock));
-	fprintf(recordF, "VERSION %d\n", iParamVersion);
-	fprintf(recordF, "ROOMSIZE %0.1f x %0.1f\n", mapD.size.x, mapD.size.y);
-	fprintf(recordF, "SCALE %s\n", curScaleName);
-	fprintf(recordF, "ORIG %0.3f %0.3f %0.3f\n", mainD.scale, mainD.orig.x,
-	        mainD.orig.y);
+	RecordPrintf("# %s Version: %s, Date: %s\n", sProdName, sVersion,
+	             ctime(&clock));
+	RecordPrintf("VERSION %d\n", iParamVersion);
+	RecordPrintf("ROOMSIZE %0.1f x %0.1f\n", mapD.size.x, mapD.size.y);
+	RecordPrintf("SCALE %s\n", curScaleName);
+	RecordPrintf("ORIG %0.3f %0.3f %0.3f\n", mainD.scale, mainD.orig.x,
+	             mainD.orig.y);
 	if (logClock != 0) {
-		fprintf(recordF, "# LOG CLOCK %s\n", ctime(&logClock));
+		RecordPrintf("# LOG CLOCK %s\n", ctime(&logClock));
 	}
 	if (logTable_da.cnt > 11) {
 		lprintf("StartRecord( %s ) @ %s\n", pathName, ctime(&clock));
 	}
 	FormStartRecord(recordF);
+	SetCLocale();
 	WriteTracks(recordF, TRUE);
 	WriteLayers(recordF);
-	fprintf(recordF, "REDRAW\n");
+	SetUserLocale();
+	RecordPrintf("REDRAW\n");
 	fflush(recordF);
 	wTextClear(recordT);
 	wShow(recordW);
@@ -215,9 +250,9 @@ static void DoRecordButton(void *context)
 
 	switch ((int)VP2L(context)) {
 	case 0: /* Stop */
-		fprintf(recordF, "CLEAR\nMESSAGE\n");
-		fprintf(recordF, N_("End of Playback.  Hit Step to exit\n"));
-		fprintf(recordF, "%s\nSTEP\n", END_MESSAGE);
+		RecordPrintf("CLEAR\nMESSAGE\n");
+		RecordPrintf("%s", N_("End of Playback.  Hit Step to exit\n"));
+		RecordPrintf("%s\nSTEP\n", END_MESSAGE);
 		fclose(recordF);
 		recordF = NULL;
 		FormStartRecord(NULL);
@@ -225,7 +260,7 @@ static void DoRecordButton(void *context)
 		break;
 
 	case 1: /* Step */
-		fprintf(recordF, "STEP\n");
+		RecordPrintf("STEP\n");
 		break;
 
 	case 4: /* End */
@@ -240,7 +275,7 @@ static void DoRecordButton(void *context)
 				len--;
 			}
 			cp[len] = '\0';
-			fprintf(recordF, "%s\n%s\nSTEP\n", cp, END_MESSAGE);
+			RecordPrintf("%s\n%s\nSTEP\n", cp, END_MESSAGE);
 			MyFree(cp);
 			recordingMessage = FALSE;
 		}
@@ -253,7 +288,7 @@ static void DoRecordButton(void *context)
 		break;
 
 	case 2: /* Message */
-		fprintf(recordF, "MESSAGE\n");
+		RecordPrintf("MESSAGE\n");
 		wTextSetReadonly(recordT, FALSE);
 		wTextClear(recordT);
 		recordingMessage = TRUE;
@@ -264,12 +299,12 @@ static void DoRecordButton(void *context)
 		break;
 
 	case 3: /* Pause */
-		fprintf(recordF, "BIGPAUSE\n");
+		RecordPrintf("BIGPAUSE\n");
 		fflush(recordF);
 		break;
 
 	case 5: /* CLEAR */
-		fprintf(recordF, "CLEAR\n");
+		RecordPrintf("CLEAR\n");
 		fflush(recordF);
 		wTextClear(recordT);
 		break;
@@ -1635,6 +1670,8 @@ static int StartPlayback(int cnt, char **pathName, void *context)
 		CreateDemoW();
 	}
 	wButtonSetLabel(demoNext, _("Sa_ve"));
+	wTooltipSetText((wControl_p)demoNext,
+	                _("Save the layout built by the playback"));
 	wControlShow((wControl_p)demoBack, FALSE);
 	PlaybackSetup();
 	curDemo = -1;
@@ -1656,7 +1693,6 @@ static void DemoFinish(const void *demoPGp)
 		// We're waiting for the user to press 'Step'
 		PlaybackQuit();
 	}
-	SetUserLocale();
 }
 
 
@@ -1833,6 +1869,7 @@ static void DoDemo(void *demoNumber)
 		CreateDemoW();
 	}
 	wButtonSetLabel(demoNext, _("_Next"));
+	wTooltipSet((wControl_p)demoNext, demoPG.nameStr, "next");
 	wControlShow((wControl_p)demoBack, TRUE);
 	curDemo = (int)VP2L(demoNumber);
 	if (curDemo < 0 || curDemo >= demoList_da.cnt) {

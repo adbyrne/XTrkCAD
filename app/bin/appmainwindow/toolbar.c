@@ -551,16 +551,7 @@ static void
 SaveToolbarConfig(void)
 {
 	wPrefSetInteger(TOOLBAR_SECTION, TOOLBAR_VISIBLE, toolbarSet);
-	if (recordF)
-		fprintf(recordF, "PARAMETER %s %s %ld", TOOLBAR_SECTION,
-		        TOOLBAR_VISIBLE, toolbarSet);
-
 	wPrefSetInteger(TOOLBAR_SECTION, TOOLBAR_LAYER_BUTTONS, layerCount);
-
-	if (recordF)
-		fprintf(recordF, "PARAMETER %s %s %ld", TOOLBAR_SECTION,
-		        TOOLBAR_LAYER_BUTTONS, layerCount);
-
 }
 
 static char* resourceFiles[] = { "icons16.gresource",
@@ -604,20 +595,9 @@ ToolbarLoadConfig(void)
 	// unused but saved to stay compatible
 	wPrefSetInteger(TOOLBAR_SECTION, "max-toolbarset", maxToolbarSet);
 
-	if (recordF)
-		fprintf(recordF, "PARAMETER %s %s %lX -> %lX", TOOLBAR_SECTION,
-		        TOOLBAR_VISIBLE, toolbarSetIni, toolbarSet);
-
-
 	wPrefGetInteger(TOOLBAR_SECTION, TOOLBAR_LAYER_BUTTONS, &layerCount, 10);
-	if (recordF)
-		fprintf(recordF, "PARAMETER %s %s -> %ld", TOOLBAR_SECTION,
-		        TOOLBAR_LAYER_BUTTONS, layerCount);
 
 	wPrefGetInteger("pref", "iconsize", &iconSize, 0);
-	if (recordF)
-		fprintf(recordF, "PARAMETER %s %s -> %ld", "pref",
-		        "iconsize", iconSize);
 
 	LoadIconResource(iconSize);
 }
