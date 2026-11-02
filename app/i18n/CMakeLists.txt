@@ -39,11 +39,13 @@ mark_as_advanced(xtc_xgettext xtc_msginit xtc_msgmerge
 # Custom string extractor utility
 add_executable(stripmsg stripmsg.c)
 
-# Create custom message files list
+# Create custom message files list. Only search app/: from the source root the
+# glob also finds the installed copies in an in-tree build directory, whose
+# stale text would end up in the .pot.
 file(GLOB_RECURSE xtc_custom_msg_files
-	${XTrkCAD_SOURCE_DIR}/*.xtq
-	${XTrkCAD_SOURCE_DIR}/*.xtr
-	${XTrkCAD_SOURCE_DIR}/*.tip)
+	${XTrkCAD_SOURCE_DIR}/app/*.xtq
+	${XTrkCAD_SOURCE_DIR}/app/*.xtr
+	${XTrkCAD_SOURCE_DIR}/app/*.tip)
 
 # Extract translatable strings from custom message files to one temporary file
 add_custom_target(
@@ -138,7 +140,7 @@ add_custom_command(
 			-d ${GETTEXT_PACKAGE}
 			-F
 			-o ${potfile}
-			--from-code=ISO-8859-15 ${xgt_source_files}
+			--from-code=UTF-8 ${xgt_source_files}
 	DEPENDS custmsg msgfiles tooltips ${ui_source_files}
 	WORKING_DIRECTORY ${i18n_SOURCE_DIR}
 )

@@ -164,7 +164,7 @@ static struct {
 static void
 DeleteTag(void *context )
 {
-	int thisTag = (int)((long)context);
+	int thisTag = (int)VP2L(context);
 	paramData_p menuItem = carInvPLs+sortorder.carInvSort[thisTag];
 
 	if(sortorder.criteria == 0 || thisTag >= sortorder.criteria) {
@@ -189,7 +189,7 @@ DeleteTag(void *context )
 static void
 SelectOrder(void *context)
 {
-	unsigned sortby = (unsigned int )((long)context);
+	unsigned sortby = (unsigned int)VP2L(context);
 
 	if(sortorder.criteria < MAX_SORT_CRITERIA) {
 		const char *label;

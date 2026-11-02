@@ -34,7 +34,9 @@
 #define MAX_FILES 500
 #ifdef _WIN32
 #define WIKIFORMATOPTION "/w"
+#ifdef _MSC_VER
 #pragma warning( disable : 4996 )
+#endif
 #else
 #define WIKIFORMATOPTION "-w"
 #endif
