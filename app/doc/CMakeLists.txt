@@ -74,7 +74,7 @@ if(DOXYGEN_FOUND)
 
 	# Apple Help Book packaging (XTRKCAD_USE_APPLEHELP) is a separate, non-default
 	# help viewer from the browser-based wHelp() the real release ships on every
-	# platform including macOS (XTRKCAD_USE_APPLEHELP=OFF in release.yml, see
+	# platform including macOS (XTRKCAD_USE_APPLEHELP is OFF by default, see
 	# app/wlib/gtk3lib/CMakeLists.txt) -- only build/install the Help Book bundle
 	# when that viewer is actually enabled, not on every APPLE build.
 	if (APPLE AND XTRKCAD_USE_APPLEHELP)

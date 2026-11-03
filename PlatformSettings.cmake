@@ -29,7 +29,10 @@ if(UNIX)
     if(APPLE)
         set(CMAKE_MACOSX_RPATH 0)
 	    set(XTRKCAD_USE_GETTEXT_DEFAULT OFF)
-	    set(XTRKCAD_USE_APPLEHELP_DEFAULT ON)
+	    # Help opens in the default browser, as in the packages. Apple
+	    # Help (osxhelp.c) needs an installed .app bundle with a registered
+	    # Help Book, so a plain build had no working Help (Dev Issues #64).
+	    set(XTRKCAD_USE_APPLEHELP_DEFAULT OFF)
 		set(CMAKE_FIND_APPBUNDLE LAST)
 	    set(XTRKCAD_USE_BROWSER_DEFAULT ON)
     else()
