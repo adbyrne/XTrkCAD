@@ -99,6 +99,14 @@ target_include_directories(textpositiontest
 )
 add_test(TextPositionTest textpositiontest)
 
+# These tests create GTK widgets, so they need a display (CI runs them under
+# xvfb-run). Jobs without one, and the ASan/Valgrind jobs, where GTK's own
+# allocations show up as leaks, leave them out with -LE gtk-display. Label any
+# new test here that calls into GTK.
+set_tests_properties(PreferenceTest MRUListTest TextPositionTest
+	PROPERTIES LABELS gtk-display
+)
+
 set_target_properties(
 	textpositiontest
  	PROPERTIES FOLDER UnitTestsWLib

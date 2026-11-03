@@ -128,7 +128,7 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
 - **`c-tests-linux`, `c-tests-arm64`, `c-tests-debian`, `c-tests-linux-clang`,
   `c-tests-macos`, `c-tests-windows`, `c-tests-sanitizers`, `c-tests-valgrind`** — build
   plus `ctest` across compilers (GCC, Clang, AppleClang, MinGW GCC), platforms, and architectures, plus ASan/UBSan and
-  Valgrind runs (`PreferenceTest` and `MRUListTest` excluded from both — see
+  Valgrind runs (tests labelled `gtk-display` excluded from both — see
   \ref advanced-optional-local-checks "Advanced/optional local checks" in the
   \ref index "Developer Documentation" page for why). All pass `-LE regression` so the demo
   regression suite (see `regression-gtk3` below) isn't picked up here too. `c-tests-debian` runs
