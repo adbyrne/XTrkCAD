@@ -765,10 +765,11 @@ static void NewStructure( void )
 	struct extraDataCompound_t *xx;
 	wIndex_t pierInx;
 
-	CHECK( curStructure->segCnt >= 1 );
-	if (Dst.state == 0) {
+	/* Nothing placed, or no structure loaded (Dev Issues #63) */
+	if (Dst.state == 0 || curStructure == NULL) {
 		return;
 	}
+	CHECK( curStructure->segCnt >= 1 );
 	if (curStructure->special == TOpierInfo &&
 	    curStructure->u.pierInfo.cnt>1 &&
 	    wListGetIndex(pierL) == -1) {
