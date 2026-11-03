@@ -2922,6 +2922,7 @@ static void NewTurnOk( const void * context )
 	pp=LoadSegs( curDesign, TRUE );
 	if ( pp == NULL ) {
 		SetUserLocale();
+		FormDialogKeepOpen( &turnDesignPG );
 		return;
 	}
 

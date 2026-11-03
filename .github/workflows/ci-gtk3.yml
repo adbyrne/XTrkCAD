@@ -298,15 +298,15 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Test under Valgrind
-        # PreferenceTest and MRUListTest (SF #794) both require a GTK3 display;
-        # GTK3 internals also trigger many Valgrind false-positives. Both are
-        # covered by c-tests-linux, which runs under xvfb-run.
+        # -LE gtk-display: the GTK widget tests (PreferenceTest, MRUListTest,
+        # TextPositionTest; labelled in app/wlib/gtk3lib/unittests) need a
+        # display, and GTK3 internals trigger many Valgrind false positives.
+        # c-tests-linux runs them under xvfb-run.
         # -LE regression: see c-tests-linux; the GTK3 issue #26 suite has its
         # own job (regression-gtk3), not Valgrind-instrumented.
         run: |
           ctest --test-dir build --output-on-failure \
-            -E "PreferenceTest|MRUListTest" \
-            -LE regression \
+            -LE "regression|gtk-display" \
             -T memcheck \
             --overwrite "MemoryCheckCommand=$(which valgrind)" \
             --overwrite "MemoryCheckCommandOptions=--error-exitcode=1 --track-origins=yes --leak-check=full"

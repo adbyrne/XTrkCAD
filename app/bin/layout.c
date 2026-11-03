@@ -543,9 +543,6 @@ static wBool_t file_changed;
 bool haveBackground = false;
 BOOL_T backgroundVisible = TRUE;
 
-/**  \todo why use a global here that is never changed */
-char * noname = "";
-
 wControl_p backgroundB;
 
 /**
@@ -626,10 +623,10 @@ EXPORT int LoadImageFile(
         void * data )
 {
 	if (files >0) {
-		SetLayoutBackGroundFullPath( strdup(fileName[0]) );
+		SetLayoutBackGroundFullPath( fileName[0] );
 
 		if (!LoadBackGroundImage()) {
-			SetLayoutBackGroundFullPath(noname);
+			SetLayoutBackGroundFullPath("");
 			backgroundVisible = FALSE;
 		} else {
 			backgroundVisible = TRUE;
@@ -642,7 +639,7 @@ EXPORT int LoadImageFile(
 			MainRedraw();
 		}
 	} else {
-		SetLayoutBackGroundFullPath(noname);
+		SetLayoutBackGroundFullPath("");
 		backgroundVisible = FALSE;
 	}
 	wControlActive((wControl_p)backgroundB, backgroundVisible);
@@ -691,7 +688,7 @@ static void ImageFileBrowse( void * unused )
 */
 static void ImageFileClear( void * unused)
 {
-	SetLayoutBackGroundFullPath(noname);
+	SetLayoutBackGroundFullPath("");
 	wDrawSetBackground(  mainD.d, NULL, NULL);
 	SetName();
 	wControlActive((wControl_p)backgroundB, FALSE);
@@ -1027,7 +1024,7 @@ void
 LayoutBackGroundInit(BOOL_T clear)
 {
 	if (clear) {
-		SetLayoutBackGroundFullPath(noname);
+		SetLayoutBackGroundFullPath("");
 		SetLayoutBackGroundPos(zero);
 		SetLayoutBackGroundAngle(0.0);
 		SetLayoutBackGroundScreen(0);
@@ -1041,7 +1038,7 @@ LayoutBackGroundInit(BOOL_T clear)
 	if (str && str[0]) {
 		haveBackground = true;
 		if (!LoadBackGroundImage()) {    //Failed -> Wipe Out
-			SetLayoutBackGroundFullPath(noname);
+			SetLayoutBackGroundFullPath("");
 			SetLayoutBackGroundPos(zero);
 			SetLayoutBackGroundAngle(0.0);
 			SetLayoutBackGroundScreen(0);

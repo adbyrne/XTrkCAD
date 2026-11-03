@@ -98,22 +98,17 @@ The <b>Display</b> dialog is invoked from the Options (\ref optionM) menu
 
 ![](displayopt.png)
 
-The <b>Display</b> dialog contains items which control the display of objects on the Main window.
+The <b>Display</b> dialog contains items which control the display of objects on the Main window. It is broken up into tabs specific to Drawing, Labels, Map, and Train Running.
 
-- <b>Auto Pan</b> - if enabled, dragging near the edge of the Main Canvas (\ref mainW) will cause the canvas to move to follow the mouse.
-
-- <b>Car Labels</b> - controls the grouping and display of <b>Cars</b> on the <b>Hot Bar</b> (\ref cmdHotBar) during the <b>Train</b> (\ref cmdTrain) command.  This can be a combination of <b>Prototype</b>, <b>Manufacturer</b>, <b>Part Number</b> and <b>Item</b>.
+The <b>Drawing</b> tab has these settings:
 
 - <b>Color Tracks</b> - when set to layers, tracks are drawn with color of the layer (\ref cmdLayer) they belong to and not the normal track color.
 This can be disabled in the Layer dialog's View tab for each Layer by unchecking the <b>Use Layer Color</b> checkbox.
 
-- <b>Color Draws</b> - when set to layers, non-tracks (lines, table edges and structures) are drawn with color of the layer (\ref cmdLayer) they belong to rather than based on thier own object setting.
+- <b>Color Draw</b> - when set to layers, non-tracks (lines, table edges and structures) are drawn with color of the layer (\ref cmdLayer) they belong to rather than based on their own object setting.
 This can be disabled in the Layer dialog's View tab for each Layer by unchecking the <b>Use Layer Color</b> checkbox.
 
-- <b>Constrain Drawing Area to Room Boundaries</b> - when Zooming and moving the Main Canvas (\ref mainW) may show areas beyond the boundaries of the room.
-Setting this option constrains the Main Canvas to minimize these areas (the <b>grey</b> area).
-
-- <b>Dont Hide System Cursor</b> - when XTrackCAD substitutes a specialized cursor to show actions that will occur (or are occuring) it will normallly hide the System Cursor.  This option suppresses this behaviour and leaves the system cursor in place.
+- <b>Draw Tunnel</b> - how to draw hidden tracks (\ref cmdTunnel), either not at all, as dashed lines or as normal solid lines (which might be faster).
 
 - <b>Draw EndPts</b> - when to draw endpoints between connected track: never, only for turnouts or for all tracks.
 
@@ -123,39 +118,58 @@ Setting this option constrains the Main Canvas to minimize these areas (the <b>g
 
 - <b>Draw Centers</b> - enable or disable drawing of center markings (ie. crosshairs) for curved track.
 
-- <b>Draw Tunnel</b> - how to draw hidden tracks (\ref cmdTunnel), either not at all, as dashed lines or as normal solid lines (which might be faster).
+- <b>Two Rail Scale</b> - draw tracks using two lines when the drawing Scale is smaller than this value.
 
-- <b>Hide Trains On Hidden Track</b> - controls whether trains (\ref cmdTrain) on invisible layers (\ref cmdLayer) or hidden tracks (\ref cmdTunnel) (if hidden tracks are not drawn) are displayed.
+- <b>Constrain Drawing Area to Room Boundaries</b> - when Zooming and moving the Main Canvas (\ref mainW) may show areas beyond the boundaries of the room.
+Setting this option constrains the Main Canvas to minimize these areas (the <b>grey</b> area).
 
-- <b>Hot Bar Labels</b> - controls the format of titles for objects on the <b>Hot Bar</b> (\ref cmdHotBar).
+![](displayoptlabels.png)
+
+The <b>Labels</b> tab has these settings:
 
 - <b>Label Enable</b> - individual control over whether to display various types of labels.  You may want to turn some of these off if your layout is too cluttered.
 
-  - <i>Cars</i> - Reporting mark labels on cars - the content shown on the Cars label is either the Repmarks (if the Rep Number is set), or the car index number (with a "#" before it). See the Car Part dialog \ref carpart.
-
-  - <i>EndPt Elevations</i> - Elevation markers attached to endpoints.
+  - <i>Track Descriptions</i> - Title of each turnout and sectional track, optional details of each piece of Flexible Track. These can be shown or hidden using the Move Description \ref cmdMoveLabel command.
 
   - <i>Lengths</i> - Length of flex-track attached to ends of turnouts all the way to the next turnout.
 
-  - <i>Track Descriptions</i> - Title of each turnout and sectional track, optional details of each piece of Flexible Track. These can be shown or hidden using the Move Description \ref cmdMoveLabel command.
+  - <i>EndPt Elevations</i> - Elevation markers attached to endpoints.
 
   - <i>Track Elevations</i> - Computed elevations at the center of each track.
 
-- <b>Label Font Size</b> - controls font size for Labels on layout.
-
-- <b>Layout Labels</b> - controls the format of titles for Turnouts and Structures displayed on the Layout.
+  - <i>Cars</i> - Reporting mark labels on cars - the content shown on the Cars label is either the Repmarks (if the Rep Number is set), or the car index number (with a "#" before it). See the Car Part dialog \ref carpart.
 
 - <b>Label Scale</b> - the program will draw labels only when the drawing Scale is smaller or equal to this value.
 
+- <b>Label Font Size</b> - controls font size for Labels on layout.
+
+- <b>Hot Bar Labels</b> - controls the format of titles for objects on the <b>Hot Bar</b> (\ref cmdHotBar).
+
+- <b>Layout Labels</b> - controls the format of titles for Turnouts and Structures displayed on the Layout.
+
 - <b>List Labels</b> - controls the format of titles for turnouts and structures displayed in lists (such as the <b>Parts List</b> (\ref cmdEnum)).
+
+- <b>Car Labels</b> - controls the grouping and display of <b>Cars</b> on the <b>Hot Bar</b> (\ref cmdHotBar) during the <b>Train</b> (\ref cmdTrain) command.  This can be a combination of <b>Prototype</b>, <b>Manufacturer</b>, <b>Part Number</b> and <b>Item</b>.
+
+- <b>Dont Hide System Cursor</b> - when XTrackCAD substitutes a specialized cursor to show actions that will occur (or are occuring) it will normallly hide the System Cursor.  This option suppresses this behaviour and leaves the system cursor in place.
+
+![](displayoptmap.png)
+
+The <b>Map</b> tab has these settings:
 
 - <b>Live Map</b> - if checked then the Main Window (\ref mainW) will be updated as you drag on the <b>Map Window</b> (\ref cmdMap).  Note that this can be slow.
 
+- <b>Auto Pan</b> - if enabled, dragging near the edge of the Main Canvas (\ref mainW) will cause the canvas to move to follow the mouse.
+
 - <b>Map Scale</b> - scale of the Map (\ref cmdMap) window.  Increase this value to make the <b>Map</b> window smaller when working with large layouts.  <b>Note:</b> you cannot make the <b>Map</b> window larger than the screen.
 
-- <b>Train Update Delay</b> - number of milliseconds between updates in the <b>Train Simulation</b> (\ref cmdTrain) mode.  A lower value will generate a smoother display but reduces system responsiveness.
+![](displayopttrain.png)
 
-- <b>Two Rail Scale</b> - draw tracks using two lines when the drawing Scale is smaller than this value.
+The <b>Train Running</b> tab has these settings:
+
+- <b>Hide Trains On Hidden Track</b> - controls whether trains (\ref cmdTrain) on invisible layers (\ref cmdLayer) or hidden tracks (\ref cmdTunnel) (if hidden tracks are not drawn) are displayed.
+
+- <b>Train Update Delay</b> - number of milliseconds between updates in the <b>Train Simulation</b> (\ref cmdTrain) mode.  A lower value will generate a smoother display but reduces system responsiveness.
 
 */
 
@@ -274,36 +288,52 @@ The font selection dialog allows selection of the font used by the text (\ref cm
 
 The <b>Layout Options</b> dialog, displayed by the Options (\ref optionM) or the File (\ref fileM menu, contains items controlling the current layout.
 
-- ![](layout.png)
+![](layout.png)
 
-- <b>Gauge</b> - Drop down menu used to select track gauge.
+Layout options dialog has tabs for Layout Data, Background, and Restrictions.
 
-- <b>Height</b> - Height of layout drawing which, depending on the <b>Unit</b> setting (English or Metric) established in the <b>Preferences</b> dialog (\ref cmdPref), is measured in inches or centimeters.
+The <b>Layout Data</b> tab has these settings:
 
 - <b>Room Width</b> - Width of layout drawing which, depending on the <b>Unit</b> setting (English or Metric) established in the <b>Preferences</b> dialog (\ref cmdPref), is measured in inches or centimeters.
 
-- <b>Scale</b> - Drop down menu used to select track scale.
+- <b>Height</b> - Height of layout drawing which, depending on the <b>Unit</b> setting (English or Metric) established in the <b>Preferences</b> dialog (\ref cmdPref), is measured in inches or centimeters.
 
 - <b>Title</b> - Two lines that can be used to enter title and subtitle descriptions for the layout. Information entered in these fields will be shown on any printout of your layout design.
 
-- <b>Maximum Track Grade</b> - Specifies maximum track elevation expressed as a percent (%). Tracks with a larger elevation are considered exceptional and drawn in the exception (\ref cmdRgbcolor) color.
+- <b>Scale</b> - Drop down menu used to select track scale.
 
-- <b>Minimum Track Radius</b> - Specifies minimum track radius (in inches or centimeters). Curved tracks with a smaller radius are considered exceptional and drawn in the exception (\ref cmdRgbcolor) color.
+- <b>Gauge</b> - Drop down menu used to select track gauge.
 
-- <b>Background File Name</b> - The last 40 characters of the full file pathname for the image used for a temporary background behind all the drawn objects. It is set using the <b>Browse</b> and reset with the <b>Clear</b> buttons.
+- Named Settings File <b>Save As</b> - Save the current settings to a named settings file (common to all tabs)
+
+- Named Settings File <b>Load</b> - Load settings from a named settings file (common to all tabs)
+
+![](layoutbckgnd.png)
+
+The <b>Background</b> tab has these settings:
+
+- <b>Image</b> file name - The last 40 characters of the full file pathname for the image used for a temporary background behind all the drawn objects. It is set using the <b>Browse</b> and reset with the <b>Clear</b> buttons.
 It is also cleared along with all the other background values after a <b>Open</b> or <b>New</b> command.
 The file is initally specified to be in the local file system. In order to send it along with the layout, use <b>Save As</b> command and specify the <i>Archive</i> \anchor idx_Archive_241  Archive format (\*.xtce).
 This will create a single zipped package file containing the layout and the image file which can be sent and will open on a different system.
 If this has been done, after <b>Open</b> of the archive, the image file path will point into the extracted archive file directory.
 It can be changed to a new local file and the next <b>Save</b> will rebuild the package using the new image file instead of the old one.
 
-- <b>Background Pos X, Y</b> - The offset of the bottom left corner of the background image from the origin (in inches or centimeters) after rotation.
+- <b>Position X, Y</b> - The offset of the bottom left corner of the background image from the origin (in inches or centimeters) after rotation.
 
-- <b>Background Size</b> - The model size (in inches or cm) to scale the base of the background image to (measured from bottom left to bottom right as displayed after any rotation has been applied). Note - A value of 0.0 means that no scaling is applied and the image is shown at its current size in pixels regardless of scale or zoom.
+- <b>Size</b> - The model size (in inches or cm) to scale the base of the background image to (measured from bottom left to bottom right as displayed after any rotation has been applied). Note - A value of 0.0 means that no scaling is applied and the image is shown at its current size in pixels regardless of scale or zoom.
 
-- <b>Background Screen</b> - The amount of screening (from 0 to 100%) to apply to the background image. Screening allows objects drawn over the image to be seen more clearly. 0 means no screening, while 100% means noting will be shown.
+- <b>Angle</b> - The rotation angle to apply to the background image (in degrees) about its center before it is moved so that its bottom left corner is offset by the <b>Position</b> setting.
 
-- <b>Background Angle</b> - The rotation angle to apply to the background image (in degrees) about its center before it is moved so that its bottom left corner is offset by the <b>Background Pos</b> setting.
+- <b>Screen</b> - The amount of screening (from 0 to 100%) to apply to the background image. Screening allows objects drawn over the image to be seen more clearly. 0 means no screening, while 100% means nothing will be shown.
+
+![](layoutrestrict.png)
+
+The <b>Restrictions</b> tab has these settings:
+
+- <b>Min Track Radius</b> - Specifies minimum track radius (in inches or centimeters). Curved tracks with a smaller radius are considered exceptional and drawn in the exception (\ref cmdRgbcolor) color.
+
+- <b>Max Track Grade</b> - Specifies maximum track elevation expressed as a percent (%). Tracks with a larger elevation are considered exceptional and drawn in the exception (\ref cmdRgbcolor) color.
 
 */
 
@@ -349,10 +379,6 @@ This dialog controls some parameters which likely will not be changed frequently
 - <b>Turntable Angle</b> - minimum angle between adjacent tracks connected to a <b>Turntable</b> (\ref cmdTurntable).
 
 - <b>Units</b> - choose between English (inches) or Metric (centimeters) measurements.
-
-- <b>Write Settings</b> - Save the current settings to a named settings file
-
-- <b>Read Settings</b> - Load settings from a named settings file
 
 */
 

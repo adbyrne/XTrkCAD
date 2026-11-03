@@ -627,8 +627,6 @@ wControl_p wMenuBarAdd(
 
 	gtk_widget_show(menuItem);
 
-	/* TODO: why is help not supported here? */
-	/*gtkAddHelpString( m->panel_item, helpStr );*/
 	return m;
 }
 

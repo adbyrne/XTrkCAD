@@ -180,19 +180,6 @@ static bool IntegerPush(const char* value, void* dp)
 	long valL;
 	wBool_t wasInvalid = p->bInvalid;
 
-	// const char* value;
-
-	// \todo Pressing Enter key is handled here, but when does that happen?, see following
-	// functions as well. Function currently gets called on focus loss
-	//if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
-	//	value = wEntryGetValue(p->control);
-	//	p->enter_pressed = TRUE;
-	//}
-	//else {
-	//	value = val;
-	//	p->enter_pressed = FALSE;
-	//}
-
 	valL = FormIntegerGetValue(p, value);
 	if(p->bInvalid) {
 		// LOG(log_form, 1, (" -> InvalidNumber\n"));
@@ -250,15 +237,6 @@ static bool FloatPush(const char* value, void * dp)
 	FLOAT_T valF;
 	wBool_t wasInvalid = p->bInvalid;
 
-	//if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
-	//	value = wEntryGetValue(p->control);
-	//	p->enter_pressed = TRUE;
-	//}
-	//else {
-	//	value = val;
-	//	p->enter_pressed = FALSE;
-	//}
-
 	valF = FormFloatGetValue(p, value);
 	if(p->bInvalid) {
 		/* See the matching comment in IntegerPush: FormCheckInputs re-gates
@@ -306,22 +284,12 @@ static bool FloatPush(const char* value, void * dp)
 static bool StringPush(const char* val, void* dp)
 {
 	paramData_p p = (paramData_p)dp;
-	// const char* value;
 	wBool_t result = FALSE;
 	wBool_t wasInvalid = p->bInvalid;
 
 	if (DO_MACRO_RECORD(p)) {
 		FormMacroRecord("PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val);
 	}
-
-	//if (strlen(val) == 1 && val[strlen(val) - 1] == '\n') {
-	//	value = wEntryGetValue(p->control);
-	//	p->enter_pressed = TRUE;
-	//}
-	//else {
-	//	value = val;
-	//	p->enter_pressed = FALSE;
-	//}
 
 	LOG(log_form, 1, ("StringPush( %s: Enter:%d Val:%s )\n",
 	                  p->nameStr, p->enter_pressed, val));

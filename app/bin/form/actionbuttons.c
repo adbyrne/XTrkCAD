@@ -46,6 +46,19 @@ void FormDialogOkActive(
 	}
 }
 
+/**
+ * Called from a dialog's okProc that rejected the input: the dialog stays
+ * open instead of being hidden after okProc returns, so the user can
+ * correct the values.
+ *
+ * \param pg IN the dialog's group
+ */
+void FormDialogKeepOpen(
+        paramGroup_p pg)
+{
+	pg->keepOpen = TRUE;
+}
+
 #define  FORMCANCEL_NEWUNDO
 #ifdef FORMCANCEL_NEWUNDO
 /* No Cancel button, Command can be undone

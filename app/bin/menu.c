@@ -1855,7 +1855,6 @@ EXPORT void CreateMenus(void)
 	InitCmdDescribe2(changeM);
 	InitCmdPan2(changeM);
 
-	/**  \todo Layers for the toolbar */
 	InitLayers(BG_LAYER);
 
 	cmdGroup = BG_HOTBAR;

@@ -162,7 +162,6 @@ FormLoadDefaultValues(paramGroup_p pg)
 				}
 				break;
 			case PD_LIST:
-			/** \todo Load column widths from preferences */
 			case PD_COMBOLIST:
 				if ((p->option & PDO_LISTINDEX)) {
 					DefaultFromListIndex(pg->nameStr, p->nameStr, prefSectAlternative,

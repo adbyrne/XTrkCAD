@@ -113,26 +113,7 @@ EXPORT char * curSubContents;
 EXPORT dynArr_t paramProc_da;
 
 
-EXPORT char * GetNextLine( void )
-{
-	if (!paramFile) {
-		paramLine[0] = '\0';
-		return NULL;
-	}
-	if (fgets( paramLine, sizeof paramLine, paramFile ) == NULL) {
-		sprintf( message, "INPUT ERROR: premature EOF on %s", paramFileName );
-		wNoticeWithIcon( NT_ERROR, message, _("Ok"), NULL );
-		if ( paramFile ) {
-			fclose( paramFile );
-			paramFile = NULL;
-		}
-	}
-	Stripcr( paramLine );
-	ParamCheckSumLine( paramLine );
-	paramLineNum++;
-	return paramLine;
-}
-
+/* GetNextLine(), IsEND() and ReadMultilineText() are in filelines.c. */
 
 /* InputError() moved to getargs.c (2026-07-11) -- see that file for why. */
 
@@ -148,64 +129,6 @@ EXPORT void SyntaxError(
 
 /* GetArgs() moved to getargs.c (2026-07-11) -- see that file for why. */
 
-
-
-wBool_t IsEND( const char * sEnd )
-{
-	char * cp;
-	wBool_t bAllowNakedENDs = paramVersion < VERSION_NONAKEDENDS;
-	for ( cp = paramLine; *cp && (isspace( *cp ) || *cp == '\t'); cp++ );
-	if ( strncmp( cp, sEnd, strlen(sEnd) ) == 0 ) {
-		cp += strlen( sEnd );
-	} else if ( bAllowNakedENDs && strncmp( cp, "END", 3 ) == 0 ) {
-		cp += 3;
-	} else {
-		return FALSE;
-	}
-	for ( ; *cp && isspace( *cp ); cp++ );
-	if ( *cp != '\0' ) {
-		return FALSE;
-	}
-	return TRUE;
-}
-
-
-/**
- * Read the text for a note/car. Lines are read from the input file
- * until the END statement is found.
- *
- * \todo Handle premature end as an error
- *
- * \return pointer to string, has to be myfree'd by caller
- */
-
-char *
-ReadMultilineText()
-{
-	char *string;
-	DynString noteText;
-	DynStringMalloc(&noteText, 0);
-	char *line;
-
-	line = GetNextLine();
-
-	while ( !IsEND("END") ) {
-		DynStringCatCStr(&noteText, line);
-		DynStringCatCStr(&noteText, "\n");
-		line = GetNextLine();
-	}
-	string = MyStrdup(DynStringToCStr(&noteText));
-	string[strlen(string) - 1] = '\0';
-
-#ifdef UTFCONVERT
-	if (wIsUTF8(string)) {
-		ConvertUTF8ToSystem(string);
-	}
-#endif // UTFCONVERT
-
-	DynStringFree(&noteText);
-	return (string);
-}
 
 
 EXPORT wBool_t ParseRoomSize(

@@ -820,7 +820,7 @@ static paramData_t demoPLs[] = {
 #define demoT (demoPLs[I_DEMOTEXT].control)
 	[I_DEMOTEXT] = {
 		PD_TEXT, NULL, "text", PDO_NORECORD, &demoTextData, NULL,
-		BT_CHARUNITS | BO_READONLY
+		BO_READONLY
 	}
 };
 static paramGroup_t demoPG = {"demo", PGO_FULLDIALOGFROMBUILDER, demoPLs,
