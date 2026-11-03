@@ -245,15 +245,19 @@ const char * wMemStats(void)
  * \param h IN pointer to height
  */
 
-
-/** \todo gdk_screen_get_monitor_geometry is deprecated, use approach described in  */
 void wGetDisplaySize(wWinPix_t * w, wWinPix_t * h)
 {
-	GdkScreen *screen = gdk_screen_get_default();
-	guint monitor = gdk_screen_get_primary_monitor(screen);
+	GdkDisplay *display = gdk_display_get_default();
+	GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
 	GdkRectangle screen_geometry = { 0, 0, 0, 0 };
 
-	gdk_screen_get_monitor_geometry( screen, monitor, &screen_geometry );
+	// not every backend has a primary monitor, e.g. Wayland
+	if (monitor == NULL) {
+		monitor = gdk_display_get_monitor(display, 0);
+	}
+	if (monitor != NULL) {
+		gdk_monitor_get_geometry(monitor, &screen_geometry);
+	}
 
 	*w = screen_geometry.width;
 	*h = screen_geometry.height;

@@ -98,8 +98,13 @@ static void ButtonOk(void *data)
 
 	FormSaveDefaultValues(group);
 
+	group->keepOpen = FALSE;
 	if (group->okProc) {
 		group->okProc(group);
+	}
+	if (group->keepOpen) {
+		LOG(log_form, 1, ("DialogsButtonOk -> kept open\n"));
+		return;
 	}
 
 	LOG(log_form, 1, ("DialogsButtonOk -> Ok\n"));

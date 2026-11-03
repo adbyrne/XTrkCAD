@@ -484,15 +484,21 @@ void wTextSetSize(wControl_p bt, wWinPix_t w, wWinPix_t h)
 }
 
 /**
- * set the position of the text widget ????
+ * Move the cursor to a position in the text and scroll it into view
  *
  * \param bt IN the text widget
- * \param pos IN position
+ * \param pos IN position as a character offset, past the end means end of text
  */
 
 void wTextSetPosition(wControl_p bt, int pos)
 {
-	/* \TODO TextSetPosition */
+	GtkTextView* tv = GTK_TEXT_VIEW(bt->attributes.text.text);
+	GtkTextBuffer* tb = gtk_text_view_get_buffer(tv);
+	GtkTextIter iter;
+
+	gtk_text_buffer_get_iter_at_offset(tb, &iter, pos);
+	gtk_text_buffer_place_cursor(tb, &iter);
+	gtk_text_view_scroll_mark_onscreen(tv, gtk_text_buffer_get_insert(tb));
 }
 
 /**
@@ -527,6 +533,9 @@ static void textChanged(GtkWidget* widget, wControl_p bt)
  * : set entry field to read only
  * : use properties 'cursor-visible' and 'editable in builder definitions for same
  *
+ * BT_TOP
+ * : after appending text show the start of the text instead of the end
+ *
  * \param parent IN parent window
  * \param x IN x position
  * \param y IN y position
@@ -536,8 +545,6 @@ static void textChanged(GtkWidget* widget, wControl_p bt)
  * \param width IN
  * \param height IN
  * \return 	bb handle for created text widget
- *
- * \todo Options BT_HSCROLL, BT_CHARUNITS, BT_FIXEDFONT, BT_TOP
  */
 
 wControl_p

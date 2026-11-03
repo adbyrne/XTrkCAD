@@ -206,7 +206,6 @@ void CarUpdateHotbarList()
 	char descManufBuf[STR_LONG_SIZE];
 	carItem_p firstItem = NULL;
 
-	/** \todo extract the following code to its own function and put into dcar.c */
 	wListClear((wList_p)newCarPLs[0].control);
 	for (int inx = 0; inx < carItemHotbar_da.cnt; inx++) {
 		carItem_p item;

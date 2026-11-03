@@ -38,6 +38,7 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
+#include <gio/gio.h>
 #include <glib.h>
 #include <glib/gstdio.h>
 
@@ -240,6 +241,36 @@ const char * wGetAppLibDir( void )
 }
 
 /**
+ * Copy the system wide default configuration file, if there is one, to the
+ * newly created working directory. The copy gets default permissions, as the
+ * user has to be able to update it even if the original is read-only. Failing
+ * is not fatal, the program then starts with its built-in defaults.
+ */
+
+static void CopyDefaultConfig(void)
+{
+	gchar *etcConfig = g_strdup_printf("/etc/%s.ini", wlibGetAppName());
+	gchar *userConfig = g_strdup_printf("%s/%s.ini", appWorkDir, wlibGetAppName());
+	GFile *source = g_file_new_for_path(etcConfig);
+	GFile *destination = g_file_new_for_path(userConfig);
+	GError *error = NULL;
+
+	if (!g_file_copy(source, destination, G_FILE_COPY_TARGET_DEFAULT_PERMS,
+	                 NULL, NULL, NULL, &error)) {
+		if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) {
+			g_warning("Cannot copy %s to %s: %s", etcConfig, userConfig,
+			          error->message);
+		}
+		g_error_free(error);
+	}
+
+	g_object_unref(destination);
+	g_object_unref(source);
+	g_free(userConfig);
+	g_free(etcConfig);
+}
+
+/**
  * Get the working directory for the application. This directory is used for storing
  * internal files including rc files. If it doesn't exist, the directory is created
  * silently.
@@ -273,27 +304,7 @@ const char * wGetAppWorkDir(
 			g_free(tmp);
 			wExit(0);
 		} else {
-			/*
-			 * check for default configuration file and copy to
-			 * the workdir if it exists
-			 */
-			struct stat stFileInfo;
-			gchar *appEtcConfig;
-			gchar *copyConfigCmd;
-			appEtcConfig = g_strdup_printf( "/etc/%s.ini", wlibGetAppName());
-
-			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
-				copyConfigCmd = g_strdup_printf( "cp %s %s",
-				                                 appEtcConfig,
-				                                 appWorkDir );
-#ifdef TODO_UNUSED
-				int rc = system( copyConfigCmd );
-#endif
-
-				g_free(copyConfigCmd);
-			}
-			g_free(appEtcConfig);
-
+			CopyDefaultConfig();
 		}
 	}
 	return appWorkDir;

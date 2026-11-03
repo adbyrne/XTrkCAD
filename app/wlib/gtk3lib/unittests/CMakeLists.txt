@@ -79,3 +79,27 @@ set_target_properties(
 	getopttest
  	PROPERTIES FOLDER UnitTestsWLib
 )
+
+# build unit tests for positioning in multiline text controls
+
+add_executable(textpositiontest textpositiontest.c)
+target_link_libraries(textpositiontest
+    PRIVATE
+	xtrkcad-wlib
+	CMocka::cmocka
+	PkgConfig::GTK3
+)
+if(UNIX)
+	target_link_libraries(textpositiontest PRIVATE m)
+endif()
+target_include_directories(textpositiontest
+	PRIVATE
+	"../../include"
+	"../../../bin"
+)
+add_test(TextPositionTest textpositiontest)
+
+set_target_properties(
+	textpositiontest
+ 	PROPERTIES FOLDER UnitTestsWLib
+)

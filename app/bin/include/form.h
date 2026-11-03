@@ -195,6 +195,7 @@ typedef struct paramGroup_t {
 	wWinPix_t origW;
 	wWinPix_t origH;
 	wBox_p * boxs;
+	wBool_t keepOpen;	/**< set by FormDialogKeepOpen(), see there */
 } paramGroup_t;
 
 #define PD_F_ALT_CANCELLABEL	(1L<<30)		/**<use Close or Cancel for the discard button */
@@ -267,6 +268,7 @@ wBool_t FormCheckInputs(paramGroup_p group, wControl_p b);
 long FormUpdate(paramGroup_p pg);
 
 void FormDialogOkActive(paramGroup_cp pg, int active);
+void FormDialogKeepOpen(paramGroup_p pg);
 void FormOk_Null(const void *group);
 void FormCancel_Undo(paramGroup_cp group );
 void FormCancel_Current(paramGroup_cp group);

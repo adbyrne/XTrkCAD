@@ -49,7 +49,7 @@ unsigned selected;
 #define MAX_TEXT_COLUMNS 9
 #define MAX_CSV_COLUMNS  40
 #define CONDITION_DEFAULT_LEN 5
-#define MAXIMUM_LENGTH_DATE	8		//yy/mm/dd
+#define MAXIMUM_LENGTH_DATE	8		//yyyymmdd
 
 #define UPDATE_MAX_WIDTH(index, current_width) \
     if ((unsigned int)(current_width) > widths[(index)]) { \
@@ -640,10 +640,6 @@ TextExportString(FILE *fh, int width, const char *string)
 {
 	fprintf(fh, "%-*.*s ", width, width, string);
 }
-
-/**
- * \todo this is wrong, it prints a number instead of a date!
- */
 
 static void
 TextExportDate(FILE *fh, int width, unsigned long dateValue)

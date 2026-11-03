@@ -181,6 +181,7 @@ target_sources(xtrkcad-lib
     file2uri.c
     fileio.c
     filenoteui.c
+    filelines.c
     getargs.c
     icons.c
     i18n.c

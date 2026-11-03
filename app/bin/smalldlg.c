@@ -235,7 +235,7 @@ static paramData_t aboutPLs[] = {
 	{   PD_MESSAGE, NULL, "mess1", PDO_DLGNEWCOLUMN, NULL, NULL, BM_LARGE },
 #define I_COPYRIGHT				 (2)
 #define COPYRIGHT_T			(aboutPLs[I_COPYRIGHT].control)
-	{   PD_TEXT, NULL, "text", 0, &aboutTextData, NULL, BO_READONLY | BT_TOP | BT_CHARUNITS}
+	{   PD_TEXT, NULL, "text", 0, &aboutTextData, NULL, BO_READONLY | BT_TOP}
 };
 static paramGroup_t aboutPG = { "about", 0l, aboutPLs, COUNT( aboutPLs ) };
 

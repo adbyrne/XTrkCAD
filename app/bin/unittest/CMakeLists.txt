@@ -90,6 +90,29 @@ target_link_libraries(getargstest CMocka::cmocka)
 
 add_test(GetArgsTest getargstest)
 
+# filelines.c is standalone like getargs.c above; the test links the real
+# Stripcr() and DynString, and stubs the rest.
+add_executable(filelinestest
+	filelinestest.c
+	../filelines.c
+	../stringxtc.c
+)
+
+target_include_directories(filelinestest PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/..
+	${CMAKE_CURRENT_SOURCE_DIR}/../include
+	${CMAKE_SOURCE_DIR}/app/wlib/include
+	${CMAKE_SOURCE_DIR}/app/dynstring
+	${messagefile_BINARY_DIR}
+)
+
+add_dependencies(filelinestest msgfiles)
+
+target_link_libraries(filelinestest PRIVATE dynstring CMocka::cmocka)
+
+add_test(FileLinesTest filelinestest)
+set_tests_properties(FileLinesTest PROPERTIES TIMEOUT 30)
+
 # path manipulation
 
 add_executable( pathstest
@@ -403,12 +426,13 @@ set_target_properties(
 	layergrouptest
 	notenamestest
 	jsonnoteerrortest
+	filelinestest
  	PROPERTIES FOLDER UnitTests
  )
 
 if(XTRKCAD_SANITIZE AND UNIX)
 	set(SANITIZE_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer)
-	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest reportstest elevjointest layergrouptest notenamestest jsonnoteerrortest)
+	foreach(t dxfformattest shortentest defaultstest pathstest utilitytest beziertest cornutest undostreamtest carstest carregistrytest careditlogictest reportstest elevjointest layergrouptest notenamestest jsonnoteerrortest filelinestest)
 		target_compile_options(${t} PRIVATE ${SANITIZE_FLAGS})
 		target_link_options(${t} PRIVATE ${SANITIZE_FLAGS})
 	endforeach()
