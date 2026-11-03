@@ -58,9 +58,12 @@ relative to the *current directory*. The archive then worked only when started f
 `bin/` or when unpacked into `/usr/local`.
 
 Help topics are `file:///<data directory>/html/<topic>.html` (`browserhelp.c`), opened in the
-default browser (`opendocument.c`). The builds use `-DXTRKCAD_USE_APPLEHELP=OFF
--DXTRKCAD_USE_BROWSER=ON`. `osxhelp.c` and `helphelper` are the older Apple Help Viewer path,
-which these builds don't use. If Help doesn't open, see \ref help-troubleshooting.
+default browser (`opendocument.c`). That is the default (`XTRKCAD_USE_APPLEHELP` OFF,
+`XTRKCAD_USE_BROWSER` ON); the package workflows also pass both explicitly. `osxhelp.c` and
+`helphelper` are the older Apple Help Viewer path, built only with `-DXTRKCAD_USE_APPLEHELP=ON`.
+It needs an installed `.app` bundle with a registered Help Book, so a plain build had no working
+Help while it was the default (Development Issues #64). If Help doesn't open, see
+\ref help-troubleshooting.
 
 # Testing and debugging on macOS {#macos-testing}
 

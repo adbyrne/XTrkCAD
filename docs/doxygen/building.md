@@ -51,11 +51,14 @@ GTK_PREFIX=$(brew --prefix gtk+3)
 export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
     -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
-    -DCMAKE_EXE_LINKER_FLAGS="$(pkg-config --libs-only-L gtk+-3.0)" \
-    -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
+    -DCMAKE_EXE_LINKER_FLAGS="$(pkg-config --libs-only-L gtk+-3.0)"
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
+
+Help opens in the default browser (`XTRKCAD_USE_BROWSER`, ON). The older Apple Help Viewer path
+is `-DXTRKCAD_USE_APPLEHELP=ON`; it only works in an installed `.app` bundle with a registered
+Help Book, so it is OFF by default (Development Issues #64).
 
 # Windows (MSYS2/MinGW64)
 
