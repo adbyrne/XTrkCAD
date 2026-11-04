@@ -1597,6 +1597,72 @@ EXPORT int LayoutRoundTripTest( const char * pathName )
 	return nFail;
 }
 
+/**
+ * Regression test for -Texport:<layout>: load a layout, then print it to
+ * export.pdf and export it to export.svg, export.dxf and export.png, in the
+ * working directory, through the normal code, and import the DXF file back.
+ * tools/check-export-test.sh checks the files.
+ *
+ * \param pathName IN the layout
+ * \return number of failed checks
+ */
+EXPORT int LayoutExportTest( const char * pathName )
+{
+	char * source = MyStrdup( pathName );
+	char * pdf = NULL, * svg = NULL, * dxf = NULL, * png = NULL;
+	int nFail = 0;
+	int count = RoundTripLoad( source );
+
+	if ( count <= 0 ) {
+		MyFree( source );
+		return 1;
+	}
+	MakeFullpath( &pdf, workingDir, "export.pdf", NULL );
+	MakeFullpath( &svg, workingDir, "export.svg", NULL );
+	MakeFullpath( &dxf, workingDir, "export.dxf", NULL );
+	MakeFullpath( &png, workingDir, "export.png", NULL );
+
+	PrintAllPagesToFile( pdf );
+	if ( !ExportBitmapToFile( png ) ) {
+		lprintf( "  FAIL: bitmap export\n" );
+		nFail++;
+	}
+#if XTRKCAD_CREATE_SVG
+	if ( !ExportSVGToFile( svg ) ) {
+		lprintf( "  FAIL: SVG export\n" );
+		nFail++;
+	}
+#endif
+	SetAllTrackSelect( TRUE );
+	if ( !ExportDxfToFile( dxf ) ) {
+		lprintf( "  FAIL: DXF export\n" );
+		nFail++;
+	}
+	SetAllTrackSelect( FALSE );
+
+	track_p trk;
+	int countImported = 0;
+	if ( !ImportDxfFromFile( dxf ) ) {
+		lprintf( "  FAIL: DXF import\n" );
+		nFail++;
+	}
+	TRK_ITERATE( trk ) {
+		countImported++;
+	}
+	if ( countImported <= count ) {
+		lprintf( "  FAIL: DXF import added nothing: %d tracks before, %d after\n",
+		         count, countImported );
+		nFail++;
+	}
+
+	free( pdf );
+	free( svg );
+	free( dxf );
+	free( png );
+	MyFree( source );
+	return nFail;
+}
+
 EXPORT void FileInit( void )
 {
 	libDir = wGetAppLibDir();

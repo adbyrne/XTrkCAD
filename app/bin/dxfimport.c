@@ -299,6 +299,18 @@ static void dxfDebugMessage(int ok, const char* fileName)
 	}
 }
 
+/**
+ * Import a DXF file into the layout without the dialog, for LayoutExportTest().
+ *
+ * \param pathName IN the file
+ * \return TRUE on success
+ */
+EXPORT BOOL_T ImportDxfFromFile(char * pathName)
+{
+	importDxfXti = 1;
+	return ImportDxf(1, &pathName, NULL);
+}
+
 // The main ReadDxfFile function
 static void ProcessDxfFile(
         char** pathName,

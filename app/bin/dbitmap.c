@@ -316,6 +316,20 @@ OutputBitmapPixelSize( void )
  * Compute pixel size of bitmap
  */
 
+static void ComputeBitmapSize( void );
+
+/**
+ * Export the layout to a bitmap without the dialog, for LayoutExportTest().
+ *
+ * \param pathName IN the file
+ * \return TRUE on success
+ */
+EXPORT BOOL_T ExportBitmapToFile( char * pathName )
+{
+	ComputeBitmapSize();
+	return SaveBitmapFile( 1, &pathName, NULL );
+}
+
 static void ComputeBitmapSize( void )
 {
 	FLOAT_T Lborder=0.0, Rborder=0.0, Tborder=0.0, Bborder=0.0;

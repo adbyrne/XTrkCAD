@@ -1659,6 +1659,22 @@ static STATUS_T CmdPrint(
 	}
 }
 
+/**
+ * Print every page of the layout to a PDF file through the normal print path,
+ * without the dialog. For LayoutExportTest().
+ *
+ * \param pathName IN the PDF file
+ */
+EXPORT void PrintAllPagesToFile( const char * pathName )
+{
+	CmdPrint( C_START, zero );
+	SelectAllPages();
+	wPrintSetExportFile( pathName );
+	DoPrintPrint( NULL );
+	wPrintSetExportFile( NULL );
+	wHide( printWin );
+}
+
 EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 {
 	wIcon_p printIcon;

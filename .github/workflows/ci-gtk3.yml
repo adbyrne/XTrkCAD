@@ -142,6 +142,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps
+        with:
+          # pdfinfo and pdftotext, for RegressionExport.check
+          extra: poppler-utils
       - name: Configure
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON
       - name: Build

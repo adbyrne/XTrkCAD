@@ -46,6 +46,7 @@ foreach(_xtrkcad_demo_line ${_xtrkcad_demo_lines})
 endforeach()
 
 set(_xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/RegressionSuite")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/export")
 # One round-trip test per example layout (Development Issues #67)
 file(GLOB _xtrkcad_example_layouts "${CMAKE_SOURCE_DIR}/app/lib/examples/*.xtc")
 foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
@@ -259,3 +260,31 @@ foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
         RUN_SERIAL TRUE
     )
 endforeach()
+
+# Print and export a small layout through the normal code, then check the files
+# (Development Issues #68). The check needs poppler-utils, which isn't something
+# every package job should have to install, so these aren't in regression-ci;
+# regression-gtk3-standalone runs them.
+find_program(XTRKCAD_PDFTOTEXT_EXECUTABLE pdftotext)
+find_program(XTRKCAD_PDFINFO_EXECUTABLE pdfinfo)
+if(XTRKCAD_PDFTOTEXT_EXECUTABLE AND XTRKCAD_PDFINFO_EXECUTABLE)
+    set(_xtrkcad_export_home "${XTRKCAD_REGRESSION_HOME_ROOT}/export")
+    xtrkcad_add_regression_test(RegressionExport.run "${_xtrkcad_export_home}"
+        "-Texport:${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/export-test.xtc")
+    set_tests_properties(RegressionExport.run PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        FIXTURES_SETUP regression_export
+        LABELS "regression"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_export_home}"
+        RUN_SERIAL TRUE
+    )
+    add_test(NAME RegressionExport.check
+        COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-export-test.sh"
+            "${_xtrkcad_export_home}/.${XTRKCAD_BIN}"
+    )
+    set_tests_properties(RegressionExport.check PROPERTIES
+        FIXTURES_REQUIRED regression_export
+        LABELS "regression"
+    )
+endif()

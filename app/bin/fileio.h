@@ -122,8 +122,12 @@ void DoImportModule( void * typeVP );
 void DoImportDxf( void * unused );
 void DoExport( void * unused );
 void DoExportDxf( void * unused );
+BOOL_T ExportDxfToFile( char * pathName );
+BOOL_T ImportDxfFromFile( char * pathName );
+BOOL_T ExportBitmapToFile( char * pathName );
 #if XTRKCAD_CREATE_SVG
 void DoExportSVG( void * unused );
+BOOL_T ExportSVGToFile( char * pathName );
 #endif
 extern wBool_t editStatus; // Status of last Edit* command
 void EditCopy( void * unused );
