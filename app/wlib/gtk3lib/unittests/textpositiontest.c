@@ -72,6 +72,14 @@ static double ScrollOffset(fixture_t * f)
 	               gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(f->scroll)));
 }
 
+static double ScrollBottom(fixture_t * f)
+{
+	GtkAdjustment * adj =
+	        gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(f->scroll));
+
+	return gtk_adjustment_get_upper(adj) - gtk_adjustment_get_page_size(adj);
+}
+
 static int CursorOffset(fixture_t * f)
 {
 	GtkTextBuffer * tb = gtk_text_view_get_buffer(
@@ -118,7 +126,8 @@ static void TopWhileVisibleScrollsToTop(void **state)
 	RunPendingEvents();
 	Fill(f);
 	RunPendingEvents();
-	assert_true(ScrollOffset(f) > 1.0);
+	// the appends scrolled all the way to the end (Development Issues #65)
+	assert_true(ScrollOffset(f) >= ScrollBottom(f) - 1.0);
 
 	wTextSetPosition(&f->control, 0);
 	RunPendingEvents();

@@ -59,6 +59,87 @@ struct PrintData {
  */
 
 
+#define SCROLL_MARK "wlib-scroll-target"
+#define SCROLL_IDLE "wlib-scroll-idle"
+
+static void QueueScrollApply(GtkTextView *tv);
+
+static void ScrollOnMap(GtkWidget *widget, gpointer data)
+{
+	(void)data;
+	g_signal_handlers_disconnect_by_func(widget, G_CALLBACK(ScrollOnMap), NULL);
+	QueueScrollApply(GTK_TEXT_VIEW(widget));
+}
+
+/**
+ * Bring the scroll target into view without GTK's animated scrolling.
+ * Runs at idle priority, after the text view has validated its lines, so
+ * the target's position is exact.
+ */
+static gboolean ScrollApplyIdle(gpointer data)
+{
+	GtkTextView *tv = data;
+	GtkTextBuffer *tb = gtk_text_view_get_buffer(tv);
+	GtkTextMark *mark = gtk_text_buffer_get_mark(tb, SCROLL_MARK);
+
+	g_object_set_data(G_OBJECT(tv), SCROLL_IDLE, NULL);
+	if (mark && !gtk_widget_in_destruction(GTK_WIDGET(tv))) {
+		if (!gtk_widget_get_mapped(GTK_WIDGET(tv))) {
+			/* line heights are only computed once the view is shown */
+			g_signal_connect(tv, "map", G_CALLBACK(ScrollOnMap), NULL);
+		} else {
+			GtkAdjustment *adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(tv));
+			GtkTextIter iter;
+			GdkRectangle rect;
+			double value = gtk_adjustment_get_value(adj);
+			double page = gtk_adjustment_get_page_size(adj);
+
+			gtk_text_buffer_get_iter_at_mark(tb, &iter, mark);
+			gtk_text_view_get_iter_location(tv, &iter, &rect);
+			if (rect.y < value) {
+				value = rect.y;
+			} else if (rect.y + rect.height > value + page) {
+				value = rect.y + rect.height - page;
+			}
+			gtk_adjustment_set_value(adj, value);
+			gtk_text_buffer_delete_mark(tb, mark);
+		}
+	}
+	g_object_unref(tv);
+	return G_SOURCE_REMOVE;
+}
+
+static void QueueScrollApply(GtkTextView *tv)
+{
+	if (g_object_get_data(G_OBJECT(tv), SCROLL_IDLE) == NULL) {
+		guint id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, ScrollApplyIdle,
+		                           g_object_ref(tv), NULL);
+		g_object_set_data(G_OBJECT(tv), SCROLL_IDLE, GUINT_TO_POINTER(id));
+	}
+}
+
+/**
+ * Scroll \p iter into view once the text view has laid out its lines.
+ *
+ * gtk_text_view_scroll_mark_onscreen() animates the scroll towards a target
+ * computed from line heights that are still estimates after a large
+ * insert, and the view's own adjustment updates during validation cancel
+ * the animation part way, so a long text ended up scrolled only a little
+ * (Development Issues #65).
+ */
+static void ScrollToIter(GtkTextView *tv, GtkTextIter *iter)
+{
+	GtkTextBuffer *tb = gtk_text_view_get_buffer(tv);
+	GtkTextMark *mark = gtk_text_buffer_get_mark(tb, SCROLL_MARK);
+
+	if (mark) {
+		gtk_text_buffer_move_mark(tb, mark, iter);
+	} else {
+		gtk_text_buffer_create_mark(tb, SCROLL_MARK, iter, FALSE);
+	}
+	QueueScrollApply(tv);
+}
+
 /**
  * Reset a text entry by clearing text and resetting the readonly and the
  * change flag.
@@ -90,7 +171,6 @@ void wTextAppend(wControl_p bt,
 {
 	GtkTextBuffer* tb;
 	GtkTextIter ti1;
-	GtkTextMark* tm;
 
 	if (bt->attributes.text.text == 0) {
 		abort();
@@ -110,9 +190,7 @@ void wTextAppend(wControl_p bt,
 		// and scroll to end of text
 		gtk_text_buffer_get_end_iter(tb, &ti1);
 	}
-	tm = gtk_text_buffer_create_mark(tb, NULL, &ti1, TRUE);
-	gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(bt->attributes.text.text), tm);
-	gtk_text_buffer_delete_mark(tb, tm);
+	ScrollToIter(GTK_TEXT_VIEW(bt->attributes.text.text), &ti1);
 
 	bt->attributes.text.changed = FALSE;
 }
@@ -498,7 +576,7 @@ void wTextSetPosition(wControl_p bt, int pos)
 
 	gtk_text_buffer_get_iter_at_offset(tb, &iter, pos);
 	gtk_text_buffer_place_cursor(tb, &iter);
-	gtk_text_view_scroll_mark_onscreen(tv, gtk_text_buffer_get_insert(tb));
+	ScrollToIter(tv, &iter);
 }
 
 /**
