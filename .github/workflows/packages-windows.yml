@@ -201,7 +201,8 @@ jobs:
           retention-days: 14
 
       - name: Package NSIS installer
-        # Built on version tags, and on request (include_nsis) otherwise.
+        # Built on pushes to main and version tags, and on request
+        # (include_nsis) otherwise.
         # cmake --install doesn't collect the MinGW DLLs (the step above
         # does, into staging/), so the installer is built from staging/ as
         # well: CPACK_INSTALLED_DIRECTORIES adds it to what CPack installs

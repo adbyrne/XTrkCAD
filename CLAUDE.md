@@ -285,10 +285,22 @@ Useful CMake options:
 ## Tests
 
 Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and
-`app/dynstring/unittest/`. Hg `default` has 81 tests, 23 of them outside the `regression` label
-(r7884, `ctest -N`, 2026-10-28).
+`app/dynstring/unittest/`. Hg `default` has 134 tests, 25 of them outside the `regression` label
+(r7981, `ctest -N`, with `poppler-utils` installed; the 2 `RegressionExport.*` tests need it).
 The full run including the regression demo-playback suite takes ~10 minutes; run it in the
 background.
+
+Run new load, save or parse code under ASan too (`-DXTRKCAD_SANITIZE=ON`, clang). Its fill pattern
+exposes uninitialised values that a normal build sees as 0: that's how the `ReadJoint()` bug showed
+up (Development Issues #67). Regression tests besides the demos:
+- `RegressionCompare.*`: the demo check itself has to detect a wrong segment and an extra track.
+- `RegressionRoundTrip.*`: `-T<layout>.xtc` loads, saves, reloads and saves each example, `.xtc` and
+  `.xtce`.
+- `RegressionExport.*`: `-Texport:<layout>` prints to PDF and exports SVG, DXF and PNG; checks printed
+  text is at its point size.
+
+`CompareSegs()` really compares turnouts and structures since #66, so changing them can fail a demo.
+If the new result is right, `-d regression=3` writes new blocks, but read each diff first.
 
 ```sh
 ctest --test-dir build                       # everything, incl. regression

@@ -149,7 +149,7 @@ jobs:
           retention-days: 14
 
   # ── Install test — Windows NSIS installer on a clean runner ───────────────
-  # Runs only when the installer was built (tags, include_nsis).
+  # Runs only when the installer was built (pushes, tags, include_nsis).
   # tools/package-install-test-nsis.ps1 installs it silently into the
   # default Program Files folder, runs the ZIP test's checks on the
   # installed tree, checks the uninstall entry, Start menu shortcuts and

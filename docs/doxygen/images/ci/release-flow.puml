@@ -23,7 +23,7 @@ if (packages_from_run set?) then (no)
   fork again
     :packages-windows
     (packages-windows.yml,
-    NSIS: tags, include_nsis);
+    NSIS: push, include_nsis);
     :install-tests-windows
     (install-tests.yml);
   fork again
