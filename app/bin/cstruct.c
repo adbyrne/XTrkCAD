@@ -455,7 +455,7 @@ static wBool_t CompareStruct( track_cp trk1, track_cp trk2 )
 	REGRESS_CHECK_POS( "DescOrig", xx1, xx2, descriptionOrig ) */
 	REGRESS_CHECK_POS( "DescOff", xx1, xx2, descriptionOff )
 	REGRESS_CHECK_POS( "DescSize", xx1, xx2, descriptionSize )
-	return CompareSegs( xx1->segs, xx1->segCnt, xx1->segs, xx1->segCnt );
+	return CompareSegs( xx1->segs, xx1->segCnt, xx2->segs, xx2->segCnt );
 }
 
 static trackCmd_t structureCmds = {

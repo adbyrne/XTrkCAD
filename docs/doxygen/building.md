@@ -374,6 +374,12 @@ bug:
   virtual framebuffer. `app/bin/RegressionTests.cmake` wraps every regression test's command with
   `if [ -n "$WAYLAND_DISPLAY" ]; then export GDK_BACKEND=x11; fi` — a no-op on a pure-X11 session
   or a CI runner (no `WAYLAND_DISPLAY` there), a hard backend override on a Wayland desktop.
+- **What a `REGRESSION` block checks** — each track in the block is looked up by index and compared
+  with the live track, and the number of tracks has to match. Positions are compared within 0.1
+  layout unit (`IsPosClose()`, `track.c`). The three `RegressionCompare.*` tests check this check:
+  one fixture in `app/bin/unittest/testfiles/` has to match, and two have to be reported, a wrong
+  turnout segment and an extra track. When a block fails after a change, work out which side is
+  right before regenerating it (`-d regression=3` writes new blocks to `xtrkcad.regress`).
 - **Visual pre/post diffing (`-d visualdiff=1`)** — the regression suite's `REGRESSION START`/`END`
   blocks compare track coordinates as text, which can miss a change that's obvious in a picture
   (SF #667/#26: a fixture regen silently dropped a join's connector tracks, and the numeric diff

@@ -46,6 +46,9 @@ foreach(_xtrkcad_demo_line ${_xtrkcad_demo_lines})
 endforeach()
 
 set(_xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/RegressionSuite")
+foreach(_xtrkcad_compare_case match segment extra)
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
+endforeach()
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/${_xtrkcad_demo}")
 endforeach()
@@ -206,3 +209,28 @@ set_tests_properties(RegressionSuite PROPERTIES
     ENVIRONMENT "HOME=${_xtrkcad_regression_suite_home}"
     RUN_SERIAL TRUE
 )
+
+# Tests of the regression check itself (Development Issues #66). It compared
+# turnout and structure segments with themselves for years without anything
+# noticing, so these make sure a difference really does fail: one case that has
+# to match, and two that have to be reported. Those two pass on the expected
+# message, not on the exit code, so a crash doesn't count as detecting anything.
+set(_xtrkcad_compare_dir "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles")
+set(_xtrkcad_compare_segment_regex "FAIL: Compare T:1 .*SEG:1 - Pos.1.")
+set(_xtrkcad_compare_extra_regex "FAIL: Track count: Actual 2, Expected 1")
+foreach(_xtrkcad_compare_case match segment extra)
+    set(_xtrkcad_compare_home "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
+    xtrkcad_add_regression_test("RegressionCompare.${_xtrkcad_compare_case}" "${_xtrkcad_compare_home}"
+        "-T${_xtrkcad_compare_dir}/regress-compare-${_xtrkcad_compare_case}.xtr")
+    set_tests_properties("RegressionCompare.${_xtrkcad_compare_case}" PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "regression;regression-ci"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_compare_home}"
+        RUN_SERIAL TRUE
+    )
+    if(NOT _xtrkcad_compare_case STREQUAL "match")
+        set_tests_properties("RegressionCompare.${_xtrkcad_compare_case}" PROPERTIES
+            PASS_REGULAR_EXPRESSION "${_xtrkcad_compare_${_xtrkcad_compare_case}_regex}")
+    endif()
+endforeach()
