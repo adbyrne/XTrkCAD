@@ -302,7 +302,7 @@ jobs:
       - name: Show the log
         # The Windows build logs to a file, not to the test's output
         if: always()
-        run: find "$(cygpath -u "$APPDATA")" -name xtclog.txt -exec tail -n 40 {} ; 2>/dev/null || true
+        run: find "$(cygpath -u "$APPDATA")" -name xtclog.txt -exec tail -n 40 {} + 2>/dev/null || true
 
   regression-macos:
     # See regression-windows. Runs on the same runners as the other macOS jobs,
