@@ -46,6 +46,13 @@ foreach(_xtrkcad_demo_line ${_xtrkcad_demo_lines})
 endforeach()
 
 set(_xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/RegressionSuite")
+# One round-trip test per example layout (Development Issues #67)
+file(GLOB _xtrkcad_example_layouts "${CMAKE_SOURCE_DIR}/app/lib/examples/*.xtc")
+foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
+    get_filename_component(_xtrkcad_example_name "${_xtrkcad_example}" NAME_WE)
+    string(MAKE_C_IDENTIFIER "${_xtrkcad_example_name}" _xtrkcad_example_id)
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-${_xtrkcad_example_id}")
+endforeach()
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
@@ -233,4 +240,22 @@ foreach(_xtrkcad_compare_case match segment extra)
         set_tests_properties("RegressionCompare.${_xtrkcad_compare_case}" PROPERTIES
             PASS_REGULAR_EXPRESSION "${_xtrkcad_compare_${_xtrkcad_compare_case}_regex}")
     endif()
+endforeach()
+
+# Load each example layout, save it, reload it and save again, in both .xtc and
+# .xtce (LayoutRoundTripTest(), fileio.c). Nothing else exercises the real load
+# and save paths. regression-ci, so the sanitizer job runs these too.
+foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
+    get_filename_component(_xtrkcad_example_name "${_xtrkcad_example}" NAME_WE)
+    string(MAKE_C_IDENTIFIER "${_xtrkcad_example_name}" _xtrkcad_example_id)
+    set(_xtrkcad_roundtrip_home "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-${_xtrkcad_example_id}")
+    xtrkcad_add_regression_test("RegressionRoundTrip.${_xtrkcad_example_id}" "${_xtrkcad_roundtrip_home}"
+        "-T${_xtrkcad_example}")
+    set_tests_properties("RegressionRoundTrip.${_xtrkcad_example_id}" PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "regression;regression-ci"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_roundtrip_home}"
+        RUN_SERIAL TRUE
+    )
 endforeach()

@@ -295,16 +295,20 @@ BOOL_T CreateArchive(
 		return FALSE;
 	}
 
-	unlink(fileName); 							//Delete Old
-	if (rename(archive_path, fileName) == -1) {	//Move zip into place
-		if ( Copyfile( archive_path, fileName ) == -1 ) {
-			NoticeMessage(MSG_ZIP_RENAME_FAIL, _("Continue"), NULL, archiveUtf8,
-			              fileName, strerror(errno));
-			free(archive_path);
-			MyFree(archiveUtf8);
-			return FALSE;
-		} else {
-			unlink( archive_path );
+	// Saving into the working directory: it's already in place, and deleting
+	// the "old" file would delete the archive just written.
+	if (strcmp(archive_path, fileName) != 0) {
+		unlink(fileName); 							//Delete Old
+		if (rename(archive_path, fileName) == -1) {	//Move zip into place
+			if ( Copyfile( archive_path, fileName ) == -1 ) {
+				NoticeMessage(MSG_ZIP_RENAME_FAIL, _("Continue"), NULL, archiveUtf8,
+				              fileName, strerror(errno));
+				free(archive_path);
+				MyFree(archiveUtf8);
+				return FALSE;
+			} else {
+				unlink( archive_path );
+			}
 		}
 	}
 	free(archive_path);
