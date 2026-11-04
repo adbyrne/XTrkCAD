@@ -264,7 +264,7 @@ jobs:
     # point can differ (Development Issues #69).
     continue-on-error: true
     runs-on: windows-2025
-    timeout-minutes: 45
+    timeout-minutes: 30
     defaults:
       run:
         shell: msys2 {0}
@@ -298,7 +298,11 @@ jobs:
       - name: Build
         run: cmake --build build --parallel
       - name: Regression suite
-        run: ctest --test-dir build -L regression-ci --output-on-failure
+        run: ctest --test-dir build -L regression-ci --output-on-failure --timeout 300
+      - name: Show the log
+        # The Windows build logs to a file, not to the test's output
+        if: always()
+        run: find "$(cygpath -u "$APPDATA")" -name xtclog.txt -exec tail -n 40 {} ; 2>/dev/null || true
 
   regression-macos:
     # See regression-windows. Runs on the same runners as the other macOS jobs,
