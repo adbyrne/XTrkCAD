@@ -394,6 +394,11 @@ bug:
   (`pdfinfo`, `pdftohtml`), so the tests are only added if those are found. They're labelled
   `regression` but not `regression-ci`: `regression-gtk3-standalone` and the coverage job install
   `poppler-utils` and run them, so the package jobs don't have to.
+- **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
+  platforms, report-only (`continue-on-error`) for now, because the expected values were recorded on
+  Linux and floating point can differ. Locally, pass `-DXTRKCAD_REGRESSION_TESTING=ON`, as the option
+  only defaults on for Linux. On Windows the log goes to a file, so `RegressionCompare.*` only checks
+  the exit code there, and all tests share the normal work directory instead of a scratch `$HOME`.
 - **Visual pre/post diffing (`-d visualdiff=1`)** — the regression suite's `REGRESSION START`/`END`
   blocks compare track coordinates as text, which can miss a change that's obvious in a picture
   (SF #667/#26: a fixture regen silently dropped a join's connector tracks, and the numeric diff

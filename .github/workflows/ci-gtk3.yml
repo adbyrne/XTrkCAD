@@ -258,6 +258,75 @@ jobs:
           cmake --list-presets=all
           cmake --workflow --preset windows-debug
 
+  regression-windows:
+    # The demo suite and the round trip on Windows. Report-only until it has a
+    # track record, because expected values were recorded on Linux and floating
+    # point can differ (Development Issues #69).
+    continue-on-error: true
+    runs-on: windows-2025
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          suppress-deprecation-warnings: msystem-mingw64
+          update: false
+          pacboy: >-
+            gcc:p
+            cmake:p
+            ninja:p
+            pkgconf:p
+            gtk3:p
+            zlib:p
+            libzip:p
+            mxml:p
+            librsvg:p
+            gettext-tools:p
+            cmocka:p
+      - uses: ./.github/actions/msys2-pin-gcc
+      - name: Configure
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_REGRESSION_TESTING=ON \
+            -DXTRKCAD_USE_GETTEXT=OFF
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Regression suite
+        run: ctest --test-dir build -L regression-ci --output-on-failure
+
+  regression-macos:
+    # See regression-windows. Runs on the same runners as the other macOS jobs,
+    # which can be scarce, so it stays report-only for longer than Windows.
+    continue-on-error: true
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/select-xcode
+      - name: Install dependencies
+        run: brew install ninja gtk+3 cmocka libzip librsvg
+      - name: Configure
+        run: |
+          GTK_PREFIX=$(brew --prefix gtk+3)
+          PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
+          export PKG_CONFIG_PATH
+          GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_REGRESSION_TESTING=ON \
+            -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
+            -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
+            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
+      - name: Build
+        run: cmake --build build
+      - name: Regression suite
+        run: ctest --test-dir build -L regression-ci --output-on-failure
+
   regression-gtk3-sanitizers:
     # Closes the gap SF #682 documented: c-tests-sanitizers (gtk3-toolchain.yml) excludes the
     # demo-playback regression suite (-LE regression), and regression-gtk3
