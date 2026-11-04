@@ -323,7 +323,8 @@ left visible in the `cppcheck-deep`/`clang-tidy` report-only artifacts instead â
 `release.yml` builds the packages, install-tests them on clean systems, and publishes them. What
 it publishes depends on how it was started:
 
-- **Push to `%main`:** every package and install test. `publish-latest-release` refreshes the
+- **Push to `%main`:** every package and install test, the NSIS installer included, so testers
+  always have a current one. `publish-latest-release` refreshes the
   rolling `latest-main` prerelease as soon as the packages are built, without waiting for the
   install tests, and `deploy-pages` redeploys GitHub Pages.
 - **`v*.*.*` tag:** the same, plus the NSIS installer and its test. `github-release` drafts the
@@ -361,7 +362,7 @@ regenerate the committed SVG with `plantuml -tsvg docs/doxygen/images/ci/release
 |---|---|---|
 | `linux`, `windows`, `macos` | on | Build and install-test that platform's packages. Turn a platform off to save the runners when your change only affects the others. |
 | `packages_from_run` | empty | The run ID of an earlier `release.yml` run (`gh run list -w release.yml`). No packages are built: the install tests download that run's artifacts and test them with *this* branch's `tools/package-install-test*` scripts. The artifacts expire after 14 days. The report and docs jobs are skipped too. |
-| `include_nsis` | off | Also build and test the Windows NSIS installer. Tags always do. |
+| `include_nsis` | off | Also build and test the Windows NSIS installer. Pushes and tags always do. |
 | `include_dmg` | off | Also try the experimental self-contained macOS DMG. |
 | `publish_temp_release` | off | Publish the packages to a temporary prerelease named after the branch. Delete it once the branch merges or is dropped. |
 
@@ -565,7 +566,7 @@ pwsh tools/package-install-test-windows.ps1 xtrkcad-5.4.0-windows-x64.zip
 
 ## Windows installer test {#package-install-test-nsis}
 
-When the NSIS installers are built (version tags, or `include_nsis`), the
+When the NSIS installers are built (pushes to `%main`, version tags, or `include_nsis`), the
 `install-test-windows-nsis` job runs once per variant: `tools/package-install-test-nsis.ps1` on a fresh
 `windows-2025` runner. It does what a user does with the installer and checks the result:
 

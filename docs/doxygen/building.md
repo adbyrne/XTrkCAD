@@ -247,7 +247,6 @@ by hand gives the same result. On a tag, `release.yml` also:
 - checks that the tag names the version in `ProgramVersion.cmake` (`check-release-tag`): `v5.4.0`
   for 5.4.0, or `v5.4.0-<suffix>` for a trial run. Any other tag fails the run;
 - fails the Windows build unless configure reports the unversioned install name;
-- builds the Windows NSIS installer, which ordinary pushes to `main` skip;
 - drafts the GitHub Release (`github-release`) only after every package built **and** passed its
   install test on a clean system, the installer included. A suffixed tag's release is marked as
   a prerelease.
