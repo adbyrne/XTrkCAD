@@ -280,6 +280,10 @@ static void EnsureCheckpointFileNames( void )
  * \return FALSE in case of load error
  */
 
+/** TRUE if the last ReadTrackFile() stopped early: the file ended inside an
+ * object, or the user chose Stop after an input error. */
+static BOOL_T readTrackFileIncomplete = FALSE;
+
 BOOL_T ReadTrackFile(
         const char * pathName,
         const char * fileName,
@@ -421,6 +425,7 @@ BOOL_T ReadTrackFile(
 	}
 
 	ParamSetInReadTracks(FALSE);
+	readTrackFileIncomplete = (paramFile == NULL);
 	if (paramFile) {
 		fclose(paramFile);
 		paramFile = NULL;
@@ -579,8 +584,10 @@ int LoadTracks(
 	char *copyOfFileName = MyStrdup(fileName[0]);
 
 	unsigned long time0 = wGetTimer();
-	if (loadXTC
-	    && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, TRUE, TRUE )) {
+	BOOL_T loaded = loadXTC
+	                && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, TRUE, TRUE )
+	                && !readTrackFileIncomplete;
+	if (loaded) {
 
 		//nameOfFile = NULL;
 		//extOfFile = NULL;
@@ -597,6 +604,16 @@ int LoadTracks(
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		LayerSetCounts();
+	} else {
+		/* The previous layout is already gone. Don't keep a partial layout
+		 * that could be saved over a good file. */
+		ClearTracks();
+		ResetLayers();
+		NoteNameResetAll();
+		checkPtMark = changed = 0;
+		SetLayoutFullPath("");
+		SetWindowTitle();
+		DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
 	}
 
 	MyFree(copyOfFileName);
@@ -608,6 +625,9 @@ int LoadTracks(
 	UndoResume();
 	Reset();
 	wSetCursor( mainD.d, defaultCursor );
+	if (!loaded) {
+		InfoMessage( _("The layout file could not be loaded") );
+	}
 	return TRUE;
 }
 

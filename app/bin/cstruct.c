@@ -794,7 +794,8 @@ static void NewStructure( void )
 			pierInx = 0;
 		}
 		xx->u.pier.height = curStructure->u.pierInfo.info[pierInx].height;
-		xx->u.pier.name = curStructure->u.pierInfo.info[pierInx].name;
+		/* Own copy: the part is freed when its parameter file is unloaded */
+		xx->u.pier.name = MyStrdup( curStructure->u.pierInfo.info[pierInx].name );
 		if (pierTrk != NULL && xx->u.pier.height >= 0 ) {
 			UpdateTrkEndElev( pierTrk, pierEp, ELEV_DEF, xx->u.pier.height, NULL );
 		}

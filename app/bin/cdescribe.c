@@ -366,21 +366,21 @@ static paramGroup_p CreateDescribeDialog(
 		switch( ddp->type ) {
 		case DESC_POS:
 			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
-			pdp->option |= PDO_SAMEROW | PDO_NEWSAMEROW;
+			pdp->option |= PDO_SAMEROW | PDO_NEWSAMEROW | PDO_DIM;
 			pdp->context = (void*)ddp;
 			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
 			pdp->winLabel = NULL;
-			pdp->option |= PDO_SAMEROW;
+			pdp->option |= PDO_SAMEROW | PDO_DIM;
 			// Point to 2nd double of a coOrd
 			pdp->valueP = (char *)pdp[-1].valueP + offsetof( coOrd, y );
 			break;
 		case DESC_POS3D:	/* untested, see track.h */
 			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
-			pdp->option |= PDO_SAMEROW | PDO_NEWSAMEROW;
+			pdp->option |= PDO_SAMEROW | PDO_NEWSAMEROW | PDO_DIM;
 			pdp->context = (void*)ddp;
 			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
 			pdp->winLabel = NULL;
-			pdp->option |= PDO_SAMEROW;
+			pdp->option |= PDO_SAMEROW | PDO_DIM;
 			pdp->context = (void*)ddp;
 			pdp->valueP = (char *)pdp[-1].valueP + offsetof( coOrd, y );
 			pdp = CreateDescribeField( PD_FLOAT, pg, ddp );
