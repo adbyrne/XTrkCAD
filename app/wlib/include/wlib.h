@@ -891,6 +891,8 @@ const char *wPrintGetName(void);
 typedef wBool_t (*wPrintPageRenderProc)(int pageNr, void *data);
 void wPrintDocSetPages(int nPages, wPrintPageRenderProc proc, void *data);
 wBool_t wPrintDocRun(void);
+/** Print to this PDF file, without the dialog, from now on; NULL ends that. */
+void wPrintSetExportFile(const char * pathName);
 
 /*------------------------------------------------------------------------------
  *

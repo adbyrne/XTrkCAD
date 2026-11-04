@@ -472,6 +472,17 @@ static int DoExportSVGTracks(
 }
 
 /**
+ * Export to a file without the dialog, for LayoutExportTest().
+ *
+ * \param pathName IN the file
+ * \return TRUE on success
+ */
+BOOL_T ExportSVGToFile(char * pathName)
+{
+	return DoExportSVGTracks(1, &pathName, NULL);
+}
+
+/**
  * Create and show the dialog for selecting the DXF export filename
  */
 

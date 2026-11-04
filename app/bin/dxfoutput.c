@@ -230,6 +230,18 @@ static int DoExportDXFTracks(
 }
 
 /**
+* Export the selected tracks to a file without the dialog, for
+* LayoutExportTest().
+*
+* \param pathName IN the file
+* \return TRUE on success
+*/
+BOOL_T ExportDxfToFile(char * pathName)
+{
+	return DoExportDXFTracks(1, &pathName, NULL);
+}
+
+/**
 * Create and show the dialog for selected the DXF export filename
 */
 

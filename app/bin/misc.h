@@ -275,6 +275,7 @@ void SetFileChanged(void);
 extern long adjTimer;
 int RegressionTestAll(const char *target);
 int LayoutRoundTripTest(const char *pathName);
+int LayoutExportTest(const char *pathName);
 extern FILE * recordF;
 void RecordPrintf(const char *format, ...);
 void RecordVPrintf(const char *format, va_list args);

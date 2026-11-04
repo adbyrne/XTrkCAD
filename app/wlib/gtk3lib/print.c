@@ -804,6 +804,21 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
 	return (printOp != NULL);
 }
 
+static char * exportFile = NULL;
+
+/**
+ * Make wPrintDocRun() write this PDF file instead of showing the print dialog.
+ * For tests, which have nobody to answer the dialog.
+ *
+ * \param pathName IN the file, or NULL to go back to the dialog
+ */
+
+void wPrintSetExportFile(const char * pathName)
+{
+	g_free(exportFile);
+	exportFile = g_strdup(pathName);
+}
+
 /**
  * Run the print operation. Shows the native print dialog and then drives the
  * begin-print / draw-page / end-print cycle. This call blocks until the job
@@ -821,8 +836,13 @@ wBool_t wPrintDocRun(void)
 		return FALSE;
 	}
 
+	if (exportFile) {
+		gtk_print_operation_set_export_filename(printOp, exportFile);
+	}
+
 	res = gtk_print_operation_run(printOp,
-	                              GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+	                              exportFile ? GTK_PRINT_OPERATION_ACTION_EXPORT
+	                              : GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
 	                              GTK_WINDOW(wlibAppWinGetMain()),
 	                              &err);
 

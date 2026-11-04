@@ -387,6 +387,13 @@ bug:
   `regression-ci` label, so the sanitizer job runs them too. That matters: ASan's fill pattern exposes
   values read from uninitialised memory that a normal build happens to see as 0. It proves saving is
   stable, not that the first load of an old file read everything in it.
+- **Print and export (`RegressionExport.*`)** — `-Texport:<layout>` prints a small layout to PDF
+  without the dialog (`wPrintSetExportFile()`), exports SVG, DXF and PNG and imports the DXF file back,
+  all through the normal code (`LayoutExportTest()`, `fileio.c`). `tools/check-export-test.sh` then
+  checks the files, including that printed text is at its point size. It needs `poppler-utils`
+  (`pdfinfo`, `pdftohtml`), so the tests are only added if those are found. They're labelled
+  `regression` but not `regression-ci`: `regression-gtk3-standalone` and the coverage job install
+  `poppler-utils` and run them, so the package jobs don't have to.
 - **Visual pre/post diffing (`-d visualdiff=1`)** — the regression suite's `REGRESSION START`/`END`
   blocks compare track coordinates as text, which can miss a change that's obvious in a picture
   (SF #667/#26: a fixture regen silently dropped a join's connector tracks, and the numeric diff

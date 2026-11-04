@@ -112,6 +112,7 @@ void InitCmdRuler( wMenu_p menu );
 
 void InitCmdParallel( wMenu_p menu );
 wIndex_t InitCmdPrint( wMenu_p menu );
+void PrintAllPagesToFile( const char * pathName );
 void InitCmdText( wMenu_p menu );
 void InitCmdTrain( wMenu_p menu );
 void InitCmdTurnout( wMenu_p menu );
