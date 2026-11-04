@@ -1558,7 +1558,9 @@ EXPORT int LayoutRoundTripTest( const char * pathName )
 		return 1;
 	}
 	lprintf( "%s: %d tracks\n", source, count1 );
+	// The second archive save replaces the first, as saving a layout again does
 	if ( !SaveTracks( 1, &save1, NULL ) || !SaveTracks( 1, &archive, NULL )
+	     || !SaveTracks( 1, &archive, NULL ) || !SaveTracks( 1, &archive2, NULL )
 	     || !SaveTracks( 1, &archive2, NULL ) ) {
 		lprintf( "  FAIL: can't save\n" );
 		return 1;

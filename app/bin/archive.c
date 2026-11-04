@@ -260,7 +260,13 @@ BOOL_T CreateArchive(
 	char * archive_path;
 	char * archiveUtf8;
 
-	MakeFullpath(&archive_path, workingDir, archive_name, NULL);
+	// Build it under a temporary name, so it can't collide with the destination
+	// when that's in the working directory too, then move it into place.
+	char * temp_name = MyMalloc(strlen(archive_name) + 5);
+	sprintf(temp_name, "%s.tmp", archive_name);
+	MakeFullpath(&archive_path, workingDir, temp_name, NULL);
+	MyFree(temp_name);
+	unlink(archive_path);						// Left by an interrupted save
 
 	archiveUtf8 = MyStrdup(archive_path);
 #ifdef UTFCONVERT
@@ -295,20 +301,16 @@ BOOL_T CreateArchive(
 		return FALSE;
 	}
 
-	// Saving into the working directory: it's already in place, and deleting
-	// the "old" file would delete the archive just written.
-	if (strcmp(archive_path, fileName) != 0) {
-		unlink(fileName); 							//Delete Old
-		if (rename(archive_path, fileName) == -1) {	//Move zip into place
-			if ( Copyfile( archive_path, fileName ) == -1 ) {
-				NoticeMessage(MSG_ZIP_RENAME_FAIL, _("Continue"), NULL, archiveUtf8,
-				              fileName, strerror(errno));
-				free(archive_path);
-				MyFree(archiveUtf8);
-				return FALSE;
-			} else {
-				unlink( archive_path );
-			}
+	unlink(fileName); 							//Delete Old
+	if (rename(archive_path, fileName) == -1) {	//Move zip into place
+		if ( Copyfile( archive_path, fileName ) == -1 ) {
+			NoticeMessage(MSG_ZIP_RENAME_FAIL, _("Continue"), NULL, archiveUtf8,
+			              fileName, strerror(errno));
+			free(archive_path);
+			MyFree(archiveUtf8);
+			return FALSE;
+		} else {
+			unlink( archive_path );
 		}
 	}
 	free(archive_path);
