@@ -1341,6 +1341,7 @@ EXPORT int CheckRegressionResult( long regressVersion,const char * sFileName,
 	char * sRegressionFile = NULL;
 	track_p to_first_save = to_first;
 	track_p* to_last_save = to_last;
+	int nExpected = 0;
 	MakeFullpath( &sRegressionFile, workingDir, "xtrkcad.regress", NULL );
 
 	while ( GetNextLine() ) {
@@ -1363,6 +1364,7 @@ EXPORT int CheckRegressionResult( long regressVersion,const char * sFileName,
 		}
 		track_cp tExpected = to_first;
 		to_first = to_first_save;
+		nExpected++;
 		// Find corresponding Actual track
 		track_cp tActual = FindTrack( GetTrkIndex( tExpected ) );
 		strcat( message, "Regression " );
@@ -1412,6 +1414,17 @@ EXPORT int CheckRegressionResult( long regressVersion,const char * sFileName,
 	to_last = to_last_save;
 	if ( strncmp( paramLine, "REGRESSION END", 14 ) != 0 ) {
 		InputError( "Expected REGRESSION END", TRUE );
+	}
+	// The comparison above only looks up expected tracks, so it can't see
+	// tracks that shouldn't be there.
+	int nActual = 0;
+	track_p tActual;
+	TRK_ITERATE( tActual ) {
+		nActual++;
+	}
+	if ( nActual != nExpected ) {
+		nFail++;
+		lprintf( "  FAIL: Track count: Actual %d, Expected %d\n", nActual, nExpected );
 	}
 	return nFail;
 }

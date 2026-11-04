@@ -2247,11 +2247,18 @@ EXPORT wBool_t CompareSegs(
 			REGRESS_CHECK_POS( "Pos[1]", segP1, segP2, u.l.pos[1] )
 //			REGRESS_CHECK_POS( "Pos[2]", segP1, segP2, u.l.pos[2] )
 //			REGRESS_CHECK_POS( "Pos[3]", segP1, segP2, u.l.pos[3] )
-			REGRESS_CHECK_ANGLE( "Angle", segP1, segP2, u.l.angle )
-			REGRESS_CHECK_INT( "Option", segP1, segP2, u.l.option )
+			// u.l.angle isn't read anywhere and isn't in the file, and
+			// u.l.option only exists for these two types.
+			if ( segP1->type == SEG_DIMLIN || segP1->type == SEG_BENCH ) {
+				REGRESS_CHECK_INT( "Option", segP1, segP2, u.l.option )
+			}
 			break;
 		case SEG_BEZTRK:
 		case SEG_BEZLIN:
+			REGRESS_CHECK_POS( "Pos[0]", segP1, segP2, u.b.pos[0] )
+			REGRESS_CHECK_POS( "Pos[1]", segP1, segP2, u.b.pos[1] )
+			REGRESS_CHECK_POS( "Pos[2]", segP1, segP2, u.b.pos[2] )
+			REGRESS_CHECK_POS( "Pos[3]", segP1, segP2, u.b.pos[3] )
 			break; // u.b
 		case SEG_CRVLIN:
 		case SEG_CRVTRK:
@@ -2278,12 +2285,19 @@ EXPORT wBool_t CompareSegs(
 			// CHECK fontP
 			REGRESS_CHECK_DIST( "Fontsize", segP1, segP2, u.t.fontSize )
 			REGRESS_CHECK_INT( "Boxed", segP1, segP2, u.t.boxed )
-			// CHECK string
+			if ( strcmp( segP1->u.t.string, segP2->u.t.string ) != 0 ) {
+				sprintf( cp, "String: Actual \"%.40s\", Expected \"%.40s\"\n",
+				         segP1->u.t.string, segP2->u.t.string );
+				return FALSE;
+			}
 			break; // u.t
 		case SEG_POLY:
 		case SEG_FILPOLY:
 			REGRESS_CHECK_INT( "Cnt", segP1, segP2, u.p.cnt )
-			// CHECK pts
+			for ( int ptInx = 0; ptInx < segP1->u.p.cnt; ptInx++ ) {
+				REGRESS_CHECK_POS( "Pts", segP1, segP2, u.p.pts[ptInx].pt )
+				REGRESS_CHECK_INT( "PtType", segP1, segP2, u.p.pts[ptInx].pt_type )
+			}
 			REGRESS_CHECK_POS( "Orig", segP1, segP2, u.p.orig )
 			REGRESS_CHECK_ANGLE( "Angle", segP1, segP2, u.p.angle )
 			break; // u.p
