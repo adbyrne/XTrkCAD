@@ -1000,6 +1000,7 @@ static BOOL_T ReadJoint(
 	char * cp = NULL;
 	coOrd savedDescOff = {0.0,0.0};
 
+	memset( &e, 0, sizeof e );
 	if ( !GetArgs( line+6, paramVersion<3?"dXZs9dffffdddpYfc":paramVersion<9
 	               ?"dLl00s9dffffdddpYfc":"dLl00s9dffffdddpffc",
 	               &index, &layer, &options, scale, &visible, &e.l0, &e.l1, &e.R, &e.L,
@@ -1016,7 +1017,6 @@ static BOOL_T ReadJoint(
 	}
 	trk = NewTrack( index, T_EASEMENT, 0, sizeof e );
 	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
-	xx->descriptionOff = savedDescOff;
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(trk, visible!=0);
 		SetTrkNoTies(trk, FALSE);
@@ -1035,6 +1035,7 @@ static BOOL_T ReadJoint(
 		SetTrkBits(trk,TB_HIDEDESC);
 	}
 	e.base.trkType = T_EASEMENT;
+	e.descriptionOff = savedDescOff;
 	*xx = e;
 	SetEndPts( trk, 2 );
 	ComputeBoundingBox( trk );

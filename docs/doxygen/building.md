@@ -380,6 +380,13 @@ bug:
   one fixture in `app/bin/unittest/testfiles/` has to match, and two have to be reported, a wrong
   turnout segment and an extra track. When a block fails after a change, work out which side is
   right before regenerating it (`-d regression=3` writes new blocks to `xtrkcad.regress`).
+- **Layout round trip (`RegressionRoundTrip.*`)** — one test per layout in `app/lib/examples`: `-T<layout>.xtc`
+  loads it, saves it, reloads the save and saves again, and the saves have to match, leaving out the
+  date and `MAPSCALE` (it follows from the window size). The same goes for `.xtce`, saved both
+  elsewhere and in the working directory (`LayoutRoundTripTest()`, `fileio.c`). The tests have the
+  `regression-ci` label, so the sanitizer job runs them too. That matters: ASan's fill pattern exposes
+  values read from uninitialised memory that a normal build happens to see as 0. It proves saving is
+  stable, not that the first load of an old file read everything in it.
 - **Visual pre/post diffing (`-d visualdiff=1`)** — the regression suite's `REGRESSION START`/`END`
   blocks compare track coordinates as text, which can miss a change that's obvious in a picture
   (SF #667/#26: a fixture regen silently dropped a join's connector tracks, and the numeric diff

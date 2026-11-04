@@ -1454,6 +1454,149 @@ EXPORT void LoadFileList(void)
 
 
 
+/**
+ * Compare two saved layouts, leaving out the first line, which holds the date,
+ * and MAPSCALE, which follows from the window size. Reports the first
+ * difference.
+ *
+ * \param path1 IN first layout
+ * \param path2 IN second layout
+ * \return TRUE if they're the same
+ */
+static BOOL_T SavedLayoutsMatch( const char * path1, const char * path2 )
+{
+	static char line1[STR_HUGE_SIZE], line2[STR_HUGE_SIZE];
+	FILE * f1 = fopen( path1, "r" );
+	FILE * f2 = fopen( path2, "r" );
+	BOOL_T match = FALSE;
+	if ( f1 && f2 ) {
+		long lineNum = 0;
+		while ( TRUE ) {
+			char * p1 = fgets( line1, sizeof line1, f1 );
+			char * p2 = fgets( line2, sizeof line2, f2 );
+			lineNum++;
+			if ( p1 == NULL || p2 == NULL ) {
+				match = ( p1 == p2 );
+				if ( !match ) {
+					lprintf( "  FAIL: %s and %s: different length at line %ld\n",
+					         path1, path2, lineNum );
+				}
+				break;
+			}
+			if ( lineNum > 1 && strncmp( line1, "MAPSCALE ", 9 ) != 0
+			     && strcmp( line1, line2 ) != 0 ) {
+				lprintf( "  FAIL: %s and %s differ at line %ld:\n  %s  %s",
+				         path1, path2, lineNum, line1, line2 );
+				break;
+			}
+		}
+	} else {
+		lprintf( "  FAIL: can't open %s or %s\n", path1, path2 );
+	}
+	if ( f1 ) {
+		fclose( f1 );
+	}
+	if ( f2 ) {
+		fclose( f2 );
+	}
+	return match;
+}
+
+/**
+ * Load a layout and return its track count, or -1 if it didn't load.
+ */
+static int RoundTripLoad( char * path )
+{
+	int count = 0;
+	track_p trk;
+	// LoadTracks() would stop at a notice with nobody to answer it
+	if ( access( path, R_OK ) != 0 ) {
+		lprintf( "  FAIL: %s is missing\n", path );
+		return -1;
+	}
+	if ( !LoadTracks( 1, &path, NULL ) ) {
+		lprintf( "  FAIL: can't load %s\n", path );
+		return -1;
+	}
+	TRK_ITERATE( trk ) {
+		count++;
+	}
+	return count;
+}
+
+/**
+ * Regression test for -T<layout>: load a layout, save it, load the saved copy
+ * and save again. The two saves have to match, and every load has to give the
+ * same number of tracks. The same goes for the archive format (.xtce), saved
+ * both elsewhere and in the working directory, where CreateArchive() builds
+ * it. It's a check that nothing gets lost or changed by saving, whichever
+ * version of the program wrote the original.
+ *
+ * \param pathName IN the layout
+ * \return number of failed checks
+ */
+EXPORT int LayoutRoundTripTest( const char * pathName )
+{
+	char * dir = NULL;
+	char * save1 = NULL, * save2 = NULL, * archive = NULL, * save3 = NULL;
+	char * archive2 = NULL;
+	char * source = MyStrdup( pathName );
+	int nFail = 0;
+	int count1, count2 = -1, count3 = -1;
+
+	MakeFullpath( &dir, workingDir, "roundtrip", NULL );
+	SafeCreateDir( dir );
+	MakeFullpath( &save1, dir, "roundtrip1.xtc", NULL );
+	MakeFullpath( &save2, dir, "roundtrip2.xtc", NULL );
+	MakeFullpath( &archive, dir, "roundtrip.xtce", NULL );
+	MakeFullpath( &save3, dir, "roundtrip3.xtc", NULL );
+	MakeFullpath( &archive2, workingDir, "roundtrip.xtce", NULL );
+
+	count1 = RoundTripLoad( source );
+	if ( count1 <= 0 ) {
+		lprintf( "  FAIL: %s: %d tracks\n", source, count1 );
+		return 1;
+	}
+	lprintf( "%s: %d tracks\n", source, count1 );
+	if ( !SaveTracks( 1, &save1, NULL ) || !SaveTracks( 1, &archive, NULL )
+	     || !SaveTracks( 1, &archive2, NULL ) ) {
+		lprintf( "  FAIL: can't save\n" );
+		return 1;
+	}
+
+	count2 = RoundTripLoad( save1 );
+	if ( count2 != count1 ) {
+		lprintf( "  FAIL: saved layout has %d tracks\n", count2 );
+		nFail++;
+	}
+	if ( !SaveTracks( 1, &save2, NULL ) || !SavedLayoutsMatch( save1, save2 ) ) {
+		nFail++;
+	}
+
+	count3 = RoundTripLoad( archive );
+	if ( count3 != count1 ) {
+		lprintf( "  FAIL: saved archive has %d tracks\n", count3 );
+		nFail++;
+	}
+	if ( !SaveTracks( 1, &save3, NULL ) || !SavedLayoutsMatch( save1, save3 ) ) {
+		nFail++;
+	}
+
+	if ( RoundTripLoad( archive2 ) != count1 ) {
+		lprintf( "  FAIL: archive in the working directory is wrong\n" );
+		nFail++;
+	}
+
+	free( dir );
+	free( archive2 );
+	free( save1 );
+	free( save2 );
+	free( archive );
+	free( save3 );
+	MyFree( source );
+	return nFail;
+}
+
 EXPORT void FileInit( void )
 {
 	libDir = wGetAppLibDir();

@@ -870,7 +870,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 			wPrintVersion();
 			exit(0);
 			break;
-		case 'T': // run tests, optionally scoped to a comma-separated list of demos or .xtr paths (-Tdemo1,demo2)
+		case 'T': // run tests, optionally scoped to a comma-separated list of demos or .xtr paths, or one .xtc layout to round-trip (-Tdemo1,demo2)
 			LogSet( "regression", 2 );
 			bRunTests = TRUE;
 			testTarget = optarg;

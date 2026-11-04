@@ -1993,6 +1993,12 @@ static void FilterDemoList(const char *target)
  */
 EXPORT int RegressionTestAll(const char *target)
 {
+	if (target != NULL) {
+		const char *ext = FindFileExtension(FindFilename((char *)target));
+		if (ext != NULL && (strcmp(ext, "xtc") == 0 || strcmp(ext, "xtce") == 0)) {
+			return LayoutRoundTripTest(target);
+		}
+	}
 	playbackNonStop = TRUE;
 	SetPlaybackSpeed(5);
 	CreateDemoW();
