@@ -36,6 +36,10 @@ on:
         description: Pin MinGW GCC (.github/actions/msys2-pin-gcc); MINGW64 only.
         type: boolean
         default: true
+      windows-build-types:
+        description: JSON list of CMake build types for c-tests-windows. Packages are Release, the other test jobs Debug.
+        type: string
+        default: '["Debug", "Release"]'
 
 jobs:
   c-tests-linux:
@@ -207,8 +211,14 @@ jobs:
     # directly using the official GTK Windows runtime (MSYS2). pacboy's ":p"
     # suffix expands each package to the selected environment's prefix
     # (mingw-w64-x86_64-*, mingw-w64-clang-aarch64-*).
-    name: c-tests-windows (${{ inputs.windows-runner }}, ${{ inputs.msystem }})
+    # Debug and Release: a Release-only failure would otherwise first show up in
+    # release.yml's packaging jobs, after the merge (Development Issues #65, #70).
+    name: c-tests-windows (${{ inputs.windows-runner }}, ${{ inputs.msystem }}, ${{ matrix.build-type }})
     runs-on: ${{ inputs.windows-runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        build-type: ${{ fromJSON(inputs.windows-build-types) }}
     timeout-minutes: 30
     defaults:
       run:
@@ -239,7 +249,7 @@ jobs:
       - name: Configure
         run: |
           cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DXTRKCAD_TESTING=ON \
             -DXTRKCAD_USE_GETTEXT=OFF
       - name: Build

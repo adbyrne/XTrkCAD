@@ -91,6 +91,9 @@ The shared pieces:
   `c-tests-linux`, `c-tests-linux-clang`, `c-tests-arm64`, `regression-gtk3`,
   `c-tests-sanitizers`, `cppcheck`, `c-tests-macos` and `c-tests-windows`. `ci-gtk3.yml` calls it
   with the pinned runners and `ci-gtk3-preview.yml` with the next ones.
+  `c-tests-windows` runs Debug and Release (`windows-build-types`), because packages are built as
+  Release and the other test jobs as Debug. Without it, a Release-only failure first shows up in
+  `release.yml`, after the merge. The preview run stays on Debug.
 - **`gtk3-qa-reports.yml`** (a reusable workflow) holds the report-only analysis jobs. `ci-gtk3.yml`
   calls it for plain-text PR artifacts, `release.yml` for the published HTML reports, and
   `ci-gtk3-preview.yml` on the next Ubuntu (Linux only: `other-platforms: false` leaves out the
