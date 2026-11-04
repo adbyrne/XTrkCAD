@@ -328,100 +328,186 @@ parameter list.
 
 ![](bprint.png)
 
-The <b>Print</b> command (<b>File&gt;Print</b>) is used to print all or a portion of the layout.
+The <b>Print</b> command (<b>File&gt;Print</b>, <i>Ctrl+P</i>) prints all or part of the layout, at a scale you choose.
 
-![](bsetup.png)
+Printing has two steps:
 
-The <b>Print Setup</b> command (<b>File&gt;Print Setup</b>) is used to set up the printer properties.
+1. In the XTrackCAD <b>Print</b> dialog you choose the print scale, which pages to print and what to put on them.  While the dialog is open, a grid on the layout shows how the layout is divided into pages.
 
-When the <b>Print</b> command is selected a grid, which represents each printed page, is drawn on the layout. Pages can be selected or unselected for printing by placing the mouse over a grid section and clicking the left mouse button.
+2. When you press <b>Print</b>, the system's print dialog opens.  There you choose the printer (or print to a PDF file) and the number of copies.
+
+For step-by-step examples, such as a one-page overview or a print at a chosen scale, see \subpage printHowTo.
+
+<h3>The print grid</h3>
+
+![](printgrid.png)
+
+Each rectangle of the grid is one printed page.  Selected pages are shaded.
+
+- Click a page to select it, click it again to deselect it.
+
+- `Shift+Left+Drag` moves the grid, `Shift+Right+Drag` rotates it.  The <b>Advanced</b> tab shows the resulting origin and angle.
+
+<h3>Page Setup tab</h3>
 
 ![](print.png)
 
-The <b>Print</b> dialog contains a number of control areas:
+- <b>Print Scale</b> - the reduction from layout to paper, as 1:<i>Print Scale</i>.  At 24, 24 inches of layout print as 1 inch on paper.  The value is a whole number from 1 (full size) to 999.  Text on the layout shrinks with the print scale, the same way it does when you zoom out on screen.
 
-- <b>The size of each page is controlled by:</b>
+- <b>Page Width</b>, <b>Page Height</b> - how much of the layout one page covers, in layout units.  For example, at a Print Scale of 24, a <b>Page Width</b> of 192.000 means each page covers 16 feet of layout.  You can enter smaller values, but not more than the page holds at this scale.
 
-  - <b>Scale</b> - up to 1:1.
+- <b>Max</b> - sets <b>Page Width</b> and <b>Page Height</b> to the most that fits on the paper at this scale.
 
-  - <b>Width, Height</b> - scaled size of each page. Values for <b>Width</b> and <b>Height</b> can be manually entered, overriding the maximum values. Values larger than the page size times the <i>Scale</i> cannot be entered.
+- <b>Snap Shot</b> - picks the <b>Print Scale</b> and <b>Page Format</b> that fit the whole layout on one page, and selects that page.  It fits the room size set in the Layout dialog (\ref cmdLayout), not just the objects you have drawn.
 
-  - <b>Max</b> - sets Width and Height to the maximum for the print <i>Scale</i>.
+- <b>Page Format</b> - <i>Portrait</i> or <i>Landscape</i>.  XTrackCAD turns the page itself, so use this setting rather than the orientation in the system dialogs.
 
-  - <b>Snap Shot</b> - adjusts the <i>Scale</i>, <i>Origin</i> and <i>Angle</i> to produce a one-page snap shot of the layout.
+- <b>Print Order</b> - relative to the print grid, <i>Normal</i> prints columns first, top to bottom, left to right.  <i>Reverse</i> prints rows first, left to right, bottom to top.
 
-  - <b>Format</b> - Portrait or Landscape.
+<h3>Content tab</h3>
 
-- <b>Page printing order is controlled by the <b>Print Order</b> option.</b>
+![](printcontent.png)
 
-  - Relative to the Print Grid:
+- <b>Engineering Data</b> - adds a box at the bottom of each page with the layout title and subtitle (\ref cmdLayout), the date, the print scale, the room size, the model scale and the file name.  The box takes 1 inch of the page.
 
-  - <b>Normal</b> order is Columns first, Top to Bottom, Left to Right.
+- <b>Page Numbers</b> - prints the page number in the center of each page as (x/y).  x is the page position from left to right, y from bottom to top, so (1/1) is the page at the bottom left.  The numbers of the neighboring pages are printed on each edge.
 
-  - <b>Reverse</b> order is Rows first, Left to Right, Bottom to Top.
+- <b>Registration Marks</b> - prints alignment crosses every 3" (or 10cm).  Only available at a <b>Print Scale</b> of 1.  This helps to line up pages printed at different angles.
 
-Whether tracks are printed with one or two lines (representing the center line and rails) depends on the <b>Print Scale</b>.  If this value is smaller than or equal to twice the Two Rail Scale on the Display (\ref cmdDisplay) dialog then tracks are drawn with two lines. This corresponds to the way tracks are drawn on the main window, adjusted to account for the greater resolution of most printers. At 1:1 tracks are also drawn with a center line.
+- <b>Snap Grid</b> - prints the Snap Grid (\ref cmdGrid).  Only available while the Snap Grid is shown.
 
-- <b>Other options:</b>
+- <b>Centerline Below Scale 1:1</b> - prints a dotted line down the center of each track.  The centerline is always printed at 1:1; this adds it at smaller scales.  Disabled when tracks print with a single line.
 
-  - <b>Engineering Data</b> - show title, user, date and other information in a box at the bottom of the printout.
+- <b>Roadbed Outline</b> - prints lines along the edges of the roadbed, if <b>Width</b> is greater than the track gauge.  Most useful at 1:1, for cutting sub-roadbed.  Disabled when tracks print with a single line.
 
-  - <b>Registration Marks</b> - at 1:1 scale, print location markers every 3" (or 10cm).  This option is only enabled at 1:1. This is useful for aligning multiple pages printed at different angles.
+- <b>Print Rulers</b> - prints rulers along the edge of the layout (<i>Layout Edge</i>), along the edges of every page (<i>Every Page</i>), or not at all (<i>None</i>).  The rulers show layout distances, so they are a quick check of the printed scale.  Only available when the grid <b>Angle</b> is 0.
 
-  - <b>Page Numbers</b> - to help positioning the individual pages the page number is printed in the center of the page in the format (x/y).
-x is the page position from left to right, y in from bottom to top, So (1/1) is the page at the bottom left.
-As an additional aid, the numbers of the next pages are printed on each edge.
+Whether tracks print with one line or two (center line and rails) depends on the <b>Print Scale</b>.  If the Print Scale is no more than twice the <b>Two Rail Scale</b> on the Display dialog (\ref cmdDisplay), tracks print with two lines.  At 1:1 the center line is printed too.
 
-  - <b>Snap Grid</b> - if the Snap Grid (\ref cmdGrid) is visible then it may be drawn on the printout. This option is only enabled if the <i>Snap Grid</i> is visible.
+<h3>Advanced tab</h3>
 
-  - <b>Rulers</b> - choose to print rulers at the layout edge, or on all edges of the page, an option is only enabled if the <b>Angle</b> is <i>0.000</i>, or None - which means print no rulers.
+![](printadvanced.png)
 
-  - <b>Centerline below Scale 1:1</b> - dotted line down the center of the Track/Roadbed.  This line will always be printed at Scale 1:1, but selecting this option will print it at smaller scales. This option is disabled if tracks would be drawn with only one line (instead of two).
+- <b>Origin: X</b>, <b>Y</b> and <b>Angle</b> - the position and rotation of the print grid on the layout.  Type values here, or drag the grid with the mouse.  <b>Reset</b> sets them to 0.
 
-  - <b>Roadbed Outline</b> - lines representing the edge of the Roadbed.  The Roadbed will be printed if the <i>Width</i> is greater than the track gauge.  Note: this option is most useful at 1:1.  This option is disabled if tracks would be drawn with only one line (instead of two).
+- <b>Page Margins: Ignore</b> - uses the whole sheet instead of the printable area, so pages can be placed edge to edge without trimming.  Most printers can't print right to the edge, so a thin strip around each page may stay blank.
 
-  - <b>Ignore Page Margins</b> - use the physical page size.  This allows the printouts to abut without trimming.
+- <b>Margins</b> - shows and changes the margins for the current printer (\ref cmdPrintMargin).
 
-  - <b>Margins</b> - examine and update the printer margins for the current printer.  (\ref cmdPrintMargin)
+<h3>Buttons</h3>
 
-- <b>The orientation of the print grid is controlled by:</b>
+- <b>Filter Layers/Groups...</b> - prints only some Layers or Layer Groups (\ref cmdPrintExportFilter), without changing which layers are visible.  Hidden layers never print.
 
-  - <b>X</b> - X co-ordinate.
+- <b>Setup</b> - opens Printer Setup (\ref printSetup) to choose the paper size.
 
-  - <b>Y</b> - Y co-ordinate.
+- <b>Clear</b> - deselects all pages.
 
-  - <b>Angle</b> - of the grid.
+- <b>Select All</b> - selects every page of the grid that covers the layout.
 
-These values can be set directly or by dragging on the layout.  `Shift+Left+Drag` moves the grid and `Shift+Right+Drag` rotates the grid.  The <b>Reset</b> button resets the values to 0.
+- <b>Print</b> - opens the system print dialog for the selected pages.  It is only enabled once at least one page is selected.  After printing, the <b>Print</b> dialog closes and the page selection is cleared; the other settings are kept.
 
-The <b>Print</b> button prints the selected pages and closes the <b>Print</b> dialog.  It is not enabled until you have selected some pages to print.
+*/
 
-The <b>Setup</b> button invokes the Printer Setup (\ref printSetup) dialog.
+/**
+\page printHowTo Printing How-To
 
-The <b>Select All</b> button selects all pages for printing.
+Each example starts from <b>File&gt;Print</b> (<i>Ctrl+P</i>).  The settings are explained on the Printing page (\ref cmdPrint).
 
-The <b>Clear</b> button unselects all selected pages, so no pages will be printed.
+Try a new kind of printout with a PDF file first (see <i>Check a printout on screen first</i> below).  It costs no paper and shows exactly what the printer will get.
 
-The <b>Filter Layers/Groups...</b> button opens the <b>Filter Layers/Groups
-for Print/Export</b> dialog (\ref cmdPrintExportFilter) to further scope
-what's printed to specific Layers or Layer Groups (\ref cmdLayergroup), on
-top of whatever Layer visibility already allows through.
+<h3>One-page overview of the whole layout</h3>
 
-<i>Suggested Uses:</i>
+1. Check the room size in the Layout dialog (\ref cmdLayout): <b>Snap Shot</b> fits the room, not just the objects you have drawn.  If the drawing only fills part of the room, the overview will be smaller than it needs to be.
 
-Use the <b>Snapshot</b> button to set the scale and orientation for a one-page printout of the layout.  Also set <b>Engineering Data</b> to add the Layout Title, Scale and other data for a summary.
+2. Optional: on the <b>Content</b> tab, check <b>Engineering Data</b> to add the layout title, scale and date.  Uncheck <b>Page Numbers</b>, since there is only one page.
 
-Use <b>Layers</b> (\ref cmdLayer) to control which tracks are visible (and printed), or use the <b>Filter Layers/Groups...</b> button (\ref cmdPrintExportFilter) for a one-off scope without changing any layer's actual visibility.  Put bench-work, scenery or different tracks levels in separate layers and hide the layers you are not working with.
+3. On the <b>Page Setup</b> tab, press <b>Snap Shot</b>.  XTrackCAD chooses the <b>Print Scale</b> and <b>Page Format</b> that fit everything on one page, and selects that page (<i>1 page selected</i>).
 
-To transfer the drawing to the layout without printing at 1:1, make the Snap Grid (\ref cmdGrid) visible and orient it to match your room or layout table.
+4. Press <b>Print</b>, choose the printer or PDF in the system dialog and print.
 
-Check the <b>Print Snap Grid</b> toggle and use the printed grid to transfer measurements to your layout space.  You may want to change the color (\ref cmdRgbcolor) of the <b>Snap Grid</b> to make it more visible on the printout.
+<b>One page per level.</b>  If each level of the layout is on its own Layer or Layer Group, you can print a matching overview for each one:
 
-When you print multiple pages you can check <b>Ignore Page Margins</b> so pages can be placed next to each other.  The tracks will line up correctly without trimming or overlapping the pages.  Note: depending on your printer there will be an unprintable margin around the edge of the page.
+1. Set up the overview as above and press <b>Snap Shot</b> once.  The scale stays the same for every level, so the pages can be compared or overlaid.
 
-If you print at 1:1 for direct transfer to the sub-roadbed, check <b>Print Roadbed Outline</b> and set <b>Width</b> to show lines for making cuts.
+2. Press <b>Filter Layers/Groups...</b> and include only the layers (or the Layer Group) of the first level.  Close the filter dialog with <b>Done</b>.  The layers must also be visible (\ref cmdLayer); the filter never prints a hidden layer.
 
-If you make printouts in strips at different angles at 1:1 (to follow tracks around a curve), check <i>Print Registration Marks</i> to be able to align the separate strips.
+3. Press <b>Print</b> and print the page.
+
+4. Open <b>Print</b> again and press <b>Snap Shot</b> again: printing clears the page selection, and <b>Snap Shot</b> picks the same scale every time.  Change the filter to the next level and print again.  Repeat for each level.
+
+5. Afterwards, press <b>Clear Filter</b> in the filter dialog so later prints and exports include everything again.
+
+Tip: the Engineering Data box shows the layout title and subtitle.  To label each page with its level, change the subtitle in the Layout dialog (\ref cmdLayout) before printing that level.
+
+<h3>Print at a chosen scale</h3>
+
+For example, to make 1 foot of layout 1/2 inch on paper:
+
+1. Work out the Print Scale: divide the layout distance by the paper distance, in the same units.  1 foot = 12 inches, and 12 / 0.5 = 24, so the Print Scale is <b>24</b> (1:24).
+
+2. On the <b>Page Setup</b> tab, enter 24 in <b>Print Scale</b> and press <i>Tab</i>.  The grid on the layout is redrawn for the new page size, and <b>Page Width</b> and <b>Page Height</b> show how much layout each page covers.
+
+3. Choose the <b>Page Format</b> (Portrait or Landscape) that covers the layout with fewer pages.
+
+4. Select the pages to print: click them on the layout, or press <b>Select All</b>.  To move the grid so the layout falls on fewer pages, use `Shift+Left+Drag`, or set the origin on the <b>Advanced</b> tab.
+
+5. On the <b>Content</b> tab, set <b>Print Rulers</b> to <i>Layout Edge</i> or <i>Every Page</i>, so you can check the scale on the printout.
+
+6. Press <b>Print</b>.  In the system print dialog, make sure the printer does not resize the page: scale 100%, one page per sheet, and no <i>Fit to page</i>.
+
+7. Check the printout: the 1-foot marks on the ruler should be 1/2 inch apart.
+
+Some common choices:
+
+| Layout distance | Paper distance | Print Scale |
+|-----------------|----------------|-------------|
+| 1 foot          | 1 inch         | 12          |
+| 1 foot          | 1/2 inch       | 24          |
+| 1 foot          | 1/4 inch       | 48          |
+| 1 foot          | 1/8 inch       | 96          |
+| 1 meter         | 2 cm           | 50          |
+| 1 meter         | 1 cm           | 100         |
+| full size       | full size      | 1           |
+
+The layout distance is the size of the layout as drawn: the real benchwork, not the prototype it models.  The Print Scale has to be a whole number.
+
+<h3>Full-size (1:1) templates</h3>
+
+Printing at a Print Scale of 1 gives full-size templates to lay track or cut sub-roadbed from.
+
+1. Enter 1 in <b>Print Scale</b>.
+
+2. On the <b>Content</b> tab, check <b>Registration Marks</b>, so the pages can be lined up.  For cutting sub-roadbed, also check <b>Roadbed Outline</b> and set its <b>Width</b>.
+
+3. On the <b>Advanced</b> tab, check <b>Page Margins: Ignore</b>, so the pages can be taped together edge to edge.
+
+4. Select only the pages you need and print them.
+
+If you print strips at different angles to follow the track around a curve, the registration marks let you line the strips up.  To transfer the plan without printing at 1:1, show the Snap Grid (\ref cmdGrid) lined up with your room and print it with <b>Snap Grid</b> on the <b>Content</b> tab.  You may want to change the Snap Grid color (\ref cmdRgbcolor) so it stands out on paper.
+
+<h3>Check a printout on screen first</h3>
+
+To see the result before using paper, print to a PDF file and open it in a PDF viewer:
+
+- On Linux, choose <b>Print to File</b> in the system print dialog and select <i>PDF</i>.
+
+- On Windows, choose the <b>Microsoft Print to PDF</b> printer.
+
+- On macOS, choose <b>Print to File</b> as on Linux.
+
+<h3>Troubleshooting</h3>
+
+- <b>The Print button is disabled.</b> No pages are selected.  Click pages on the layout, or press <b>Select All</b> or <b>Snap Shot</b>.
+
+- <b>More pages than expected.</b> The number of pages depends on the <b>Print Scale</b>: the smaller the number, the larger the printout.  Use <b>Snap Shot</b> for a single page, or raise the Print Scale.
+
+- <b>The printout is not to scale.</b> Check that the system print dialog and the printer driver print at 100%, with no <i>Fit to page</i> or <i>Shrink to fit</i>.  Then check the printer margins (\ref cmdPrintMargin).
+
+- <b>Something is missing from the printout.</b> Only visible layers print (\ref cmdLayer).  If the <b>Filter Layers/Groups</b> dialog (\ref cmdPrintExportFilter) has layers included, only those layers print.
+
+- <b>The overview is smaller than it could be.</b> <b>Snap Shot</b> fits the room size in the Layout dialog (\ref cmdLayout).  Make the room size fit the drawing, or set the Print Scale by hand and move the grid.
+
+- <b>Text is the wrong size.</b> Text on the layout prints at the size it has at the chosen <b>Print Scale</b>, just as it looks when zoomed out on screen.  Print to PDF to check, and report the problem with the PDF and your layout file if the text does not match the screen.
 
 */
 
@@ -430,8 +516,24 @@ If you make printouts in strips at different angles at 1:1 (to follow tracks aro
 
 \anchor idx_Printer_Setup_204
 
+The <b>Printer Setup</b> command (<b>File&gt;Print Setup</b>), and the <b>Setup</b> button on the <b>Print</b> dialog (\ref cmdPrint), open the system's page setup dialog.  It looks different on each system:
+
 - \subpage Linux
 - \subpage MS-Windows
+
+In either dialog, choose the printer and the paper size.  Ignore the orientation: use the <b>Page Format</b> on the <b>Print</b> dialog instead.  XTrackCAD remembers the settings for the next print.
+
+XTrackCAD starts from the margins the system reports for the printer and paper.  If your printer's printable area is different, adjust it with <b>Margins</b> on the <b>Print</b> dialog's <b>Advanced</b> tab (\ref cmdPrintMargin).  Those values are saved for each printer.
+
+<h3>Advanced: print scale overrides</h3>
+
+Two settings in the <i>Preference</i> section of the XTrackCAD configuration file can override how drawings and text are scaled for printing.  They are only needed to work around a printer driver that reports its resolution wrongly, and are not set by default:
+
+- <i>Preference.PrintScale</i> - if greater than 0, drawing coordinates are scaled by this factor relative to 72 dpi.
+
+- <i>Preference.PrintTextScale</i> - if greater than 0, text is scaled by this factor.  Only used when <i>PrintScale</i> is set.
+
+If they are not set in the configuration file, XTrackCAD uses the environment variables <i>XTRKCADPRINTSCALE</i> and <i>XTRKCADPRINTTEXTSCALE</i> instead.
 
 */
 
@@ -442,35 +544,15 @@ If you make printouts in strips at different angles at 1:1 (to follow tracks aro
 
 ![](printset.png)
 
-The <b>Printer Setup</b> dialog allows you to configure the application's use of the printer.
+The Linux <b>Page Setup</b> dialog contains:
 
-The <b>Printer Setup</b> window contains:
+- <b>Format for</b> - the printer to set up.  Choose <i>Any Printer</i> for a general paper size.
 
-- <b>Format for</b> - a list to select a particular printer.  The entries on this list are defined by `printer` lines in the `~/.xtrkcad/xtrkcad.rc` file.  The first entry, 'File', causes printouts to be sent to a file.  You will be prompted for a file name when doing a print.
+- <b>Paper size</b> - the paper loaded in the printer.
 
-- <b>Paper Size</b> - a list of various supported paper sizes.
+- <b>Orientation</b> - ignored by XTrackCAD; use the <b>Page Format</b> on the <b>Print</b> dialog.
 
-- <b>Orientation</b> - a Radio button to select various Landscape or Portrait formats. This setting is ignored, use the <b>Page Format</b> entry on the <b>Print</b> dialog.
-
-- <b>Apply</b> - updates the data and ends the dialog.
-
-- <b>Cancel</b> - ends the dialog without update.
-
-<i>Note</i> -
-Printing uses a default of 600ppi. It scales the print and text from a default size of 72dpi.
-This is often the expected value for a standard printer driver to work correctly, but will not work if the driver is not accurately setting the ppi available.
-To override the printer ppi you can use either the configuration file settings for print or environmental variables.
-These values are set in the Preferences section.
-
-Preferences.PrintScale - The floating point ratio of the real printer dpi to 72.
-
-Preferences.PrintTextScale - The floating point ratio of the real printer text support to a dpi of 72. This value has no effect unless PrintScale is set to &gt; 0.0.
-
-These values can also be set using environmental variables if the configuration preference values are not set or they are set to &lt;=0.0.
-
-XTRKCADPRINTSCALE
-
-XTRKCADPRINTTEXTSCALE
+- <b>Apply</b> saves the settings, <b>Cancel</b> discards them.
 
 */
 
@@ -479,27 +561,15 @@ XTRKCADPRINTTEXTSCALE
 
 \anchor idx_Microsoft_Windows_206
 
-![](printset_win.png)
+On Windows, <b>Printer Setup</b> opens the standard Windows <b>Page Setup</b> dialog.  It contains:
 
-The Windows <b>Printer Setup</b> dialog allows you to configure the application's use of the printer.
+- <b>Paper Size</b> and <b>Source</b> - the paper and the tray to use.
 
-The <b>Printer Setup</b> window contains:
+- <b>Orientation</b> - ignored by XTrackCAD; use the <b>Page Format</b> on the <b>Print</b> dialog.
 
-- <b>Name</b> - a drop down list for selection of a particular printer.  Entries in this list are defined by `Windows`.
+- <b>Margins</b> - the margins XTrackCAD starts from.  Fine-tune them with the <b>Margins</b> button on the <b>Print</b> dialog (\ref cmdPrintMargin).
 
-- <b>Status</b> - the current status of the selected printer.
-
-- <b>Type</b> - the type and model of printer selected.
-
-- <b>Where</b> - The location of the printer if it's defined in the printers properties.
-
-- <b>Comment</b> - Any comments defined that are defined in the printers properties.
-
-- <b>Paper Size</b> - a list of various North American and European paper sizes.
-
-- <b>Paper Source</b> - a list of various paper tray locations associated with the selected printer.
-
-- <b>Orientation</b> - a Radio button to select either Landscape or Portrait format. This setting is ignored, use the <b>Page Format</b> entry on the <b>Print</b> dialog.
+- <b>Printer...</b> - chooses the printer.
 
 */
 

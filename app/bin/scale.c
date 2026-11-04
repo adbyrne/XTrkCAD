@@ -978,7 +978,7 @@ static void RescaleDlgOk(
 
 
 static wBool_t RescaleDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP )
 {

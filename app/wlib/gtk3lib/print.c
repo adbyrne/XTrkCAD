@@ -234,8 +234,8 @@ void wPrintSetup(wPrintSetupCallBack_p callback)
 		WlibApplySettings(NULL);
 	}
 
-	new_page_setup = gtk_print_run_page_setup_dialog(wlibAppWinGetMain(),
-	                 page_setup, settings);
+	new_page_setup = gtk_print_run_page_setup_dialog(
+	                         GTK_WINDOW(wlibAppWinGetMain()), page_setup, settings);
 
 	if (page_setup
 	    && (page_setup != new_page_setup)) {      //Can be the same if no mods...
@@ -823,12 +823,12 @@ wBool_t wPrintDocRun(void)
 
 	res = gtk_print_operation_run(printOp,
 	                              GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
-	                              wlibAppWinGetMain(),
+	                              GTK_WINDOW(wlibAppWinGetMain()),
 	                              &err);
 
 	if (res == GTK_PRINT_OPERATION_RESULT_ERROR) {
 		GtkWidget *dialog =
-		        gtk_message_dialog_new(wlibAppWinGetMain(),
+		        gtk_message_dialog_new(GTK_WINDOW(wlibAppWinGetMain()),
 		                               GTK_DIALOG_DESTROY_WITH_PARENT,
 		                               GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 		                               "%s", err ? err->message : "print error");

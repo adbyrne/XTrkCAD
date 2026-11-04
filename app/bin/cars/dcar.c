@@ -162,7 +162,7 @@ static paramData_t newCarPLs[] = {
 	{ PD_MESSAGE, NULL, "newcardesc", 0, NULL }
 };
 static wBool_t CarItemHotbarUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void* data);
 static paramGroup_t newCarPG = {
@@ -174,9 +174,6 @@ static paramGroup_t newCarPG = {
 };
 EXPORT wControl_p newCarControls[2];
 static char newCarLabel1[STR_SIZE];
-#ifdef TODO_UNUSED
-static char* newCarLabels[2] = { newCarLabel1, NULL };
-#endif
 
 /**
  * Format a car item's Description and Manufacturer, separated by a slash,
@@ -209,7 +206,6 @@ void CarUpdateHotbarList()
 	char descManufBuf[STR_LONG_SIZE];
 	carItem_p firstItem = NULL;
 
-	/** \todo extract the following code to its own function and put into dcar.c */
 	wListClear((wList_p)newCarPLs[0].control);
 	for (int inx = 0; inx < carItemHotbar_da.cnt; inx++) {
 		carItem_p item;
@@ -309,7 +305,7 @@ static char* CarItemHotbarProc(
 
 
 static wBool_t CarItemHotbarUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void* data)
 {

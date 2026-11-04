@@ -127,11 +127,12 @@ $env:PATH = @("$env:SystemRoot\System32", $env:SystemRoot,
 $Before = @(Get-ChildItem -Recurse -File $Root | ForEach-Object FullName)
 
 # xtrkcad-<version>-windows-x64.zip, or the installer's
-# xtrkcad-setup-<version>-x64.exe
+# xtrkcad-setup-<version>-x64.exe; the UCRT64 variants end in -ucrt
+# (Development Issues #34)
 $Want = ''
 $Leaf = Split-Path -Leaf $Package
-if ($Leaf -match '^xtrkcad-(.+)-windows-[a-z0-9]+\.zip$' -or
-	$Leaf -match '^xtrkcad-setup-(.+)-x(64|86)\.exe$') {
+if ($Leaf -match '^xtrkcad-(.+)-windows-[a-z0-9]+(-ucrt)?\.zip$' -or
+	$Leaf -match '^xtrkcad-setup-(.+)-x(64|86)(-ucrt)?\.exe$') {
 	$Want = $Matches[1]
 }
 $out = Join-Path $Work 'version.txt'

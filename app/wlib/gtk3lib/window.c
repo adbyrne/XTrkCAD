@@ -213,8 +213,6 @@ void wWinBlockEnable(
 /**
  * Returns whether the window is visible.
  *
- * \todo this is a dummy, use GTK to query the visibility
- *
  * \param win IN window
  * \return    TRUE if visible, FALSE otherwise
  */
@@ -222,8 +220,7 @@ void wWinBlockEnable(
 wBool_t wWinIsVisible(
         wControl_p win)
 {
-	return(TRUE);
-
+	return(win && win->widget && gtk_widget_get_visible(win->widget));
 }
 
 /**
@@ -319,8 +316,6 @@ void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width,
  * call back is called with wQuit_e.
  *
  * \param rc IN exit code
- *
- * \todo Move to a more appropriate file (main or appwindow?)
  */
 
 

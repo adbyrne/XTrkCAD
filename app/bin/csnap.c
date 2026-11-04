@@ -596,6 +596,7 @@ static void GridOk( const void * unused )
 	if ( ( grid.Horz.Enable && grid.Horz.Spacing <= 0.0) ||
 	     ( grid.Vert.Enable && grid.Vert.Spacing <= 0.0) ) {
 		NoticeMessage( MSG_GRID_ENABLE_SPACE_GTR_0, _("Ok"), NULL );
+		FormDialogKeepOpen( &gridPG );
 		return;
 	}
 	if ( grid.Horz.Spacing <= 0.0 &&
@@ -683,7 +684,7 @@ static void GridChange( long changes )
 
 
 static wBool_t GridDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP )
 {

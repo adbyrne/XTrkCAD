@@ -23,73 +23,76 @@
 #include <string.h>
 #include <dynstring.h>
 #include "misc.h"
-#include "uthash.h"
 #include "paths.h"
 
 #define PATHS_SECTION "paths"
 #define PATH_TYPE_SIZE	10
 
-struct pathTable {
-	char type[ PATH_TYPE_SIZE]; 			/**< type of path */
-	DynString path;							/**< path */
-	UT_hash_handle hh; 						/**< makes this structure hashable */
+struct pathList {
+	char type[ PATH_TYPE_SIZE ];	/**< type of path */
+	DynString path;			/**< path */
+	struct pathList *next;		/**< next entry in list */
 };
 
-static struct pathTable *paths;
+static struct pathList *pathPreferences;
 
-static void AddPath(const char *type, char*path);
-static struct pathTable *FindPath(const char *type);
+static void AddPathToList( const char *type, char *path );
+static struct pathList *FindPathInList( const char *type );
 
 /**
-* Find the path for a given type in the hash table
-*
-* \param type IN the searched type
-* \return
-*/
-
-static struct pathTable *
-FindPath(const char *type)
+ * Find the path for a given type in the list
+ *
+ * \param type IN the searched type
+ * \return the list entry or NULL if not found
+ */
+static struct pathList *
+FindPathInList(const char *type)
 {
-	struct pathTable *entry;
-	/* cppcheck-suppress uninitvar */ /* uthash macro initializes internal fields */
-	// NOLINTNEXTLINE(bugprone-casting-through-void) -- vendored uthash.h macro
-	HASH_FIND_STR(paths, type, entry);
-	return (entry);
+	struct pathList *member = pathPreferences;
+
+	while(member) {
+		if(!strcmp(member->type, type)) {
+			break;
+		}
+		member = member->next;
+	}
+
+	return member;
 }
 
 /**
- * Add a path to the table. If it already exists, the value list updated.
+ * Add a path to the list. If the type already exists, its path is replaced.
  *
  * \param type IN type of path
- * \param path  IN path
+ * \param path IN path
  */
 static void
-AddPath(const char *type, char*path)
+AddPathToList(const char *type, char *path)
 {
-	struct pathTable *tableEntry;
-	tableEntry = FindPath(type);
+	struct pathList *newMember;
 
-	if (tableEntry) {
-		DynStringClear(&(tableEntry->path));
+	if(!(newMember = FindPathInList(type))) {
+		newMember = malloc(sizeof(struct pathList));
+		CHECK(newMember);
+
+		CHECK(strlen(type) < PATH_TYPE_SIZE);
+
+		strcpy(newMember->type, type);
+		DynStringMalloc( &newMember->path, strlen(path) + 1 );
+
+		newMember->next = pathPreferences;
+		pathPreferences = newMember;
 	} else {
-		tableEntry = malloc(sizeof(struct pathTable));
-		DynStringMalloc(&tableEntry->path, 16);
-		strcpy(tableEntry->type, type);
-#ifdef WINDOWS
-#pragma warning( disable : 4267)
-#endif
-		// This generates warning C4267 on windows
-		/* cppcheck-suppress uninitvar */ /* uthash macro initializes internal fields */
-		HASH_ADD_STR(paths, type, tableEntry);
+		DynStringClear(&(newMember->path));
 	}
 
-	DynStringCatCStr(&(tableEntry->path), path);
+	DynStringCatCStr(&newMember->path, path);
 }
 
 /**
  * Update the current directory for a specific filetype. Get the directory part from the current file.
  * XTrackCAD keeps separate directories for different filetypes.(for trackplans, bitmaps and DXF files).
- * The paths are stored in a hash table using the file type as the hash.
+ * The paths are stored in a list keyed by the file type.
  *
  * \param pathType IN file type
  * \param fileName IN fully qualified filename
@@ -109,7 +112,7 @@ void SetCurrentPath(
 
 	if (path) {
 		*path = '\0';
-		AddPath(pathType, copy);
+		AddPathToList(pathType, copy);
 		wPrefSetString(PATHS_SECTION, pathType, copy);
 	}
 
@@ -118,7 +121,7 @@ void SetCurrentPath(
 
 /**
  * Get the current path for a given file type. Following options are searched:
- * 1. the hash array
+ * 1. the path list
  * 2. the preferences file for this type
  * 3. the older general setting (for backwards compatibility)
  * 4. the user's home directory as default
@@ -131,10 +134,10 @@ void SetCurrentPath(
 char *GetCurrentPath(
         const char *pathType)
 {
-	struct pathTable *currentPath;
+	struct pathList *currentPath;
 	const char *path;
 	CHECK(pathType != NULL);
-	currentPath = FindPath(pathType);
+	currentPath = FindPathInList(pathType);
 
 	if (currentPath) {
 		return (DynStringToCStr(&(currentPath->path)));
@@ -150,7 +153,7 @@ char *GetCurrentPath(
 		path = wGetUserHomeDir();
 	}
 
-	AddPath(pathType, (char *)path);
+	AddPathToList(pathType, (char *)path);
 	return ((char *)path);
 }
 

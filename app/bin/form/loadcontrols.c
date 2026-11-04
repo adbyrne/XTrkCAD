@@ -62,7 +62,7 @@ LoadColorButton( paramData_p colorButton, wDrawColor color)
 }
 
 void FormLoadSingleControl(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx)
 {
 	paramData_p p = &pg->paramPtr[inx];
@@ -158,7 +158,7 @@ void FormLoadSingleControl(
 
 
 void FormLoadMessage(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         char* message)
 {

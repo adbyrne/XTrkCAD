@@ -38,3 +38,6 @@ jobs:
       runner: ubuntu-26.04
       coverage: false
       artifact-suffix: -ubuntu2604
+      # previews the next Ubuntu's tools only; ci-gtk3.yml runs the macOS
+      # and Windows warnings jobs
+      other-platforms: false

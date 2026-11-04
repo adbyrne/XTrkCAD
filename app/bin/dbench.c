@@ -41,7 +41,7 @@ static char *benchTypeS[] = { "", N_(" L-Girder"), N_(" T-Girder") };
 typedef struct {
 	char * name;
 	// cppcheck-suppress unusedStructMember
-	char** xpm;
+	const char * file;
 	// cppcheck-suppress unusedStructMember
 	wIcon_p icon;
 } orientData_t;
@@ -89,15 +89,9 @@ EXPORT void BenchUpdateOrientationList(
 	wComboBoxClear( list );
 	op = orientD[type].data;
 	for (cnt=orientD[type].cnt-1; cnt>=0; cnt--,op++) {
-#ifdef WINDOWS
-		if (op->icon == NULL) {
-			op->icon = wIconCreatePixBufFromResource( XTRKCAD_SYMBOLS_PATH, op->xpm);
-		}
-		wComboBoxAddValue( list, op->icon, op );
-#else
-		/* gtk_combo_find is upset if we try to put anything other that a label on a list */
+		/* GTK combo boxes take text, on Windows too: the icon branch here
+		 * was for the old Win32 wlib and passed the wIcon_p as the label */
 		wComboBoxAddValue( list, _(op->name), op );
-#endif
 	}
 	wComboBoxSetIndex( list, 0 );
 }

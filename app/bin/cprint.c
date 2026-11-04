@@ -709,7 +709,7 @@ static void DoPrintMarginOk( const void * context )
 	DoPrintScale();
 }
 
-static wBool_t PrintMarginDlgUpdate( paramGroup_p pg, int index,
+static wBool_t PrintMarginDlgUpdate( paramGroup_cp pg, int index,
                                      void * context )
 {
 	wBool_t bEnable =
@@ -1492,7 +1492,7 @@ static void PrintChange( long changes )
 
 
 static wBool_t PrintDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP )
 {

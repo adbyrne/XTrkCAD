@@ -97,7 +97,7 @@ static BOOL_T AnyHILIGHT = FALSE;
 static void ControlUnHilightAll( void );
 
 static wBool_t ControlDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void *valueP )
 {

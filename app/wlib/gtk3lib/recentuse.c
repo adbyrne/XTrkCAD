@@ -161,7 +161,8 @@ PushListEntry(wControl_p list, const char* label, const char* context)
 	gtk_menu_shell_append(GTK_MENU_SHELL(ru->parentMenu->widget),
 	                      newEntry->menuentry);
 
-	g_signal_connect(newEntry->menuentry, "activate", ActivateListMenuItem,
+	g_signal_connect(newEntry->menuentry, "activate",
+	                 G_CALLBACK(ActivateListMenuItem),
 	                 newEntry);
 
 	name = g_strdup(wlibConvertInput(label));

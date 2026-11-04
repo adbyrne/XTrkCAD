@@ -44,6 +44,7 @@ jobs:
       actions: read
     outputs:
       run_id: ${{ steps.find.outputs.run_id }}
+      windows_ucrt: ${{ steps.find.outputs.windows_ucrt }}
     steps:
       - name: Find the packages to test
         id: find
@@ -67,6 +68,11 @@ jobs:
             --json workflowName,headBranch,headSha,createdAt \
             --jq '"testing packages from run '"$RUN"': \(.workflowName), \(.headBranch) \(.headSha[0:8]), \(.createdAt)"'
           echo "run_id=$RUN" >> "$GITHUB_OUTPUT"
+          # Runs from before Development Issues #34 have no UCRT64 packages.
+          UCRT=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN/artifacts?name=packages-windows-x64-ucrt-zip" \
+            --jq '.total_count > 0')
+          echo "UCRT64 Windows packages in that run: $UCRT"
+          echo "windows_ucrt=$UCRT" >> "$GITHUB_OUTPUT"
 
   install-tests:
     needs: [find-packages]
@@ -79,4 +85,5 @@ jobs:
       windows: true
       macos: true
       include_nsis: ${{ inputs.include_nsis == true }}
+      windows_ucrt: ${{ needs.find-packages.outputs.windows_ucrt == 'true' }}
       packages_from_run: ${{ needs.find-packages.outputs.run_id }}

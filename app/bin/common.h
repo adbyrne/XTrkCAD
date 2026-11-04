@@ -52,7 +52,15 @@
 // Windows
 #include <io.h>
 #include <process.h>
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wendif-labels"
+#endif
 #include "win32/dirent.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 #include "win32/msvccompat.h"
 #include "direct.h"
 #include "getopt.h"
@@ -84,10 +92,12 @@
 #define round(x) floor((x)+0.5)
 #endif
 
+#ifdef _MSC_VER
 /* suppress warning from *.bmp about conversion of int to char */
 #pragma warning( disable : 4305 )
 /* suppress warning about array references */
 #pragma warning( disable : 6385 )
+#endif
 #endif
 
 // We need to pass integer values via void* objects

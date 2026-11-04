@@ -38,12 +38,25 @@ EXPORT void FormOk_Null(
 }
 
 void FormDialogOkActive(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int active)
 {
 	if (pg->okB) {
 		wControlActive((wControl_p)pg->okB, active);
 	}
+}
+
+/**
+ * Called from a dialog's okProc that rejected the input: the dialog stays
+ * open instead of being hidden after okProc returns, so the user can
+ * correct the values.
+ *
+ * \param pg IN the dialog's group
+ */
+void FormDialogKeepOpen(
+        paramGroup_p pg)
+{
+	pg->keepOpen = TRUE;
 }
 
 #define  FORMCANCEL_NEWUNDO

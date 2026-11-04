@@ -215,7 +215,7 @@ static void EasementSel(
 
 
 static wBool_t EasementDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP )
 {

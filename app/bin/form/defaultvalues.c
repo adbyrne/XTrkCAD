@@ -85,10 +85,6 @@ FormatWidthsList(unsigned count, wWinPix_t* widths, DynString *output)
 static void
 SaveListColumnWidths(const char *section, const char *key, paramData_p listData)
 {
-#ifdef TODO_UNUSED
-	paramListData_t *listDataP = (paramListData_t*)listData->winData;
-#endif
-
 	if (listData->control) {
 		DynString columnWidthString;
 		wWinPix_t* colWidths = NULL;
@@ -166,7 +162,6 @@ FormLoadDefaultValues(paramGroup_p pg)
 				}
 				break;
 			case PD_LIST:
-			/** \todo Load column widths from preferences */
 			case PD_COMBOLIST:
 				if ((p->option & PDO_LISTINDEX)) {
 					DefaultFromListIndex(pg->nameStr, p->nameStr, prefSectAlternative,

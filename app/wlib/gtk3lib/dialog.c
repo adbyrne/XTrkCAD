@@ -204,7 +204,7 @@ deleteHandler(GtkDialog *win, GdkEvent *event, gpointer userdata)
 
 	if(dcontrol->winProc) {
 		dcontrol->winProc(dialog, wClose_e, NULL,  dialog->context);
-		return gtk_widget_hide_on_delete(win);
+		return gtk_widget_hide_on_delete(GTK_WIDGET(win));
 	}
 
 	return FALSE;
@@ -302,7 +302,7 @@ wWinDialogCreate(wControl_p parent,
 		gtk_window_set_title(GTK_WINDOW(dialog), titleStr);
 	}
 
-	g_signal_connect(dialog, "delete-event", deleteHandler, winDialog);
+	g_signal_connect(dialog, "delete-event", G_CALLBACK(deleteHandler), winDialog);
 
 	gtk_widget_show(dialog);
 	dcontrol->winProc = winProc;

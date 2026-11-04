@@ -33,11 +33,15 @@ foreach(infile ${infiles})
                 "xtp"
                 OUTPUT_VARIABLE outfile
     )
-    # Custom command to do the processing
+    # Custom command to do the processing. The echo runs only when
+    # mkcarpart exited successfully, so a build log that stops before
+    # "done" shows the generator itself hung or failed, not a later step.
     add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
         DEPENDS "${infile}" mkcarpart
         COMMAND $<TARGET_FILE:mkcarpart> "${infile}" "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
+        COMMAND ${CMAKE_COMMAND} -E echo "mkcarpart: ${outfile} done"
+        COMMENT "mkcarpart: ${infile} -> ${outfile}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
     target_sources(xtpfiles
@@ -48,47 +52,6 @@ foreach(infile ${infiles})
 	    FILES "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
 	    DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/params
 	)
-endforeach()
-
-# create param files from  structure definitions
-
-add_executable( mkstruct mkstruct.c )
-set_target_properties(
-   mkstruct
-   PROPERTIES FOLDER "Param Files"
-)
-
-set(infiles
-    "revell.struct"
-)
-
-# define build commands for all struct files
-foreach(infile ${infiles})
-    # Generate output file name
-    cmake_path(REPLACE_EXTENSION infile
-                "xtp"
-                OUTPUT_VARIABLE outfile
-    )
-    cmake_path(ABSOLUTE_PATH
-                outfile
-                BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-
-    add_custom_command(
-        OUTPUT "${outfile}"
-        COMMAND $<TARGET_FILE:mkstruct> "${infile}" "${outfile}"
-        DEPENDS "${infile}" mkstruct
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    )
-
-    target_sources(xtpfiles
-       PRIVATE
-       "${outfile}"
-    )
-    install(
-        FILES "${outfile}"
-        DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/params"
-    )
 endforeach()
 
 install(

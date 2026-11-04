@@ -93,7 +93,8 @@ The shared pieces:
   with the pinned runners and `ci-gtk3-preview.yml` with the next ones.
 - **`gtk3-qa-reports.yml`** (a reusable workflow) holds the report-only analysis jobs. `ci-gtk3.yml`
   calls it for plain-text PR artifacts, `release.yml` for the published HTML reports, and
-  `ci-gtk3-preview.yml` on the next Ubuntu.
+  `ci-gtk3-preview.yml` on the next Ubuntu (Linux only: `other-platforms: false` leaves out the
+  macOS and Windows warnings jobs).
 - **`packages-linux.yml`, `packages-macos.yml`, `packages-windows.yml`** and
   **`install-tests.yml`** (reusable workflows) hold the packaging and install-test jobs that
   `release.yml` calls; `install-tests-only.yml` reuses `install-tests.yml`. See
@@ -127,7 +128,7 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
 - **`c-tests-linux`, `c-tests-arm64`, `c-tests-debian`, `c-tests-linux-clang`,
   `c-tests-macos`, `c-tests-windows`, `c-tests-sanitizers`, `c-tests-valgrind`** — build
   plus `ctest` across compilers (GCC, Clang, AppleClang, MinGW GCC), platforms, and architectures, plus ASan/UBSan and
-  Valgrind runs (`PreferenceTest` and `MRUListTest` excluded from both — see
+  Valgrind runs (tests labelled `gtk-display` excluded from both — see
   \ref advanced-optional-local-checks "Advanced/optional local checks" in the
   \ref index "Developer Documentation" page for why). All pass `-LE regression` so the demo
   regression suite (see `regression-gtk3` below) isn't picked up here too. `c-tests-debian` runs
@@ -156,8 +157,8 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
 - **`astyle-check`** — AStyle 3.6.13 (built from source, pinned — an unpinned version once
   produced different formatting for identical input, SF #638) dry-run conformance to
   `app/lib/astylerc`, scoped to `app/bin`, `app/wlib`, `app/help`, and `app/tools`. Vendored code
-  (`app/wlib/gtk3lib/wrapbox/`, the `app/tools/dirent.c`/`dirent.h` Win32 shim, and
-  `app/bin/uthash.h`, an unmodified upstream uthash release) and `unittest/` directories are
+  (`app/wlib/gtk3lib/wrapbox/` and the `app/tools/dirent.c`/`dirent.h` Win32 shim) and
+  `unittest/` directories are
   excluded by design. The command, version and exclude list live in `tools/astyle-check.sh`;
   run it locally before pushing.
 - **`fuzz-getargs`** — a bounded-time libFuzzer regression run of the `fuzz_getargs` harness (not
@@ -173,14 +174,13 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
   astyle output against Linux's, to catch astyle itself behaving differently per OS (not code
   formatting drift — that's what the gating `astyle-check` job is for). The Windows job checks out
   with `core.autocrlf` off, so astyle sees the same LF line endings as on Linux.
-- **`compiler-warnings`, `compiler-warnings-macos`, `compiler-warnings-windows`** — captures
-  `-Wall -Wextra` build output as an artifact on each platform. The Linux job also configures
-  with `-DXTRKCAD_REPORT_POINTER_TYPES=ON`, which turns `PlatformSettings.cmake`'s
-  `-Wno-incompatible-pointer-types` into `-Wno-error=incompatible-pointer-types`, and prints the
-  number of distinct `-Wincompatible-pointer-types` sites in the job summary. Normal builds still
-  suppress them: there were 333 on 2026-10-25, a few real bugs among mostly harmless type
-  differences, and they're being fixed in stages (Development Issues #52, #53, #54). The count
-  should only go down; a PR that raises it has added one.
+- **`compiler-warnings`, `compiler-warnings-macos`, `compiler-warnings-windows`** (in
+  `gtk3-qa-reports.yml`, so they show as `qa / ...`) — capture `-Wall -Wextra` build output on
+  Linux (GCC), macOS (AppleClang) and Windows (MSYS2 MINGW64 GCC). Each compiler sees code the
+  others don't (platform-only branches) and reports different warnings, so all three are
+  published as "Compiler warnings" pages on the GitHub Pages site; look there for current counts
+  rather than in this guide. The macOS and Windows jobs are `continue-on-error`, so a runner
+  problem doesn't hold up the Pages deploy; the site then says that report is missing.
 - **`coverage`** — generates an lcov HTML report and uploads it as an artifact.
 
 ## Toolchain preview (advisory)
@@ -207,8 +207,8 @@ page (Actions tab → the run → Artifacts); each job's own "Upload findings"/"
 step names it. **CodeQL** is a separate workflow (`codeql.yml`) — it runs on push/PR and a weekly
 Monday cron, and its results show up in the repo's Security tab rather than as an artifact.
 
-Five of these (`coverage`, `cppcheck-deep`, `clang-tidy`, `codespell`, `compiler-warnings`) are
-additionally published as permanent, browsable HTML at
+Five of these (`coverage`, `cppcheck-deep`, `clang-tidy`, `codespell`, and `compiler-warnings` with
+its macOS and Windows variants) are additionally published as permanent, browsable HTML at
 `$GITHUB_USER.github.io/XTrkCAD` (GitHub Pages' default project-page URL for whichever fork's
 Actions is doing the deploying), redeployed on every push to
 `%main` by `release.yml`'s `qa-reports` job. That job calls `gtk3-qa-reports.yml` with
@@ -246,7 +246,7 @@ codespell's), turn it into the same grouped, GitHub-linked HTML the published si
 `tools/format-findings-report.sh`:
 
 ```sh
-tools/format-findings-report.sh <input.txt> <output.html> "<title>" <bracketed|codespell> <blob-base-url>
+tools/format-findings-report.sh <input.txt> <output.html> "<title>" <bracketed|codespell> <blob-base-url> [source-root]
 ```
 
 `bracketed` handles cppcheck/clang-tidy/compiler-warning lines ending in `[category]`;
@@ -254,7 +254,11 @@ tools/format-findings-report.sh <input.txt> <output.html> "<title>" <bracketed|c
 prepended to each finding's `file#Lline` to build its link — pass a real GitHub blob URL (e.g.
 `https://github.com/$GITHUB_USER/XTrkCAD/blob/$(git rev-parse HEAD)/`) to get working links
 against your own checkout, or omit meaningful linking entirely by passing any placeholder if you
-just want the grouped local HTML view. The `coverage` report doesn't go through this script — `genhtml`
+just want the grouped local HTML view. Compilers print absolute paths, so pass the checkout's
+root as `[source-root]` (`"$PWD"` from the repository root; in MSYS2, `"$(cygpath -m "$PWD")"`)
+to make them repository-relative; it handles Windows paths written with `/` or `\`, whose
+drive colon would otherwise keep the line from parsing. Identical findings are listed once: a
+warning in a header otherwise repeats for every file that includes it. The `coverage` report doesn't go through this script — `genhtml`
 already produces its own linked, per-line HTML.
 
 The gating `cppcheck` job (default/error-only severity, distinct from the report-only
@@ -287,6 +291,25 @@ permanently-accepted non-ratchetable noise (SF #662) rather than ratcheted like 
 standardized on `__attribute__((fallthrough))`, recognized identically by both compilers, before
 the Clang-only guard was dropped (SF #663).
 
+`incompatible-pointer-types` is an error on GCC and Clang, on every platform. Until Development
+Issues #52-#54 it was suppressed, and fixing the sites turned up real bugs (a layer's frozen flag
+written through the wrong type, an uninitialized result for an empty list, an icon from the
+wrong set). To keep new code clean:
+
+- **Define a callback with exactly the signature of its typedef.** A `paramChangeProc` takes
+  `paramGroup_cp`; wlib's button and menu callbacks take `void *`, not `const void *`; list
+  callbacks take `wIndex_t`. Don't cast a function to make it fit: a call through the wrong
+  type is undefined behaviour, which Clang's `-fsanitize=function` (in the UBSan run) reports.
+- **A helper that only reads a group, or writes through its controls, takes `paramGroup_cp`.**
+  Writing through `pg->paramPtr` is allowed on a const group.
+- **wlib control handles are all `struct control`** (`wControl_p`, `wButton_p`, `wList_p`, ...),
+  so they pass to each other without casts.
+- **Convert GTK and GLib types with their macros, not casts or nothing:** `GTK_WINDOW()`,
+  `GTK_WIDGET()`, `GTK_TOGGLE_BUTTON()`, `G_OBJECT()`, and `G_CALLBACK()` for signal handlers.
+  In debug GLib the widget macros also check the type at run time.
+- **Give a pointer its real type** rather than casting it at each use (a file name is a
+  `const char *`, an icon a `wIcon_p`).
+
 The large-volume cppcheck/clang-tidy categories that Phase 13 sampled and decided *not* to
 bulk-suppress (`variableScope`, `bugprone-narrowing-conversions`, and others) are deliberately
 left visible in the `cppcheck-deep`/`clang-tidy` report-only artifacts instead — see
@@ -313,7 +336,7 @@ so each can be read on its own:
 |---|---|---|
 | `packages-linux.yml` | `package-linux-ubuntu`, `package-linux-debian`, `package-linux-fedora` | `release.yml` (`packages-linux`) |
 | `packages-macos.yml` | `package-macos` (arm64, x86_64), DMG with `include_dmg` | `release.yml` (`packages-macos`) |
-| `packages-windows.yml` | `package-windows` (ZIP), NSIS with `include_nsis` | `release.yml` (`packages-windows`) |
+| `packages-windows.yml` | `package-windows` (MINGW64, UCRT64: ZIP, NSIS with `include_nsis`) | `release.yml` (`packages-windows`) |
 | `install-tests.yml` | `install-test-linux`, `install-test-windows`, `install-test-windows-nsis`, `install-test-macos` | `release.yml` once per platform (`install-tests-linux`, `-windows`, `-macos`); `install-tests-only.yml` |
 | `gtk3-qa-reports.yml` | the analysis reports | `release.yml` (`qa-reports`), `ci-gtk3.yml` |
 
@@ -349,8 +372,10 @@ branch and commit.
 
 **Changed an install-test script** (`tools/package-install-test*`): nothing to do.
 `install-tests-only.yml` runs on the pull request (and on `test/**` pushes) and tests the newest
-successful `%main` packages with your scripts, in minutes and without building anything. To pick
-the packages, or to include the NSIS installer from a run that built it:
+successful `%main` packages with your scripts, in minutes and without building anything. The
+UCRT64 Windows packages are tested only when that run has them (`install-tests.yml`'s
+`windows_ucrt` input). To pick the packages, or to include the NSIS installer from a run that
+built it:
 
 ```sh
 gh workflow run install-tests-only.yml --ref <branch> -f packages_from_run=<run id> -f include_nsis=true
@@ -491,8 +516,12 @@ podman run --rm -v "$PWD:/src:ro,z" ubuntu:26.04 \
 
 Background on Windows' run-time differences and the ZIP's layout: \ref windows.
 
-The Windows package is the ZIP from `package-windows`. Users install it by unpacking it
-anywhere. The `install-test-windows` job runs `tools/package-install-test-windows.ps1` on a
+The Windows packages are the ZIPs from `package-windows`, one per MSYS2 environment (MINGW64
+and UCRT64, \ref windows-package). MSYS2 deprecates MINGW64, but it stays the standard
+package until after 5.4.0 (Development Issues #34), so every `setup-msys2` step that can run it
+passes `suppress-deprecation-warnings: msystem-mingw64` to keep that warning out of the run
+annotations. Drop the input together with MINGW64. Users install one by unpacking it anywhere. The
+`install-test-windows` job runs once per variant: `tools/package-install-test-windows.ps1` on a
 fresh `windows-2025` runner. The script unpacks the ZIP into a directory whose name contains a
 space and runs the program with only the Windows system directories on `PATH`. Without that,
 a DLL the package forgot could still be found in the runner's MSYS2, Git or Perl. It checks
@@ -517,8 +546,8 @@ that:
   under `Program Files`.
 
 `package-windows` builds the ZIP by installing to a staging directory and copying in the GTK3
-runtime: pixbuf loaders, GSettings schemas, the hicolor icon theme, and every MinGW64 DLL that
-`ntldd -R` finds for the binary and the loaders. Before this test existed, that copy failed
+runtime: pixbuf loaders, GSettings schemas, the hicolor icon theme, and every DLL from its MSYS2
+environment that `ntldd -R` finds for the binary and the loaders. Before this test existed, that copy failed
 without anyone noticing (`xargs` dropped the backslashes in `ntldd`'s Windows paths, and
 `|| true` hid the errors), so no ZIP had ever shipped a DLL. The step now fails on any error.
 
@@ -533,8 +562,8 @@ pwsh tools/package-install-test-windows.ps1 xtrkcad-5.4.0-windows-x64.zip
 
 ## Windows installer test {#package-install-test-nsis}
 
-When the NSIS installer is built (version tags, or `include_nsis`), the
-`install-test-windows-nsis` job runs `tools/package-install-test-nsis.ps1` on a fresh
+When the NSIS installers are built (version tags, or `include_nsis`), the
+`install-test-windows-nsis` job runs once per variant: `tools/package-install-test-nsis.ps1` on a fresh
 `windows-2025` runner. It does what a user does with the installer and checks the result:
 
 - it installs silently (`/S`) into the default folder, which must be under `Program Files`,

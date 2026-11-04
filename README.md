@@ -41,7 +41,7 @@ whether the last run passed.
 | Debian 12 / 13, Raspberry Pi OS 64-bit | `*-debian12.deb` / `*-debian13.deb` (x86_64, aarch64) |
 | Fedora 44 / 45 | `*-fedora44.rpm` / `*-fedora45.rpm` (x86_64, aarch64) |
 | Other Linux (x86_64) | `*.x86_64.sh` self-extracting archive, or build from `xtrkcad-source-*` |
-| Windows 10/11 x64 | `*-windows-x64.zip`: unpack anywhere and run `bin\xtrkcad-<version>.exe` |
+| Windows 10/11 x64 | `*-windows-x64.zip`: unpack anywhere and run `bin\xtrkcad-<version>.exe`. `*-windows-x64-ucrt.zip` is the same program built against Windows' Universal C Runtime (MSYS2 UCRT64); if you're not sure which to take, use the one without `-ucrt` |
 | macOS (Apple Silicon / Intel) | `*-macos-arm64.tar.gz` / `*-macos-x86_64.tar.gz`; needs Homebrew's GTK3, see `README-INSTALL.txt` inside |
 
 These are development builds: they install as `xtrkcad-<version>` with their own settings, next

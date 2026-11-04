@@ -48,7 +48,7 @@ long GetChanges( paramGroup_p pg )
 }
 
 static wBool_t OptionDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void* valueP)
 {
@@ -66,11 +66,6 @@ static wBool_t OptionDlgUpdate(
 
 static wControl_p displayW;
 
-
-#ifdef TODO_UNUSED
-static char * hotBarLabelsLabels[] = { N_("Part No"), N_("Descr"), NULL };
-static char * listLabelsLabels[] = { N_("Manuf"), N_("Part No"), N_("Descr"), NULL };
-#endif
 
 
 static paramData_t displayPLs[] = {

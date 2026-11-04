@@ -354,6 +354,18 @@ jobs:
           tar -xzf downloaded/xtrkcad-codespell-html/xtrkcad-codespell.tar.gz -C site/codespell
           tar -xzf downloaded/xtrkcad-compiler-warnings-html/xtrkcad-compiler-warnings.tar.gz -C site/compiler-warnings
           tar -xzf downloaded/xtrkcad-suppress-inventory-html/xtrkcad-suppress-inventory.tar.gz -C site/suppress-inventory
+          # The macOS and Windows reports are continue-on-error jobs, so a
+          # runner problem can leave them out; say so instead of failing.
+          for os in macos windows; do
+            mkdir -p "site/compiler-warnings-$os"
+            tgz="downloaded/xtrkcad-compiler-warnings-$os-html/xtrkcad-compiler-warnings-$os.tar.gz"
+            if [ -f "$tgz" ]; then
+              tar -xzf "$tgz" -C "site/compiler-warnings-$os"
+            else
+              echo "<!doctype html><title>Not available</title><p>This run produced no $os compiler-warnings report; see the release.yml run's qa-reports jobs.</p>" \
+                > "site/compiler-warnings-$os/index.html"
+            fi
+          done
           cat > site/index.html <<'PAGEEOF'
           <!doctype html>
           <html lang="en">
@@ -374,7 +386,9 @@ jobs:
             <li><a href="cppcheck-deep/">cppcheck (deep)</a></li>
             <li><a href="clang-tidy/">clang-tidy</a></li>
             <li><a href="codespell/">codespell</a></li>
-            <li><a href="compiler-warnings/">Compiler warnings</a> (-Wall -Wextra, Linux)</li>
+            <li>Compiler warnings, -Wall -Wextra: <a href="compiler-warnings/">Linux (GCC)</a>,
+              <a href="compiler-warnings-macos/">macOS (AppleClang)</a>,
+              <a href="compiler-warnings-windows/">Windows (MinGW GCC)</a></li>
             <li><a href="suppress-inventory/">Suppress inventory</a> (cppcheck-suppress/NOLINT comments, boilerplate vs. specific reasoning)</li>
           </ul>
           </body>

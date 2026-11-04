@@ -370,12 +370,12 @@ wlibPrefGetPrintSettings(void)
 
 	if (!settings) {
 		if (err->code != G_FILE_ERROR_NOENT) {
-			GtkWindow *dialog;
+			GtkWidget *dialog;
 			// G_FILE_ERROR_NOENT = section missing; gtk_print_settings_new_from_key_file
 			// returns this when the group is absent (gtk_page_setup_new_from_key_file
 			// returns G_FILE_ERROR_NAMETOOLONG for the same condition — GTK inconsistency)
 			dialog = gtk_message_dialog_new(
-			                 wlibAppWinGetMain(), GTK_DIALOG_DESTROY_WITH_PARENT,
+			                 GTK_WINDOW(wlibAppWinGetMain()), GTK_DIALOG_DESTROY_WITH_PARENT,
 			                 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", err->message);
 			gtk_dialog_run(GTK_DIALOG(dialog));
 			gtk_widget_destroy(dialog);
@@ -409,9 +409,9 @@ wlibPrefGetPageSetup(void)
 		// returns this when the group is absent (gtk_print_settings_new_from_key_file
 		// returns G_FILE_ERROR_NOENT for the same condition — GTK inconsistency)
 		if (err->code != G_FILE_ERROR_NAMETOOLONG) {
-			GtkDialog *dialog;
+			GtkWidget *dialog;
 
-			dialog = gtk_message_dialog_new(wlibAppWinGetMain(),
+			dialog = gtk_message_dialog_new(GTK_WINDOW(wlibAppWinGetMain()),
 			                                GTK_DIALOG_DESTROY_WITH_PARENT,
 			                                GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 			                                "%s", err->message);

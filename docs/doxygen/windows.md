@@ -81,8 +81,20 @@ session D-Bus at startup, there is none on Windows, and nothing in XTrackCAD nee
 
 # The Windows package {#windows-package}
 
-`packages-windows.yml`'s `package-windows` job (called by `release.yml`) builds in MSYS2 MINGW64 on `windows-2025` and publishes
-`xtrkcad-<version>-windows-x64.zip`. Users unpack it anywhere and run `bin\xtrkcad-<version>.exe`,
+`packages-windows.yml`'s `package-windows` job (called by `release.yml`) builds on `windows-2025`
+in two MSYS2 environments and publishes a package from each (Development Issues #34):
+
+| Variant | File names | C runtime |
+|---------|------------|-----------|
+| MINGW64, the standard package | `xtrkcad-<version>-windows-x64.zip`, `xtrkcad-setup-<version>-x64.exe` | `msvcrt.dll` |
+| UCRT64 | `xtrkcad-<version>-windows-x64-ucrt.zip`, `xtrkcad-setup-<version>-x64-ucrt.exe` | the Universal C Runtime |
+
+Both come from the same source and the same steps; only the environment differs (pacboy's `:p`
+package prefix, `$MSYSTEM_PREFIX`). The installers use the same `XTrkCAD` folder and uninstall
+entry, so installing one replaces the other. MSYS2 has deprecated MINGW64, but it stays the
+standard package until after 5.4.0, because many users run older Windows versions.
+
+Users unpack the ZIP anywhere and run `bin\xtrkcad-<version>.exe`,
 or `bin\xtrkcad.exe` in a release (\ref release-defaults "Defaults for Release"). The job installs
 MSYS2's own `git` so that `ProgramVersion.cmake` sees the commit hash and the release tag; on a
 tag it fails unless configure reports the unversioned install name. Before Development Issues #48
@@ -91,10 +103,10 @@ The ZIP must be complete on its own, because users don't have MSYS2:
 
 | Path in the ZIP | Contents | Where it comes from |
 |-----------------|----------|---------------------|
-| `bin\` | the exe and every MinGW64 DLL it or a pixbuf loader needs (48 in 2026-10) | `ntldd -R`, converted with `cygpath` |
-| `lib\gdk-pixbuf-2.0\<ver>\` | image loaders and `loaders.cache` | copied from `/mingw64` |
-| `share\glib-2.0\schemas\` | `gschemas.compiled` (GTK3 needs it on Windows) | copied from `/mingw64` |
-| `share\icons\hicolor\` | GTK's fallback icon theme | copied from `/mingw64` |
+| `bin\` | the exe and every DLL from the MSYS2 environment it or a pixbuf loader needs | `ntldd -R`, converted with `cygpath` |
+| `lib\gdk-pixbuf-2.0\<ver>\` | image loaders and `loaders.cache` | copied from `/mingw64` or `/ucrt64` |
+| `share\glib-2.0\schemas\` | `gschemas.compiled` (GTK3 needs it on Windows) | copied from `/mingw64` or `/ucrt64` |
+| `share\icons\hicolor\` | GTK's fallback icon theme | copied from `/mingw64` or `/ucrt64` |
 | `share\<app name>\` | params, demos, examples, help | `cmake --install` |
 
 Until Development Issues #42 the DLL copy ran through `xargs`, which dropped the backslashes in
@@ -113,9 +125,9 @@ to uninstall the previous one first and then replaces it (\ref release-defaults 
 Before Development Issues #49 the installer had no DLLs, wasn't built on tags, and its Start
 menu shortcut pointed at `bin\xtrkcad.exe` even when the binary was versioned.
 
-**Toolchain:** CI builds with MSYS2 MINGW64 and pins MinGW GCC (`.github/actions/msys2-pin-gcc`).
-MSYS2 has deprecated MINGW64. Moving CI and the release to UCRT64 is tracked as Development
-Issues #34.
+**Toolchain:** CI builds with MSYS2 MINGW64 and pins MinGW GCC (`.github/actions/msys2-pin-gcc`,
+which works in either environment). The packages are built in MINGW64 and UCRT64 (see above);
+dropping MINGW64 is for after 5.4.0 (Development Issues #34).
 
 # Testing on Windows {#windows-testing}
 

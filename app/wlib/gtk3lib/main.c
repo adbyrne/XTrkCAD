@@ -123,9 +123,6 @@ LogWriter(GLogLevelFlags logLevel, const GLogField *fields, gsize nFields,
 
 /**
  * Load CSS definitions from resource. Name of the CSS-file is xtrackcad.css
- *
- * \todo Connect signal parsing-error and show / log errors
- *
  */
 
 static void

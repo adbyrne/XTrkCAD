@@ -314,13 +314,13 @@ wToggleGroupRegister( wControl_p toggle,
 
 	if (grp->master == NULL) {
 		/* First toggle in this group becomes the master (hub) */
-		grp->master = toggle->widget;
+		grp->master = G_OBJECT(toggle->widget);
 
 		wlibToggleGroupConnect(group_name, G_CALLBACK(notify_active), toggle);
 		return TOGGLE_GROUP_MASTER;
 	}
 	/* Bind to existing master */
-	GBinding *b = CreateBinding(grp->master, toggle->widget );
+	GBinding *b = CreateBinding(grp->master, G_OBJECT(toggle->widget) );
 	grp->bindings = g_list_append(grp->bindings, b);
 
 	grp->members = g_list_append(grp->members, toggle->widget);

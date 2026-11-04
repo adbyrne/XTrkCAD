@@ -2150,7 +2150,7 @@ static void TurnoutOk(void const * arg)
 
 
 static wBool_t TurnoutDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void* valueP)
 {

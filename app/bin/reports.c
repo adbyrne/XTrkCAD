@@ -157,7 +157,7 @@ typedef struct {
 } reportsOpCtx_t;
 
 static void DoReportsOp(void *data);
-static wBool_t ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP);
+static wBool_t ReportsDlgUpdate(paramGroup_cp pg, int inx, void *valueP);
 static void ReportsCancel(paramGroup_cp pg);
 static void ReportsShowDialog(reportsDialog_t *rd, const char *title);
 
@@ -418,7 +418,7 @@ void ReportsDrawIndicator(void *dArg)
  * Matches the pg/inx/valueP-dispatch pattern denum.c's EnumDlgUpdate()
  * already uses for the same kind of "one shared changeProc, several
  * controls" dialog. */
-static wBool_t ReportsDlgUpdate(paramGroup_p pg, int inx, void *valueP)
+static wBool_t ReportsDlgUpdate(paramGroup_cp pg, int inx, void *valueP)
 {
 	wIndex_t sel;
 	reportsEndPt_t *entry;
@@ -1656,7 +1656,7 @@ void ReportsEquipmentSuitability( void * unused )
 /** Tentative declaration -- same reason as reportsPG above. */
 static paramGroup_t reportsGapsPG;
 static void ReportsBuildGapsText(DynString *out);
-static wBool_t ReportsDlgUpdateGaps(paramGroup_p pg, int inx, void *valueP);
+static wBool_t ReportsDlgUpdateGaps(paramGroup_cp pg, int inx, void *valueP);
 static void ReportsCancelGaps(paramGroup_cp pg);
 
 static reportsDialog_t reportsGapsDlg = {
@@ -1758,7 +1758,7 @@ static void ReportsPopulateGapsList(void)
  * indicates at the pair's midpoint (using trackA's own scale for the
  * indicator radius, see reportsGapPair_t's doc comment). Same guard/
  * recovery shape as phase 1's ReportsDlgUpdate(). */
-static wBool_t ReportsDlgUpdateGaps(paramGroup_p pg, int inx, void *valueP)
+static wBool_t ReportsDlgUpdateGaps(paramGroup_cp pg, int inx, void *valueP)
 {
 	wIndex_t sel;
 	reportsGapPair_t *entry;
@@ -1988,7 +1988,7 @@ void ReportsGaps( void * unused )
 /** Tentative declaration -- same reason as reportsPG above. */
 static paramGroup_t reportsKinkedPG;
 static void ReportsBuildKinkedText(DynString *out);
-static wBool_t ReportsDlgUpdateKinked(paramGroup_p pg, int inx, void *valueP);
+static wBool_t ReportsDlgUpdateKinked(paramGroup_cp pg, int inx, void *valueP);
 static void ReportsCancelKinked(paramGroup_cp pg);
 
 static reportsDialog_t reportsKinkedDlg = {
@@ -2070,7 +2070,7 @@ static void ReportsPopulateKinkedList(void)
 
 /** paramGroup_t changeProc for the Kinked Joints dialog -- selecting a
  * row pans/indicates at the joint's own position. */
-static wBool_t ReportsDlgUpdateKinked(paramGroup_p pg, int inx, void *valueP)
+static wBool_t ReportsDlgUpdateKinked(paramGroup_cp pg, int inx, void *valueP)
 {
 	wIndex_t sel;
 	reportsKinkedJoint_t *entry;
@@ -2235,7 +2235,7 @@ void ReportsKinkedJoints( void * unused )
 /** Tentative declaration -- same reason as reportsPG above. */
 static paramGroup_t reportsNotesPG;
 static void ReportsBuildNoteText(DynString *out);
-static wBool_t ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP);
+static wBool_t ReportsDlgUpdateNotes(paramGroup_cp pg, int inx, void *valueP);
 static void ReportsCancelNotes(paramGroup_cp pg);
 
 static reportsDialog_t reportsNotesDlg = {
@@ -2422,7 +2422,7 @@ static void ReportsPopulateNoteList(void)
 /** paramGroup_t changeProc for the Notes dialog -- selecting a row pans/
  * indicates at that note's own position. Same guard/recovery shape as
  * phase 1's ReportsDlgUpdate()/Gaps' ReportsDlgUpdateGaps(). */
-static wBool_t ReportsDlgUpdateNotes(paramGroup_p pg, int inx, void *valueP)
+static wBool_t ReportsDlgUpdateNotes(paramGroup_cp pg, int inx, void *valueP)
 {
 	wIndex_t sel;
 	reportsNoteRow_t *entry;

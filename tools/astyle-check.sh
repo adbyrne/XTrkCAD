@@ -49,7 +49,6 @@ OUTPUT=$("$ASTYLE" --options=app/lib/astylerc --dry-run -Q --recursive --ignore-
 	--exclude=unittest \
 	--exclude=dirent.c \
 	--exclude=dirent.h \
-	--exclude=uthash.h \
 	"app/bin/*.c" "app/bin/*.h" "app/wlib/*.c" "app/wlib/*.h" "app/help/*.c" "app/help/*.h" "app/tools/*.c" "app/tools/*.h" 2>&1 | grep '^Formatted' || true)
 
 if [ -n "$OUTPUT" ]; then

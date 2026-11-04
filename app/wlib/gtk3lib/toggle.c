@@ -276,7 +276,8 @@ wControl_p wToggleCreate(
 		}
 
 		int scrollarea = MIN(buttonCount * ToggleHeight(), MAX_SCROLL_AREA_SIZE);
-		gtk_scrolled_window_set_min_content_height(scroll, scrollarea );
+		gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(scroll),
+		                scrollarea );
 
 		if (valueP) {
 			wToggleSetValue(b, *valueP);

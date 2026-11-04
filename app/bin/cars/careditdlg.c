@@ -183,7 +183,7 @@ static void CarDlgRedraw( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y );
 
 static paramDrawData_t carDlgDrawData = { 500, 120, CarDlgRedraw, NULL, &carDlgD };
 static paramTextData_t notesData = { 500, 156 };
-static wBool_t CarDlgUpdate( paramGroup_p, int, void * );
+static wBool_t CarDlgUpdate( paramGroup_cp, int, void * );
 static void CarDlgNewDesc( void );
 static void CarDlgManufFocusOut( void );
 static void CarDlgModelFocusOut( void );
@@ -1708,7 +1708,7 @@ static const struct {
 	{ I_CD_CPLDLEN,   CAR_DIMS_CPLDLEN_BAD,   MSG_CARDESC_BAD_COUPLER_LENGTH_VALUE },
 };
 
-static void CarDlgUpdateSummaries( paramGroup_p pg )
+static void CarDlgUpdateSummaries( paramGroup_cp pg )
 {
 	char geom[128];
 	char ident[4 * STR_SIZE + 16];
@@ -1742,7 +1742,7 @@ static void CarDlgUpdateSummaries( paramGroup_p pg )
 }
 
 static wBool_t CarDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP )
 {

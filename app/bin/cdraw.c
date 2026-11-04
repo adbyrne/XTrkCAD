@@ -3060,11 +3060,6 @@ static void InitializeBenchLists(void);
 
 static void UpdateBenchOrientation(void);
 
-/**  \todo added as part of the merge with 5.3.2, examine and enable
-static void DisableControlRecording(void);
-static void EnableLineControlRecording(void);
-static void EnableBenchControlRecording(void);
-*/
 static void ConfigureLineColor(void);
 
 static void CreateDrawControls(paramGroup_p pg);
@@ -3118,17 +3113,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 static STATUS_T
 HandleStartCommand(wAction_t action, BOOL_T* infoSubst)
 {
-#ifdef TODO_UNUSED
-	static char objectLabel[OBJECT_LABEL_SIZE];
-#endif
-
-	// \todo needs work to be activated
-	//if (!magneticSnap) {
-	//	InfoMessage(_("+Alt for Magnetic Snap"));
-	//}
-	//else {
-	//	InfoMessage(_("+Alt to inhibit Magnetic Snap"));
-	//}
 	drawCmdContext.Op = (wIndex_t)VP2L(commandContext);
 	if (drawCmdContext.Op < 0 || drawCmdContext.Op > OP_LAST) {
 		NoticeMessage("cmdDraw: Op %d", _("Ok"), NULL, drawCmdContext.Op);

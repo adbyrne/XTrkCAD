@@ -108,7 +108,7 @@ static void JsonNoteValidate(void *junk);
 static void JsonNoteFormat(void *junk);
 static void JsonFieldSave(void *junk);
 static void JsonFieldDelete(void *junk);
-static wBool_t JsonDlgUpdate(paramGroup_p pg, int inx, void *valueP);
+static wBool_t JsonDlgUpdate(paramGroup_cp pg, int inx, void *valueP);
 
 static paramTextData_t jsonNoteTextData = { 300, 150 };
 static paramFloatRange_t noRangeCheck = { 0.0, 0.0, 80, PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW };
@@ -741,7 +741,7 @@ JsonNoteFormat(void *junk)
  * don't just warn, on invalid JSON.
  */
 static wBool_t
-JsonDlgUpdate(paramGroup_p pg, int inx, void *valueP)
+JsonDlgUpdate(paramGroup_cp pg, int inx, void *valueP)
 {
 	(void)pg;
 	(void)valueP;

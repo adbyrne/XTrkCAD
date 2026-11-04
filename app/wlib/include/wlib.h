@@ -435,9 +435,6 @@ const char *wEntryGetValue(wControl_p control);
  */
 
 /* Creation Options */
-#define BT_HSCROLL (1L << 24)
-#define BT_CHARUNITS (1L << 23)
-#define BT_FIXEDFONT (1L << 22)
 #define BT_TOP (1L << 20) /* Show the top of the text */
 
 wControl_p wTextCreate(wControl_p parent, wWinPix_t x, wWinPix_t y,
@@ -617,7 +614,7 @@ void wControlSetCustomTooltip(wControl_p control,
  */
 
 /* Creation CallBacks */
-typedef void (*wListCallBack_p)(unsigned int, const char *, unsigned int,
+typedef void (*wListCallBack_p)(wIndex_t, const char *, wIndex_t,
                                 void *, void *);
 
 /* Creation Options */

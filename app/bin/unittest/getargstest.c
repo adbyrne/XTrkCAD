@@ -90,7 +90,7 @@ void DoSaveAs(void *doAfterSaveVP)
  * functions, which this test has no need to link just to prove the
  * quote-doubling escape logic under test here; a no-op is behaviorally
  * fine since every fixture string below is already plain ASCII/UTF-8. */
-void ConvertUTF8ToSystem(unsigned char *in)
+void ConvertUTF8ToSystem(char *in)
 {
 	(void)in;
 }
@@ -129,8 +129,8 @@ void ClearTracks(void) { }
 int ConfirmReset(BOOL_T b) { (void)b; return 0; }
 void DoLayout(void *unused) { (void)unused; }
 void DoSave(void *doAfterSaveVP) { (void)doAfterSaveVP; }
-void DoZoomDown(const void *modeVP) { (void)modeVP; }
-void DoZoomUp(const void *modeVP) { (void)modeVP; }
+void DoZoomDown(void *modeVP) { (void)modeVP; }
+void DoZoomUp(void *modeVP) { (void)modeVP; }
 void EditCopy(void *unused) { (void)unused; }
 void EditCut(void *unused) { (void)unused; }
 void EditPaste(void *unused) { (void)unused; }

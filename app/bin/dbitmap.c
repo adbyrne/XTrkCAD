@@ -307,7 +307,7 @@ OutputBitmapPixelSize( void )
 
 	FormLoadControls( &outputBitMapPG );
 
-	snprintf( &sizeMsg, STR_SIZE,_( "%ld by %ld pixels" ), bitmap_w, bitmap_h );
+	snprintf( sizeMsg, STR_SIZE,_( "%ld by %ld pixels" ), bitmap_w, bitmap_h );
 
 	FormLoadMessage( &outputBitMapPG, I_BITMAPSIZE, sizeMsg );
 }

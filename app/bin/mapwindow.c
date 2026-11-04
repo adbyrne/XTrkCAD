@@ -312,16 +312,6 @@ static void MapRedraw( wControl_p bd, void* pContex, wWinPix_t px,
 }
 
 
-#ifdef TODO_UNUSED
-/*
- * Set mapW size to fit the rescaled map
- *
- * \param reset IN
- */
-static int mapBorderH = 24;
-static int mapBorderW = 24;
-#endif
-
 void MapChangeScale()
 {
 	wWinPix_t w, h;
@@ -412,7 +402,7 @@ EXPORT void MapWindowShow(int state)
 // FormCreateDialog's (group, index, value) arguments arrived shifted; it
 // ignores them, which is the only reason that worked (Development Issues #53).
 static wBool_t
-MapWindowEventProc(paramGroup_p pg, int inx, void *valueP)
+MapWindowEventProc(paramGroup_cp pg, int inx, void *valueP)
 {
 	wToggleGroupSetActive(TOGGLEGRP_MAP_VISIBLE, FALSE);
 	mapVisible = FALSE;

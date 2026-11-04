@@ -49,7 +49,7 @@ unsigned selected;
 #define MAX_TEXT_COLUMNS 9
 #define MAX_CSV_COLUMNS  40
 #define CONDITION_DEFAULT_LEN 5
-#define MAXIMUM_LENGTH_DATE	8		//yy/mm/dd
+#define MAXIMUM_LENGTH_DATE	8		//yyyymmdd
 
 #define UPDATE_MAX_WIDTH(index, current_width) \
     if ((unsigned int)(current_width) > widths[(index)]) { \
@@ -164,7 +164,7 @@ static struct {
 static void
 DeleteTag(void *context )
 {
-	int thisTag = (int)((long)context);
+	int thisTag = (int)VP2L(context);
 	paramData_p menuItem = carInvPLs+sortorder.carInvSort[thisTag];
 
 	if(sortorder.criteria == 0 || thisTag >= sortorder.criteria) {
@@ -189,7 +189,7 @@ DeleteTag(void *context )
 static void
 SelectOrder(void *context)
 {
-	unsigned sortby = (unsigned int )((long)context);
+	unsigned sortby = (unsigned int)VP2L(context);
 
 	if(sortorder.criteria < MAX_SORT_CRITERIA) {
 		const char *label;
@@ -495,7 +495,7 @@ static void FormatDisplayItem(carItem_p item)
 }
 
 static wBool_t CarInvDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void* valueP)
 {
@@ -640,10 +640,6 @@ TextExportString(FILE *fh, int width, const char *string)
 {
 	fprintf(fh, "%-*.*s ", width, width, string);
 }
-
-/**
- * \todo this is wrong, it prints a number instead of a date!
- */
 
 static void
 TextExportDate(FILE *fh, int width, unsigned long dateValue)

@@ -50,7 +50,7 @@ MRUList* MRUCreate(int max_capacity)
 
 
 static gint
-labelcmp(const void* ptr1, const char* label)
+labelcmp(gconstpointer ptr1, gconstpointer label)
 {
 	const MRUEntry* entry1 = (MRUEntry *)ptr1;
 
@@ -78,7 +78,7 @@ void *MRUTouchEntry(MRUList* list, const char* label, void *entry)
 
 	// check for existence of entry
 	GList* link = g_queue_find_custom(list->elements, label,
-	                                  (GCompareFunc)labelcmp);
+	                                  labelcmp);
 
 	if (link) {
 		// already present: replace its data with the new entry and move to
@@ -113,7 +113,7 @@ void* MRUAppendEntry(MRUList* list, const char* label, void* entry)
 
 	// check for existence of entry
 	const GList* link = g_queue_find_custom(list->elements, label,
-	                                        (GCompareFunc)labelcmp);
+	                                        labelcmp);
 
 	if (link) {
 		// already present: this list preserves insertion order, so just

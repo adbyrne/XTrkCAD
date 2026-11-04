@@ -361,7 +361,7 @@ PriceListChange( long changes )
 
 static wBool_t
 PriceListDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP )
 {

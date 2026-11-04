@@ -618,7 +618,7 @@ static void SignalEditCancel ( paramGroup_cp junk )
 	wHide( signalEditW );
 }
 
-static wBool_t SignalEditDlgUpdate (paramGroup_p pg, int inx, void *valueP )
+static wBool_t SignalEditDlgUpdate (paramGroup_cp pg, int inx, void *valueP )
 {
 	wIndex_t selcnt = wListGetSelectedCount( aspectSelL );
 

@@ -51,11 +51,14 @@ GTK_PREFIX=$(brew --prefix gtk+3)
 export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
     -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
-    -DCMAKE_EXE_LINKER_FLAGS="$(pkg-config --libs-only-L gtk+-3.0)" \
-    -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
+    -DCMAKE_EXE_LINKER_FLAGS="$(pkg-config --libs-only-L gtk+-3.0)"
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
+
+Help opens in the default browser (`XTRKCAD_USE_BROWSER`, ON). The older Apple Help Viewer path
+is `-DXTRKCAD_USE_APPLEHELP=ON`; it only works in an installed `.app` bundle with a registered
+Help Book, so it is OFF by default (Development Issues #64).
 
 # Windows (MSYS2/MinGW64)
 
@@ -307,11 +310,13 @@ Not part of the everyday build/test loop, but available if you're chasing a spec
 bug:
 
 - **Sanitizers** — `-DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang` builds with ASan/UBSan.
-  `PreferenceTest` and `MRUListTest` (SF #794) are excluded when running under it (GTK3's own
-  internal allocations trip ASan's leak detector; both tests still run normally elsewhere,
-  e.g. under `c-tests-linux`'s `xvfb-run`).
+  Leave out the GTK widget tests with `-LE gtk-display` when running under it: GTK3's own
+  internal allocations trip ASan's leak detector. They still run normally elsewhere, e.g.
+  under `c-tests-linux`'s `xvfb-run`. Tests labelled `gtk-display` create GTK widgets and
+  need a display; give any new test that calls into GTK the same label
+  (`app/wlib/gtk3lib/unittests/CMakeLists.txt`).
 - **Valgrind** — `ctest -T memcheck --overwrite MemoryCheckCommand=$(which valgrind)`.
-  `PreferenceTest` and `MRUListTest` are excluded here too, for the same GTK3-internals reason.
+  `-LE gtk-display` here too, for the same GTK3-internals reason.
 - **Regression demo-playback suite** — `-DXTRKCAD_REGRESSION_TESTING=ON` (auto-enabled on Linux
   when `xvfb-run` or an existing `DISPLAY` is found) adds ~47 per-demo `ctest` targets, one per
   entry in `app/lib/xtrkcad.xtq`'s `DEMO` list, for targeting a single demo during local
@@ -471,8 +476,8 @@ in this table.
 
 | Tool | Pin status | Currently tested (as of 2026-10-18 — unpinned rows drift as packages update) |
 |------|-----------|------------------------------------------|
-| Doxygen | pinned | 1.15.0 (upstream Linux binary, `.github/actions/setup-doxygen`) for the dev-guide jobs (`ci-gtk3.yml`'s `doxygen` and `help-links-check`, `release.yml`'s `package-docs`). The packaging jobs build the User Guide with the OS package instead: apt/Homebrew (unpinned) on Linux/macOS; MSYS2 `mingw-w64-x86_64-doxygen` pinned to 1.16.1-4 in `package-windows`, since 1.18.0-3 aborts on the User Guide build (`std::system_error`, 2026-10-05) |
-| ntldd | pinned | `mingw-w64-x86_64-ntldd-r19.7fb9365-4`, installed with `pacman -U` from its URL in `package-windows` (it collects the DLLs for the ZIP and installer). On 2026-10-25 MSYS2 changed that package's database entry without a version bump, and installing it through `setup-msys2` failed the signature check against the runner image's older database |
+| Doxygen | pinned | 1.15.0 (upstream Linux binary, `.github/actions/setup-doxygen`) for the dev-guide jobs (`ci-gtk3.yml`'s `doxygen` and `help-links-check`, `release.yml`'s `package-docs`). The packaging jobs build the User Guide with the OS package instead: apt/Homebrew (unpinned) on Linux/macOS; MSYS2 doxygen pinned to 1.16.1-4 in `package-windows` (`mingw-w64-x86_64-` and `mingw-w64-ucrt-x86_64-`), since 1.18.0-3 aborts on the User Guide build (`std::system_error`, 2026-10-05) |
+| ntldd | pinned | `ntldd-r19.7fb9365-4` (MINGW64 and UCRT64 packages), installed with `pacman -U` from its URL in `package-windows` (it collects the DLLs for the ZIP and installer). On 2026-10-25 MSYS2 changed that package's database entry without a version bump, and installing it through `setup-msys2` failed the signature check against the runner image's older database |
 | AStyle | pinned | 3.6.13, all platforms (built from source, not the OS package; version set in `tools/astyle-check.sh`) |
 | CMake | floor/ceiling only (`3.20`–`4.0`) | 3.28.3 (Linux), 4.4.x (Windows/MSYS2), Homebrew current (macOS) |
 | cppcheck | pinned (runner) | 2.13.0 (Ubuntu 24.04) |

@@ -243,7 +243,7 @@ Then you can place the Helix and join to other tracks as you would a Circle trac
 Many objects on the layout have labels: Turnouts/Helix/Curved Titles, Track Lengths, End-Point Elevations, Track Elevations and Cars.\
 You can turn these labels on or off with the Label Enable toggle buttons on the "Options|Display" dialog.
 
-If you hold down the Control key when using the Rotate command, the rotation will be done in increments of 15�.
+If you hold down the Control key when using the Rotate command, the rotation will be done in increments of 15°.
 
 When using the Rotate command, Shift-Right-Click displays a menu allowing you to rotate by specific amounts or to align the selected objects with another object.
 

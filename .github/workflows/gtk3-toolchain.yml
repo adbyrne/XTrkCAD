@@ -134,13 +134,14 @@ jobs:
         env:
           ASAN_OPTIONS: "abort_on_error=1:detect_leaks=1"
           UBSAN_OPTIONS: "abort_on_error=1:print_stacktrace=1"
-        # PreferenceTest and MRUListTest (SF #794) both require a GTK3 display
-        # and trigger GTK3 internal allocations that ASAN flags as leaks. Both
-        # are covered by c-tests-linux, which runs under xvfb-run.
+        # -LE gtk-display: the GTK widget tests (PreferenceTest, MRUListTest,
+        # TextPositionTest; labelled in app/wlib/gtk3lib/unittests) need a
+        # display, and GTK3's internal allocations show up as ASan leaks.
+        # c-tests-linux runs them under xvfb-run.
         # -LE regression: keeps this job's fast unit-test feedback loop from
         # being held up by the ~3 minute sanitizer-instrumented playback run --
         # see ci-gtk3.yml's regression-gtk3-sanitizers, which covers it separately.
-        run: ctest --test-dir build --output-on-failure -E "PreferenceTest|MRUListTest" -LE regression
+        run: ctest --test-dir build --output-on-failure -LE "regression|gtk-display"
 
   cppcheck:
     # The gate: cppcheck's default (error-only) check set, --error-exitcode=1.
@@ -217,6 +218,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ inputs.msystem }}
+          suppress-deprecation-warnings: msystem-mingw64
           update: false
           pacboy: >-
             ${{ inputs.cc-package }}:p

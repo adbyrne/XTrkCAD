@@ -296,7 +296,7 @@ wIndex_t wListGetValues(
 		}
 
 		GtkBin *bin = GTK_BIN( bl->widget );
-		GtkCellView *cellView = gtk_bin_get_child( bin );
+		GtkWidget *cellView = gtk_bin_get_child( bin );
 		GtkEntry *entry = GTK_ENTRY( cellView );
 		entry_value = gtk_entry_get_text( entry );
 		item_data = NULL;

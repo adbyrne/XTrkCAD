@@ -620,7 +620,7 @@ static void HotbarJump( int inx, const char * name, void * arg )
 }
 
 
-static BOOL_T SetHotBarScale( const char * line )
+static BOOL_T SetHotBarScale( char * line )
 {
 	curBarScale = atof( line + 9 );
 	return TRUE;

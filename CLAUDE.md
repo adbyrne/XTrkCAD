@@ -281,9 +281,6 @@ Useful CMake options:
   (`xtrkcad-5.4.0` vs plain `xtrkcad`). `AUTO` (default) is OFF on a tagged release, so a new
   release replaces the previous install, and ON otherwise (Development Issues #48; dev guide
   "Defaults for Release").
-- `-DXTRKCAD_REPORT_POINTER_TYPES=ON` — report `-Wincompatible-pointer-types` as warnings instead of
-  suppressing them (the CI compiler-warnings report does). Being fixed in stages: Development
-  Issues #52/#53/#54, plan in `.claude/plans/incompatible-pointer-types.md`.
 
 ## Tests
 

@@ -55,7 +55,7 @@ EXPORT paramGroup_cp DialogGroupFind( const char* sName )
 EXPORT paramGroup_cp * DialogGroupIter( paramGroup_cp * ppg )
 {
 	if ( ppg == NULL ) {
-		return &dialogGroups(0);
+		return &DYNARR_N( paramGroup_cp, dialogGroups_da, 0 );
 	}
 	if ( ppg >= &DYNARR_LAST( paramGroup_cp, dialogGroups_da ) ) {
 		return NULL;
@@ -98,8 +98,13 @@ static void ButtonOk(void *data)
 
 	FormSaveDefaultValues(group);
 
+	group->keepOpen = FALSE;
 	if (group->okProc) {
 		group->okProc(group);
+	}
+	if (group->keepOpen) {
+		LOG(log_form, 1, ("DialogsButtonOk -> kept open\n"));
+		return;
 	}
 
 	LOG(log_form, 1, ("DialogsButtonOk -> Ok\n"));

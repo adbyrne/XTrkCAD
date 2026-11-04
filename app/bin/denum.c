@@ -110,7 +110,7 @@ static void DoEnumOp(
 
 
 static wBool_t EnumDlgUpdate(
-        paramGroup_p pg,
+        paramGroup_cp pg,
         int inx,
         void * valueP )
 {

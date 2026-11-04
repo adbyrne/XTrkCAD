@@ -1,9 +1,11 @@
 name: Pin MinGW GCC (MSYS2)
 description: >-
-  Installs an exact MSYS2 MINGW64 gcc/gcc-libs pair with pacman -U, the same
-  way release.yml pins MSYS2 doxygen, so new GCC warnings only arrive when we
+  Installs an exact MSYS2 gcc/gcc-libs pair with pacman -U, the same way
+  release.yml pins MSYS2 doxygen, so new GCC warnings only arrive when we
   bump the version. The default here is the one place the Windows jobs' GCC
-  version is set. Run after msys2/setup-msys2.
+  version is set. Works in the MINGW64 and UCRT64 environments: the package
+  prefix and repository come from the MSYS2 shell. Run after
+  msys2/setup-msys2.
 inputs:
   version:
     description: MSYS2 package version (pkgver-pkgrel), e.g. 16.2.0-6.
@@ -16,7 +18,10 @@ runs:
       env:
         MSYS2_GCC_PKG_VERSION: ${{ inputs.version }}
       run: |
+        # MINGW_PACKAGE_PREFIX is mingw-w64-x86_64 or mingw-w64-ucrt-x86_64;
+        # the repository is the lower-case environment (mingw64, ucrt64).
+        REPO="https://repo.msys2.org/mingw/${MSYSTEM,,}"
         pacman -U --noconfirm \
-          "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-libs-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst" \
-          "https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-gcc-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst"
+          "$REPO/${MINGW_PACKAGE_PREFIX}-gcc-libs-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst" \
+          "$REPO/${MINGW_PACKAGE_PREFIX}-gcc-${MSYS2_GCC_PKG_VERSION}-any.pkg.tar.zst"
         gcc --version | head -1
