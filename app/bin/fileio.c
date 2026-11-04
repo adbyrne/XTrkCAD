@@ -1598,7 +1598,7 @@ EXPORT int LayoutRoundTripTest( const char * pathName )
 }
 
 /**
- * Regression test for -Texport:<layout>: load a layout, then print it to
+ * Regression test for -Texport:&lt;layout&gt;: load a layout, then print it to
  * export.pdf and export it to export.svg, export.dxf and export.png, in the
  * working directory, through the normal code, and import the DXF file back.
  * tools/check-export-test.sh checks the files.

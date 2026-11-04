@@ -265,9 +265,9 @@ endforeach()
 # (Development Issues #68). The check needs poppler-utils, which isn't something
 # every package job should have to install, so these aren't in regression-ci;
 # regression-gtk3-standalone runs them.
-find_program(XTRKCAD_PDFTOTEXT_EXECUTABLE pdftotext)
+find_program(XTRKCAD_PDFTOHTML_EXECUTABLE pdftohtml)
 find_program(XTRKCAD_PDFINFO_EXECUTABLE pdfinfo)
-if(XTRKCAD_PDFTOTEXT_EXECUTABLE AND XTRKCAD_PDFINFO_EXECUTABLE)
+if(XTRKCAD_PDFTOHTML_EXECUTABLE AND XTRKCAD_PDFINFO_EXECUTABLE)
     set(_xtrkcad_export_home "${XTRKCAD_REGRESSION_HOME_ROOT}/export")
     xtrkcad_add_regression_test(RegressionExport.run "${_xtrkcad_export_home}"
         "-Texport:${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/export-test.xtc")

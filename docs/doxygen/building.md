@@ -391,7 +391,7 @@ bug:
   without the dialog (`wPrintSetExportFile()`), exports SVG, DXF and PNG and imports the DXF file back,
   all through the normal code (`LayoutExportTest()`, `fileio.c`). `tools/check-export-test.sh` then
   checks the files, including that printed text is at its point size. It needs `poppler-utils`
-  (`pdfinfo`, `pdftotext`), so the tests are only added if those are found. They're labelled
+  (`pdfinfo`, `pdftohtml`), so the tests are only added if those are found. They're labelled
   `regression` but not `regression-ci`: `regression-gtk3-standalone` and the coverage job install
   `poppler-utils` and run them, so the package jobs don't have to.
 - **Visual pre/post diffing (`-d visualdiff=1`)** — the regression suite's `REGRESSION START`/`END`

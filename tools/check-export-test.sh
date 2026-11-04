@@ -5,7 +5,7 @@
 #
 # The layout is app/bin/unittest/testfiles/export-test.xtc: a straight track, a
 # line and a text of size 288, which prints at 18 pt at the default print scale
-# of 1:16. Needs pdfinfo and pdftotext (poppler-utils).
+# of 1:16. Needs pdfinfo and pdftohtml (poppler-utils).
 
 DIR=$1
 RC=0
@@ -19,20 +19,21 @@ SVG="$DIR/export.svg"
 DXF="$DIR/export.dxf"
 PNG="$DIR/export.png"
 
-# PDF: one page at least, holding the text at its point size. A font's box is
-# taller than its point size by a factor that depends on the font (1.36 for
-# DejaVu). Pango's default 96 dpi instead of 72 makes it 1.33 times that, which
-# is what the upper limit is there to catch (Development Issues #62).
+# PDF: one page at least, holding the text at its point size. pdftohtml reports
+# the size itself, whatever the font's proportions, unlike pdftotext's box
+# height. Pango's default 96 dpi instead of 72 would give 24 here (Development
+# Issues #62).
 [ -s "$PDF" ] || fail "no PDF"
 PAGES=$(pdfinfo "$PDF" | awk '/^Pages:/ {print $2}')
 [ "${PAGES:-0}" -ge 1 ] || fail "PDF has no pages"
-RATIO=$(pdftotext -bbox "$PDF" - | awk -F'"' '/>CHECKTEXT</ {printf "%.3f", ($8 - $4) / 18.0; exit}')
-if [ -z "$RATIO" ]; then
+XML=$(pdftohtml -xml -stdout -i -zoom 1 "$PDF")
+FONT=$(printf '%s\n' "$XML" | sed -n 's/.*font="\([0-9]*\)">CHECKTEXT<.*/\1/p' | head -n 1)
+if [ -z "$FONT" ]; then
 	fail "CHECKTEXT isn't in the PDF"
 else
-	echo "PDF text height is $RATIO x its point size"
-	awk -v r="$RATIO" 'BEGIN {exit !(r >= 1.0 && r <= 1.6)}' ||
-		fail "printed text is the wrong size: $RATIO x its point size"
+	SIZE=$(printf '%s\n' "$XML" | sed -n "s/.*<fontspec id=\"$FONT\" size=\"\([0-9]*\)\".*/\1/p")
+	echo "PDF text is ${SIZE:-unknown} pt"
+	[ "$SIZE" = 18 ] || fail "printed text should be 18 pt, not ${SIZE:-unknown}"
 fi
 
 # SVG: the text and something for each drawn object
