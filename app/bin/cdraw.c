@@ -813,7 +813,6 @@ static void UpdateDraw( track_p trk, int drawDescInx, descData_p descUpd,
 					Translate( &drawData.endPt[2], drawData.endPt[3], angle, drawData.width);
 					UNREORIGIN( segPtr->u.p.pts[2].pt, drawData.endPt[2], xx->angle, xx->orig );
 				}
-				DrawDescSetMode(E0, DESC_CHANGE);
 			}
 		}
 		break;
