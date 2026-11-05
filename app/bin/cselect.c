@@ -480,8 +480,9 @@ EXPORT void OrphanedTrackSelect( void *ptr )
 	trk = NULL;
 
 	while( TrackIterate( &trk ) ) {
-		if( GetLayerVisible( GetTrkLayer( trk ) && !GetLayerModule(GetTrkLayer(trk))
-		                     && !GetLayerFrozen(GetTrkLayer(trk)))) {
+		if( GetLayerVisible( GetTrkLayer( trk ) )
+		    && !GetLayerModule( GetTrkLayer( trk ) )
+		    && !GetLayerFrozen( GetTrkLayer( trk ) ) ) {
 			int cnt = 0;
 			for( ep = 0; ep < GetTrkEndPtCnt( trk ); ep++ ) {
 				if( GetTrkEndTrk( trk, ep ) ) {
