@@ -1632,6 +1632,7 @@ EXPORT BOOL_T WriteSegsEnd(
 				               segs[i].u.p.pts[j].pt_type ) > 0;
 			break;
 		case SEG_TEXT: /* 0pf0fq */
+			trackText = segs[i].u.t.string;
 #ifdef UTFCONVERT
 			if (RequiresConvToUTF8(segs[i].u.t.string)) {
 				size_t cnt = strlen(segs[i].u.t.string) * 2 + 1;
@@ -1639,8 +1640,6 @@ EXPORT BOOL_T WriteSegsEnd(
 				wSystemToUTF8(segs[i].u.t.string, out, (unsigned int)cnt);
 				trackText = out;
 			}
-#else
-			trackText = segs[i].u.t.string;
 #endif // UTFCONVERT
 			escaped_text = ConvertToEscapedText(trackText);
 			rc &= fprintf( f, "\t%c %lu %0.6f %0.6f %0.6f %d %0.6f \"%s\" %d %lu\n",
@@ -1651,6 +1650,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			MyFree(escaped_text);
 #ifdef UTFCONVERT
 			MyFree(out);
+			out = NULL;
 #endif
 			break;
 		default:
