@@ -62,6 +62,7 @@ foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
     string(MAKE_C_IDENTIFIER "${_xtrkcad_example_name}" _xtrkcad_example_id)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-${_xtrkcad_example_id}")
 endforeach()
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-empty-text")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
@@ -312,6 +313,31 @@ foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
         RUN_SERIAL TRUE
     )
 endforeach()
+
+# Empty text segments, alone and after a converted text in the same object:
+# saving them crashed on Windows, and could write the wrong text instead
+# (Development Issues #73). The check compares the saved texts with the source.
+set(_xtrkcad_empty_text_home "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-empty-text")
+set(_xtrkcad_empty_text_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-empty-text.xtc")
+xtrkcad_add_regression_test(RegressionRoundTrip.empty_text "${_xtrkcad_empty_text_home}"
+    "${_xtrkcad_test_option}${_xtrkcad_empty_text_source}")
+set_tests_properties(RegressionRoundTrip.empty_text PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    FIXTURES_SETUP regression_empty_text
+    LABELS "regression;regression-ci"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_empty_text_home}"
+    RUN_SERIAL TRUE
+)
+add_test(NAME RegressionRoundTrip.empty_text_check
+    COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-roundtrip-text.sh"
+        "${_xtrkcad_empty_text_source}"
+        "${_xtrkcad_empty_text_home}/.${XTRKCAD_BIN}/roundtrip/roundtrip1.xtc"
+)
+set_tests_properties(RegressionRoundTrip.empty_text_check PROPERTIES
+    FIXTURES_REQUIRED regression_empty_text
+    LABELS "regression;regression-ci"
+)
 
 # Print and export a small layout through the normal code, then check the files
 # (Development Issues #68). The check needs poppler-utils, which isn't something
