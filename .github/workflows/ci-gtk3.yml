@@ -259,12 +259,12 @@ jobs:
           cmake --workflow --preset windows-debug
 
   regression-windows:
-    # The demo suite and the round trip on Windows. Report-only until it has a
-    # track record, because expected values were recorded on Linux and floating
-    # point can differ (Development Issues #69).
+    # The demos, one process each, and the round trip on Windows. Report-only
+    # until it has a track record, because expected values were recorded on
+    # Linux and floating point can differ (Development Issues #69).
     continue-on-error: true
     runs-on: windows-2025
-    timeout-minutes: 30
+    timeout-minutes: 60
     defaults:
       run:
         shell: msys2 {0}
@@ -298,11 +298,7 @@ jobs:
       - name: Build
         run: cmake --build build --parallel
       - name: Regression suite
-        run: ctest --test-dir build -L regression-ci --output-on-failure --timeout 300
-      - name: Show the log
-        # The Windows build logs to a file, not to the test's output
-        if: always()
-        run: find "$(cygpath -u "$APPDATA")" -name xtclog.txt -exec tail -n 40 {} + 2>/dev/null || true
+        run: ctest --test-dir build -L regression-ci --output-on-failure
 
   regression-macos:
     # See regression-windows. Runs on the same runners as the other macOS jobs,

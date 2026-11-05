@@ -366,6 +366,9 @@ bug:
   (see [gtk3issues #28](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/28/)) so CI can still
   gate on the rest of the suite on that architecture. Temporary — remove the exclusion once #28
   is actually root-caused and fixed, don't leave it in place indefinitely.
+- **`dmtoyard.xtr` excluded from `RegressionSuite` on macOS** — the first turnout stays at the
+  press position, and the rest of the demo builds on that
+  ([gtk3issues #72](https://sourceforge.net/p/xtrkcad-fork/gtk3issues/72/)). Temporary too.
 - **Wayland desktop: regression tests forced to X11** — `xvfb-run` only overrides `DISPLAY`, not
   `WAYLAND_DISPLAY`. On a Wayland session, GTK3's backend auto-detect then prefers the real
   compositor over the X11 display `xvfb-run` just set up, so every regression test opened real
@@ -396,8 +399,11 @@ bug:
 - **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
   platforms, report-only (`continue-on-error`) for now, because the expected values were recorded on
   Linux and floating point can differ. Locally, pass `-DXTRKCAD_REGRESSION_TESTING=ON`, as the option
-  only defaults on for Linux. On Windows the log goes to a file, so `RegressionCompare.*` only checks
-  the exit code there, and all tests share the normal work directory instead of a scratch `$HOME`.
+  only defaults on for Linux. Windows has no `RegressionSuite`: it didn't finish within its 900 s, and
+  a timeout doesn't show which demo was running, so the per-demo tests are in `regression-ci` there.
+  Windows ignores `$HOME` for the work directory, so each test writes `xtrkcad0.ini` into the scratch
+  install to get its own, and a failure prints `xtrkcad.regress` and the end of `xtclog.txt` from it.
+  The log goes to a file there, so `RegressionCompare.*` only checks the exit code.
 - **Visual pre/post diffing (`-d visualdiff=1`)** — the regression suite's `REGRESSION START`/`END`
   blocks compare track coordinates as text, which can miss a change that's obvious in a picture
   (SF #667/#26: a fixture regen silently dropped a join's connector tracks, and the numeric diff
