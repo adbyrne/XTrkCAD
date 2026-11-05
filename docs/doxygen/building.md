@@ -388,7 +388,9 @@ bug:
   elsewhere and in the working directory (`LayoutRoundTripTest()`, `fileio.c`). The tests have the
   `regression-ci` label, so the sanitizer job runs them too. That matters: ASan's fill pattern exposes
   values read from uninitialised memory that a normal build happens to see as 0. It proves saving is
-  stable, not that the first load of an old file read everything in it.
+  stable, not that the first load of an old file read everything in it. `empty_text` and
+  `empty_text_check` use a small layout of their own, with empty text segments, and also compare the
+  saved texts with the source.
 - **Print and export (`RegressionExport.*`)** — `-Texport:<layout>` prints a small layout to PDF
   without the dialog (`wPrintSetExportFile()`), exports SVG, DXF and PNG and imports the DXF file back,
   all through the normal code (`LayoutExportTest()`, `fileio.c`). `tools/check-export-test.sh` then
@@ -397,9 +399,9 @@ bug:
   `regression` but not `regression-ci`: `regression-gtk3-standalone` and the coverage job install
   `poppler-utils` and run them, so the package jobs don't have to.
 - **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
-  platforms, report-only (`continue-on-error`) for now, because the expected values were recorded on
-  Linux and floating point can differ. Locally, pass `-DXTRKCAD_REGRESSION_TESTING=ON`, as the option
-  only defaults on for Linux. Windows has no `RegressionSuite`: it didn't finish within its 900 s, and
+  platforms. `regression-windows` gates like the Linux jobs. `regression-macos` is report-only
+  (`continue-on-error`), since its runners can be scarce. Locally, pass
+  `-DXTRKCAD_REGRESSION_TESTING=ON`, as the option only defaults on for Linux. Windows has no `RegressionSuite`: it didn't finish within its 900 s, and
   a timeout doesn't show which demo was running, so the per-demo tests are in `regression-ci` there.
   Windows ignores `$HOME` for the work directory, so each test writes `xtrkcad0.ini` into the scratch
   install to get its own, and a failure prints `xtrkcad.regress` and the end of `xtclog.txt` from it.
