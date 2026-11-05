@@ -259,10 +259,8 @@ jobs:
           cmake --workflow --preset windows-debug
 
   regression-windows:
-    # The demos, one process each, and the round trip on Windows. Report-only
-    # until it has a track record, because expected values were recorded on
-    # Linux and floating point can differ (Development Issues #69).
-    continue-on-error: true
+    # The demos, one process each, and the round trip on Windows (Development
+    # Issues #69). Few developers test on Windows by hand, so this one gates.
     runs-on: windows-2025
     timeout-minutes: 60
     defaults:
@@ -301,8 +299,8 @@ jobs:
         run: ctest --test-dir build -L regression-ci --output-on-failure
 
   regression-macos:
-    # See regression-windows. Runs on the same runners as the other macOS jobs,
-    # which can be scarce, so it stays report-only for longer than Windows.
+    # See regression-windows. Report-only, unlike Windows: it runs on the same
+    # runners as the other macOS jobs, which can be scarce.
     continue-on-error: true
     runs-on: macos-26
     timeout-minutes: 45
