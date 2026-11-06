@@ -332,7 +332,7 @@ static void ChkRevert(void * unused)
 		rc = wNoticeWithIcon(NT_WARNING,
 		                     _("Do you want to return to the last saved state?\n\n"
 		                       "Revert will cause all changes done since last save to be lost."),
-		                     _("&Revert"), _("&Cancel"));
+		                     _("_Revert"), _("_Cancel"));
 		if (rc) {
 			/* load the file */
 			char *filename = GetLayoutFullPath();
@@ -1365,7 +1365,7 @@ EXPORT void CreateMenus(void)
 	wMenuSeparatorCreate(fileM);
 
 	cmdGroup = BG_PRINT;
-	MiscMenuItemCreate(fileM, NULL, "printSetup", _("P&rint Setup ..."),
+	MiscMenuItemCreate(fileM, NULL, "printSetup", _("P_rint Setup ..."),
 	                   ACCL_PRINTSETUP, PrintSetupMenuCB, 0,
 	                   I2VP(0));
 	InitCmdPrint(fileM);
@@ -1415,16 +1415,16 @@ EXPORT void CreateMenus(void)
 	wMenuSeparatorCreate(fileM);
 
 	paramFilesCallback = ParamFilesInit();
-	MiscMenuItemCreate(fileM, NULL, "cmdPrmfile", _("Parameter &Files ..."),
+	MiscMenuItemCreate(fileM, NULL, "cmdPrmfile", _("Parameter _Files ..."),
 	                   ACCL_PARAMFILES, paramFilesCallback, 0, NULL);
-	MiscMenuItemCreate(fileM, NULL, "cmdFileNote", _("No&tes ..."), ACCL_NOTES,
+	MiscMenuItemCreate(fileM, NULL, "cmdFileNote", _("No_tes ..."), ACCL_NOTES,
 	                   DoNote, 0, NULL);
 
 
 	//fileList_ml = wMenuListCreate(fileM, "menuFileList", NEWEST_TOP, NUM_FILELIST,
 	//                              ChkFileList);
 	wMenuSeparatorCreate(fileM);
-	wMenuPushCreate(fileM, "quit", _("E&xit"), 0,
+	wMenuPushCreate(fileM, "quit", _("E_xit"), 0,
 	                DoQuit, NULL);
 
 	InitCmdExport();
@@ -1463,20 +1463,20 @@ EXPORT void CreateMenus(void)
 	/*
 	 * EDIT MENU
 	 */
-	MiscMenuItemCreate(editM, NULL, "cmdUndo", _("&Undo"), ACCL_UNDO,
+	MiscMenuItemCreate(editM, NULL, "cmdUndo", _("_Undo"), ACCL_UNDO,
 	                   UndoUndo, 0, NULL);
-	MiscMenuItemCreate(editM, NULL, "cmdRedo", _("R&edo"), ACCL_REDO,
+	MiscMenuItemCreate(editM, NULL, "cmdRedo", _("R_edo"), ACCL_REDO,
 	                   UndoRedo, 0, NULL);
 	wMenuSeparatorCreate(editM);
-	MiscMenuItemCreate(editM, NULL, "cmdCut", _("Cu&t"), ACCL_CUT,
+	MiscMenuItemCreate(editM, NULL, "cmdCut", _("Cu_t"), ACCL_CUT,
 	                   EditCut, IC_SELECTED, NULL);
-	MiscMenuItemCreate(editM, NULL, "cmdCopy", _("&Copy"), ACCL_COPY,
+	MiscMenuItemCreate(editM, NULL, "cmdCopy", _("_Copy"), ACCL_COPY,
 	                   EditCopy, IC_SELECTED, NULL);
-	MiscMenuItemCreate(editM, NULL, "cmdPaste", _("&Paste"), ACCL_PASTE,
+	MiscMenuItemCreate(editM, NULL, "cmdPaste", _("_Paste"), ACCL_PASTE,
 	                   EditPaste, 0, NULL);
-	MiscMenuItemCreate(editM, NULL, "cmdClone", _("C&lone"), ACCL_CLONE,
+	MiscMenuItemCreate(editM, NULL, "cmdClone", _("C_lone"), ACCL_CLONE,
 	                   EditClone, 0, NULL);
-	MiscMenuItemCreate(editM, NULL, "cmdDelete", _("De&lete"), ACCL_DELETE,
+	MiscMenuItemCreate(editM, NULL, "cmdDelete", _("De_lete"), ACCL_DELETE,
 	                   SelectDeleteCB, IC_SELECTED, NULL);
 	MiscMenuItemCreate(editM, NULL, "cmdMoveToCurrentLayer",
 	                   _("Move To Current Layer"), ACCL_MOVCURLAYER,
@@ -1484,7 +1484,7 @@ EXPORT void CreateMenus(void)
 	                   IC_SELECTED, NULL);
 	wMenuSeparatorCreate( editM );
 	menuPLs[menuPG.paramCnt].context = I2VP(1);
-	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", _("Select &All"),
+	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", _("Select _All"),
 	                    ACCL_SELECTALL, SetAllTrackSelectCB, 0, I2VP(TRUE) );
 	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer",
 	                    _("Select Current Layer"), ACCL_SETCURLAYER, SelectCurrentLayer, 0, NULL);
@@ -1492,24 +1492,24 @@ EXPORT void CreateMenus(void)
 	                    _("Select Layers/Groups ..."), 0L, InitSelectLayersDialog(), 0, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdSelectByIndex", _("Select By Index"), 0L,
 	                    StartIndexDialog, 0, &SelectByIndex );
-	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", _("&Deselect All"),
+	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", _("_Deselect All"),
 	                    ACCL_DESELECTALL, SetAllTrackSelectCB, 0, I2VP(FALSE) );
-	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", _("&Invert Selection"), 0L,
+	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", _("_Invert Selection"), 0L,
 	                    InvertTrackSelect, 0, NULL);
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectOrphaned",
 	                    _("Select Stranded Track"), 0L, OrphanedTrackSelect, 0, NULL);
 	wMenuSeparatorCreate( editM );
-	MiscMenuItemCreate( editM, NULL, "cmdTunnel", _("Tu&nnel"), ACCL_TUNNEL,
+	MiscMenuItemCreate( editM, NULL, "cmdTunnel", _("Tu_nnel"), ACCL_TUNNEL,
 	                    SelectTunnel, IC_SELECTED, NULL);
-	MiscMenuItemCreate( editM, NULL, "cmdBridge", _("B&ridge"), ACCL_BRIDGE,
+	MiscMenuItemCreate( editM, NULL, "cmdBridge", _("B_ridge"), ACCL_BRIDGE,
 	                    SelectBridge, IC_SELECTED, NULL);
-	MiscMenuItemCreate( editM, NULL, "cmdRoadbed", _("&Roadbed"), ACCL_ROADBED,
+	MiscMenuItemCreate( editM, NULL, "cmdRoadbed", _("_Roadbed"), ACCL_ROADBED,
 	                    SelectRoadbed, IC_SELECTED, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdTies", _("Ties/NoTies"), ACCL_TIES,
 	                    SelectTies, IC_SELECTED, NULL);
-	MiscMenuItemCreate( editM, NULL, "cmdAbove", _("Move to &Front"), ACCL_ABOVE,
+	MiscMenuItemCreate( editM, NULL, "cmdAbove", _("Move to _Front"), ACCL_ABOVE,
 	                    SelectAbove, IC_SELECTED, NULL);
-	MiscMenuItemCreate( editM, NULL, "cmdBelow", _("Move to &Back"), ACCL_BELOW,
+	MiscMenuItemCreate( editM, NULL, "cmdBelow", _("Move to _Back"), ACCL_BELOW,
 	                    SelectBelow, IC_SELECTED, NULL);
 
 	wMenuSeparatorCreate( editM );
@@ -1524,13 +1524,13 @@ EXPORT void CreateMenus(void)
 	 * VIEW MENU
 	 */
 
-	zoomInM = wMenuPushCreate(viewM, "menuEdit-zoomIn", _("Zoom &In"),
+	zoomInM = wMenuPushCreate(viewM, "menuEdit-zoomIn", _("Zoom _In"),
 	                          ACCL_ZOOMIN, DoZoomUp, I2VP(1));
-	zoomSubM = wMenuMenuCreate(viewM, "menuEdit-zoomTo", _("&Zoom"));
-	zoomOutM = wMenuPushCreate(viewM, "menuEdit-zoomOut", _("Zoom &Out"),
+	zoomSubM = wMenuMenuCreate(viewM, "menuEdit-zoomTo", _("_Zoom"));
+	zoomOutM = wMenuPushCreate(viewM, "menuEdit-zoomOut", _("Zoom _Out"),
 	                           ACCL_ZOOMOUT, DoZoomDown, I2VP(1));
 	zoomExtentsM = wMenuPushCreate(viewM, "menuEdit-zoomExtents",
-	                               _("Zoom &Extents"),
+	                               _("Zoom _Extents"),
 	                               0, DoZoomExtents, I2VP(0));
 	wMenuSeparatorCreate(viewM);
 
@@ -1541,7 +1541,7 @@ EXPORT void CreateMenus(void)
 	wControlLinkedSet((wControl_p) zoomOutM, (wControl_p) zoomDownB);
 	wControlLinkedSet((wControl_p) zoomExtentsM, (wControl_p) zoomExtentsB);
 
-	wMenuPushCreate(viewM, "menuEdit-redraw", _("&Redraw"), ACCL_REDRAW,
+	wMenuPushCreate(viewM, "menuEdit-redraw", _("_Redraw"), ACCL_REDRAW,
 	                (wMenuCallBack_p) MainRedraw, NULL);
 	wMenuPushCreate(viewM, "menuEdit-redraw", _("Redraw All"), ACCL_REDRAWALL,
 	                (wMenuCallBack_p) DoRedraw, NULL);
@@ -1587,7 +1587,7 @@ EXPORT void CreateMenus(void)
 
 	wMenuSeparatorCreate(viewM);
 
-	MiscMenuItemCreate(viewM, NULL, "cmdToolbarOpt", _("&Toolbar Options..."),
+	MiscMenuItemCreate(viewM, NULL, "cmdToolbarOpt", _("_Toolbar Options..."),
 	                   0L, DoToolbar, IC_MODETRAIN_TOO, NULL);
 
 	cmdGroup = BG_EASE;
@@ -1716,36 +1716,36 @@ EXPORT void CreateMenus(void)
 	/*
 	 * OPTION MENU
 	 */
-	MiscMenuItemCreate(optionM, NULL, "cmdLayout", _("L&ayout..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdLayout", _("L_ayout..."),
 	                   ACCL_LAYOUTW, LayoutInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdDisplay", _("&Display..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdDisplay", _("_Display..."),
 	                   ACCL_DISPLAYW, DisplayInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdCmdopt", _("Co&mmand..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdCmdopt", _("Co_mmand..."),
 	                   ACCL_CMDOPTW, CmdoptInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdEasement", _("&Easements..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdEasement", _("_Easements..."),
 	                   ACCL_EASEW, DoEasementRedir,
 	                   IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "fontSelW", _("&Fonts..."), ACCL_FONTW,
+	MiscMenuItemCreate(optionM, NULL, "fontSelW", _("_Fonts..."), ACCL_FONTW,
 	                   SelectFont, IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdSticky", _("Stic&ky..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdSticky", _("Stic_ky..."),
 	                   ACCL_STICKY, DoSticky, IC_MODETRAIN_TOO,
 	                   NULL);
 	if (extraButtons) {
 		menuPLs[menuPG.paramCnt].context = debugW;
-		MiscMenuItemCreate(optionM, NULL, "cmdDebug", _("&Debug..."), 0,
+		MiscMenuItemCreate(optionM, NULL, "cmdDebug", _("_Debug..."), 0,
 		                   DebugInit, IC_MODETRAIN_TOO, NULL);
 	}
-	MiscMenuItemCreate(optionM, NULL, "cmdPref", _("&Preferences..."),
+	MiscMenuItemCreate(optionM, NULL, "cmdPref", _("_Preferences..."),
 	                   ACCL_PREFERENCES, PrefInit(), IC_MODETRAIN_TOO, NULL);
-	MiscMenuItemCreate(optionM, NULL, "cmdColor", _("&Colors..."), ACCL_COLORW,
+	MiscMenuItemCreate(optionM, NULL, "cmdColor", _("_Colors..."), ACCL_COLORW,
 	                   ColorInit(), IC_MODETRAIN_TOO, NULL);
 
 	/*
 	 * MACRO MENU
 	 */
-	wMenuPushCreate(macroM, "cmdRecord", _("&Record ..."), ACCL_RECORD,
+	wMenuPushCreate(macroM, "cmdRecord", _("_Record ..."), ACCL_RECORD,
 	                DoRecord, NULL);
-	wMenuPushCreate(macroM, "cmdDemo", _("&Play Back ..."), ACCL_PLAYBACK,
+	wMenuPushCreate(macroM, "cmdDemo", _("_Play Back ..."), ACCL_PLAYBACK,
 	                DoPlayBack, NULL);
 
 	/*
@@ -1787,14 +1787,14 @@ EXPORT void CreateMenus(void)
 
 	InitNewTurn(
 	        wMenuMenuCreate(manageM, "cmdTurnoutNew",
-	                        _("Tur&nout Designer...")));
+	                        _("Tur_nout Designer...")));
 
 	MiscMenuItemCreate(manageM, NULL, "cmdContmgm",
-	                   _("Layout &Control Elements..."), ACCL_CONTMGM,
+	                   _("Layout _Control Elements..."), ACCL_CONTMGM,
 	                   ControlMgrInit(), 0, NULL);
-	MiscMenuItemCreate(manageM, NULL, "cmdGroup", _("&Group..."), ACCL_GROUP,
+	MiscMenuItemCreate(manageM, NULL, "cmdGroup", _("_Group..."), ACCL_GROUP,
 	                   DoGroup, IC_SELECTED, NULL);
-	MiscMenuItemCreate(manageM, NULL, "cmdUngroup", _("&Ungroup"), ACCL_UNGROUP,
+	MiscMenuItemCreate(manageM, NULL, "cmdUngroup", _("_Ungroup"), ACCL_UNGROUP,
 	                   DoUngroup, IC_SELECTED, NULL);
 
 	MiscMenuItemCreate(manageM, NULL, "cmdCustmgm",
@@ -1818,35 +1818,35 @@ EXPORT void CreateMenus(void)
 	                   ACCL_MANAGENOTES, InitManageNotesDialog(), 0, NULL);
 	wMenuSeparatorCreate(manageM);
 
-	MiscMenuItemCreate(manageM, NULL, "cmdEnumerate", _("Parts &List..."),
+	MiscMenuItemCreate(manageM, NULL, "cmdEnumerate", _("Parts _List..."),
 	                   ACCL_PARTSLIST, EnumerateTracks, 0,
 	                   NULL);
 	MiscMenuItemCreate(manageM, NULL, "cmdPricelist", _("Price List..."),
 	                   ACCL_PRICELIST, PriceListInit(), 0, NULL);
 
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsUnconnected",
-	                   _("&Unconnected Endpoints ..."), ACCL_REPORTSUNCONN,
+	                   _("_Unconnected Endpoints ..."), ACCL_REPORTSUNCONN,
 	                   ReportsUnconnectedEndpoints, 0, NULL);
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsTurnout",
-	                   _("&Turnout Density ..."), ACCL_REPORTSTURNOUT,
+	                   _("_Turnout Density ..."), ACCL_REPORTSTURNOUT,
 	                   ReportsTurnoutDensity, 0, NULL);
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsTrackLen",
-	                   _("Track &Lengths ..."), ACCL_REPORTSTRACKLEN,
+	                   _("Track _Lengths ..."), ACCL_REPORTSTRACKLEN,
 	                   ReportsTrackLengths, 0, NULL);
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsCurveStats",
-	                   _("&Curve Stats ..."), ACCL_REPORTSCURVESTATS,
+	                   _("_Curve Stats ..."), ACCL_REPORTSCURVESTATS,
 	                   ReportsCurveStats, 0, NULL);
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsEquipment",
-	                   _("&Equipment Suitability ..."), ACCL_REPORTSEQUIPMENT,
+	                   _("_Equipment Suitability ..."), ACCL_REPORTSEQUIPMENT,
 	                   ReportsEquipmentSuitability, 0, NULL);
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsGaps",
-	                   _("&Gaps ..."), ACCL_REPORTSGAPS,
+	                   _("_Gaps ..."), ACCL_REPORTSGAPS,
 	                   ReportsGaps, 0, NULL);
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsKinked",
-	                   _("&Kinked Joints ..."), ACCL_REPORTSKINKED,
+	                   _("_Kinked Joints ..."), ACCL_REPORTSKINKED,
 	                   ReportsKinkedJoints, 0, NULL);
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsNotes",
-	                   _("&Notes ..."), ACCL_REPORTSNOTES,
+	                   _("_Notes ..."), ACCL_REPORTSNOTES,
 	                   ReportsNotes, 0, NULL);
 
 	cmdGroup = BG_LAYER;

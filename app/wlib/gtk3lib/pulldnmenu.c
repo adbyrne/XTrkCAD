@@ -171,18 +171,6 @@ static void setAcclKey( GtkWidget* menu_item, int acclKey)
 	                           acclKey & 0xFF, mask, GTK_ACCEL_VISIBLE);
 }
 
-static char *
-ChangeToUnderscore(const char *label)
-{
-	char *labelcopy = NULL;
-
-	if(label) {
-		labelcopy = g_strdup(label);
-		g_strdelimit(labelcopy, "&", '_');
-	}
-	return(labelcopy);
-}
-
 /**
  * Create a new menu element, add to the parent menu and to help
  *
@@ -202,9 +190,6 @@ static void CreateMenuItem(
         const char * labelStr,
         int acclKey )
 {
-	// create a modifiable copy of the label
-	char *labelcopy = ChangeToUnderscore(labelStr);
-
 	switch ( mtype ) {
 	case M_SEPARATOR:
 		mi->widget = gtk_separator_menu_item_new();
@@ -212,7 +197,7 @@ static void CreateMenuItem(
 	case M_TOGGLE: {
 		unsigned long handler_id;
 		mi->widget = gtk_check_menu_item_new_with_mnemonic(
-		                     wlibConvertInput(labelcopy));
+		                     wlibConvertInput(labelStr));
 		handler_id = g_signal_connect(mi->widget, "toggled", G_CALLBACK(pushMenuItem),
 		                              mi);
 		g_object_set_data(G_OBJECT(mi->widget), "handler-id",
@@ -222,7 +207,7 @@ static void CreateMenuItem(
 	case M_RADIO:
 		mi->widget = gtk_radio_menu_item_new_with_mnemonic(
 		                     m->attributes.menu.radioGroup,
-		                     wlibConvertInput(labelcopy));
+		                     wlibConvertInput(labelStr));
 		m->attributes.menu.radioGroup = gtk_radio_menu_item_get_group (
 		                                        GTK_RADIO_MENU_ITEM ( mi->widget ));
 		g_signal_connect(mi->widget, "activate", G_CALLBACK(pushMenuItem),
@@ -233,7 +218,7 @@ static void CreateMenuItem(
 			mi->widget = wlibWidgetFromIdWarn(m->parent, helpStr);
 		} else {
 			mi->widget = gtk_menu_item_new_with_mnemonic(
-			                     wlibConvertInput(labelcopy));
+			                     wlibConvertInput(labelStr));
 		}
 		g_signal_connect(mi->widget, "activate",G_CALLBACK(pushMenuItem),
 		                 mi);
@@ -243,8 +228,6 @@ static void CreateMenuItem(
 		g_abort();
 		break;
 	}
-
-	g_free(labelcopy);
 
 	if (mi->widget) {
 		if (acclKey) {
@@ -392,14 +375,12 @@ wControl_p wMenuMenuCreate(
 	struct menu *menu;
 	GtkWidget* submenu;
 	GtkWidget* menuitem;
-	char *label;
 
 	mm = wlibControlNew(M_SUBMENU, m, helpStr, NULL);
 	menu = CONTROL_GET_ATTRIBUTES_PTR(mm, menu);
 	menu->radioGroup = NULL;
 
-	label = ChangeToUnderscore( labelStr );
-	menuitem = gtk_menu_item_new_with_mnemonic(wlibConvertInput(label));
+	menuitem = gtk_menu_item_new_with_mnemonic(wlibConvertInput(labelStr));
 
 	submenu = gtk_menu_new();
 	gtk_menu_item_set_submenu( GTK_MENU_ITEM( menuitem ), submenu );
@@ -409,7 +390,6 @@ wControl_p wMenuMenuCreate(
 
 	mm->widget = submenu;
 
-	g_free(label);
 	return mm;
 }
 

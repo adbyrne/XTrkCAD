@@ -164,20 +164,6 @@
                 <property name="top_attach">2</property>
               </packing>
             </child>
-            <child>
-              <object class="GtkToggleButton" id="new">
-                <property name="label" translatable="yes">Create</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="valign">start</property>
-                <property name="sensitive">False</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>

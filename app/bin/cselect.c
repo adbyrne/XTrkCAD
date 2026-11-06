@@ -3884,7 +3884,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu )
 	wMenuPushCreate(selectPopup1M, "", _("Zoom In"), 0, DoZoomUp, I2VP(1));
 	wMenuPushCreate( selectPopup1M, "", _("Zoom to extents - 'e'"), 0,
 	                 DoZoomExtents, I2VP(0) );
-	wMenu_p zoomPop1 = wMenuMenuCreate(selectPopup1M, "", _("&Zoom"));
+	wMenu_p zoomPop1 = wMenuMenuCreate(selectPopup1M, "", _("_Zoom"));
 	InitCmdZoom(NULL, NULL, zoomPop1, NULL);
 	wMenuPushCreate(selectPopup1M, "", _("Zoom Out"), 0, DoZoomDown, I2VP(1));
 	wMenuPushCreate(selectPopup1M, "", _("Pan to Origin - 'o'/'0'"), 0,

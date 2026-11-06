@@ -2075,7 +2075,7 @@ EXPORT void InitCmdPan2(wMenu_p menu)
 	                           PanMenuEnter, I2VP('9'));
 	panOrig = wMenuPushCreate(panPopupM, "", _("Pan to Origin - 'o'/'0'"), 0,
 	                          PanMenuEnter, I2VP('o'));
-	wMenu_p zoomPanM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
+	wMenu_p zoomPanM = wMenuMenuCreate(panPopupM, "", _("_Zoom"));
 	InitCmdZoom(NULL, NULL, NULL, zoomPanM);
 	panHere = wMenuPushCreate(panPopupM, "", _("Pan center here - 'c'"), 0,
 	                          PanHere, I2VP(3));

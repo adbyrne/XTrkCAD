@@ -57,7 +57,9 @@ static drawCmd_t structureD = {
 	Pix2CoOrd, CoOrd2Pix
 };
 
-static wIndex_t structureHotBarCmdInx;
+static wIndex_t structureCmdInx = -1;
+static wIndex_t structureHotBarCmdInx = -1;
+static void CancelPlacementFromFile(int fileIndex);
 static wIndex_t structureInx;
 static long hideStructureWindow;
 static void RedrawStructure( wControl_p d, void * context, wWinPix_t x,
@@ -199,6 +201,8 @@ DeleteStructures(int fileIndex)
 	int startInx = -1;
 	int cnt = 0;
 
+	CancelPlacementFromFile(fileIndex);
+
 	// go to the start of the block
 	while (inx < structureInfo_da.cnt &&
 	       structureInfo(inx)->paramFileIndex != fileIndex) {
@@ -210,6 +214,9 @@ DeleteStructures(int fileIndex)
 	     structureInfo(inx)->paramFileIndex == fileIndex; inx++) {
 		turnoutInfo_t * to = structureInfo(inx);
 		if (to->paramFileIndex == fileIndex) {
+			if ( to == curStructure ) {
+				curStructure = NULL;
+			}
 			StructureDelete(to);
 			cnt++;
 		}
@@ -818,6 +825,26 @@ static void NewStructure( void )
 }
 
 
+/**
+ * End the running structure command, as Esc would, if the structure it is
+ * placing comes from a parameter file that is about to be deleted.
+ *
+ * \param[in] fileIndex parameter file
+ */
+
+static void CancelPlacementFromFile(int fileIndex)
+{
+	wIndex_t cmdInx = GetCurrentCommand();
+
+	if (Dst.state != 0 && curStructure != NULL &&
+	    curStructure->paramFileIndex == fileIndex &&
+	    (cmdInx == structureCmdInx || cmdInx == structureHotBarCmdInx)) {
+		Reset();
+		InfoMessage(_("The part being placed is no longer available"));
+	}
+}
+
+
 static void StructRotate( void * pangle )
 {
 	if (Dst.state == 0) {
@@ -960,7 +987,7 @@ EXPORT STATUS_T CmdStructureAction(
 
 	case C_REDRAW:
 		wSetCursor(mainD.d,defaultCursor);
-		if (Dst.state) {
+		if (Dst.state && curStructure) {
 			DrawSegs( &tempD, Dst.pos, Dst.angle,
 			          curStructure->segs, curStructure->segCnt, 0.0, selectedColor );
 		}
@@ -1100,6 +1127,7 @@ static STATUS_T CmdStructure(
 
 	case C_CANCEL:
 		//wHide( structureW );
+		Dst.state = 0;
 		return C_TERMINATE;
 
 	case C_REDRAW:
@@ -1242,9 +1270,10 @@ static STATUS_T CmdStructureHotBar(
 
 EXPORT void InitCmdStruct( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdStructure, "cmdStructure", _("Structure"),
-	               CreateToolbarIconFromResource("building.png"), LEVEL0_50,
-	               IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
+	structureCmdInx = AddMenuButton( menu, CmdStructure, "cmdStructure",
+	                                 _("Structure"),
+	                                 CreateToolbarIconFromResource("building.png"), LEVEL0_50,
+	                                 IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
 	structureHotBarCmdInx = AddMenuButton( menu, CmdStructureHotBar,
 	                                       "cmdStructureHotBar", "", NULL, LEVEL0_50,
 	                                       IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, 0, NULL );

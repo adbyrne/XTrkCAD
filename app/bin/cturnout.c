@@ -73,7 +73,9 @@ static drawCmd_t turnoutD = {
 	Pix2CoOrd, CoOrd2Pix
 };
 
-static wIndex_t turnoutHotBarCmdInx;
+static wIndex_t turnoutCmdInx = -1;
+static wIndex_t turnoutHotBarCmdInx = -1;
+static void CancelPlacementFromFile(int fileIndex);
 static wIndex_t turnoutInx;
 static long hideTurnoutWindow;
 static void RedrawTurnout( wControl_p d, void * context, wWinPix_t x,
@@ -85,11 +87,6 @@ static wWinPix_t turnoutListWidths[] = { 80, 80, 220 };
 static paramListData_t listData = { 13, 400, 3, turnoutListWidths, NULL };
 static paramDrawData_t turnoutDrawData = { 490, 200, RedrawTurnout, SelTurnoutEndPt, &turnoutD };
 
-/**
- * \todo for turnoutNew PD_MENU was replaced by PD_BUTTON as a temporary fix. There should be a selector for
- * which type of new track should be created newly.
- */
-
 static paramData_t turnoutPLs[] = {
 #define I_LIST		(0)
 #define turnoutListL    (turnoutPLs[I_LIST].control)
@@ -97,10 +94,7 @@ static paramData_t turnoutPLs[] = {
 #define I_DRAW		(1)
 #define turnoutDrawD    (turnoutPLs[I_DRAW].control)
 	{   PD_DRAW, NULL, "canvas", PDO_NOPSHUPD | PDO_DLGUNDERCMDBUTT, &turnoutDrawData, NULL, 0 },
-#define I_NEW		(2)
-#define turnoutNewM     (turnoutPLs[I_NEW].control)
-	{   PD_BUTTON, NULL, "new", PDO_DLGCMDBUTTON, NULL, N_("New") },
-#define I_HIDE		(3)
+#define I_HIDE		(2)
 #define turnoutHideT    (turnoutPLs[I_HIDE].control)
 	{   PD_TOGGLE, &hideTurnoutWindow, "hide", PDO_DLGCMDBUTTON, NULL, NULL, BC_NOBORDER }
 };
@@ -224,6 +218,8 @@ DeleteTurnoutParams(int fileIndex)
 	int startInx = -1;
 	int cnt = 0;
 
+	CancelPlacementFromFile(fileIndex);
+
 	// go to the start of the block
 	while (inx < turnoutInfo_da.cnt &&
 	       turnoutInfo(inx)->paramFileIndex != fileIndex) {
@@ -235,11 +231,11 @@ DeleteTurnoutParams(int fileIndex)
 	     turnoutInfo(inx)->paramFileIndex == fileIndex; inx++) {
 		turnoutInfo_t* to = turnoutInfo(inx);
 		if (to->paramFileIndex == fileIndex) {
-			DeleteTurnout(to);
-			cnt++;
 			if ( to == curTurnout ) {
 				curTurnout = NULL;
 			}
+			DeleteTurnout(to);
+			cnt++;
 		}
 	}
 
@@ -2802,6 +2798,25 @@ static void CreateMoveAnchor(coOrd pos)
 }
 
 /**
+ * End the running turnout command, as Esc would, if the turnout it is placing
+ * comes from a parameter file that is about to be deleted.
+ *
+ * \param[in] fileIndex parameter file
+ */
+
+static void CancelPlacementFromFile(int fileIndex)
+{
+	wIndex_t cmdInx = GetCurrentCommand();
+
+	if (Dto.state != 0 && curTurnout != NULL &&
+	    curTurnout->paramFileIndex == fileIndex &&
+	    (cmdInx == turnoutCmdInx || cmdInx == turnoutHotBarCmdInx)) {
+		Reset();
+		InfoMessage(_("The part being placed is no longer available"));
+	}
+}
+
+/**
  * Process the mouse events for laying track.
  *
  * \param action IN event type
@@ -2944,7 +2959,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 
 	case C_REDRAW:
 		wSetCursor(mainD.d, defaultCursor);
-		if (Dto.state) {
+		if (Dto.state && curTurnout) {
 			DrawSegs(&tempD, Dto.pos, Dto.angle,
 			         curTurnout->segs, curTurnout->segCnt, trackGauge, selectedColor);
 		}
@@ -3014,7 +3029,6 @@ static STATUS_T CmdTurnout(
 			                            NULL, NULL,
 			                            TRUE,
 			                            F_RESIZE | F_RECALLSIZE | PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate);
-			//InitNewTurn(turnoutNewM);
 		}
 		turnoutIndex = wListGetIndex(turnoutListL);
 		turnoutPtr = curTurnout;
@@ -3240,10 +3254,11 @@ static STATUS_T CmdTurnoutHotBar(
 
 EXPORT void InitCmdTurnout(wMenu_p menu)
 {
-	AddMenuButton(menu, CmdTurnout, "cmdNewFixedTrack", _("Fixed-Track"),
-	              CreateToolbarIconFromResource("turnout.png"), LEVEL0_50,
-	              IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU | IC_POPUP2, ACCL_TURNOUT,
-	              NULL);
+	turnoutCmdInx = AddMenuButton(menu, CmdTurnout, "cmdNewFixedTrack",
+	                              _("Fixed-Track"),
+	                              CreateToolbarIconFromResource("turnout.png"), LEVEL0_50,
+	                              IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU | IC_POPUP2, ACCL_TURNOUT,
+	                              NULL);
 	turnoutHotBarCmdInx = AddMenuButton(menu, CmdTurnoutHotBar, "cmdTurnoutHotBar",
 	                                    "", NULL, LEVEL0_50, IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU |
 	                                    IC_POPUP2, 0, NULL);

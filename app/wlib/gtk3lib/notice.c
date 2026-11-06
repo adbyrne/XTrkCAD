@@ -87,19 +87,12 @@ int wNoticeWithIcon(int type,
 	gtk_window_set_title(GTK_WINDOW(dialog), headline);
 
 	/* use the caller's labels (e.g. "Continue"/"Stop"), not GTK's stock
-	 * Yes/No; the negative button goes first, as GTK lays them out.
-	 * Labels may carry Windows-style '&' mnemonics ("&Revert"), as in
-	 * menu labels (pulldnmenu.c): GTK uses '_' instead. */
+	 * Yes/No; the negative button goes first, as GTK lays them out. */
 	if (no) {
-		char *label = g_strdelimit(g_strdup(no), "&", '_');
-		gtk_dialog_add_button(GTK_DIALOG(dialog), label, GTK_RESPONSE_NO);
-		g_free(label);
+		gtk_dialog_add_button(GTK_DIALOG(dialog), no, GTK_RESPONSE_NO);
 	}
-	{
-		char *label = g_strdelimit(g_strdup(yes ? yes : _("Ok")), "&", '_');
-		gtk_dialog_add_button(GTK_DIALOG(dialog), label, GTK_RESPONSE_YES);
-		g_free(label);
-	}
+	gtk_dialog_add_button(GTK_DIALOG(dialog), yes ? yes : _("Ok"),
+	                      GTK_RESPONSE_YES);
 	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_YES);
 
 	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
