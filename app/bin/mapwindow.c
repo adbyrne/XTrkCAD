@@ -335,7 +335,10 @@ void MapChangeScale()
 	LOG(log_mapsize, 2, ("  MapChangeScale mapD.scale=%0.3f w=%ld h=%ld\n",
 	                     mapD.scale, w, h));
 
-	wWinSetAspectRatio(mapW, mapD.size.x, mapD.size.y );
+	// The window's pixel size, not the layout's: wWinPix_t is an integer, and
+	// a layout's size isn't, so 12.9 x 8.1 inches came out as 12:8 (and any
+	// size below an inch as a division by zero).
+	wWinSetAspectRatio(mapW, w, h);
 	// Force the map to redraw with the new scale
 	if (mapD.d) {
 		MapRedraw(mapD.d, NULL, 0, 0);

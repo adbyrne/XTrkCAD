@@ -1630,9 +1630,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 				posx.y = (p1.y-p0.y)/2.0 + p0.y;
 				a0 -= 90.0;
 				if (r<0) {											//Negative radius means other side
-					coOrd pt = p0;
-					p0 = p1;
-					p1 = pt;
 					a0 += 180.0;
 				}
 				coOrd pc;

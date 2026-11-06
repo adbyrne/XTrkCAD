@@ -2231,7 +2231,7 @@ static void ParamPlayback(char *line)
 					if (p->option & PDO_ANGLE)
 						valF1 =
 						        NormalizeAngle((angleSystem == ANGLE_POLAR) ? valF1 : -valF1);
-					valS = FormatFloat(valF);
+					valS = FormatFloat(valF1);
 				}
 				if (p->control) {
 					wEntrySetValue((wEntry_p)p->control, valS);
@@ -2366,6 +2366,12 @@ static void ParamCheck(char *line)
 
 	pg = DialogGroupFind(line);
 	if (pg == NULL) {
+		// A test whose dialog never opened hasn't checked anything.
+		if (bRunTests) {
+			lprintf("  FAIL: PARAMCHECK %d: no matching dialog: %s\n",
+			        paramLineNum, line);
+			nRegressionFail++;
+		}
 		return;
 	}
 	//	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
@@ -2474,7 +2480,12 @@ static void ParamCheck(char *line)
 		case PD_EXPANDER:
 			break;
 		}
-		if (hasError) {
+		if (hasError && bRunTests) {
+			// Nobody is there to dismiss a notice during -T.
+			lprintf("  FAIL: PARAMCHECK %d: %s-%s: exp: %s, act=%s\n",
+			        paramLineNum, pg->nameStr, p->nameStr, expVal, actVal);
+			nRegressionFail++;
+		} else if (hasError) {
 			f = fopen("error.log", "a");
 			if (f == NULL) {
 				NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, "PARAMCHECK LOG",
@@ -2493,8 +2504,8 @@ static void ParamCheck(char *line)
 		//	 }
 	}
 	if (bRunTests) {
-		lprintf( "PLAYBACK: unknown PARAMCHECK (no matching dialog group): %s\n",
-		         line );
+		lprintf( "  FAIL: PARAMCHECK %d: no such field: %s\n", paramLineNum, line );
+		nRegressionFail++;
 	} else {
 		NoticeMessage("Unknown PARAMCHECK: %s", _("Ok"), NULL, line);
 	}
