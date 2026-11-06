@@ -242,15 +242,10 @@ endforeach()
 #   FMA-contraction codegen issue (forcing -ffp-contract=off on the cornu library
 #   had zero effect on the failing job), root cause still unknown (Development
 #   Issues #28).
-# - dmtoyard.xtr, macOS: the first turnout stays at the press position, and the
-#   rest of the demo builds on that (Development Issues #72).
 if(NOT WIN32)
     set(_xtrkcad_suite_demos ${_xtrkcad_demo_names})
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
         list(REMOVE_ITEM _xtrkcad_suite_demos "dmjnss.xtr")
-    endif()
-    if(APPLE)
-        list(REMOVE_ITEM _xtrkcad_suite_demos "dmtoyard.xtr")
     endif()
     if(_xtrkcad_suite_demos STREQUAL _xtrkcad_demo_names)
         set(_xtrkcad_regression_suite_command ${_xtrkcad_test_option})
