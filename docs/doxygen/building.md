@@ -405,8 +405,8 @@ bug:
   `regression` but not `regression-ci`: `regression-gtk3-standalone` and the coverage job install
   `poppler-utils` and run them, so the package jobs don't have to.
 - **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
-  platforms. `regression-windows` gates like the Linux jobs. `regression-macos` is report-only
-  (`continue-on-error`), since its runners can be scarce. Locally, pass
+  platforms. Both gate like the Linux jobs. macOS runners can be scarce, so a `regression-macos`
+  job that never starts may need a rerun. Locally, pass
   `-DXTRKCAD_REGRESSION_TESTING=ON`, as the option only defaults on for Linux. Windows has no `RegressionSuite`: it didn't finish within its 900 s, and
   a timeout doesn't show which demo was running, so the per-demo tests are in `regression-ci` there.
   Windows ignores `$HOME` for the work directory, so each test writes `xtrkcad0.ini` into the scratch
