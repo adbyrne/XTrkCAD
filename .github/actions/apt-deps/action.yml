@@ -16,18 +16,53 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: apt-get install
+    # The Azure apt mirror the hosted runners use normally delivers 12 MB/s
+    # but on bad days 30-70 kB/s, enough to take a job past its time limit
+    # before it builds anything (and that fails the Hg sync). So the .deb
+    # files are cached. apt still decides what to install, and fetches anything
+    # missing from the cache, so a cache that's stale or empty just costs time.
+    # /var/tmp because runner.temp names the host's path inside a container.
+    - name: Work out the package list and cache key
+      id: pkgs
       shell: bash
       env:
         BASE: ${{ inputs.base }}
         EXTRA: ${{ inputs.extra }}
       run: |
-        SUDO=""
-        if [ "$(id -u)" -ne 0 ]; then SUDO=sudo; fi
         PKGS=""
         if [ "$BASE" = true ]; then
           PKGS="cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev libmxml-dev librsvg2-bin gettext xvfb xauth"
         fi
+        PKGS="$PKGS $EXTRA"
+        . /etc/os-release
+        hash=$(printf '%s\n' $PKGS | sort -u | sha256sum | cut -c1-12)
+        prefix="apt-debs-$ID-$VERSION_ID-$(dpkg --print-architecture)-$hash-"
+        {
+          echo "pkgs=$PKGS"
+          echo "prefix=$prefix"
+          # A new key each week, so old package versions don't pile up.
+          echo "key=$prefix$(date +%G-%V)"
+        } >> "$GITHUB_OUTPUT"
+    - name: Restore cached packages
+      id: restore
+      uses: actions/cache/restore@v6
+      env:
+        # The default is 10 minutes; apt can fetch them itself in less.
+        SEGMENT_DOWNLOAD_TIMEOUT_MINS: '3'
+      with:
+        path: /var/tmp/apt-archives
+        key: ${{ steps.pkgs.outputs.key }}
+        restore-keys: ${{ steps.pkgs.outputs.prefix }}
+    - name: apt-get install
+      shell: bash
+      env:
+        PKGS: ${{ steps.pkgs.outputs.pkgs }}
+      run: |
+        SUDO=""
+        if [ "$(id -u)" -ne 0 ]; then SUDO=sudo; fi
+        ARCHIVES=/var/tmp/apt-archives
+        $SUDO mkdir -p "$ARCHIVES/partial"
+        echo "Cached packages: $(find "$ARCHIVES" -name '*.deb' | wc -l)"
         # apt-get stalled in this step on three CI runs on 2026-10-23, and on
         # another the mirror was slow (30-70 kB/s) but kept going. So no
         # overall time limit, which would kill a slow download that's still
@@ -40,6 +75,8 @@ runs:
             # shellcheck disable=SC2086 # empty SUDO must vanish
             if $SUDO apt-get -o Acquire::Retries=3 \
                 -o Acquire::http::Timeout=60 -o Acquire::https::Timeout=60 \
+                -o Dir::Cache::Archives="$ARCHIVES" \
+                -o APT::Keep-Downloaded-Packages=true \
                 "$@"; then
               return 0
             fi
@@ -50,4 +87,18 @@ runs:
         }
         apt_get update -q
         # shellcheck disable=SC2086 # word splitting is intended
-        apt_get install -y $PKGS $EXTRA
+        apt_get install -y $PKGS
+        # Drops versions the mirror no longer offers, then readies the
+        # directory for the save below: the cache action isn't root.
+        apt_get autoclean -q
+        $SUDO rm -rf "$ARCHIVES/partial" "$ARCHIVES/lock"
+        $SUDO chown -R "$(id -u):$(id -g)" "$ARCHIVES"
+        echo "Packages to cache: $(find "$ARCHIVES" -name '*.deb' | wc -l)"
+    # Only main saves. Every branch can read main's caches, while a cache saved
+    # on a branch is seen only by that branch, so it would just use up the quota.
+    - name: Save packages to the cache
+      if: github.ref == 'refs/heads/main' && steps.restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v6
+      with:
+        path: /var/tmp/apt-archives
+        key: ${{ steps.pkgs.outputs.key }}
