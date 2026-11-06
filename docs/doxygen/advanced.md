@@ -104,7 +104,10 @@ The shared pieces:
   \ref release-workflow "release.yml".
 - **`.github/actions/`** holds composite actions for repeated steps: `apt-deps` (the Linux package
   list), `select-xcode`, `msys2-pin-gcc`, `setup-doxygen` and `setup-cmake`. Each pinned version
-  is set once, as the action's default.
+  is set once, as the action's default. `apt-deps` caches the downloaded `.deb` files, so a slow
+  apt mirror doesn't use up a job's time limit. There's a cache per release, architecture and
+  package list, with a new key each week. Only `main` saves them; other branches restore from
+  `main`'s, and apt downloads whatever is missing.
 - **`tools/cppcheck-gate.sh`** and **`tools/astyle-check.sh`** hold the two gate commands. Run
   them locally from the repository root.
 
