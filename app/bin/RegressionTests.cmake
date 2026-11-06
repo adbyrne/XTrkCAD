@@ -66,6 +66,9 @@ list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/round
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
+foreach(_xtrkcad_paramcheck_case block wrong)
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
+endforeach()
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/${_xtrkcad_demo}")
 endforeach()
@@ -295,6 +298,28 @@ foreach(_xtrkcad_compare_case match segment extra)
         endif()
     endif()
 endforeach()
+
+# Field values in a dialog, through PARAMCHECK. "wrong" has to fail, so a check
+# that reports nothing can't pass as a good result. It passes on the message, not
+# the exit code, as the comparator tests above do.
+foreach(_xtrkcad_paramcheck_case block wrong)
+    set(_xtrkcad_paramcheck_home "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
+    xtrkcad_add_regression_test("RegressionParamCheck.${_xtrkcad_paramcheck_case}" "${_xtrkcad_paramcheck_home}"
+        "${_xtrkcad_test_option}${_xtrkcad_compare_dir}/regress-paramcheck-${_xtrkcad_paramcheck_case}.xtr")
+    set_tests_properties("RegressionParamCheck.${_xtrkcad_paramcheck_case}" PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "regression;regression-ci"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_paramcheck_home}"
+        RUN_SERIAL TRUE
+    )
+endforeach()
+if(WIN32)
+    set_tests_properties(RegressionParamCheck.wrong PROPERTIES WILL_FAIL TRUE)
+else()
+    set_tests_properties(RegressionParamCheck.wrong PROPERTIES
+        PASS_REGULAR_EXPRESSION "FAIL: PARAMCHECK .*exp: 99.000, act=20.000")
+endif()
 
 # Load each example layout, save it, reload it and save again, in both .xtc and
 # .xtce (LayoutRoundTripTest(), fileio.c). Nothing else exercises the real load

@@ -2186,7 +2186,6 @@ static STATUS_T CmdRotate(
 			/*printf( "angle 2 = %0.3f\n", angle );*/
 			return C_CONTINUE;
 		}
-		ANGLE_T diff_angle = 0.0;
 		base = pos;
 		drawEnable = enableMoveDraw;
 		if ( FindDistance( orig, pos ) > (20.0/BASE_DPI)*mainD.scale ) {
@@ -2220,7 +2219,7 @@ static STATUS_T CmdRotate(
 			}
 			orig_base = base = pos;
 			//angle = NormalizeAngle( angle-baseAngle );
-			diff_angle = DifferenceBetweenAngles(baseAngle,angle);
+			ANGLE_T diff_angle = DifferenceBetweenAngles(baseAngle,angle);
 			if ( (MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) ==
 			     (WKEY_CTRL|WKEY_SHIFT) ) {  //Both Shift+Ctrl
 				if (clockwise) {

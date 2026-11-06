@@ -284,8 +284,6 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 		}
 		blockData.endPt[1] = GetTrkEndPos((&(xx->trackList))[tcount].t,1);
 		blockData.length += GetTrkLength((&(xx->trackList))[tcount].t,0,1);
-		tcount++;
-		break;
 	}
 	blockDesc[E0].mode =
 	        blockDesc[E1].mode =
