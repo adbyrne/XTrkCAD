@@ -63,6 +63,7 @@ foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-${_xtrkcad_example_id}")
 endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-empty-text")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-objects")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
@@ -356,6 +357,30 @@ add_test(NAME RegressionRoundTrip.empty_text_check
 )
 set_tests_properties(RegressionRoundTrip.empty_text_check PROPERTIES
     FIXTURES_REQUIRED regression_empty_text
+    LABELS "regression;regression-ci"
+)
+
+# Object types no example or demo contains: Bezier, sensor, control, switchmotor,
+# block, signal (Development Issues #75). The check compares them with the source.
+set(_xtrkcad_objects_home "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-objects")
+set(_xtrkcad_objects_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc")
+xtrkcad_add_regression_test(RegressionRoundTrip.objects "${_xtrkcad_objects_home}"
+    "${_xtrkcad_test_option}${_xtrkcad_objects_source}")
+set_tests_properties(RegressionRoundTrip.objects PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    FIXTURES_SETUP regression_objects
+    LABELS "regression;regression-ci"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_objects_home}"
+    RUN_SERIAL TRUE
+)
+add_test(NAME RegressionRoundTrip.objects_check
+    COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-roundtrip-objects.sh"
+        "${_xtrkcad_objects_source}"
+        "${_xtrkcad_objects_home}/.${XTRKCAD_BIN}/roundtrip/roundtrip1.xtc"
+)
+set_tests_properties(RegressionRoundTrip.objects_check PROPERTIES
+    FIXTURES_REQUIRED regression_objects
     LABELS "regression;regression-ci"
 )
 
