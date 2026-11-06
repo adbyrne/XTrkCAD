@@ -217,37 +217,26 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd,
 			UndoStart( _("Change block"), "Change block" );
 		}
 		UndoModify( trk );
+		// The old strings stay allocated: UndoModify() saved these pointers,
+		// and Undo puts them back.
 		if (nChanged) {
-			if (xx->name) { MyFree(xx->name); }
 			xx->name = newName;
 		}
 		if (sChanged) {
-			if (xx->script) { MyFree(xx->script); }
 			xx->script = newScript;
 		}
 		return;
 	}
 }
 
+/*
+ * A block isn't something to click on: it has no drawing and no bounding box,
+ * and it would hide its own tracks, since OnTrack() prefers the later object at
+ * the same distance. The Block Edit command finds it from one of its tracks.
+ */
 static DIST_T DistanceBlock (track_p t, coOrd * p )
 {
-	blockData_p xx = GetblockData(t);
-	DIST_T closest, current;
-	int iTrk = 1;
-	coOrd pos = *p;
-	closest = 99999.0;
-	coOrd best_pos = pos;
-	for (iTrk = 0; iTrk < xx->numTracks; iTrk++) {
-		pos = *p;
-		if ((&(xx->trackList))[iTrk].t == NULL) { continue; }
-		current = GetTrkDistance ((&(xx->trackList))[iTrk].t, &pos);
-		if (current < closest) {
-			closest = current;
-			best_pos = pos;
-		}
-	}
-	*p = best_pos;
-	return closest;
+	return DIST_INF;
 }
 
 static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
@@ -704,17 +693,19 @@ static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 	}
 }
 
-#if 0
-
+/**
+ * Click on a track to open the Properties of the block it belongs to. Handles
+ * the Properties dialog the way CmdDescribe() does.
+ */
 static STATUS_T CmdBlockEdit( wAction_t action, coOrd pos )
 {
 	track_p trk,btrk;
 	char msg[STR_SIZE];
 
-	switch (action) {
+	switch (action & 0xFF) {
 	case C_START:
 		InfoMessage( _("Select a track") );
-		inDescribeCmd = TRUE;
+		descUndoStarted = FALSE;
 		return C_CONTINUE;
 	case C_DOWN:
 		if ((trk = OnTrack(&pos, TRUE, TRUE )) == NULL) {
@@ -725,18 +716,21 @@ static STATUS_T CmdBlockEdit( wAction_t action, coOrd pos )
 			ErrorMessage( _("Not a block!") );
 			return C_CONTINUE;
 		}
+		DescribeDone( NULL );
+		inDescribeCmd = TRUE;
 		DescribeTrack (btrk, msg, sizeof msg );
+		inDescribeCmd = FALSE;
 		InfoMessage( msg );
 		return C_CONTINUE;
-	case C_REDRAW:
-		return C_CONTINUE;
 	case C_CANCEL:
-		inDescribeCmd = FALSE;
+		DescribeDone( NULL );
 		return C_TERMINATE;
 	default:
 		return C_CONTINUE;
 	}
 }
+
+#if 0
 
 static STATUS_T CmdBlockDelete( wAction_t action, coOrd pos )
 {
@@ -1022,6 +1016,9 @@ EXPORT void InitCmdBlock( wMenu_p menu )
 	AddMenuButton( menu, CmdBlockCreate, "cmdBlock", _("Block"),
 	               CreateToolbarIconFromResource( "block.png"), LEVEL0_50,
 	               IC_STICKY|IC_POPUP2, ACCL_BLOCK1, NULL );
+	AddMenuButton( menu, CmdBlockEdit, "cmdBlockEdit", _("Edit Block"),
+	               CreateToolbarIconFromResource( "block.png"), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2, ACCL_BLOCK2, NULL );
 	FormRegister( &blockPG );
 }
 

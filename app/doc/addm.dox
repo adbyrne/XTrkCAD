@@ -57,6 +57,8 @@ create parallel track or line to existing flex-track, straight or curved track. 
 
 - <i>Block</i> \anchor idx_Block_33  \anchor idx_Control_Element_Block_34  - Create a block. (\subpage cmdBlock)
 
+- <i>Edit Block</i> - Change a block's name or script. (\subpage cmdBlockEdit)
+
 - <i>Switchmotor</i> \anchor idx_Switchmotor_35  \anchor idx_Control_Element_Switchmotor_36  - Create a switchmotor. (\subpage cmdSwitchmotor)
 
 - <i>Signal</i> \anchor idx_Signal_37  \anchor idx_Control_Element_Signal_38  - Create a signal. (\subpage cmdSignal)
@@ -529,6 +531,19 @@ the other is a block occupancy script. The name identifies the block and the
 script is information used by the layout control software to detect block
 occupancy. The script could be a code snippet or I/O device address
 information, etc.
+
+To change a block later, use <b>Edit Block</b>.
+
+*/
+
+/**
+\page cmdBlockEdit Edit Block
+
+Select <b>Edit Block</b> from the Control Element menu, then click on a track
+that belongs to the block. The block's Properties dialog opens, where you can
+change its name and script. It also shows the block's length and end points.
+
+If the track isn't part of a block, you get the message <i>Not a block!</i>
 
 */
 
