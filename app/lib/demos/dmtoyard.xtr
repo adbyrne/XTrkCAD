@@ -31,6 +31,10 @@ MOUSE 3 36.5 1.917
 #BIGPAUSE
 MOUSE 3 36.5 1.917
 BIGPAUSE
+# This drag is shorter than the click/drag threshold at 72 dpi (macOS). Then only
+# the timeout makes it a drag, on this move, and the press position is used for it.
+# MOUSE 4 then moves to the final position.
+MOUSE 3 36.5 1.917
 MOUSE 4 36.5 1.917
 ##PARAMETER turnout ok
 MOUSE 3336 36.5 1.917
