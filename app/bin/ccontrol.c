@@ -221,8 +221,9 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 			UndoStart( _("Change Control"), "Change Control" );
 		}
 		UndoModify( trk );
+		// The old strings stay allocated: UndoModify() saved these pointers,
+		// and Undo puts them back.
 		if (nChanged) {
-			MyFree(xx->name);
 			xx->name = newName;
 		}
 		if (pChanged) {
@@ -230,11 +231,9 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 			xx->orig = controlProperties.pos;
 		}
 		if (onChanged) {
-			MyFree(xx->onscript);
 			xx->onscript = newOnScript;
 		}
 		if (offChanged) {
-			MyFree(xx->offscript);
 			xx->offscript = newOffScript;
 		}
 		if (pChanged) {

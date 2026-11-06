@@ -198,8 +198,9 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 			UndoStart( _("Change Sensor"), "Change Sensor" );
 		}
 		UndoModify( trk );
+		// The old strings stay allocated: UndoModify() saved these pointers,
+		// and Undo puts them back.
 		if (nChanged) {
-			MyFree(xx->name);
 			xx->name = newName;
 		}
 		if (pChanged) {
@@ -209,7 +210,6 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 			DrawNewTrack(trk);
 		}
 		if (sChanged) {
-			MyFree(xx->script);
 			xx->script = newScript;
 		}
 

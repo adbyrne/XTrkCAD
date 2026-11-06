@@ -1,0 +1,83 @@
+# Rename an object, Undo, Redo: the name has to follow, and under the sanitizers
+# nothing may touch freed memory, since UndoModify() saves the name as a raw pointer
+# (Development Issues #75).
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 40.000 x 20.000
+SCALE HO
+SENSOR 1 0 HO 2 5.000000 5.000000 "S1" "s1-script"
+CONTROL 2 0 HO 2 15.000000 5.000000 "C1" "c1-on" "c1-off"
+SIGNAL 3 0 HO 2 25.000000 5.000000 90.000000 2 "G1"
+	END$SIGNAL
+REDRAW
+UNDORESUME
+COMMAND Describe
+MOUSE 2 5.000 5.000
+MOUSE 4 5.000 5.000
+PARAMCHECK Describe Sensor 1 S1
+PARAMETER Describe Sensor 1 S2
+PARAMETER Describe Sensor cancel
+COMMAND Describe
+MOUSE 2 5.000 5.000
+MOUSE 4 5.000 5.000
+PARAMCHECK Describe Sensor 1 S2
+PARAMETER Describe Sensor cancel
+UNDOSTEP
+COMMAND Describe
+MOUSE 2 5.000 5.000
+MOUSE 4 5.000 5.000
+PARAMCHECK Describe Sensor 1 S1
+PARAMETER Describe Sensor cancel
+REDOSTEP
+COMMAND Describe
+MOUSE 2 5.000 5.000
+MOUSE 4 5.000 5.000
+PARAMCHECK Describe Sensor 1 S2
+PARAMETER Describe Sensor cancel
+COMMAND Describe
+MOUSE 2 15.000 5.000
+MOUSE 4 15.000 5.000
+PARAMCHECK Describe Control 1 C1
+PARAMETER Describe Control 1 C2
+PARAMETER Describe Control cancel
+COMMAND Describe
+MOUSE 2 15.000 5.000
+MOUSE 4 15.000 5.000
+PARAMCHECK Describe Control 1 C2
+PARAMETER Describe Control cancel
+UNDOSTEP
+COMMAND Describe
+MOUSE 2 15.000 5.000
+MOUSE 4 15.000 5.000
+PARAMCHECK Describe Control 1 C1
+PARAMETER Describe Control cancel
+REDOSTEP
+COMMAND Describe
+MOUSE 2 15.000 5.000
+MOUSE 4 15.000 5.000
+PARAMCHECK Describe Control 1 C2
+PARAMETER Describe Control cancel
+COMMAND Describe
+MOUSE 2 25.000 5.000
+MOUSE 4 25.000 5.000
+PARAMCHECK Describe Signal 1 G1
+PARAMETER Describe Signal 1 G2
+PARAMETER Describe Signal cancel
+COMMAND Describe
+MOUSE 2 25.000 5.000
+MOUSE 4 25.000 5.000
+PARAMCHECK Describe Signal 1 G2
+PARAMETER Describe Signal cancel
+UNDOSTEP
+COMMAND Describe
+MOUSE 2 25.000 5.000
+MOUSE 4 25.000 5.000
+PARAMCHECK Describe Signal 1 G1
+PARAMETER Describe Signal cancel
+REDOSTEP
+COMMAND Describe
+MOUSE 2 25.000 5.000
+MOUSE 4 25.000 5.000
+PARAMCHECK Describe Signal 1 G2
+PARAMETER Describe Signal cancel

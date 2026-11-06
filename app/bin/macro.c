@@ -2677,6 +2677,25 @@ static void ParamIntSave(paramGroup_cp pg, int class)
 	}
 }
 
+/*
+ * Playback suspends undo, so a demo can't exercise it. A script testing Undo
+ * turns it back on with UNDORESUME, then uses UNDOSTEP and REDOSTEP.
+ */
+static void UndoResumePlayback(char *line)
+{
+	UndoResume();
+}
+
+static void UndoStepPlayback(char *line)
+{
+	UndoUndo(NULL);
+}
+
+static void RedoStepPlayback(char *line)
+{
+	UndoRedo(NULL);
+}
+
 EXPORT void ParamRestoreAll(void)
 {
 	for (paramGroup_cp *ppg = DialogGroupIter(NULL); ppg;
@@ -2767,6 +2786,9 @@ EXPORT BOOL_T MacroInit(void)
 	AddPlaybackProc("PARAMETER", ParamPlayback, NULL);
 	AddPlaybackProc("PARAMCHECK", ParamCheck, NULL);
 	AddPlaybackProc("HELP ", HelpPlayback, NULL);
+	AddPlaybackProc("UNDORESUME", UndoResumePlayback, NULL);
+	AddPlaybackProc("UNDOSTEP", UndoStepPlayback, NULL);
+	AddPlaybackProc("REDOSTEP", RedoStepPlayback, NULL);
 
 	recordMouseMoves = (getenv("XTRKCADNORECORDMOUSEMOVES") == NULL);
 
