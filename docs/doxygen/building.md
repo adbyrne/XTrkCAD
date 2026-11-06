@@ -387,7 +387,16 @@ bug:
   values read from uninitialised memory that a normal build happens to see as 0. It proves saving is
   stable, not that the first load of an old file read everything in it. `empty_text` and
   `empty_text_check` use a small layout of their own, with empty text segments, and also compare the
-  saved texts with the source.
+  saved texts with the source. `objects` and `objects_check` do the same for the object types no
+  example contains: Bezier, sensor, control, switch motor, block and signal.
+- **Dialog values (`RegressionParamCheck.*`)** — a script line `PARAMCHECK <dialog> <field> <value>`
+  checks a value in an open dialog. Under `-T`, a wrong value or a dialog or field that doesn't exist
+  logs `FAIL` and counts as a regression failure; `wrong` makes sure that happens. For a Properties
+  dialog, `<dialog>` is `Describe <type>` and `<field>` is the field's position, from 1.
+- **Undo (`RegressionParamCheck.undo`)** — playback suspends undo, so no demo tests it. A script turns
+  it on with `UNDORESUME`, then steps with `UNDOSTEP` and `REDOSTEP`. Undo saves an object's data as
+  raw bytes, pointers included, so an Update function must not free a string that `UndoModify()` has
+  just saved.
 - **Print and export (`RegressionExport.*`)** — `-Texport:<layout>` prints a small layout to PDF
   without the dialog (`wPrintSetExportFile()`), exports SVG, DXF and PNG and imports the DXF file back,
   all through the normal code (`LayoutExportTest()`, `fileio.c`). `tools/check-export-test.sh` then
