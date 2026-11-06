@@ -299,9 +299,9 @@ jobs:
         run: ctest --test-dir build -L regression-ci --output-on-failure
 
   regression-macos:
-    # See regression-windows. Report-only, unlike Windows: it runs on the same
-    # runners as the other macOS jobs, which can be scarce.
-    continue-on-error: true
+    # See regression-windows. Gates too, since Development Issues #72 made the
+    # whole suite pass. It runs on the same runners as the other macOS jobs, which
+    # can be scarce, so a job that never starts may need a rerun.
     runs-on: macos-26
     timeout-minutes: 45
     steps:
