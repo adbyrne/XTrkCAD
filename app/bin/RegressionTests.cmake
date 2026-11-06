@@ -63,10 +63,11 @@ foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-${_xtrkcad_example_id}")
 endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-empty-text")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-objects")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
-foreach(_xtrkcad_paramcheck_case block wrong)
+foreach(_xtrkcad_paramcheck_case block wrong undo)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
@@ -297,7 +298,7 @@ endforeach()
 # Field values in a dialog, through PARAMCHECK. "wrong" has to fail, so a check
 # that reports nothing can't pass as a good result. It passes on the message, not
 # the exit code, as the comparator tests above do.
-foreach(_xtrkcad_paramcheck_case block wrong)
+foreach(_xtrkcad_paramcheck_case block wrong undo)
     set(_xtrkcad_paramcheck_home "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
     xtrkcad_add_regression_test("RegressionParamCheck.${_xtrkcad_paramcheck_case}" "${_xtrkcad_paramcheck_home}"
         "${_xtrkcad_test_option}${_xtrkcad_compare_dir}/regress-paramcheck-${_xtrkcad_paramcheck_case}.xtr")
@@ -356,6 +357,30 @@ add_test(NAME RegressionRoundTrip.empty_text_check
 )
 set_tests_properties(RegressionRoundTrip.empty_text_check PROPERTIES
     FIXTURES_REQUIRED regression_empty_text
+    LABELS "regression;regression-ci"
+)
+
+# Object types no example or demo contains: Bezier, sensor, control, switchmotor,
+# block, signal (Development Issues #75). The check compares them with the source.
+set(_xtrkcad_objects_home "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-objects")
+set(_xtrkcad_objects_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc")
+xtrkcad_add_regression_test(RegressionRoundTrip.objects "${_xtrkcad_objects_home}"
+    "${_xtrkcad_test_option}${_xtrkcad_objects_source}")
+set_tests_properties(RegressionRoundTrip.objects PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    FIXTURES_SETUP regression_objects
+    LABELS "regression;regression-ci"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_objects_home}"
+    RUN_SERIAL TRUE
+)
+add_test(NAME RegressionRoundTrip.objects_check
+    COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-roundtrip-objects.sh"
+        "${_xtrkcad_objects_source}"
+        "${_xtrkcad_objects_home}/.${XTRKCAD_BIN}/roundtrip/roundtrip1.xtc"
+)
+set_tests_properties(RegressionRoundTrip.objects_check PROPERTIES
+    FIXTURES_REQUIRED regression_objects
     LABELS "regression;regression-ci"
 )
 

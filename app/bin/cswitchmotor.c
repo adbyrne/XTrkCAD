@@ -299,20 +299,18 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd,
 			UndoStart( _("Change Switch Motor"), "Change Switch Motor" );
 		}
 		UndoModify( trk );
+		// The old strings stay allocated: UndoModify() saved these pointers,
+		// and Undo puts them back.
 		if (nChanged) {
-			MyFree(xx->name);
 			xx->name = newName;
 		}
 		if (norChanged) {
-			MyFree(xx->normal);
 			xx->normal = newNormal;
 		}
 		if (revChanged) {
-			MyFree(xx->reverse);
 			xx->reverse = newReverse;
 		}
 		if (psChanged) {
-			MyFree(xx->pointsense);
 			xx->pointsense = newPointSense;
 		}
 		return;

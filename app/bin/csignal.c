@@ -262,13 +262,14 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
 		if (signalProperties.orient != xx->angle) {
 			oChanged = TRUE;
 		}
-		if (!changed) { break; }
+		if (!nChanged && !pChanged && !oChanged) { break; }
 		if (needUndoStart) {
 			UndoStart( _("Change Signal"), "Change Signal" );
 		}
 		UndoModify( trk );
+		// The old strings stay allocated: UndoModify() saved these pointers,
+		// and Undo puts them back.
 		if (nChanged) {
-			MyFree(xx->name);
 			xx->name = newName;
 		}
 		if (pChanged || oChanged) {

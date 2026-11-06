@@ -298,6 +298,8 @@ up (Development Issues #67). Regression tests besides the demos:
   `.xtce`.
 - `RegressionExport.*`: `-Texport:<layout>` prints to PDF and exports SVG, DXF and PNG; checks printed
   text is at its point size.
+- `RegressionParamCheck.*`: `PARAMCHECK` in a script checks a dialog's values, and `UNDORESUME`,
+  `UNDOSTEP`, `REDOSTEP` test Undo, which playback otherwise suspends.
 
 `CompareSegs()` really compares turnouts and structures since #66, so changing them can fail a demo.
 If the new result is right, `-d regression=3` writes new blocks, but read each diff first.
