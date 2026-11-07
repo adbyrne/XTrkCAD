@@ -398,6 +398,48 @@ EXPORT void InfoMessage(const char * format, ...)
 	SetMessage(message2);
 }
 
+/*
+ * Under -T nobody is there to answer a notice or read the status bar, so they
+ * go to the log instead, where a test can look for them (Development Issues
+ * #75). A script picks the button with NOTICEANSWER; the default is the first.
+ */
+static int testNoticeAnswer = 1;
+
+EXPORT void SetTestNoticeAnswer(int answer)
+{
+	testNoticeAnswer = answer;
+}
+
+static void LogTestMessage(const char * kind, const char * msg)
+{
+	char flat[1024];
+	size_t i;
+	for (i = 0; msg[i] && i < sizeof flat - 1; i++) {
+		flat[i] = (msg[i] == '\n' || msg[i] == '\r') ? ' ' : msg[i];
+	}
+	flat[i] = '\0';
+	lprintf("%s: %s\n", kind, flat);
+}
+
+#ifndef XTRKCAD_TESTBUILD_NO_WMAIN /* installed by wMain()'s -T only */
+static int TestNoticeAnswer(const char * msg, const char * first,
+                            const char * second, const char * third)
+{
+	const char * label[3] = { first, second, third };
+	int answer = testNoticeAnswer;
+	if (answer < 0 && !third) {
+		answer = 0;
+	}
+	if (answer == 0 && !second) {
+		answer = 1;
+	}
+	LogTestMessage("NOTICE", msg);
+	lprintf("NOTICE ANSWER: %s\n",
+	        label[answer > 0 ? 0 : answer == 0 ? 1 : 2]);
+	return answer;
+}
+#endif
+
 EXPORT void ErrorMessage(const char * format, ...)
 {
 	va_list ap;
@@ -405,6 +447,9 @@ EXPORT void ErrorMessage(const char * format, ...)
 	format = ParseMessage(format);
 	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
+	if (bRunTests) {
+		LogTestMessage("ERROR", message2);
+	}
 	InfoDefaultControls();
 	SetMessage(message2);
 	wBeep();
@@ -427,13 +472,17 @@ EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes,
                           ...)
 {
 	va_list ap;
-	if (inPlayback) {
+	if (inPlayback && !bRunTests) {
 		return playbackRC;
 	}
 	va_start(ap, no);
 	format = ParseMessage(format);
 	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
+	if (inPlayback) {
+		LogTestMessage("NOTICE", message2);
+		return playbackRC;
+	}
 	return wNoticeWithIcon( NT_INFORMATION, message2, yes, no);
 }
 
@@ -873,6 +922,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 		case 'T': // run tests, optionally scoped to a comma-separated list of demos or .xtr paths, or one .xtc layout to round-trip (-Tdemo1,demo2)
 			LogSet( "regression", 2 );
 			bRunTests = TRUE;
+			wNoticeSetAnswer(TestNoticeAnswer);
 			testTarget = optarg;
 			break;
 		default:

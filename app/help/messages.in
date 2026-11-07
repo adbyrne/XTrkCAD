@@ -1404,7 +1404,7 @@ END
 
 # various
 MESSAGE MSG_WRITE_FAILURE
-Error \\"%s\\" occurred while writing %s.
+Error "%s" occurred while writing %s.
 Please check disk space and system status.
 #NOHELP
 END

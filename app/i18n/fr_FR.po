@@ -8423,10 +8423,10 @@ msgstr ""
 #: ../../build/app/help/messages.h:165
 #, c-format
 msgid ""
-"Error \\\\\"%s\\\\\" occurred while writing %s.\n"
+"Error \"%s\" occurred while writing %s.\n"
 "Please check disk space and system status."
 msgstr ""
-"Une erreur \\\\\"%s\\\\\" s'est produite lors de l'écriture de %s.\n"
+"Une erreur \"%s\" s'est produite lors de l'écriture de %s.\n"
 "Veuillez vérifier l'espace disque et l'état du système."
 
 #: ../../build/app/help/messages.h:166

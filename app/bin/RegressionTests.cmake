@@ -64,6 +64,9 @@ foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
 endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-empty-text")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-objects")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-badline")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-newer")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-diskfull")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
@@ -381,6 +384,78 @@ add_test(NAME RegressionRoundTrip.objects_check
 )
 set_tests_properties(RegressionRoundTrip.objects_check PROPERTIES
     FIXTURES_REQUIRED regression_objects
+    LABELS "regression;regression-ci"
+)
+
+# What the user is told when a layout has bad lines, and what survives
+# (Development Issues #75). Under -T the loader's notices go to the log and are
+# answered Continue, so the test passes on the message; the check looks at the
+# saved file.
+set(_xtrkcad_badline_home "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-badline")
+set(_xtrkcad_badline_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-badline.xtc")
+xtrkcad_add_regression_test(RegressionNotice.badline "${_xtrkcad_badline_home}"
+    "${_xtrkcad_test_option}${_xtrkcad_badline_source}")
+set_tests_properties(RegressionNotice.badline PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    FIXTURES_SETUP regression_badline
+    LABELS "regression;regression-ci"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_badline_home}"
+    RUN_SERIAL TRUE
+)
+if(NOT WIN32)
+    set_tests_properties(RegressionNotice.badline PROPERTIES
+        PASS_REGULAR_EXPRESSION "NOTICE: While processing Layout file roundtrip-badline.xtc, 4 lines were skipped")
+endif()
+# A file from a newer version: the user is told to upgrade, and the file must
+# not become the current layout, or Save would write the empty layout over it.
+set(_xtrkcad_newer_home "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-newer")
+xtrkcad_add_regression_test(RegressionNotice.newer "${_xtrkcad_newer_home}"
+    "${_xtrkcad_test_option}${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-newer-version.xtc")
+set_tests_properties(RegressionNotice.newer PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    LABELS "regression;regression-ci"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_newer_home}"
+    RUN_SERIAL TRUE
+)
+if(WIN32)
+    set_tests_properties(RegressionNotice.newer PROPERTIES WILL_FAIL TRUE)
+else()
+    set_tests_properties(RegressionNotice.newer PROPERTIES
+        PASS_REGULAR_EXPRESSION "NOTICE: File version 99 is greater than supported version"
+        FAIL_REGULAR_EXPRESSION "roundtrip-newer-version.xtc: current layout \"[^\"]+\"")
+endif()
+# Saving onto a full disk: the user must be told, and the save must count as
+# failed. Linux only: the save file is pointed at /dev/full, where every write
+# fails with "No space left on device".
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(_xtrkcad_diskfull_home "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-diskfull")
+    set(_xtrkcad_diskfull_dir "${_xtrkcad_diskfull_home}/.${XTRKCAD_BIN}/roundtrip")
+    add_test(NAME RegressionNotice.diskfull_setup
+        COMMAND sh -c "mkdir -p '${_xtrkcad_diskfull_dir}' && ln -sf /dev/full '${_xtrkcad_diskfull_dir}/roundtrip1.xtc'")
+    set_tests_properties(RegressionNotice.diskfull_setup PROPERTIES
+        FIXTURES_REQUIRED regression_clean_homes
+        FIXTURES_SETUP regression_diskfull
+        LABELS "regression;regression-ci"
+    )
+    xtrkcad_add_regression_test(RegressionNotice.diskfull "${_xtrkcad_diskfull_home}"
+        "${_xtrkcad_test_option}${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc")
+    set_tests_properties(RegressionNotice.diskfull PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes;regression_diskfull"
+        LABELS "regression;regression-ci"
+        TIMEOUT 60
+        ENVIRONMENT "HOME=${_xtrkcad_diskfull_home}"
+        RUN_SERIAL TRUE
+        PASS_REGULAR_EXPRESSION "NOTICE: Error \"No space left on device\" occurred while writing"
+    )
+endif()
+add_test(NAME RegressionNotice.badline_check
+    COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-roundtrip-badline.sh"
+        "${_xtrkcad_badline_home}/.${XTRKCAD_BIN}/roundtrip/roundtrip1.xtc"
+)
+set_tests_properties(RegressionNotice.badline_check PROPERTIES
+    FIXTURES_REQUIRED regression_badline
     LABELS "regression;regression-ci"
 )
 

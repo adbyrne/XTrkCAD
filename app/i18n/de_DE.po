@@ -8397,10 +8397,10 @@ msgstr ""
 #: ../../build/app/help/messages.h:165
 #, c-format
 msgid ""
-"Error \\\\\"%s\\\\\" occurred while writing %s.\n"
+"Error \"%s\" occurred while writing %s.\n"
 "Please check disk space and system status."
 msgstr ""
-"Fehler \\\\\"%s\\\\\" aufgetreten beim Speichern von  %s.\n"
+"Fehler \"%s\" aufgetreten beim Speichern von  %s.\n"
 "Bitte Speicherplatz und System prüfen."
 
 #: ../../build/app/help/messages.h:166
