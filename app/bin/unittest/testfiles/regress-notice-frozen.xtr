@@ -1,0 +1,24 @@
+# Properties on a frozen layer (not the current one, which loading unfreezes):
+# a click must not open the dialog, a Shift-click must (Development Issues #75).
+# The first PARAMCHECK has to report that there is no dialog.
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 40.000 x 20.000
+SCALE HO
+LAYERS 0 1 0 1 255 0 0 0 0 "Main" 0 0 0.000000 0.000000 0.000000 0.000000 0.000000
+LAYERS 1 1 1 1 255 0 0 0 0 "Frozen" 0 0 0.000000 0.000000 0.000000 0.000000 0.000000
+LAYERS CURRENT 0
+SENSOR 1 1 HO 2 5.000000 5.000000 "S1" "s1-script"
+REDRAW
+COMMAND Describe
+MOUSE 2 5.000 5.000
+MOUSE 4 5.000 5.000
+PARAMCHECK Describe Sensor 1 S1
+RESET
+KEYSTATE 2
+COMMAND Describe
+MOUSE 2 5.000 5.000
+MOUSE 4 5.000 5.000
+KEYSTATE 0
+PARAMCHECK Describe Sensor 4 s1-script

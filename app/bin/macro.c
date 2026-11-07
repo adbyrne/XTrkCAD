@@ -2249,7 +2249,14 @@ static void ParamPlayback(char *line)
 				}
 				Stripcr(line);
 				if (p->valueP) {
-					strcpy((char *)p->valueP, line);
+					// A script line longer than the field's buffer overran into
+					// the fields after it (Development Issues #75).
+					if (p->type == PD_STRING && p->max_string > 0) {
+						((char *)p->valueP)[0] = '\0';
+						strncat((char *)p->valueP, line, p->max_string - 1);
+					} else {
+						strcpy((char *)p->valueP, line);
+					}
 				}
 				if (p->control) {
 					if (p->type == PD_STRING) {

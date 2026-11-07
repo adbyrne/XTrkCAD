@@ -66,11 +66,13 @@ list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/round
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-objects")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-badline")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-newer")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/archive-badmanifest")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-frozen")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-diskfull")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
-foreach(_xtrkcad_paramcheck_case block wrong undo props)
+foreach(_xtrkcad_paramcheck_case block wrong undo props longname)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
@@ -301,7 +303,7 @@ endforeach()
 # Field values in a dialog, through PARAMCHECK. "wrong" has to fail, so a check
 # that reports nothing can't pass as a good result. It passes on the message, not
 # the exit code, as the comparator tests above do.
-foreach(_xtrkcad_paramcheck_case block wrong undo props)
+foreach(_xtrkcad_paramcheck_case block wrong undo props longname)
     set(_xtrkcad_paramcheck_home "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
     xtrkcad_add_regression_test("RegressionParamCheck.${_xtrkcad_paramcheck_case}" "${_xtrkcad_paramcheck_home}"
         "${_xtrkcad_test_option}${_xtrkcad_compare_dir}/regress-paramcheck-${_xtrkcad_paramcheck_case}.xtr")
@@ -449,6 +451,35 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         RUN_SERIAL TRUE
         PASS_REGULAR_EXPRESSION "NOTICE: Error \"No space left on device\" occurred while writing"
     )
+endif()
+# An archive whose manifest can't be read: the layout inside, named like the
+# archive, still has to open (Development Issues #75).
+set(_xtrkcad_badmanifest_home "${XTRKCAD_REGRESSION_HOME_ROOT}/archive-badmanifest")
+xtrkcad_add_regression_test(RegressionRoundTrip.badmanifest "${_xtrkcad_badmanifest_home}"
+    "${_xtrkcad_test_option}${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/archive-badmanifest.xtce")
+set_tests_properties(RegressionRoundTrip.badmanifest PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    LABELS "regression;regression-ci"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_badmanifest_home}"
+    RUN_SERIAL TRUE
+)
+set(_xtrkcad_frozen_home "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-frozen")
+xtrkcad_add_regression_test(RegressionNotice.frozen "${_xtrkcad_frozen_home}"
+    "${_xtrkcad_test_option}${_xtrkcad_compare_dir}/regress-notice-frozen.xtr")
+set_tests_properties(RegressionNotice.frozen PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    LABELS "regression;regression-ci"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_frozen_home}"
+    RUN_SERIAL TRUE
+)
+if(WIN32)
+    set_tests_properties(RegressionNotice.frozen PROPERTIES WILL_FAIL TRUE)
+else()
+    set_tests_properties(RegressionNotice.frozen PROPERTIES
+        PASS_REGULAR_EXPRESSION "no matching dialog: Describe Sensor 1 S1"
+        FAIL_REGULAR_EXPRESSION "Describe Sensor 4|Describe Sensor-4")
 endif()
 add_test(NAME RegressionNotice.badline_check
     COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-roundtrip-badline.sh"
