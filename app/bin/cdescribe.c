@@ -417,7 +417,10 @@ static paramGroup_p CreateDescribeDialog(
 			break;
 		case DESC_STRING:
 			pdp = CreateDescribeField( PD_STRING, pg, ddp );
-			pdp->max_string = ddp->max_string/10+1;
+			// The field's buffer size, as before the GTK3 rewrite (r6509): a
+			// tenth of it cut names to 8 or 25 characters, and Done saved
+			// the cut text (Development Issues #75).
+			pdp->max_string = ddp->max_string;
 			break;
 		case DESC_TEXT:
 			pdp = CreateDescribeField( PD_TEXT, pg, ddp );
