@@ -143,6 +143,14 @@ static void FindFilenameTest(void **state)
 	(void)state;
 	assert_string_equal(FindFilename(withpath), TESTFILENAME);
 	assert_string_equal(FindFilename(nopath),   TESTFILENAME);
+#ifdef WINDOWS
+	char forward[] = "D:/Test/Path/" TESTFILENAME;
+	char mixed[]   = "D:\\Test/Path\\" TESTFILENAME;
+	char mixed2[]  = "D:\\Test\\Path/" TESTFILENAME;
+	assert_string_equal(FindFilename(forward), TESTFILENAME);
+	assert_string_equal(FindFilename(mixed),   TESTFILENAME);
+	assert_string_equal(FindFilename(mixed2),  TESTFILENAME);
+#endif
 }
 
 static void FindExtensionTest(void **state)
