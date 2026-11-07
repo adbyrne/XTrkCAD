@@ -357,11 +357,15 @@ BOOL_T ReadTrackFile(
 					NoticeMessage( MSG_UPGRADE_VERSION2, _("Ok"), NULL, paramVersion, iParamVersion,
 					               sProdName );
 				}
+				// Not read: the caller must not treat it as loaded, or Save would
+				// write the empty layout over the newer file.
+				ret = FALSE;
 				break;
 			}
 			if ( paramVersion < iMinParamVersion ) {
 				NoticeMessage( MSG_BAD_FILE_VERSION, _("Ok"), NULL, paramVersion,
 				               iMinParamVersion, sProdName );
+				ret = FALSE;
 				break;
 			}
 		} else if (!full) {
@@ -716,13 +720,27 @@ static BOOL_T DoSaveTracks(
 	rc &= WriteMainNote( f );
 	rc &= WriteTracks( f, TRUE );
 	rc &= fprintf(f, "%s\n", END_TRK_FILE)>0;
-	if ( !rc ) {
-		NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), fileName );
+	// Writes are buffered, so a full disk may only show up in fclose(), and
+	// fprintf() can succeed while an earlier write failed (Development Issues
+	// #75). Check both, or a failed save is reported as done.
+	int err = rc ? 0 : errno;
+	if ( ferror(f) ) {
+		rc = FALSE;
+		if ( !err ) { err = errno; }
 	}
-	fclose(f);
+	if ( fclose(f) != 0 ) {
+		rc = FALSE;
+		if ( !err ) { err = errno; }
+	}
+	if ( !rc ) {
+		NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(err ? err : EIO),
+		               fileName );
+	}
 	bReadOnly = FALSE;
 
-	checkPtMark = changed;
+	if ( rc ) {
+		checkPtMark = changed;
+	}
 	wSetCursor( mainD.d, defaultCursor );
 	SetUserLocale();
 	return rc;
@@ -1553,6 +1571,9 @@ EXPORT int LayoutRoundTripTest( const char * pathName )
 	MakeFullpath( &archive2, workingDir, "roundtrip.xtce", NULL );
 
 	count1 = RoundTripLoad( source );
+	// Which file Save would now write to: none, if the load failed
+	char * current = GetLayoutFullPath();
+	lprintf( "%s: current layout \"%s\"\n", source, current ? current : "" );
 	if ( count1 <= 0 ) {
 		lprintf( "  FAIL: %s: %d tracks\n", source, count1 );
 		return 1;

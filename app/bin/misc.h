@@ -70,6 +70,7 @@ extern char * ConvertToEscapedText(const char * text);
  * abort handlers (AbortProg here, UndoFail in cundo.c) check this to skip
  * blocking modal dialogs that would otherwise hang a headless run forever. */
 extern BOOL_T bRunTests;
+void SetTestNoticeAnswer(int answer);
 
 extern const char * AbortMessage( const char *, ... );
 extern void AbortProg( const char *, const char *, int, const char * );

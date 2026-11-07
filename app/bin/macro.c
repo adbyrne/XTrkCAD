@@ -2681,6 +2681,21 @@ static void ParamIntSave(paramGroup_cp pg, int class)
  * Playback suspends undo, so a demo can't exercise it. A script testing Undo
  * turns it back on with UNDORESUME, then uses UNDOSTEP and REDOSTEP.
  */
+/*
+ * NOTICEANSWER first|second|third: which button answers the notices that follow,
+ * under -T (see TestNoticeAnswer() in misc.c). The default is first.
+ */
+static void NoticeAnswerPlayback(char *line)
+{
+	if (strncmp(line, "second", 6) == 0) {
+		SetTestNoticeAnswer(0);
+	} else if (strncmp(line, "third", 5) == 0) {
+		SetTestNoticeAnswer(-1);
+	} else {
+		SetTestNoticeAnswer(1);
+	}
+}
+
 static void UndoResumePlayback(char *line)
 {
 	UndoResume();
@@ -2787,6 +2802,7 @@ EXPORT BOOL_T MacroInit(void)
 	AddPlaybackProc("PARAMCHECK", ParamCheck, NULL);
 	AddPlaybackProc("HELP ", HelpPlayback, NULL);
 	AddPlaybackProc("UNDORESUME", UndoResumePlayback, NULL);
+	AddPlaybackProc("NOTICEANSWER", NoticeAnswerPlayback, NULL);
 	AddPlaybackProc("UNDOSTEP", UndoStepPlayback, NULL);
 	AddPlaybackProc("REDOSTEP", RedoStepPlayback, NULL);
 

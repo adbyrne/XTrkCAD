@@ -393,6 +393,11 @@ bug:
   checks a value in an open dialog. Under `-T`, a wrong value or a dialog or field that doesn't exist
   logs `FAIL` and counts as a regression failure; `wrong` makes sure that happens. For a Properties
   dialog, `<dialog>` is `Describe <type>` and `<field>` is the field's position, from 1.
+- **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
+  notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
+  and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button
+  answers unless a script says `NOTICEANSWER second` or `third`. A test that expects a message can
+  pass on it with `PASS_REGULAR_EXPRESSION`.
 - **Undo (`RegressionParamCheck.undo`)** — playback suspends undo, so no demo tests it. A script turns
   it on with `UNDORESUME`, then steps with `UNDOSTEP` and `REDOSTEP`. Undo saves an object's data as
   raw bytes, pointers included, so an Update function must not free a string that `UndoModify()` has

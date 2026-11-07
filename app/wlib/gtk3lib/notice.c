@@ -42,11 +42,26 @@
  * \return    True when accept was selected, false otherwise
  */
 
+static wNoticeAnswer_t noticeAnswer = NULL;
+
+/**
+ * Answer notices with \a answer instead of showing them (see wlib.h).
+ *
+ * \param answer IN function giving the button, or NULL to show notices
+ */
+void wNoticeSetAnswer(wNoticeAnswer_t answer)
+{
+	noticeAnswer = answer;
+}
+
 int wNoticeWithIcon(int type,
                     const char * msg,
                     const char * yes,
                     const char * no)
 {
+	if (noticeAnswer) {
+		return noticeAnswer(msg, yes, no, NULL) > 0;
+	}
 
 	int res;
 	unsigned flag;
@@ -149,6 +164,9 @@ int wNotice3(
         const char * cancel,		/* Second label (or 'NULL') */
         const char * alternate)
 {
+	if (noticeAnswer) {
+		return noticeAnswer(msg, affirmative, cancel, alternate);
+	}
 	int noticeValue;
 	GtkDialog* dialog;
 	GtkWidget* content_area;

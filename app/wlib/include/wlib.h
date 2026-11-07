@@ -394,6 +394,16 @@ int wNotice3(const char *msg, const char *affirmative, const char *cancel,
 
 int wNoticeWithIcon(int type, const char *msg, const char *yes, const char *no);
 
+/**
+ * Answers notices without showing them, for unattended runs such as the
+ * regression tests. While set, wNotice(), wNotice3() and wNoticeWithIcon()
+ * return what \a answer returns: 1, 0 or -1 for the first, second or third
+ * button. NULL shows the dialogs again.
+ */
+typedef int (*wNoticeAnswer_t)(const char *msg, const char *first,
+                               const char *second, const char *third);
+void wNoticeSetAnswer(wNoticeAnswer_t answer);
+
 /*----------------------------------------------------------------------------
  *
  * Scale control

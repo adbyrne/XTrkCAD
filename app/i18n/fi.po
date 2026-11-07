@@ -8541,10 +8541,10 @@ msgstr ""
 #: ../../build/app/help/messages.h:165
 #, c-format
 msgid ""
-"Error \\\\\"%s\\\\\" occurred while writing %s.\n"
+"Error \"%s\" occurred while writing %s.\n"
 "Please check disk space and system status."
 msgstr ""
-"Virhe \\\\\"%s\\\\\" tapahtui kirjoitettaessa %s.\n"
+"Virhe \"%s\" tapahtui kirjoitettaessa %s.\n"
 "Tarkasta levytila ja järjestelmän tila."
 
 #: ../../build/app/help/messages.h:166
