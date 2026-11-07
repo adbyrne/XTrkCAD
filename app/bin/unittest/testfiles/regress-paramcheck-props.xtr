@@ -1,0 +1,147 @@
+# Properties dialogs of object types no other test opens (Development Issues #75).
+# Values come from the geometry, not from a run: a Bezier or Cornu laid out on a
+# straight line has the length of that line, and a straight end has no center
+# (0,0) and no minimum radius (0). Each dialog then gets an edit, and reopening it
+# has to show the result. A position counts as two fields, X then Y.
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 60.000 x 40.000
+SCALE HO
+BEZIER 1 0 0 0 0.000000 HO 2 5.000000 30.000000 10.000000 30.000000 15.000000 30.000000 20.000000 30.000000 0 0.000000 0.000000
+	E4 5.000000 30.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	E4 20.000000 30.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+BZRLIN 2 0 0 0 0.000000 HO 2 5.000000 35.000000 10.000000 35.000000 15.000000 35.000000 20.000000 35.000000 0 0.000000 0.000000
+	END$SEGS
+CORNU 3 0 0 0 0 HO 2 30.000000 30.000000 270.000000 0.000000 0.000000 0.000000 50.000000 30.000000 90.000000 0.000000 0.000000 0.000000
+	E4 30.000000 30.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	E4 50.000000 30.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+TURNTABLE 4 0 0 0 0 HO 2 40.000000 10.000000 0 5.000000 0
+	END$SEGS
+SENSOR 5 0 HO 2 5.000000 10.000000 "S1" "s1-script"
+CONTROL 6 0 HO 2 12.000000 10.000000 "C1" "c1-on" "c1-off"
+SIGNAL 7 0 HO 2 20.000000 10.000000 90.000000 2 "G1"
+	END$SIGNAL
+REDRAW
+COMMAND Describe
+MOUSE 2 12.000 30.000
+MOUSE 4 12.000 30.000
+PARAMCHECK Describe Bezier Track 1 5.000
+PARAMCHECK Describe Bezier Track 2 30.000
+PARAMCHECK Describe Bezier Track 5 0.000
+PARAMCHECK Describe Bezier Track 6 0.000
+PARAMCHECK Describe Bezier Track 12 20.000
+PARAMCHECK Describe Bezier Track 16 0.000
+PARAMCHECK Describe Bezier Track 17 0.000
+PARAMCHECK Describe Bezier Track 19 0.000
+PARAMCHECK Describe Bezier Track 20 15.000
+PARAMETER Describe Bezier Track 12 25.000
+PARAMETER Describe Bezier Track cancel
+COMMAND Describe
+MOUSE 2 12.000 30.000
+MOUSE 4 12.000 30.000
+PARAMCHECK Describe Bezier Track 12 25.000
+PARAMCHECK Describe Bezier Track 20 20.000
+PARAMETER Describe Bezier Track cancel
+COMMAND Describe
+MOUSE 2 12.000 35.000
+MOUSE 4 12.000 35.000
+PARAMCHECK Describe Bezier Line 1 5.000
+PARAMCHECK Describe Bezier Line 2 35.000
+PARAMCHECK Describe Bezier Line 12 20.000
+PARAMCHECK Describe Bezier Line 20 15.000
+PARAMETER Describe Bezier Line 12 25.000
+PARAMETER Describe Bezier Line cancel
+COMMAND Describe
+MOUSE 2 12.000 35.000
+MOUSE 4 12.000 35.000
+PARAMCHECK Describe Bezier Line 12 25.000
+PARAMCHECK Describe Bezier Line 20 20.000
+PARAMETER Describe Bezier Line cancel
+COMMAND Describe
+MOUSE 2 40.000 30.000
+MOUSE 4 40.000 30.000
+PARAMCHECK Describe Cornu Track 1 30.000
+PARAMCHECK Describe Cornu Track 8 50.000
+PARAMCHECK Describe Cornu Track 5 0.000
+PARAMCHECK Describe Cornu Track 12 0.000
+PARAMCHECK Describe Cornu Track 15 0.000
+PARAMCHECK Describe Cornu Track 18 20.000
+PARAMETER Describe Cornu Track 8 55.000
+PARAMETER Describe Cornu Track cancel
+COMMAND Describe
+MOUSE 2 40.000 30.000
+MOUSE 4 40.000 30.000
+PARAMCHECK Describe Cornu Track 8 55.000
+PARAMCHECK Describe Cornu Track 18 25.000
+PARAMETER Describe Cornu Track cancel
+COMMAND Describe
+MOUSE 2 40.000 10.000
+MOUSE 4 40.000 10.000
+PARAMCHECK Describe Turntable 1 40.000
+PARAMCHECK Describe Turntable 2 10.000
+PARAMCHECK Describe Turntable 3 10.000
+PARAMETER Describe Turntable 3 12.000
+PARAMETER Describe Turntable cancel
+COMMAND Describe
+MOUSE 2 40.000 10.000
+MOUSE 4 40.000 10.000
+PARAMCHECK Describe Turntable 3 12.000
+PARAMETER Describe Turntable cancel
+COMMAND Describe
+MOUSE 2 5.000 10.000
+MOUSE 4 5.000 10.000
+PARAMCHECK Describe Sensor 1 S1
+PARAMCHECK Describe Sensor 2 5.000
+PARAMCHECK Describe Sensor 3 10.000
+PARAMCHECK Describe Sensor 4 s1-script
+PARAMETER Describe Sensor 4 s1-new
+PARAMETER Describe Sensor 2 6.000
+PARAMETER Describe Sensor cancel
+COMMAND Describe
+MOUSE 2 6.000 10.000
+MOUSE 4 6.000 10.000
+PARAMCHECK Describe Sensor 2 6.000
+PARAMCHECK Describe Sensor 4 s1-new
+PARAMETER Describe Sensor cancel
+# Moving it, with no other change, has to stick too.
+COMMAND Describe
+MOUSE 2 6.000 10.000
+MOUSE 4 6.000 10.000
+PARAMETER Describe Sensor 3 11.000
+PARAMETER Describe Sensor cancel
+COMMAND Describe
+MOUSE 2 6.000 11.000
+MOUSE 4 6.000 11.000
+PARAMCHECK Describe Sensor 3 11.000
+PARAMETER Describe Sensor cancel
+COMMAND Describe
+MOUSE 2 12.000 10.000
+MOUSE 4 12.000 10.000
+PARAMCHECK Describe Control 1 C1
+PARAMCHECK Describe Control 2 12.000
+PARAMCHECK Describe Control 4 c1-on
+PARAMCHECK Describe Control 5 c1-off
+PARAMETER Describe Control 5 c1-off2
+PARAMETER Describe Control cancel
+COMMAND Describe
+MOUSE 2 12.000 10.000
+MOUSE 4 12.000 10.000
+PARAMCHECK Describe Control 5 c1-off2
+PARAMETER Describe Control cancel
+COMMAND Describe
+MOUSE 2 20.000 10.000
+MOUSE 4 20.000 10.000
+PARAMCHECK Describe Signal 1 G1
+PARAMCHECK Describe Signal 2 20.000
+PARAMCHECK Describe Signal 3 10.000
+PARAMCHECK Describe Signal 5 2
+PARAMETER Describe Signal 2 21.000
+PARAMETER Describe Signal cancel
+COMMAND Describe
+MOUSE 2 21.000 10.000
+MOUSE 4 21.000 10.000
+PARAMCHECK Describe Signal 2 21.000
+PARAMETER Describe Signal cancel

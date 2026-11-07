@@ -1027,8 +1027,13 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos,
 	                &pos, &segInx, &d, &back, NULL, &negative );
 	if ( negative != back ) { params->track_angle = NormalizeAngle(params->track_angle+180); }  //Bezier is in reverse
 	trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->arcSegs,segInx);
-	if (segPtr->type == SEG_STRLIN) {
+	// A straight end has no center. Track segments are SEG_STRTRK: testing only
+	// SEG_STRLIN read a straight track segment's u.l as if it were u.c, so a
+	// straight end got its start point as center and some other value as radius.
+	if (segPtr->type == SEG_STRLIN || segPtr->type == SEG_STRTRK) {
 		params->arcR = 0.0;
+		params->arcP = zero;
+		params->arcA0 = params->arcA1 = 0.0;
 	} else {
 		params->arcR = fabs(segPtr->u.c.radius);
 		params->arcP = segPtr->u.c.center;

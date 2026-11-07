@@ -181,7 +181,7 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 		if (strcmp(thescript,xx->script) != 0) {
 			sChanged = isChanged = TRUE;
 			max_str = sensorDesc[SC].max_string;
-			if (max_str && strlen(thename)>max_str-1) {
+			if (max_str && strlen(thescript)>max_str-1) {
 				newScript = MyMalloc(max_str);
 				newScript[max_str-1] = '\0';
 				strncat(newScript,thescript,max_str-1);
@@ -191,7 +191,7 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 
 		if (sensorProperties.pos.x != xx->orig.x ||
 		    sensorProperties.pos.y != xx->orig.y) {
-			pChanged = changed = TRUE;
+			pChanged = isChanged = TRUE;
 		}
 		if (!isChanged) { break; }
 		if (needUndoStart) {
