@@ -202,7 +202,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 
 		theoffscript = wEntryGetValue( controlDesc[OF].control0 );
 		if (strcmp(theoffscript,xx->offscript) != 0) {
-			offChanged = changed = TRUE;
+			offChanged = isChanged = TRUE;
 			max_str = controlDesc[OF].max_string;
 			if (max_str && strlen(theoffscript)>max_str-1) {
 				newOffScript = MyMalloc(max_str);

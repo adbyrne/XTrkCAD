@@ -451,9 +451,9 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd,
 	ts[0] = GetTrkEndTrk(trk,0);
 	ts[1] = GetTrkEndTrk(trk,1);
 	SetUpCornuParmFromTracks(ts,&cp,xx);
-	CallCornu0(xx->pos, xx->c, xx->a, xx->r, &xx->arcSegs, FALSE);
-
-	//FixUpCornu(xx->bezierData.pos, xx, IsTrack(trk));
+	// Also recomputes the cached length, minimum radius, rate of change and
+	// winding angle, which CallCornu0() alone left at their old values.
+	FixUpCornu0(xx->pos, xx->c, xx->a, xx->r, xx);
 	ComputeCornuBoundingBox(trk, xx);
 	DrawNewTrack( trk );
 }
@@ -477,6 +477,7 @@ static void DescribeCornu( track_p trk, char * str, CSIZE_T len )
 
 	cornData.length = xx->length;
 	cornData.minRadius = xx->minCurveRadius;
+	if (cornData.minRadius >= DIST_INF) { cornData.minRadius = 0; }
 	cornData.maxRateOfChange = xx->maxRateofChange*GetScaleRatio(
 	                                   GetLayoutCurScale());
 	cornData.windingAngle = xx->windingAngle;
