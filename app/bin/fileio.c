@@ -564,10 +564,11 @@ int LoadTracks(
 
 			nameOfFile = FindFilename(full_path);
 			extOfFile = FindFileExtension(full_path);
+			// No usable manifest: the layout is named like the archive, with
+			// .xtc for .xtce. Drop the last letter: shifting the extension left
+			// made it "tce", so the layout was never found (Development Issues #75).
 			if (strcmp(extOfFile, ZIPFILETYPEEXTENSION )==0) {
-				for (int i=0; i<4; i++) {
-					extOfFile[i] = extOfFile[i+1];
-				}
+				extOfFile[strlen(extOfFile)-1] = '\0';
 			}
 			LOG(log_zip, 1, ("Zip-File %s \n", full_path))
 #if DEBUG

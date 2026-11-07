@@ -398,6 +398,13 @@ bug:
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button
   answers unless a script says `NOTICEANSWER second` or `third`. A test that expects a message can
   pass on it with `PASS_REGULAR_EXPRESSION`.
+- **What the user is told when something goes wrong (`RegressionNotice.*`)** — `badline` loads a
+  layout with a bad number and an unknown line, and `badline_check` checks which tracks survived;
+  `newer` opens a file from a newer version, which must not become the current layout (the
+  round-trip harness logs `current layout "..."` after loading); `diskfull` (Linux) saves onto
+  `/dev/full` and needs the write-failure message; `frozen` checks that Properties doesn't open on a
+  frozen layer unless Shift is held. `RegressionRoundTrip.badmanifest` opens an archive whose
+  manifest can't be read, and `RegressionParamCheck.longname` enters a name longer than its field.
 - **Undo (`RegressionParamCheck.undo`)** — playback suspends undo, so no demo tests it. A script turns
   it on with `UNDORESUME`, then steps with `UNDOSTEP` and `REDOSTEP`. Undo saves an object's data as
   raw bytes, pointers included, so an Update function must not free a string that `UndoModify()` has

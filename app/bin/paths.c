@@ -183,6 +183,15 @@ char *FindFilename(char *path)
 {
 	char *name;
 	name = strrchr(path, FILE_SEP_CHAR[0]);
+#ifdef WINDOWS
+	// Windows takes / as well, and paths from the command line or a script can
+	// use it: an archive opened as D:/x/a.xtce looked for its layout under the
+	// whole path (Development Issues #75)
+	char *slash = strrchr(path, '/');
+	if (slash && (!name || slash > name)) {
+		name = slash;
+	}
+#endif
 
 	if (name) {
 		name++;

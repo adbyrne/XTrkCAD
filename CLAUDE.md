@@ -302,6 +302,7 @@ up (Development Issues #67). Regression tests besides the demos:
   `UNDOSTEP`, `REDOSTEP` test Undo, which playback otherwise suspends.
 - Under `-T`, notices and status-bar errors go to the log (`NOTICE:`, `NOTICE ANSWER:`, `ERROR:`)
   instead of opening; `NOTICEANSWER first|second|third` picks the button.
+- `RegressionNotice.*`: what the user is told when a load or save goes wrong, and what survives.
 
 `CompareSegs()` really compares turnouts and structures since #66, so changing them can fail a demo.
 If the new result is right, `-d regression=3` writes new blocks, but read each diff first.
