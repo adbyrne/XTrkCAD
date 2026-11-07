@@ -414,7 +414,7 @@ static void LogTestMessage(const char * kind, const char * msg)
 {
 	char flat[1024];
 	size_t i;
-	for (i = 0; msg[i] && i < sizeof flat - 1; i++) {
+	for (i = 0; i < sizeof flat - 1 && msg[i]; i++) {
 		flat[i] = (msg[i] == '\n' || msg[i] == '\r') ? ' ' : msg[i];
 	}
 	flat[i] = '\0';
