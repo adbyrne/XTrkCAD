@@ -398,8 +398,24 @@ static void RedrawSelectedTracksBoundary()
 }
 
 
+/**
+ * Leave Describe for Select before a menu entry selects tracks. Describe
+ * doesn't draw the selection, so it would stay invisible until the user
+ * changes to Select. Only for the menu handlers: commands and file loading
+ * call SetAllTrackSelect() themselves and must stay in their own command.
+ */
+static void SwitchFromDescribeToSelect( void )
+{
+	if ( GetCurrentCommand() == describeCmdInx ) {
+		DoCommandB( I2VP( selectCmdInx ) );
+	}
+}
+
 EXPORT void SetAllTrackSelectCB( void * context )
 {
+	if ( VP2L( context ) ) {
+		SwitchFromDescribeToSelect();
+	}
 	SetAllTrackSelect( (BOOL_T)VP2L(context) );
 }
 
@@ -453,6 +469,7 @@ EXPORT void InvertTrackSelect( void * unused )
 {
 	track_p trk;
 
+	SwitchFromDescribeToSelect();
 	trk = NULL;
 	while ( TrackIterate( &trk ) ) {
 		if (GetLayerVisible( GetTrkLayer( trk )) &&
@@ -477,6 +494,7 @@ EXPORT void OrphanedTrackSelect( void *ptr )
 	track_p trk;
 	EPINX_T ep;
 
+	SwitchFromDescribeToSelect();
 	trk = NULL;
 
 	while( TrackIterate( &trk ) ) {
@@ -986,6 +1004,7 @@ EXPORT void SelectCurrentLayer( void * unused )
 	if (GetLayerFrozen(curLayer)) {
 		return;
 	}
+	SwitchFromDescribeToSelect();
 	while ( TrackIterate( &trk ) ) {
 		if ((!GetTrkSelected(trk)) && GetTrkLayer(trk) == curLayer) {
 			SelectOneTrack( trk, TRUE );
@@ -1025,6 +1044,9 @@ EXPORT void SelectLayerSet( const unsigned int *layerIndices, int count,
                             BOOL_T select )
 {
 	BOOL_T wanted[NUM_LAYERS];
+	if ( select ) {
+		SwitchFromDescribeToSelect();
+	}
 	memset( wanted, FALSE, sizeof wanted );
 	for ( int i = 0; i < count; i++ ) {
 		if ( layerIndices[i] < NUM_LAYERS ) {
@@ -2442,6 +2464,7 @@ EXPORT void SelectByIndex( void* string)
 {
 	char result[STR_LONG_SIZE] = "";
 	char * trkMsg;
+	SwitchFromDescribeToSelect();
 	SetAllTrackSelect(FALSE);
 	char * cp = (char *)string;
 	cp = strtok(cp,",");
