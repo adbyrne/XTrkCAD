@@ -660,6 +660,9 @@ static void SwitchMotorEditOk ( const void * junk )
 	wDrawDelayUpdate( mainD.d, TRUE );
 	UndoStart( _("Modify Switch Motor"), "Modify Switch Motor" );
 	trk = switchmotorEditTrack;
+	// Save the object first, so Undo can restore it. The old strings stay
+	// allocated: UndoModify() saved these pointers (Development Issues #75).
+	UndoModify( trk );
 	xx = GetswitchmotorData( trk );
 	xx->name = MyStrdup(switchmotorEditName);
 	xx->normal = MyStrdup(switchmotorEditNormal);

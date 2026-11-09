@@ -823,6 +823,9 @@ static void BlockEditOk ( const void * junk )
 	wDrawDelayUpdate( mainD.d, TRUE );
 	UndoStart( _("Modify Block"), "Modify Block" );
 	trk = blockEditTrack;
+	// Save the object first, so Undo can restore it. The old strings stay
+	// allocated: UndoModify() saved these pointers (Development Issues #75).
+	UndoModify( trk );
 	xx = GetblockData( trk );
 	xx->name = MyStrdup(blockEditName);
 	xx->script = MyStrdup(blockEditScript);

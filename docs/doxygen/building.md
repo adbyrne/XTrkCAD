@@ -392,7 +392,8 @@ bug:
 - **Dialog values (`RegressionParamCheck.*`)** — a script line `PARAMCHECK <dialog> <field> <value>`
   checks a value in an open dialog. Under `-T`, a wrong value or a dialog or field that doesn't exist
   logs `FAIL` and counts as a regression failure; `wrong` makes sure that happens. For a Properties
-  dialog, `<dialog>` is `Describe <type>` and `<field>` is the field's position, from 1.
+  dialog, `<dialog>` is `Describe <type>` and `<field>` is the field's position, from 1. `drawlen`
+  checks a field that a dialog fills in again after refusing a value.
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button
@@ -404,11 +405,12 @@ bug:
   round-trip harness logs `current layout "..."` after loading); `diskfull` (Linux) saves onto
   `/dev/full` and needs the write-failure message; `frozen` checks that Properties doesn't open on a
   frozen layer unless Shift is held. `RegressionRoundTrip.badmanifest` opens an archive whose
-  manifest can't be read, and `RegressionParamCheck.longname` enters a name longer than its field.
+  manifest can't be read, `RegressionParamCheck.longname` enters a name longer than its field, and
+  `longsignal` one exactly a character too long.
 - **Undo (`RegressionParamCheck.undo`)** — playback suspends undo, so no demo tests it. A script turns
   it on with `UNDORESUME`, then steps with `UNDOSTEP` and `REDOSTEP`. Undo saves an object's data as
   raw bytes, pointers included, so an Update function must not free a string that `UndoModify()` has
-  just saved.
+  just saved. `manage` does the same through Manage > Layout Control Elements, for each element type.
 - **Parameter files (`RegressionParams.*`)** — every `.xtp` installed with the program has to load.
   A new user starts with only a few of them, so nothing else reads the rest. `setup` writes a
   preferences file that lists them all (`unittest/ParamFilesIni.cmake`); it fails on a file without a

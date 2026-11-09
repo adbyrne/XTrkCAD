@@ -432,22 +432,23 @@ static void ControlEditOk ( const void * junk )
 	} else {
 		UndoStart( _("Modify Control"), "Modify Control");
 		trk = controlEditTrack;
+		UndoModify( trk );
 	}
+	// When modifying, UndoModify() saved the object above, so Undo can restore
+	// it. The old strings stay allocated: it saved these pointers
+	// (Development Issues #75).
 	xx = GetcontrolData(trk);
 	xx->orig = controlEditOrig;
 	if ( xx->name == NULL
 	     || strncmp (xx->name, controlEditName, STR_SHORT_SIZE) != 0) {
-		MyFree(xx->name);
 		xx->name = MyStrdup(controlEditName);
 	}
 	if ( xx->onscript == NULL
 	     || strncmp (xx->onscript, controlEditOnScript, STR_LONG_SIZE) != 0) {
-		MyFree(xx->onscript);
 		xx->onscript = MyStrdup(controlEditOnScript);
 	}
 	if ( xx->offscript == NULL
 	     || strncmp (xx->offscript, controlEditOffScript, STR_LONG_SIZE) != 0) {
-		MyFree(xx->offscript);
 		xx->offscript = MyStrdup(controlEditOffScript);
 	}
 	UndoEnd();

@@ -395,17 +395,19 @@ static void SensorEditOk ( const void * junk )
 	} else {
 		UndoStart( _("Modify Sensor"), "Modify Sensor");
 		trk = sensorEditTrack;
+		UndoModify( trk );
 	}
+	// When modifying, UndoModify() saved the object above, so Undo can restore
+	// it. The old strings stay allocated: it saved these pointers
+	// (Development Issues #75).
 	xx = GetsensorData(trk);
 	xx->orig = sensorEditOrig;
 	if ( xx->name == NULL
 	     || strncmp (xx->name, sensorEditName, STR_SHORT_SIZE) != 0) {
-		MyFree(xx->name);
 		xx->name = MyStrdup(sensorEditName);
 	}
 	if ( xx->script == NULL
 	     || strncmp (xx->script, sensorEditScript, STR_LONG_SIZE) != 0) {
-		MyFree(xx->script);
 		xx->script = MyStrdup(sensorEditScript);
 	}
 	UndoEnd();
