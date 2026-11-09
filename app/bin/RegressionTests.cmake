@@ -80,16 +80,13 @@ foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/${_xtrkcad_demo}")
 endforeach()
 
-# _xtrkcad_regression_home_dirs is a CMake list (semicolon-separated
-# internally) -- embedding it directly in the quoted sh -c string below would
-# leave those semicolons literal, e.g. `mkdir -p /a;/b;/c`, which sh parses as
-# three separate commands (`mkdir -p /a`, then tries to *run* `/b`, then
-# `/c`), not one mkdir with three arguments. Build a properly quoted,
-# space-separated argument string instead.
-set(_xtrkcad_regression_mkdir_args "")
-foreach(_xtrkcad_dir ${_xtrkcad_regression_home_dirs})
-    string(APPEND _xtrkcad_regression_mkdir_args " '${_xtrkcad_dir}'")
-endforeach()
+# The home directories go to a file, one per line, which RegressionCleanHomes
+# reads. Passing them on the command line stopped working on Windows once it
+# grew past 8191 characters: the line was cut off mid-quote and every
+# regression test was skipped.
+set(_xtrkcad_regression_home_list "${CMAKE_CURRENT_BINARY_DIR}/regression-home-dirs.txt")
+string(REPLACE ";" "\n" _xtrkcad_regression_home_lines "${_xtrkcad_regression_home_dirs}")
+file(WRITE "${_xtrkcad_regression_home_list}" "${_xtrkcad_regression_home_lines}\n")
 
 # Wipe every demo's scratch $HOME at the start of each ctest invocation, not
 # just once at CMake configure time. Without this, a process that's killed
@@ -115,11 +112,13 @@ endforeach()
 # empirically (PR #76): this exact gap, introduced by an earlier version of
 # this fix that only did the rm -rf, hung RegressionSuite for its full 900s
 # TIMEOUT and hung Regression.dmintro.xtr (the first standalone test to run)
-# until the CI job was killed. sh -c is used rather than a second ctest test
-# because these two steps must run as one atomic unit ahead of every
-# regression test -- Linux/Xvfb-only, matching the rest of this file.
+# until the CI job was killed. One script does both rather than two ctest
+# tests, because these two steps must run as one unit ahead of every
+# regression test.
 add_test(NAME RegressionCleanHomes
-    COMMAND sh -c "rm -rf '${XTRKCAD_REGRESSION_HOME_ROOT}' && mkdir -p${_xtrkcad_regression_mkdir_args}"
+    COMMAND ${CMAKE_COMMAND} "-DROOT=${XTRKCAD_REGRESSION_HOME_ROOT}"
+        "-DLIST=${_xtrkcad_regression_home_list}"
+        -P "${CMAKE_CURRENT_LIST_DIR}/unittest/RegressionCleanHomes.cmake"
 )
 set_tests_properties(RegressionCleanHomes PROPERTIES
     FIXTURES_SETUP regression_clean_homes
