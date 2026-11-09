@@ -556,12 +556,14 @@ static void SignalEditOk ( const void * junk )
 	} else {
 		UndoStart( _("Modify Signal"), "Modify Signal");
 		trk = signalEditTrack;
+		// Save the object first, so Undo can restore it, size included. The
+		// old strings stay allocated: UndoModify() saved these pointers
+		// (Development Issues #75).
+		UndoModify( trk );
 		xx = GetsignalData(trk);
 		if (xx->numAspects != signalAspect_da.cnt) {
 			/* We need to reallocate the extra data. */
 			for (ia = 0; ia < xx->numAspects; ia++) {
-				MyFree((&(xx->aspectList))[ia].aspectName);
-				MyFree((&(xx->aspectList))[ia].aspectScript);
 				(&(xx->aspectList))[ia].aspectName = NULL;
 				(&(xx->aspectList))[ia].aspectScript = NULL;
 			}
@@ -577,7 +579,6 @@ static void SignalEditOk ( const void * junk )
 	xx->numHeads = signalEditHeadCount;
 	if ( xx->name == NULL
 	     || strncmp (xx->name, signalEditName, STR_SHORT_SIZE) != 0) {
-		MyFree(xx->name);
 		xx->name = MyStrdup(signalEditName);
 	}
 	xx->numAspects = signalAspect_da.cnt;
@@ -586,7 +587,6 @@ static void SignalEditOk ( const void * junk )
 			(&(xx->aspectList))[ia].aspectName = signalAspect(ia).aspectName;
 		} else if (strcmp((&(xx->aspectList))[ia].aspectName,
 		                  signalAspect(ia).aspectName) != 0) {
-			MyFree((&(xx->aspectList))[ia].aspectName);
 			(&(xx->aspectList))[ia].aspectName = signalAspect(ia).aspectName;
 		} else {
 			MyFree(signalAspect(ia).aspectName);
@@ -595,7 +595,6 @@ static void SignalEditOk ( const void * junk )
 			(&(xx->aspectList))[ia].aspectScript = signalAspect(ia).aspectScript;
 		} else if (strcmp((&(xx->aspectList))[ia].aspectScript,
 		                  signalAspect(ia).aspectScript) != 0) {
-			MyFree((&(xx->aspectList))[ia].aspectScript);
 			(&(xx->aspectList))[ia].aspectScript = signalAspect(ia).aspectScript;
 		} else {
 			MyFree(signalAspect(ia).aspectScript);
