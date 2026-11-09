@@ -65,8 +65,10 @@ elseif(MODE STREQUAL "check")
     endif()
     # The saved map has one line per loaded file, title=path. Titles are
     # Latin-1 and can hold ';', and the program changes some characters in
-    # them when it saves (SaveParamFileList()), so look for each path in the
-    # raw text of that section instead.
+    # them when it saves (SaveParamFileList()), so look in the raw text of that
+    # section. Match the end of the path only: for the files in xtrkcad.upd the
+    # program writes the path itself (UpdateParamFiles()), and on Windows it
+    # spells the install directory differently.
     file(READ "${INI}" _ini)
     string(REPLACE "\r" "" _ini "${_ini}")
     string(FIND "${_ini}" "[Parameter File Map]\n" _begin)
@@ -82,10 +84,9 @@ elseif(MODE STREQUAL "check")
     string(REPLACE "\\" "/" _section "${_section}")
     set(_missing "")
     foreach(_file ${_files})
-        file(TO_CMAKE_PATH "${_file}" _path)
-        string(FIND "${_section}" "=${_path}\n" _found)
+        get_filename_component(_base "${_file}" NAME)
+        string(FIND "${_section}" "/params/${_base}\n" _found)
         if(_found EQUAL -1)
-            get_filename_component(_base "${_file}" NAME)
             string(APPEND _missing "  ${_base}\n")
         endif()
     endforeach()
