@@ -409,6 +409,13 @@ bug:
   it on with `UNDORESUME`, then steps with `UNDOSTEP` and `REDOSTEP`. Undo saves an object's data as
   raw bytes, pointers included, so an Update function must not free a string that `UndoModify()` has
   just saved.
+- **Parameter files (`RegressionParams.*`)** — every `.xtp` installed with the program has to load.
+  A new user starts with only a few of them, so nothing else reads the rest. `setup` writes a
+  preferences file that lists them all (`unittest/ParamFilesIni.cmake`); it fails on a file without a
+  `CONTENTS` line or with a title another file has, since the list is keyed by title. `load` starts
+  the program, which loads them, and fails on any notice or error (Linux and macOS). `check` fails
+  unless every file is still in the list the program saved. They're `regression-ci`, so the
+  sanitizer job parses every file too.
 - **Print and export (`RegressionExport.*`)** — `-Texport:<layout>` prints a small layout to PDF
   without the dialog (`wPrintSetExportFile()`), exports SVG, DXF and PNG and imports the DXF file back,
   all through the normal code (`LayoutExportTest()`, `fileio.c`). `tools/check-export-test.sh` then

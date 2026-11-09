@@ -69,6 +69,7 @@ list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notic
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/archive-badmanifest")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-frozen")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-diskfull")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/params-load")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
@@ -517,3 +518,44 @@ if(XTRKCAD_PDFTOHTML_EXECUTABLE AND XTRKCAD_PDFINFO_EXECUTABLE)
         LABELS "regression"
     )
 endif()
+
+# Every parameter file installed with the program has to load (Development
+# Issues #75). Otherwise only the few files a new user starts with are ever
+# read in a test. The setup step lists all installed .xtp files in the
+# preferences, so the program loads them at startup; the run fails on any
+# notice or error (Linux and macOS: Windows logs to a file); the check step
+# fails unless every file is still in the list the program saved, which a file
+# that doesn't load drops out of. regression-ci, so the sanitizer job parses
+# them all too.
+set(_xtrkcad_params_home "${XTRKCAD_REGRESSION_HOME_ROOT}/params-load")
+set(_xtrkcad_params_dir "${XTRKCAD_REGRESSION_INSTALL_PREFIX}/${XTRKCAD_SHARE_INSTALL_DIR}/params")
+set(_xtrkcad_params_ini "${_xtrkcad_params_home}/.${XTRKCAD_BIN}/${XTRKCAD_BIN}.ini")
+add_test(NAME RegressionParams.setup
+    COMMAND ${CMAKE_COMMAND} -DMODE=write "-DPARAMS_DIR=${_xtrkcad_params_dir}"
+        "-DINI=${_xtrkcad_params_ini}" -P "${CMAKE_CURRENT_LIST_DIR}/unittest/ParamFilesIni.cmake")
+set_tests_properties(RegressionParams.setup PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    FIXTURES_SETUP regression_params
+    LABELS "regression;regression-ci"
+)
+xtrkcad_add_regression_test(RegressionParams.load "${_xtrkcad_params_home}"
+    "${_xtrkcad_test_option}${_xtrkcad_compare_dir}/regress-params-load.xtr")
+set_tests_properties(RegressionParams.load PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes;regression_params"
+    LABELS "regression;regression-ci"
+    TIMEOUT 300
+    ENVIRONMENT "HOME=${_xtrkcad_params_home}"
+    RUN_SERIAL TRUE
+)
+if(NOT WIN32)
+    set_tests_properties(RegressionParams.load PROPERTIES
+        FAIL_REGULAR_EXPRESSION "NOTICE:|ERROR:")
+endif()
+add_test(NAME RegressionParams.check
+    COMMAND ${CMAKE_COMMAND} -DMODE=check "-DPARAMS_DIR=${_xtrkcad_params_dir}"
+        "-DINI=${_xtrkcad_params_ini}" -P "${CMAKE_CURRENT_LIST_DIR}/unittest/ParamFilesIni.cmake")
+set_tests_properties(RegressionParams.check PROPERTIES
+    DEPENDS RegressionParams.load
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes;regression_params"
+    LABELS "regression;regression-ci"
+)
