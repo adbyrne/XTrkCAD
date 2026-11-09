@@ -1,0 +1,9 @@
+# Nothing to play back: RegressionParams.load only needs the program to start,
+# which loads every parameter file the preferences list (see
+# RegressionTests.cmake).
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 40.000 x 20.000
+SCALE HO
+REDRAW

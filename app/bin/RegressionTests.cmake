@@ -69,6 +69,7 @@ list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notic
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/archive-badmanifest")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-frozen")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-diskfull")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/params-load")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
@@ -79,16 +80,13 @@ foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/${_xtrkcad_demo}")
 endforeach()
 
-# _xtrkcad_regression_home_dirs is a CMake list (semicolon-separated
-# internally) -- embedding it directly in the quoted sh -c string below would
-# leave those semicolons literal, e.g. `mkdir -p /a;/b;/c`, which sh parses as
-# three separate commands (`mkdir -p /a`, then tries to *run* `/b`, then
-# `/c`), not one mkdir with three arguments. Build a properly quoted,
-# space-separated argument string instead.
-set(_xtrkcad_regression_mkdir_args "")
-foreach(_xtrkcad_dir ${_xtrkcad_regression_home_dirs})
-    string(APPEND _xtrkcad_regression_mkdir_args " '${_xtrkcad_dir}'")
-endforeach()
+# The home directories go to a file, one per line, which RegressionCleanHomes
+# reads. Passing them on the command line stopped working on Windows once it
+# grew past 8191 characters: the line was cut off mid-quote and every
+# regression test was skipped.
+set(_xtrkcad_regression_home_list "${CMAKE_CURRENT_BINARY_DIR}/regression-home-dirs.txt")
+string(REPLACE ";" "\n" _xtrkcad_regression_home_lines "${_xtrkcad_regression_home_dirs}")
+file(WRITE "${_xtrkcad_regression_home_list}" "${_xtrkcad_regression_home_lines}\n")
 
 # Wipe every demo's scratch $HOME at the start of each ctest invocation, not
 # just once at CMake configure time. Without this, a process that's killed
@@ -114,11 +112,13 @@ endforeach()
 # empirically (PR #76): this exact gap, introduced by an earlier version of
 # this fix that only did the rm -rf, hung RegressionSuite for its full 900s
 # TIMEOUT and hung Regression.dmintro.xtr (the first standalone test to run)
-# until the CI job was killed. sh -c is used rather than a second ctest test
-# because these two steps must run as one atomic unit ahead of every
-# regression test -- Linux/Xvfb-only, matching the rest of this file.
+# until the CI job was killed. One script does both rather than two ctest
+# tests, because these two steps must run as one unit ahead of every
+# regression test.
 add_test(NAME RegressionCleanHomes
-    COMMAND sh -c "rm -rf '${XTRKCAD_REGRESSION_HOME_ROOT}' && mkdir -p${_xtrkcad_regression_mkdir_args}"
+    COMMAND ${CMAKE_COMMAND} "-DROOT=${XTRKCAD_REGRESSION_HOME_ROOT}"
+        "-DLIST=${_xtrkcad_regression_home_list}"
+        -P "${CMAKE_CURRENT_LIST_DIR}/unittest/RegressionCleanHomes.cmake"
 )
 set_tests_properties(RegressionCleanHomes PROPERTIES
     FIXTURES_SETUP regression_clean_homes
@@ -524,3 +524,44 @@ if(XTRKCAD_PDFTOHTML_EXECUTABLE AND XTRKCAD_PDFINFO_EXECUTABLE)
         LABELS "regression"
     )
 endif()
+
+# Every parameter file installed with the program has to load (Development
+# Issues #75). Otherwise only the few files a new user starts with are ever
+# read in a test. The setup step lists all installed .xtp files in the
+# preferences, so the program loads them at startup; the run fails on any
+# notice or error (Linux and macOS: Windows logs to a file); the check step
+# fails unless every file is still in the list the program saved, which a file
+# that doesn't load drops out of. regression-ci, so the sanitizer job parses
+# them all too.
+set(_xtrkcad_params_home "${XTRKCAD_REGRESSION_HOME_ROOT}/params-load")
+set(_xtrkcad_params_dir "${XTRKCAD_REGRESSION_INSTALL_PREFIX}/${XTRKCAD_SHARE_INSTALL_DIR}/params")
+set(_xtrkcad_params_ini "${_xtrkcad_params_home}/.${XTRKCAD_BIN}/${XTRKCAD_BIN}.ini")
+add_test(NAME RegressionParams.setup
+    COMMAND ${CMAKE_COMMAND} -DMODE=write "-DPARAMS_DIR=${_xtrkcad_params_dir}"
+        "-DINI=${_xtrkcad_params_ini}" -P "${CMAKE_CURRENT_LIST_DIR}/unittest/ParamFilesIni.cmake")
+set_tests_properties(RegressionParams.setup PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    FIXTURES_SETUP regression_params
+    LABELS "regression;regression-ci"
+)
+xtrkcad_add_regression_test(RegressionParams.load "${_xtrkcad_params_home}"
+    "${_xtrkcad_test_option}${_xtrkcad_compare_dir}/regress-params-load.xtr")
+set_tests_properties(RegressionParams.load PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes;regression_params"
+    LABELS "regression;regression-ci"
+    TIMEOUT 300
+    ENVIRONMENT "HOME=${_xtrkcad_params_home}"
+    RUN_SERIAL TRUE
+)
+if(NOT WIN32)
+    set_tests_properties(RegressionParams.load PROPERTIES
+        FAIL_REGULAR_EXPRESSION "NOTICE:|ERROR:")
+endif()
+add_test(NAME RegressionParams.check
+    COMMAND ${CMAKE_COMMAND} -DMODE=check "-DPARAMS_DIR=${_xtrkcad_params_dir}"
+        "-DINI=${_xtrkcad_params_ini}" -P "${CMAKE_CURRENT_LIST_DIR}/unittest/ParamFilesIni.cmake")
+set_tests_properties(RegressionParams.check PROPERTIES
+    DEPENDS RegressionParams.load
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes;regression_params"
+    LABELS "regression;regression-ci"
+)
