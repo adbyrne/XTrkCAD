@@ -1,0 +1,23 @@
+# A signal name exactly one character over the limit (80 for a 79-character
+# field) has to be cut to 79 and the user told the maximum. It was kept whole
+# without the notice: the check was strlen > 80, not > 79 (Development Issues
+# #75). Reopening always shows 79 characters, so only the notice in the log
+# tells the two apart; RegressionTests.cmake checks for it.
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 40.000 x 20.000
+SCALE HO
+SIGNAL 1 0 HO 2 5.000000 5.000000 90.000000 2 "G1"
+	END$SIGNAL
+REDRAW
+COMMAND Describe
+MOUSE 2 5.000 5.000
+MOUSE 4 5.000 5.000
+PARAMETER Describe Signal 1 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+PARAMETER Describe Signal cancel
+COMMAND Describe
+MOUSE 2 5.000 5.000
+MOUSE 4 5.000 5.000
+PARAMCHECK Describe Signal 1 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+PARAMETER Describe Signal cancel

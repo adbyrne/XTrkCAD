@@ -955,7 +955,13 @@ static void UpdateDraw( track_p trk, int drawDescInx, descData_p descUpd,
 	case LN:
 		if ( drawData.length <= minLength ) {
 			ErrorMessage( MSG_OBJECT_TOO_SHORT );
-			drawData.length = fabs(segPtr->u.c.radius)*2*M_PI*segPtr->u.c.a1/360.0;
+			// Show the length again. Only a curve has u.c: for a line, its
+			// fields hold the end points (Development Issues #75).
+			if ( segPtr->type == SEG_CRVLIN ) {
+				drawData.length = fabs(segPtr->u.c.radius)*2*M_PI*segPtr->u.c.a1/360.0;
+			} else {
+				drawData.length = FindDistance( drawData.endPt[0], drawData.endPt[1] );
+			}
 			DrawDescSetMode(LN, DESC_CHANGE);
 			break;
 		}

@@ -262,7 +262,7 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd,
 		if ( strcmp( thenormal, xx->normal ) != 0 ) {
 			norChanged = isChanged = TRUE;
 			max_str = switchmotorDesc[NOR].max_string;
-			if (max_str && strlen(thenormal)>max_str) {
+			if (max_str && strlen(thenormal)>max_str-1) {
 				newNormal = MyMalloc(max_str);
 				newNormal[max_str-1] = '\0';
 				strncat(newNormal,thenormal, max_str-1);
@@ -274,7 +274,7 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd,
 		if ( strcmp( thereverse, xx->reverse ) != 0 ) {
 			revChanged = isChanged = TRUE;
 			max_str = switchmotorDesc[REV].max_string;
-			if (max_str && strlen(thereverse)>max_str) {
+			if (max_str && strlen(thereverse)>max_str-1) {
 				newReverse = MyMalloc(max_str);
 				newReverse[max_str-1] = '\0';
 				strncat(newReverse,thereverse,max_str-1);

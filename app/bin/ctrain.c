@@ -214,7 +214,7 @@ static void UpdateCar(
 		// contract never returns NULL (empty string at worst).
 		cp = wEntryGetValue( carDesc[NM].control0);
 		max_str = sizeof(carData.number);
-		if (strlen(cp)>max_str) {
+		if (strlen(cp)>max_str-1) {
 			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
 		}
 		if (strcmp(CarItemNumber(xx->item), cp) != 0) {

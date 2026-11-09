@@ -247,7 +247,7 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
 		if (strcmp(thename,xx->name) != 0) {
 			nChanged = TRUE;
 			unsigned int max_str = signalDesc[NM].max_string;
-			if (max_str && strlen(thename)>max_str) {
+			if (max_str && strlen(thename)>max_str-1) {
 				newName = MyMalloc(max_str);
 				newName[max_str-1] = '\0';
 				strncat(newName,thename, max_str-1);
