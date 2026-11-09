@@ -72,7 +72,7 @@ list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notic
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
-foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep)
+foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep drawlen longsignal)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
@@ -303,7 +303,7 @@ endforeach()
 # Field values in a dialog, through PARAMCHECK. "wrong" has to fail, so a check
 # that reports nothing can't pass as a good result. It passes on the message, not
 # the exit code, as the comparator tests above do.
-foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep)
+foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep drawlen longsignal)
     set(_xtrkcad_paramcheck_home "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
     xtrkcad_add_regression_test("RegressionParamCheck.${_xtrkcad_paramcheck_case}" "${_xtrkcad_paramcheck_home}"
         "${_xtrkcad_test_option}${_xtrkcad_compare_dir}/regress-paramcheck-${_xtrkcad_paramcheck_case}.xtr")
@@ -320,6 +320,13 @@ if(WIN32)
 else()
     set_tests_properties(RegressionParamCheck.wrong PROPERTIES
         PASS_REGULAR_EXPRESSION "FAIL: PARAMCHECK .*exp: 99.000, act=20.000")
+endif()
+# Only the notice shows that the name was cut (see the script). On Windows the
+# test checks the result only, as the message tests above do.
+if(NOT WIN32)
+    set_tests_properties(RegressionParamCheck.longsignal PROPERTIES
+        PASS_REGULAR_EXPRESSION "Maximum length is 79"
+        FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK")
 endif()
 
 # Load each example layout, save it, reload it and save again, in both .xtc and

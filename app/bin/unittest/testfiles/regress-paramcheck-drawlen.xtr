@@ -1,0 +1,26 @@
+# A Length of 0 for a straight line is refused, and the field has to show the
+# line's length again. It was refilled from the curve fields of the segment,
+# which for a line hold its end points (Development Issues #75). Field 6 is
+# Length: each end point counts as two fields, X then Y, then Angle.
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 40.000 x 20.000
+SCALE HO
+DRAW 1 0 0 0 0 0.000000 0.000000 0 0.000000
+	L3 0 0.000000 5.000000 10.000000 0 15.000000 10.000000 0
+	END$SEGS
+REDRAW
+COMMAND Describe
+MOUSE 2 10.000 10.000
+MOUSE 4 10.000 10.000
+PARAMCHECK Describe Straight Line 6 10.000
+PARAMETER Describe Straight Line 6 0.000
+PARAMCHECK Describe Straight Line 6 10.000
+PARAMETER Describe Straight Line cancel
+COMMAND Describe
+MOUSE 2 10.000 10.000
+MOUSE 4 10.000 10.000
+PARAMCHECK Describe Straight Line 3 15.000
+PARAMCHECK Describe Straight Line 6 10.000
+PARAMETER Describe Straight Line cancel
