@@ -61,6 +61,7 @@ foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
     get_filename_component(_xtrkcad_example_name "${_xtrkcad_example}" NAME_WE)
     string(MAKE_C_IDENTIFIER "${_xtrkcad_example_name}" _xtrkcad_example_id)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-${_xtrkcad_example_id}")
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/describe-${_xtrkcad_example_id}")
 endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-empty-text")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-objects")
@@ -343,6 +344,35 @@ foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
         LABELS "regression;regression-ci"
         TIMEOUT 120
         ENVIRONMENT "HOME=${_xtrkcad_roundtrip_home}"
+        RUN_SERIAL TRUE
+    )
+endforeach()
+
+# Open Properties on every object of each example layout and press Done
+# without an edit: no dialog may start an Undo step, and no object may change
+# (LayoutDescribeTest(), fileio.c; Development Issues #75). The five largest
+# layouts take from 20 s to 100 s each, too long for every CI platform and the
+# sanitizer job, so they're only in the full regression run.
+set(_xtrkcad_describe_large cascade Ondaville_Franklin_and_Carolina_RR port_dinllean
+    DVRR_v3 psr)
+foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
+    get_filename_component(_xtrkcad_example_name "${_xtrkcad_example}" NAME_WE)
+    string(MAKE_C_IDENTIFIER "${_xtrkcad_example_name}" _xtrkcad_example_id)
+    set(_xtrkcad_describe_home "${XTRKCAD_REGRESSION_HOME_ROOT}/describe-${_xtrkcad_example_id}")
+    xtrkcad_add_regression_test("RegressionDescribe.${_xtrkcad_example_id}" "${_xtrkcad_describe_home}"
+        "${_xtrkcad_test_option}describe:${_xtrkcad_example}")
+    if(_xtrkcad_example_id IN_LIST _xtrkcad_describe_large)
+        set(_xtrkcad_describe_labels "regression")
+        set(_xtrkcad_describe_timeout 600)
+    else()
+        set(_xtrkcad_describe_labels "regression;regression-ci")
+        set(_xtrkcad_describe_timeout 120)
+    endif()
+    set_tests_properties("RegressionDescribe.${_xtrkcad_example_id}" PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "${_xtrkcad_describe_labels}"
+        TIMEOUT ${_xtrkcad_describe_timeout}
+        ENVIRONMENT "HOME=${_xtrkcad_describe_home}"
         RUN_SERIAL TRUE
     )
 endforeach()

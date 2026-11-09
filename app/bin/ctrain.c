@@ -43,6 +43,15 @@ static int doDrawTurnoutPosition = 1;
 
 static TRKTYP_T T_CAR = -1;
 
+
+/**
+ * \return TRUE if trk is a car on the layout
+ */
+EXPORT BOOL_T IsCar( track_cp trk )
+{
+	return T_CAR != -1 && GetTrkType( trk ) == T_CAR;
+}
+
 typedef enum { ST_NotOnTrack, ST_StopManual, ST_EndOfTrack, ST_OpenTurnout, ST_NoRoom, ST_Crashed } trainStatus_e;
 
 typedef struct extraDataCar_t {

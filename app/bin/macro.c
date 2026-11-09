@@ -1996,6 +1996,9 @@ EXPORT int RegressionTestAll(const char *target)
 	if (target != NULL && strncmp(target, "export:", 7) == 0) {
 		return LayoutExportTest(target + 7);
 	}
+	if (target != NULL && strncmp(target, "describe:", 9) == 0) {
+		return LayoutDescribeTest(target + 9);
+	}
 	if (target != NULL) {
 		const char *ext = FindFileExtension(FindFilename((char *)target));
 		if (ext != NULL && (strcmp(ext, "xtc") == 0 || strcmp(ext, "xtce") == 0)) {

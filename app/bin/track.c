@@ -138,8 +138,14 @@ EXPORT void ActivateTrack( track_cp trk)
 
 EXPORT void DescribeTrack( track_cp trk, char * str, CSIZE_T len )
 {
-
+	// The describe functions fill the Properties dialog (DoDescribe(), then
+	// lists such as font sizes or lumber types), and every value loaded
+	// into a toggle or list fires its "changed" callback. None of that is
+	// an edit: DescribeUpdate() ignores it while this is set.
+	BOOL_T loading = descLoading;
+	descLoading = TRUE;
 	trackCmds( GetTrkType(trk) )->describe ( trk, str, len );
+	descLoading = loading;
 	/*epCnt = GetTrkEndPtCnt(trk);
 	if (debugTrack >= 2)
 		for (ep=0; epCnt; ep++)
@@ -1420,7 +1426,11 @@ EXPORT int CheckRegressionResult( long regressVersion,const char * sFileName,
 	int nActual = 0;
 	track_p tActual;
 	TRK_ITERATE( tActual ) {
-		nActual++;
+		// Cars are only written by a full save (WriteCars()), never into
+		// the expected block, so there's nothing to count them against
+		if ( ! IsCar( tActual ) ) {
+			nActual++;
+		}
 	}
 	if ( nActual != nExpected ) {
 		nFail++;

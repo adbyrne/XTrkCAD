@@ -389,6 +389,14 @@ bug:
   `empty_text_check` use a small layout of their own, with empty text segments, and also compare the
   saved texts with the source. `objects` and `objects_check` do the same for the object types no
   example contains: Bezier, sensor, control, switch motor, block and signal.
+- **Properties without an edit (`RegressionDescribe.*`)** — one test per example layout:
+  `-Tdescribe:<layout>` loads it, saves and reloads it, then opens Properties on every object except
+  notes and presses Done, as a click with the Describe command does (`LayoutDescribeTest()`,
+  `fileio.c`). No dialog may start an Undo step, and every object has to match what it was before,
+  compared as the demo check compares them. Drawn objects are compared by position: Properties
+  stores a drawn object's rotation in its points, which doesn't move it. Cars aren't compared, as
+  only a full save writes them. The five largest layouts take 20 s to 100 s each, so they're only
+  labelled `regression`; the rest are `regression-ci`.
 - **Dialog values (`RegressionParamCheck.*`)** — a script line `PARAMCHECK <dialog> <field> <value>`
   checks a value in an open dialog. Under `-T`, a wrong value or a dialog or field that doesn't exist
   logs `FAIL` and counts as a regression failure; `wrong` makes sure that happens. For a Properties

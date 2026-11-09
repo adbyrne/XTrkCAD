@@ -1997,6 +1997,7 @@ static wBool_t CompareTurnout(track_cp trk1, track_cp trk2)
 	REGRESS_CHECK_INT("Flipped", xx1, xx2, flipped)
 	REGRESS_CHECK_INT("Ungrouped", xx1, xx2, ungrouped)
 	REGRESS_CHECK_INT("Split", xx1, xx2, split)
+	REGRESS_CHECK_STR("Title", xx1, xx2, title)
 	/* desc orig is not stable
 	REGRESS_CHECK_POS( "DescOrig", xx1, xx2, descriptionOrig ) */
 	REGRESS_CHECK_POS("DescOff", xx1, xx2, descriptionOff)
