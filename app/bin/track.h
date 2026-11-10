@@ -331,6 +331,13 @@ BOOL_T DeleteTrack( track_p, BOOL_T );
 			(int)(P1->FIELD), (int)(P2->FIELD) ); \
 		return FALSE; \
 	}
+#define REGRESS_CHECK_STR( TITLE, P1, P2, FIELD ) \
+	if ( strcmp( P1->FIELD ? P1->FIELD : "", P2->FIELD ? P2->FIELD : "" ) != 0 ) { \
+		snprintf( cp, sizeof message - (size_t)(cp - message), \
+			TITLE ": Actual \"%s\", Expected \"%s\"\n", \
+			P1->FIELD ? P1->FIELD : "", P2->FIELD ? P2->FIELD : "" ); \
+		return FALSE; \
+	}
 #define REGRESS_CHECK_COLOR( TITLE, P1, P2, FIELD ) \
 	if ( ! IsColorClose(P1->FIELD, P2->FIELD) ) { \
 		sprintf( cp, TITLE ": Actual %6x, Expected %6x\n", \
@@ -509,6 +516,8 @@ STATUS_T JointDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 /* cmisc.c */
 extern wIndex_t describeCmdInx;
 extern BOOL_T inDescribeCmd;
+extern BOOL_T descLoading;
+BOOL_T IsCar( track_cp );
 extern BOOL_T descUndoStarted;
 extern char * descTitle;
 typedef enum {
@@ -562,6 +571,7 @@ void DescribeDone( void * );
 BOOL_T UpdateDescStraight( int, int, int, int, int, descData_p, long );
 STATUS_T CmdDescribe(wAction_t,coOrd);
 void ClearDescribe( void );
+int DescribeAllTracks( void );
 void ClearSelect( void );
 
 

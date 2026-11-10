@@ -70,6 +70,27 @@ static int log_timereadfile = 0;
 #define rename( F1, F2 ) Copyfile( F1, F2 )
 #endif
 
+/**
+ * Create or truncate a file for writing with an explicit mode, owner read
+ * and write, instead of leaving it all to the umask as fopen() does
+ * (CodeQL cpp/world-writable-file-creation). As FOpenRestricted() in
+ * genmessages.c.
+ *
+ * \param path IN the file
+ * \return the open file, or NULL
+ */
+static FILE * FOpenWriteRestricted( const char * path )
+{
+#ifdef WINDOWS
+	int fd = _open( path, _O_CREAT | _O_WRONLY | _O_TRUNC,
+	                _S_IREAD | _S_IWRITE );
+	return fd < 0 ? NULL : _fdopen( fd, "w" );
+#else
+	int fd = open( path, O_CREAT | O_WRONLY | O_TRUNC, 0644 );
+	return fd < 0 ? NULL : fdopen( fd, "w" );
+#endif
+}
+
 EXPORT int Copyfile( const char * fn1, const char * fn2 )
 {
 	FILE *f1, *f2;
@@ -1617,6 +1638,78 @@ EXPORT int LayoutRoundTripTest( const char * pathName )
 	free( save2 );
 	free( archive );
 	free( save3 );
+	MyFree( source );
+	return nFail;
+}
+
+/**
+ * Regression test for -Tdescribe:&lt;layout&gt;: load a layout, then open
+ * Properties on every object and press Done without changing anything
+ * (DescribeAllTracks()). No dialog may start an Undo step, and every object
+ * has to match what it was before, as the demo regression check compares
+ * them (CheckRegressionResult()). Drawn objects are compared by where they
+ * are, not by how they're stored: Properties stores a drawn object's
+ * rotation in its points, which doesn't move it (CompareDraw()).
+ *
+ * \param pathName IN the layout
+ * \return number of failed checks
+ */
+EXPORT int LayoutDescribeTest( const char * pathName )
+{
+	char * source = MyStrdup( pathName );
+	char * expected = NULL;
+	int nFail = 0;
+	int count = RoundTripLoad( source );
+
+	if ( count <= 0 ) {
+		MyFree( source );
+		return 1;
+	}
+	lprintf( "%s: %d tracks\n", source, count );
+	// Start from a saved and reloaded copy, so the layout in memory holds
+	// only what a layout file can: a turntable, for one, keeps endpoints
+	// without a track that it doesn't write.
+	char * saved = NULL;
+	MakeFullpath( &saved, workingDir, "describe.xtc", NULL );
+	if ( !SaveTracks( 1, &saved, NULL ) || RoundTripLoad( saved ) <= 0 ) {
+		lprintf( "  FAIL: can't save and reload %s\n", saved );
+		free( saved );
+		MyFree( source );
+		return 1;
+	}
+	free( saved );
+	MakeFullpath( &expected, workingDir, "describe.expected", NULL );
+	FILE * f = FOpenWriteRestricted( expected );
+	if ( f == NULL ) {
+		lprintf( "  FAIL: can't write %s\n", expected );
+		nFail++;
+	} else {
+		WriteTracks( f, FALSE );
+		fprintf( f, "REGRESSION END\n" );
+		fclose( f );
+
+		int nUndo = DescribeAllTracks();
+		if ( nUndo > 0 ) {
+			lprintf( "  FAIL: %d dialogs started an Undo step\n", nUndo );
+			nFail++;
+		}
+		// Reading the expected objects mustn't record them for Undo, as
+		// playback, where the demo check runs, doesn't either
+		UndoSuspend();
+		paramFile = fopen( expected, "r" );
+		paramLineNum = 0;
+		int nDiff = CheckRegressionResult( PARAMVERSION, expected, TRUE );
+		if ( paramFile ) {
+			fclose( paramFile );
+			paramFile = NULL;
+		}
+		UndoResume();
+		if ( nDiff != 0 ) {
+			lprintf( "  FAIL: %d objects changed\n", nDiff );
+			nFail++;
+		}
+	}
+	free( expected );
 	MyFree( source );
 	return nFail;
 }

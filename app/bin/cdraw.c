@@ -1188,6 +1188,16 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	}
 	segPtr = &xx->segs[drawSegInx];
 	LOG( log_describedraw, 1, ("DescribeDraw Seg:%d\n", segPtr->type ) );
+	// Properties edits a drawn object without a rotation, so the cases below
+	// store its rotation in the segment and set the angle to 0. That has to
+	// happen to every segment, and to a curve's start angle as well: an object
+	// with more than one segment, or a rotated curved line, otherwise moved
+	// as soon as its Properties were opened. With the angle 0, the per-type
+	// code below changes nothing more.
+	if ( xx->angle != 0.0 ) {
+		RotateSegs( xx->segCnt, xx->segs, zero, xx->angle );
+		xx->angle = 0.0;
+	}
 	drawData.color = segPtr->color;
 	drawData.bg_color = segPtr->bg_color;
 	drawData.layer = GetTrkLayer(trk);
@@ -2142,9 +2152,30 @@ static wBool_t CompareDraw( track_cp trk1, track_cp trk2 )
 	struct extraDataDraw_t *xx2 = GET_EXTRA_DATA( trk2, T_DRAW, extraDataDraw_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
-	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
 	REGRESS_CHECK_INT( "LineType", xx1, xx2, lineType )
-	return CompareSegs( xx1->segs, xx1->segCnt, xx2->segs, xx2->segCnt );
+	if ( IsAngleClose( xx1->angle, xx2->angle ) ) {
+		return CompareSegs( xx1->segs, xx1->segCnt, xx2->segs, xx2->segCnt );
+	}
+	// The same object can be stored with its rotation in the angle or in its
+	// points: Properties moves it into the points (DescribeDraw()). Compare
+	// where the segments are, rotated by each object's own angle.
+	if ( xx1->segCnt != xx2->segCnt ) {
+		REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
+	}
+	trkSeg_p s1 = MyMalloc( xx1->segCnt * sizeof *s1 );
+	trkSeg_p s2 = MyMalloc( xx2->segCnt * sizeof *s2 );
+	memcpy( s1, xx1->segs, xx1->segCnt * sizeof *s1 );
+	memcpy( s2, xx2->segs, xx2->segCnt * sizeof *s2 );
+	CloneFilledDraw( xx1->segCnt, s1, FALSE );
+	CloneFilledDraw( xx2->segCnt, s2, FALSE );
+	RotateSegs( xx1->segCnt, s1, zero, xx1->angle );
+	RotateSegs( xx2->segCnt, s2, zero, xx2->angle );
+	wBool_t rc = CompareSegs( s1, xx1->segCnt, s2, xx2->segCnt );
+	FreeFilledDraw( xx1->segCnt, s1 );
+	FreeFilledDraw( xx2->segCnt, s2 );
+	MyFree( s1 );
+	MyFree( s2 );
+	return rc;
 }
 
 static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos,

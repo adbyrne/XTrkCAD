@@ -48,6 +48,8 @@ static coOrd descOrig, descSize;
 static POS_T descBorder;
 static wDrawColor descColor = 0;
 EXPORT BOOL_T descUndoStarted;
+/** Set while DescribeTrack() fills the dialog for a new object, see there */
+EXPORT BOOL_T descLoading;
 static BOOL_T descNeedDrawHilite;
 EXPORT char * descTitle = "<>";
 static char descTitleBuf[STR_SIZE];	/* backing store for descTitle */
@@ -137,6 +139,12 @@ static wBool_t DescribeUpdate(
 	descData_p ddp;
 
 	if (inx < 0) {
+		return TRUE;
+	}
+
+	if (descLoading) {
+		// Loading a value into a toggle or list fires its callback too,
+		// which would open an Undo step for an object nobody edited.
 		return TRUE;
 	}
 
@@ -510,30 +518,35 @@ void DoDescribe(char * title, track_p track, descData_p data,
 		                  F_RECALLPOS|PD_F_ALT_CANCELLABEL,
 		                  DescribeUpdate);
 
-		// Copy control[01] to desc
-		paramData_p pdp = pg->paramPtr;
-		int ddx = 0;
-		int pdx = 0;
-		int inx = 0;
-		for (descData_p ddp=data; ddp->type != DESC_NULL; ddp++, ddx++ ) {
-			LOG( log_describe, 3, ( "%d.0: %d<-%d %p \n", inx++, ddx, pdx, pdp->control ) );
-			ddp->control0 = pdp->control;
+		FormRegister(pg);
+	}
+
+	// Point the shared descData at this dialog's controls, every time:
+	// several dialogs can share one descData array (compoundDesc for
+	// Turnout, Sectional Track and Structure, crvDesc, bezDesc, ...), and
+	// update functions that read ddp->control0 directly, like
+	// UpdateCompound(), would otherwise read the fields of whichever
+	// dialog was created last, and on Done copy that object's title.
+	paramData_p pdp = pg->paramPtr;
+	int ddx = 0;
+	int pdx = 0;
+	for (descData_p ddp=data; ddp->type != DESC_NULL; ddp++, ddx++ ) {
+		LOG( log_describe, 3, ( "%d.0: %d<-%d %p \n", ddx, ddx, pdx, pdp->control ) );
+		ddp->control0 = pdp->control;
+		pdp++;
+		pdx++;
+		if ( ddp->type == DESC_POS || ddp->type == DESC_POS3D ) {
+			LOG( log_describe, 3, ( " .1: %d<-%d %p\n", ddx, pdx, pdp->control ) );
+			ddp->control1 = pdp->control;
 			pdp++;
 			pdx++;
-			if ( ddp->type == DESC_POS || ddp->type == DESC_POS3D ) {
-				LOG( log_describe, 3, ( " .1: %d<-%d %p\n", ddx, pdx, pdp->control ) );
-				ddp->control1 = pdp->control;
-				pdp++;
-				pdx++;
-			}
-			if ( ddp->type == DESC_POS3D ) {
-				LOG( log_describe, 3, ( " .2: %d<-%d %p\n", ddx, pdx, pdp->control ) );
-				ddp->control2 = pdp->control;
-				pdp++;
-				pdx++;
-			}
 		}
-		FormRegister(pg);
+		if ( ddp->type == DESC_POS3D ) {
+			LOG( log_describe, 3, ( " .2: %d<-%d %p\n", ddx, pdx, pdp->control ) );
+			ddp->control2 = pdp->control;
+			pdp++;
+			pdx++;
+		}
 	}
 
 	if ( describePG ) {
@@ -637,6 +650,53 @@ static void DescChange(long changes)
  */
 
 
+
+
+/**
+ * Regression test helper for -Tdescribe:&lt;layout&gt; (LayoutDescribeTest()):
+ * open Properties on every object, as a click with the Describe command
+ * does, and press Done without changing anything. Notes have their own
+ * dialogs and are skipped. An object whose dialog started an Undo step
+ * thought something changed, and is reported.
+ *
+ * \return number of objects whose dialog started an Undo step
+ */
+EXPORT int DescribeAllTracks(void)
+{
+	char msg[STR_SIZE];
+	track_p t;
+	int nDescribed = 0, nSkipped = 0, nUndo = 0;
+
+	descBorder = mainD.scale*0.1;
+	if (descBorder < trackGauge) {
+		descBorder = trackGauge;
+	}
+	TRK_ITERATE( t ) {
+		if ( GetTrkType( t ) == T_NOTE ) {
+			nSkipped++;
+			continue;
+		}
+		descUndoStarted = FALSE;
+		inDescribeCmd = TRUE;
+		SetDescHiliteBox( t );
+		DescribeTrack( t, msg, sizeof msg );
+		inDescribeCmd = FALSE;
+		descTrk = t;
+		wFlush();
+		// What the Done button does (DescribeCancel())
+		BOOL_T undoBefore = descUndoStarted;
+		DescribeDone( NULL );
+		wFlush();
+		if ( undoBefore || descUndoStarted ) {
+			lprintf( "  UNDO: %s %d (%s) started an Undo step\n",
+			         GetTrkTypeName( t ), GetTrkIndex( t ), msg );
+			nUndo++;
+		}
+		nDescribed++;
+	}
+	lprintf( "described %d objects, skipped %d notes\n", nDescribed, nSkipped );
+	return nUndo;
+}
 
 
 EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)

@@ -296,7 +296,12 @@ jobs:
       - name: Build
         run: cmake --build build --parallel
       - name: Regression suite
-        run: ctest --test-dir build -L regression-ci --output-on-failure
+        # RegressionDescribe.* opens a dialog per object, which is over ten
+        # times slower here than on Linux (2766 s, eight timeouts, PR #344).
+        # Its checks don't depend on the platform; Linux and macOS run them.
+        run: >-
+          ctest --test-dir build -L regression-ci -E '^RegressionDescribe\.'
+          --output-on-failure
 
   regression-macos:
     # See regression-windows. Gates too, since Development Issues #72 made the
