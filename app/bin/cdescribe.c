@@ -653,7 +653,7 @@ static void DescChange(long changes)
 
 
 /**
- * Regression test helper for -Tdescribe:<layout> (LayoutDescribeTest()):
+ * Regression test helper for -Tdescribe:&lt;layout&gt; (LayoutDescribeTest()):
  * open Properties on every object, as a click with the Describe command
  * does, and press Done without changing anything. Notes have their own
  * dialogs and are skipped. An object whose dialog started an Undo step
