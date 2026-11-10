@@ -70,6 +70,27 @@ static int log_timereadfile = 0;
 #define rename( F1, F2 ) Copyfile( F1, F2 )
 #endif
 
+/**
+ * Create or truncate a file for writing with an explicit mode, owner read
+ * and write, instead of leaving it all to the umask as fopen() does
+ * (CodeQL cpp/world-writable-file-creation). As FOpenRestricted() in
+ * genmessages.c.
+ *
+ * \param path IN the file
+ * \return the open file, or NULL
+ */
+static FILE * FOpenWriteRestricted( const char * path )
+{
+#ifdef WINDOWS
+	int fd = _open( path, _O_CREAT | _O_WRONLY | _O_TRUNC,
+	                _S_IREAD | _S_IWRITE );
+	return fd < 0 ? NULL : _fdopen( fd, "w" );
+#else
+	int fd = open( path, O_CREAT | O_WRONLY | O_TRUNC, 0644 );
+	return fd < 0 ? NULL : fdopen( fd, "w" );
+#endif
+}
+
 EXPORT int Copyfile( const char * fn1, const char * fn2 )
 {
 	FILE *f1, *f2;
@@ -1658,7 +1679,7 @@ EXPORT int LayoutDescribeTest( const char * pathName )
 	}
 	free( saved );
 	MakeFullpath( &expected, workingDir, "describe.expected", NULL );
-	FILE * f = fopen( expected, "w" );
+	FILE * f = FOpenWriteRestricted( expected );
 	if ( f == NULL ) {
 		lprintf( "  FAIL: can't write %s\n", expected );
 		nFail++;
