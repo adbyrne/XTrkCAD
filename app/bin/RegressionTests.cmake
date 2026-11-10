@@ -175,6 +175,13 @@ _xtrkcad_shell_quote_list(_xtrkcad_wrapper_sh ${_xtrkcad_regression_wrapper})
 # a pure-X11 session or CI runner (no WAYLAND_DISPLAY) sees no change at
 # all.
 set(_xtrkcad_wayland_guard "if [ -n \"$WAYLAND_DISPLAY\" ]; then export GDK_BACKEND=x11; fi; ")
+# Messages in English, whatever the developer's or runner's language: some
+# tests look for message text, and libc's own texts (strerror()) have no ID
+# to match instead. Only the messages: LC_NUMERIC and the rest keep the
+# locale, so a decimal-comma locale (de_DE) still shows where numbers are
+# written or read in it (dev ML #4641). LC_ALL would override LC_MESSAGES,
+# and LANGUAGE would override it for gettext.
+string(APPEND _xtrkcad_wayland_guard "unset LC_ALL LANGUAGE; export LC_MESSAGES=C; ")
 if(WIN32)
     # Keep MSYS from rewriting /T as a path
     string(APPEND _xtrkcad_wayland_guard "export MSYS2_ARG_CONV_EXCL='*'; ")
@@ -332,14 +339,15 @@ if(NOT WIN32)
 endif()
 # The car dialog's main flows: edit and Cancel, a new prototype, and the CSV
 # round trip. Edit and prototype may not raise a notice. The round trip deletes
-# the cars, so the only notices it may raise are Delete's "Are you sure"
-# (CMake regexes have no lookahead, hence [^A]). Importing cars whose indexes
-# are taken has to say so once.
+# the cars, so it may raise Delete's confirmation, which has no message ID,
+# but no notice that has one (the import's). Importing cars whose indexes
+# are taken has to say so once. Tests match message IDs ("NOTICE ID:"),
+# which no translation changes.
 if(NOT WIN32)
     set_tests_properties(RegressionParamCheck.carsedit RegressionParamCheck.carsproto
         PROPERTIES FAIL_REGULAR_EXPRESSION "NOTICE:|FAIL: PARAMCHECK")
     set_tests_properties(RegressionParamCheck.carscsv PROPERTIES
-        FAIL_REGULAR_EXPRESSION "NOTICE: [^A]|FAIL: PARAMCHECK")
+        FAIL_REGULAR_EXPRESSION "NOTICE ID: |FAIL: PARAMCHECK")
     # The JSON Note dialog may raise no notice, and its Undo step has to
     # work: an Undo assertion only logs, so it fails the test here.
     set_tests_properties(RegressionParamCheck.jsonnote PROPERTIES
@@ -347,12 +355,12 @@ if(NOT WIN32)
     set_tests_properties(RegressionParamCheck.undo PROPERTIES
         FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK|UNDO ASSERT")
     set_tests_properties(RegressionParamCheck.carsdelete PROPERTIES
-        PASS_REGULAR_EXPRESSION "Car Index number duplicated"
+        PASS_REGULAR_EXPRESSION "NOTICE ID: MSG_CARIMP_DUP_INDEX"
         FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK")
 endif()
 if(NOT WIN32)
     set_tests_properties(RegressionParamCheck.longsignal PROPERTIES
-        PASS_REGULAR_EXPRESSION "Maximum length is 79"
+        PASS_REGULAR_EXPRESSION "NOTICE ID: MSG_ENTERED_STRING_TRUNCATED\nNOTICE: [^\n]*79"
         FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK")
 endif()
 
@@ -470,7 +478,7 @@ set_tests_properties(RegressionNotice.badline PROPERTIES
 )
 if(NOT WIN32)
     set_tests_properties(RegressionNotice.badline PROPERTIES
-        PASS_REGULAR_EXPRESSION "NOTICE: While processing Layout file roundtrip-badline.xtc, 4 lines were skipped")
+        PASS_REGULAR_EXPRESSION "NOTICE ID: MSG_LAYOUT_LINES_SKIPPED\nNOTICE: [^\n]*roundtrip-badline\\.xtc[^\n]* 4 ")
 endif()
 # A file from a newer version: the user is told to upgrade, and the file must
 # not become the current layout, or Save would write the empty layout over it.
@@ -488,7 +496,7 @@ if(WIN32)
     set_tests_properties(RegressionNotice.newer PROPERTIES WILL_FAIL TRUE)
 else()
     set_tests_properties(RegressionNotice.newer PROPERTIES
-        PASS_REGULAR_EXPRESSION "NOTICE: File version 99 is greater than supported version"
+        PASS_REGULAR_EXPRESSION "NOTICE ID: MSG_UPGRADE_VERSION[12]\nNOTICE: [^\n]* 99 "
         FAIL_REGULAR_EXPRESSION "roundtrip-newer-version.xtc: current layout \"[^\"]+\"")
 endif()
 # Saving onto a full disk: the user must be told, and the save must count as
@@ -621,3 +629,66 @@ set_tests_properties(RegressionParams.check PROPERTIES
     FIXTURES_REQUIRED "regression_install;regression_clean_homes;regression_params"
     LABELS "regression;regression-ci"
 )
+
+# ---------------------------------------------------------------------------
+# Test levels (XTRKCAD_REGRESSION_LEVEL, top-level CMakeLists.txt)
+#
+# critical (label regression-critical): checks of code that changes data and
+# of bugs we have fixed, seconds each: dialog values and Undo (ParamCheck),
+# what the user is told when something goes wrong (Notice), the demo check
+# itself (Compare), parameter files, the round-trip fixtures, and round trip
+# and Properties on a few small example layouts. The default for a local
+# build, and what Windows and macOS run on a pull request.
+# ci (label regression-ci): critical plus every example layout and the demos
+# (RegressionSuite, or the per-demo tests on Windows).
+# full (label regression): ci plus the per-demo cold starts, the largest
+# layouts and export.
+# A test above the level is disabled, not left out, so ctest -N still lists
+# it, and the labels stay as they were for jobs that select by label.
+set(_xtrkcad_critical_tests
+    "^RegressionParamCheck\\."
+    "^RegressionNotice\\."
+    "^RegressionCompare\\."
+    "^RegressionParams\\."
+    "^RegressionRoundTrip\\.(objects|objects_check|empty_text|empty_text_check|badmanifest)$"
+    "^Regression(RoundTrip|Describe)\\.(timesavr|Control_Panels|pmi)$"
+)
+get_property(_xtrkcad_all_tests DIRECTORY PROPERTY TESTS)
+set(_xtrkcad_level_counts_critical 0)
+set(_xtrkcad_level_counts_disabled 0)
+foreach(_xtrkcad_t ${_xtrkcad_all_tests})
+    get_test_property("${_xtrkcad_t}" LABELS _xtrkcad_labels)
+    get_test_property("${_xtrkcad_t}" FIXTURES_SETUP _xtrkcad_setup)
+    # Every regression test needs the install and the clean homes; the
+    # other setup tests are at the level of the tests that need them.
+    if(NOT _xtrkcad_labels OR _xtrkcad_setup MATCHES "^regression_(install|clean_homes)$")
+        continue()
+    endif()
+    if(NOT "regression" IN_LIST _xtrkcad_labels)
+        continue()
+    endif()
+    set(_xtrkcad_is_critical FALSE)
+    foreach(_xtrkcad_re ${_xtrkcad_critical_tests})
+        if(_xtrkcad_t MATCHES "${_xtrkcad_re}")
+            set(_xtrkcad_is_critical TRUE)
+        endif()
+    endforeach()
+    if(_xtrkcad_is_critical)
+        list(APPEND _xtrkcad_labels regression-critical)
+        set_tests_properties("${_xtrkcad_t}" PROPERTIES LABELS "${_xtrkcad_labels}")
+        math(EXPR _xtrkcad_level_counts_critical "${_xtrkcad_level_counts_critical} + 1")
+    endif()
+    set(_xtrkcad_disable FALSE)
+    if(XTRKCAD_REGRESSION_LEVEL STREQUAL "critical" AND NOT _xtrkcad_is_critical)
+        set(_xtrkcad_disable TRUE)
+    elseif(XTRKCAD_REGRESSION_LEVEL STREQUAL "ci" AND NOT "regression-ci" IN_LIST _xtrkcad_labels)
+        set(_xtrkcad_disable TRUE)
+    endif()
+    if(_xtrkcad_disable)
+        set_tests_properties("${_xtrkcad_t}" PROPERTIES DISABLED TRUE)
+        math(EXPR _xtrkcad_level_counts_disabled "${_xtrkcad_level_counts_disabled} + 1")
+    endif()
+endforeach()
+message(STATUS "Regression tests: level ${XTRKCAD_REGRESSION_LEVEL}, "
+    "${_xtrkcad_level_counts_critical} critical, ${_xtrkcad_level_counts_disabled} disabled "
+    "(-DXTRKCAD_REGRESSION_LEVEL=critical|ci|full)")

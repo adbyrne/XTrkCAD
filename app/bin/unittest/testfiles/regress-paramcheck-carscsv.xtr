@@ -51,7 +51,7 @@ PARAMCHECK carpart purchPrice 12.50
 PARAMCHECK carpart currPrice 20.00
 PARAMCHECK carpart purchDate 20200504
 PARAMCHECK carpart serviceDate 20230101
-PARAMCHECK carpart condition 2 Excellent
+PARAMCHECK carpart condition 2
 PARAMCHECK carpart notes Bought at "the show", 2020
 PARAMETER carpart cancel
 PARAMETER carinv ok

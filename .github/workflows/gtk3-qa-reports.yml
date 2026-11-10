@@ -85,10 +85,12 @@ jobs:
                '/usr/*' '*/build/*' '*/unittest/*' '*/tools/*' \
                --output-file build/coverage-filtered.info \
                --ignore-errors unused --rc branch_coverage=1
+          # Yellow from 65% (lcov's default is 75), green from 90%.
           genhtml build/coverage-filtered.info \
                   --output-directory build/coverage-html \
                   --title "XTrkCAD coverage (GTK3, unit + regression suite)" \
-                  --rc branch_coverage=1
+                  --rc branch_coverage=1 \
+                  --rc genhtml_med_limit=65
           lcov --summary build/coverage-filtered.info --rc branch_coverage=1
       - name: Upload coverage report
         if: ${{ !inputs.html }}

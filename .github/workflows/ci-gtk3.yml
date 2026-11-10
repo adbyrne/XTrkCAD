@@ -152,6 +152,39 @@ jobs:
       - name: Standalone per-demo regression tests
         run: ctest --test-dir build -L "^regression$" -LE "regression-ci" --output-on-failure -VV
 
+  regression-locale-de:
+    # The regression-ci tests with a German locale (dev ML #4641): de_DE
+    # writes numbers with a decimal comma, so any track data written or read
+    # without SetCLocale() shows up here (RegressionDescribe.* did, 46
+    # tests). The test commands keep messages in English (LC_MESSAGES=C, see
+    # RegressionTests.cmake), so this checks numbers, not translations.
+    # Report-only for now, as regression-macos was: once it has been green
+    # for a few runs, drop continue-on-error to make it gate.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/apt-deps
+        with:
+          # pdfinfo and pdftohtml, for RegressionExport.check
+          extra: poppler-utils locales
+      - name: Generate the de_DE.UTF-8 locale
+        run: |
+          sudo locale-gen de_DE.UTF-8
+          # Fail here, not in the tests, if the locale didn't take: a
+          # missing locale falls back to C and every test would pass. (Not
+          # printf 1.5: in de_DE that input is itself an invalid number.)
+          test "$(LC_ALL=de_DE.UTF-8 locale -k decimal_point)" = 'decimal_point=","'
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON
+      - name: Build
+        run: cmake --build build
+      - name: Regression tests, German locale
+        env:
+          LANG: de_DE.UTF-8
+        run: ctest --test-dir build -L regression-ci --output-on-failure
+
   c-tests-debian:
     # Debian 12/13 containers on amd64 and arm64 -- the arm64 entries are
     # Raspberry Pi OS Bookworm/Trixie on a Pi 3/4/5. Catches older-toolchain
@@ -261,6 +294,9 @@ jobs:
   regression-windows:
     # The demos, one process each, and the round trip on Windows (Development
     # Issues #69). Few developers test on Windows by hand, so this one gates.
+    # On a pull request only the critical regression tests run
+    # (XTRKCAD_REGRESSION_LEVEL, RegressionTests.cmake); on main, the
+    # regression-ci set. regression-macos does the same.
     runs-on: windows-2025
     timeout-minutes: 60
     defaults:
@@ -292,6 +328,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug \
             -DXTRKCAD_TESTING=ON \
             -DXTRKCAD_REGRESSION_TESTING=ON \
+            -DXTRKCAD_REGRESSION_LEVEL=${{ github.event_name == 'pull_request' && 'critical' || 'ci' }} \
             -DXTRKCAD_USE_GETTEXT=OFF
       - name: Build
         run: cmake --build build --parallel
@@ -322,6 +359,7 @@ jobs:
           GTK_LDFLAGS=$(pkg-config --libs-only-L gtk+-3.0)
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
             -DXTRKCAD_REGRESSION_TESTING=ON \
+            -DXTRKCAD_REGRESSION_LEVEL=${{ github.event_name == 'pull_request' && 'critical' || 'ci' }} \
             -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
             -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
             -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON

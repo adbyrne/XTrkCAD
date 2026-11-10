@@ -316,6 +316,21 @@ bug:
   (`app/wlib/gtk3lib/unittests/CMakeLists.txt`).
 - **Valgrind** — `ctest -T memcheck --overwrite MemoryCheckCommand=$(which valgrind)`.
   `-LE gtk-display` here too, for the same GTK3-internals reason.
+- **Regression test levels** — `-DXTRKCAD_REGRESSION_LEVEL=critical|ci|full` picks which
+  regression tests run; the ones above it are added but disabled, so `ctest` lists them as not run.
+  - `critical` (label `regression-critical`): the checks of code that changes data and of bugs
+    already fixed, each a few seconds: `RegressionParamCheck.*`, `RegressionNotice.*`,
+    `RegressionCompare.*`, `RegressionParams.*`, the round-trip fixtures, and round trip and
+    Properties on a few small examples. About 4 minutes with the unit tests. The default for a local
+    build, and what `regression-windows` and `regression-macos` run on a pull request.
+  - `ci` (label `regression-ci`): critical plus every example layout and the demos
+    (`RegressionSuite`, or the per-demo tests on Windows). The Linux PR jobs run it, and Windows and
+    macOS on `main`.
+  - `full` (label `regression`): everything, with the per-demo cold starts, the largest layouts and
+    export. The default when `CI` is set; run it before pushing a change to shared code.
+
+  The list of critical tests is at the end of `app/bin/RegressionTests.cmake`. A new test belongs
+  there when it checks data-changing code and takes seconds.
 - **Regression demo-playback suite** — `-DXTRKCAD_REGRESSION_TESTING=ON` (auto-enabled on Linux
   when `xvfb-run` or an existing `DISPLAY` is found) adds ~47 per-demo `ctest` targets, one per
   entry in `app/lib/xtrkcad.xtq`'s `DEMO` list, for targeting a single demo during local
@@ -427,8 +442,18 @@ bug:
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button
-  answers unless a script says `NOTICEANSWER second` or `third`. A test that expects a message can
-  pass on it with `PASS_REGULAR_EXPRESSION`.
+  answers unless a script says `NOTICEANSWER second` or `third`. A message with an ID (`MSG_...` in
+  `messages.in`) also logs `NOTICE ID: MSG_...` or `ERROR ID: MSG_...` on the line before. A test
+  that expects a message passes on it with `PASS_REGULAR_EXPRESSION`, matching the ID rather than
+  the wording, plus any number or file name it needs from the text.
+- **Languages** — the regression test commands set `LC_MESSAGES=C` (and clear `LC_ALL` and
+  `LANGUAGE`), so messages are in English whatever the developer's language: a few tests match
+  texts that have no ID, such as `strerror()`'s. Only the messages: numbers keep the locale, so with
+  `LANG=de_DE.UTF-8` a decimal comma shows where data is written or read without `SetCLocale()`.
+  Run new tests once that way. Don't match translated text in a new test: match a message ID, a
+  list index (`PARAMCHECK <dialog> <list> <n>` with no text checks the selected row), or a number.
+  The `regression-locale-de` CI job runs the `regression-ci` tests with that locale; it reports only
+  until it has been green for a few runs (dev ML #4641).
 - **What the user is told when something goes wrong (`RegressionNotice.*`)** — `badline` loads a
   layout with a bad number and an unknown line, and `badline_check` checks which tracks survived;
   `newer` opens a file from a newer version, which must not become the current layout (the

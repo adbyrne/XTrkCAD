@@ -287,8 +287,10 @@ Useful CMake options:
 Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and
 `app/dynstring/unittest/`. Hg `default` has 134 tests, 25 of them outside the `regression` label
 (r7981, `ctest -N`, with `poppler-utils` installed; the 2 `RegressionExport.*` tests need it).
-The full run including the regression demo-playback suite takes ~10 minutes; run it in the
-background.
+Regression tests have levels (`-DXTRKCAD_REGRESSION_LEVEL=critical|ci|full`, `RegressionTests.cmake`):
+a local build defaults to `critical` (~4 min with the unit tests), CI to `full` (~23 min; run it in
+the background). Configure scratch builds with `full` before claiming a full pass. Windows and macOS
+run `critical` on PRs and `ci` on `main`.
 
 Run new load, save or parse code under ASan too (`-DXTRKCAD_SANITIZE=ON`, clang). Its fill pattern
 exposes uninitialised values that a normal build sees as 0: that's how the `ReadJoint()` bug showed
@@ -306,7 +308,10 @@ up (Development Issues #67). Regression tests besides the demos:
   count and pick list rows; `PARAMCHECK <dlg> ok active|inactive` checks a button (dev guide
   `building.md` has the rest). `cars*` cover the car dialog, `jsonnote` the JSON Note dialog.
 - Under `-T`, notices and status-bar errors go to the log (`NOTICE:`, `NOTICE ANSWER:`, `ERROR:`)
-  instead of opening; `NOTICEANSWER first|second|third` picks the button.
+  instead of opening; `NOTICEANSWER first|second|third` picks the button. A message with an ID logs
+  `NOTICE ID: MSG_...` first: tests match the ID, never translated text.
+- Regression tests run with `LC_MESSAGES=C` but keep the numeric locale. Run new tests once with
+  `LANG=de_DE.UTF-8` (decimal comma; dev ML #4641); CI's `regression-locale-de` does the same.
 - `RegressionNotice.*`: what the user is told when a load or save goes wrong, and what survives.
 
 `CompareSegs()` really compares turnouts and structures since #66, and `CompareNote()` a note's text,
