@@ -410,6 +410,61 @@ static void CarValidateIdentityCombinedBitsTests(void **state)
 	                 CAR_IDENT_CATALOG_UNRESOLVED | CAR_IDENT_PROTO_UNRESOLVED);
 }
 
+/* -----------------------------------------------------------------------
+ * CarNotesListText: the Notes column of the Car Inventory list shows one
+ * line, so a car whose notes run over many lines doesn't make its row tall
+ * (Development Issues #76, cascade.xtc car 1018).
+ * ----------------------------------------------------------------------- */
+
+static void CarNotesListTextEmptyTests(void **state)
+{
+	(void)state;
+	char out[32] = "junk";
+	CarNotesListText(NULL, out, sizeof out);
+	assert_string_equal(out, "");
+	CarNotesListText("", out, sizeof out);
+	assert_string_equal(out, "");
+	CarNotesListText(" \n\r\n\t\n", out, sizeof out);
+	assert_string_equal(out, "");
+}
+
+static void CarNotesListTextTrailingBlankLinesTests(void **state)
+{
+	(void)state;
+	char out[32];
+	CarNotesListText("From MR Jan 94\n\n\n\n\n", out, sizeof out);
+	assert_string_equal(out, "From MR Jan 94");
+}
+
+static void CarNotesListTextMoreLinesTests(void **state)
+{
+	(void)state;
+	char out[32];
+	CarNotesListText("\n\nfirst  \r\nsecond", out, sizeof out);
+	assert_string_equal(out, "first ...");
+}
+
+static void CarNotesListTextTabTests(void **state)
+{
+	(void)state;
+	char out[32];
+	/* A tab would start a new list column. */
+	CarNotesListText("a\tb", out, sizeof out);
+	assert_string_equal(out, "a b");
+}
+
+static void CarNotesListTextTruncateTests(void **state)
+{
+	(void)state;
+	char out[5];
+	CarNotesListText("abcdefgh", out, sizeof out);
+	assert_string_equal(out, "abcd");
+	/* No room for the marker: leave it out rather than cut it. */
+	char out8[8];
+	CarNotesListText("abcdef\nx", out8, sizeof out8);
+	assert_string_equal(out8, "abcdef");
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
@@ -452,6 +507,12 @@ int main(void)
 		cmocka_unit_test(CarValidateIdentityProtoUnresolvedTests),
 		cmocka_unit_test(CarValidateIdentityNoLevelNeverFlagsTests),
 		cmocka_unit_test(CarValidateIdentityCombinedBitsTests),
+
+		cmocka_unit_test(CarNotesListTextEmptyTests),
+		cmocka_unit_test(CarNotesListTextTrailingBlankLinesTests),
+		cmocka_unit_test(CarNotesListTextMoreLinesTests),
+		cmocka_unit_test(CarNotesListTextTabTests),
+		cmocka_unit_test(CarNotesListTextTruncateTests),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }
