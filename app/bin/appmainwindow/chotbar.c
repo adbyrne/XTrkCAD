@@ -610,6 +610,13 @@ static void HotBarSelectPlayback( char * line )
 			return;
 		}
 	}
+	// Nothing selected, so the clicks that follow would place nothing or
+	// the wrong object; a test has to say so instead of passing
+	DynString what;
+	DynStringMalloc( &what, 0 );
+	DynStringPrintf( &what, "HOTBARSELECT: no such object: %s", line );
+	PlaybackFail( DynStringToCStr( &what ) );
+	DynStringFree( &what );
 }
 
 

@@ -429,7 +429,10 @@ bug:
   text, which is long in the car inventory). For a text field, `<value>` is the whole text, with
   `\n` for a line break and `\t` for a tab. For a button, and for `ok` and `cancel`, `<value>` is
   `active` or `inactive`: playback presses a button whether or not it's active, so a script checks
-  what the user could press (`wControlIsActive()`). `FILESELECT <file>` answers the next file dialog without opening it
+  what the user could press (`wControlIsActive()`). `PARAMCHECK <dialog> window shown|hidden`
+  checks whether the dialog is open, for instance still open after OK refused its values. A
+  `HOTBARSELECT` that finds no object logs `FAIL: playback` and fails the test
+  (`PlaybackFail()`), where it used to do nothing; the clicks after it then placed nothing. `FILESELECT <file>` answers the next file dialog without opening it
   (`wFilSelSetPlayback()`); a relative name is in the work directory, which each test has to
   itself. `carnew` follows the car dialog's "New" hints while a car is added (Manage > Car
   Inventory). `carsedit` edits a car and cancels an edit, `carsproto` adds a car of a new
@@ -438,7 +441,12 @@ bug:
   a car that is on the layout isn't covered. `jsonnote` covers the JSON Note dialog: text that
   isn't a JSON object turns OK inactive and is never saved, even when OK is pressed; the field
   editor's Add, Update and Delete; and Undo and Redo of the edit. It and `undo` also fail on an
-  `UNDO ASSERT` line, which otherwise only logs.
+  `UNDO ASSERT` line, which otherwise only logs. `todesign` covers the Turnout Designer: each
+  design type is designed, placed from the hotbar and compared with a REGRESSION block. A design
+  that can't connect is refused and the dialog stays open; a right-hand turnout mirrors the left;
+  a design with an existing name asks first (`MSG_TODSGN_REPLACE`), and No keeps the old
+  definition; a frog number comes back unchanged when the dialog reopens. In a script,
+  `MOUSE 8200 <x> <y>` is the space key (`C_TEXT | ' ' << 8`), which ends a placement.
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button

@@ -139,6 +139,26 @@ static paramFloatRange_t r_90_90 = { -90, 90, 80 };
 static paramFloatRange_t r0_100 = { 0, 100, 80 };
 
 static FLOAT_T tdVal[20];
+/** The dialog's values while LoadSegs() works on tdVal, see SaveDialogValues() */
+static FLOAT_T tdValDialog[COUNT(tdVal)];
+
+/**
+ * LoadSegs() turns a frog number in tdVal into degrees, in place, and Ok
+ * writes the degrees to the custom file, where Edit turns them back. Without
+ * keeping the dialog's own values, reopening the same design from the menu
+ * (which keeps the values) showed the degrees as the frog number: a #6 came
+ * back as 9.594, and Ok then made a #9.594 turnout. These keep the dialog's
+ * values across LoadSegs().
+ */
+static void SaveDialogValues( void )
+{
+	memcpy( tdValDialog, tdVal, sizeof tdVal );
+}
+
+static void RestoreDialogValues( void )
+{
+	memcpy( tdVal, tdValDialog, sizeof tdVal );
+}
 
 paramData_t turnDesignPLs[] = {
 #define I_REG_FIRST (0)
@@ -2794,7 +2814,9 @@ static void NewTurnPrint(
 	const toDesignSchema_t * pp;
 	POS_T tmp;
 
+	SaveDialogValues();
 	pp=LoadSegs( curDesign, TRUE );
+	RestoreDialogValues();
 	if (pp == NULL) {
 		return;
 	}
@@ -2855,7 +2877,6 @@ static void OutputTurnoutDef(
         turnoutInfo_t * customTurnout,
         char * customInfoP	)
 {
-	BOOL_T foundR=FALSE;
 	turnoutInfo_t *to;
 
 	BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer,
@@ -2888,17 +2909,40 @@ static void OutputTurnoutDef(
 		                              tempSegs_da.cnt, &tempSegs(0),
 		                              TempEndPtsCount(), TempEndPt(0) );
 	}
+}
 
-	// foundR is never assigned TRUE anywhere (vestigial, no live setter);
-	// the replace-confirmation check works correctly via FindCompound() alone.
-	if ( bFirst &&
-	     customTurnout == NULL &&
-	     // cppcheck-suppress knownConditionTrueFalse
-	     ( foundR || FindCompound( FIND_TURNOUT, newTurnScaleName, message ) ) ) {
-		if ( !NoticeMessage( MSG_TODSGN_REPLACE, _("Yes"), _("No") ) ) {
-			return;
-		}
+/**
+ * Ask before a new design replaces a turnout of the same name: the Ok of a
+ * design started from the menu (not Edit) overwrites any definition with
+ * its title (CreateNewTurnout()), so this has to come before anything is
+ * created or written. The check after the definitions were created never
+ * asked: it searched for the text in message rather than the title.
+ *
+ * \return TRUE to go on, FALSE if the user said No
+ */
+static BOOL_T NewTurnReplaceOk( void )
+{
+	char title[STR_LONG_SIZE];
+	BOOL_T found;
+
+	if ( customTurnout1 != NULL ) {
+		return TRUE;	// Edit of an existing turnout replaces it on purpose
 	}
+	BuildTrimedTitle( title, "\t", newTurnManufacturer, newTurnLeftDesc,
+	                  newTurnLeftPartno );
+	found = FindCompound( FIND_TURNOUT, newTurnScaleName, title ) != NULL;
+	switch ( curDesign->type ) {
+	case NTO_REGULAR:
+	case NTO_CURVED:
+	case NTO_CORNU:
+		BuildTrimedTitle( title, "\t", newTurnManufacturer, newTurnRightDesc,
+		                  newTurnRightPartno );
+		found |= FindCompound( FIND_TURNOUT, newTurnScaleName, title ) != NULL;
+		break;
+	default:
+		break;
+	}
+	return !found || NoticeMessage( MSG_TODSGN_REPLACE, _("Yes"), _("No") ) > 0;
 }
 
 static void NewTurnOk( const void * context )
@@ -2914,13 +2958,15 @@ static void NewTurnOk( const void * context )
 	/* pick up a field still being edited (Ok acts before its focus-out);
 	 * done in the user locale, before switching to C for the file */
 	FormFetchData( &turnDesignPG );
+	SaveDialogValues();
 
 	SetCLocale();
 	//
 	// Generate segments and endPts
 	//
 	pp=LoadSegs( curDesign, TRUE );
-	if ( pp == NULL ) {
+	if ( pp == NULL || !NewTurnReplaceOk() ) {
+		RestoreDialogValues();
 		SetUserLocale();
 		FormDialogKeepOpen( &turnDesignPG );
 		return;
@@ -3008,6 +3054,7 @@ static void NewTurnOk( const void * context )
 	if (f) {
 		fclose(f);
 	}
+	RestoreDialogValues();
 	SetUserLocale();
 	includeNontrackSegments = FALSE;
 	wHide( newTurnW );
