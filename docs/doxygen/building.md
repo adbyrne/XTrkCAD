@@ -402,7 +402,10 @@ bug:
   checks a value in an open dialog. Under `-T`, a wrong value or a dialog or field that doesn't exist
   logs `FAIL` and counts as a regression failure; `wrong` makes sure that happens. For a Properties
   dialog, `<dialog>` is `Describe <type>` and `<field>` is the field's position, from 1. `drawlen`
-  checks a field that a dialog fills in again after refusing a value.
+  checks a field that a dialog fills in again after refusing a value. For a message field, such as
+  a "New" hint, `<value>` is `shown` or `hidden`. `PARAMETER <dialog> <field> FOCUSOUT` plays back
+  a combo box's entry losing focus, which recording now writes too. `carnew` follows the car
+  dialog's "New" hints while a car is added (Manage > Car Inventory).
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button
