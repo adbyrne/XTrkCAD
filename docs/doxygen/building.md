@@ -396,7 +396,8 @@ bug:
   compared as the demo check compares them. Drawn objects are compared by position: Properties
   stores a drawn object's rotation in its points, which doesn't move it. Cars aren't compared, as
   only a full save writes them. The five largest layouts take 20 s to 100 s each, so they're only
-  labelled `regression`; the rest are `regression-ci`.
+  labelled `regression`; the rest are `regression-ci`. `regression-windows` leaves them out: they
+  take over ten times as long there, and what they check doesn't depend on the platform.
 - **Dialog values (`RegressionParamCheck.*`)** — a script line `PARAMCHECK <dialog> <field> <value>`
   checks a value in an open dialog. Under `-T`, a wrong value or a dialog or field that doesn't exist
   logs `FAIL` and counts as a regression failure; `wrong` makes sure that happens. For a Properties
