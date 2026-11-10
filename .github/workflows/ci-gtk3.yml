@@ -173,8 +173,9 @@ jobs:
         run: |
           sudo locale-gen de_DE.UTF-8
           # Fail here, not in the tests, if the locale didn't take: a
-          # missing locale falls back to C and every test would pass.
-          test "$(LC_ALL=de_DE.UTF-8 printf '%.1f' 1.5)" = "1,5"
+          # missing locale falls back to C and every test would pass. (Not
+          # printf 1.5: in de_DE that input is itself an invalid number.)
+          test "$(LC_ALL=de_DE.UTF-8 locale -k decimal_point)" = 'decimal_point=","'
       - name: Configure
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REGRESSION_TESTING=ON
       - name: Build
