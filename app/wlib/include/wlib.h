@@ -591,6 +591,7 @@ void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width,
 
 void wControlShow(wControl_p, wBool_t);
 wBool_t wControlIsShown(wControl_p);
+wBool_t wControlIsActive(wControl_p);
 wWinPix_t wControlGetWidth(wControl_p);
 wWinPix_t wControlGetHeight(wControl_p);
 void wControlGetPos(wControl_p, wWinPix_t *x, wWinPix_t *y);

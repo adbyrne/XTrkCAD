@@ -2376,6 +2376,56 @@ static void ParamPlayback(char *line)
 	}
 }
 
+/*
+ * Report a PARAMCHECK mismatch: a FAIL line in a test run (-T), otherwise
+ * error.log and, if asked for, a notice.
+ */
+static void ParamCheckReport(paramGroup_cp pg, const char *field,
+                             const char *expVal, const char *actVal)
+{
+	FILE *f;
+
+	if (bRunTests) {
+		// Nobody is there to dismiss a notice during -T.
+		lprintf("  FAIL: PARAMCHECK %d: %s-%s: exp: %s, act=%s\n",
+		        paramLineNum, pg->nameStr, field, expVal, actVal);
+		nRegressionFail++;
+		return;
+	}
+	f = FOpenAppendRestricted("error.log");
+	if (f == NULL) {
+		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, "PARAMCHECK LOG",
+		              "error.log", strerror(errno));
+	} else {
+		fprintf(f, "CHECK: %s:%d: %s-%s: exp: %s, act=%s\n", paramFileName,
+		        paramLineNum, pg->nameStr, field, expVal, actVal);
+		fclose(f);
+	}
+	if (paramCheckShowErrors)
+		NoticeMessage("CHECK: %d: %s-%s: exp: %s, act=%s", _("Ok"), NULL,
+		              paramLineNum, pg->nameStr, field, expVal, actVal);
+	paramCheckErrorCount++;
+}
+
+/*
+ * "active" or "inactive": whether a button can be pressed. Playback presses
+ * a button whether or not it's active, so a script checks this instead.
+ * Returns FALSE, with *actVal set, if the control isn't in that state.
+ */
+static BOOL_T ParamCheckActive(wControl_p control, const char *want,
+                               const char **actVal)
+{
+	const char *act;
+
+	if (strcmp(want, "active") != 0 && strcmp(want, "inactive") != 0) {
+		*actVal = "active or inactive";
+		return FALSE;
+	}
+	act = control != NULL && wControlIsActive(control) ? "active" : "inactive";
+	*actVal = act;
+	return strcmp(want, act) == 0;
+}
+
 static void ParamCheck(char *line)
 {
 	paramGroup_cp pg;
@@ -2386,10 +2436,9 @@ static void ParamCheck(char *line)
 	wIndex_t inx;
 	void *listContext, *itemContext;
 	char *valS;
-	char *expVal = NULL, *actVal = NULL;
+	const char *expVal = NULL, *actVal = NULL;
 	char expNum[32], actNum[32];
 	BOOL_T hasError = FALSE;
-	FILE *f;
 
 	pg = DialogGroupFind(line);
 	if (pg == NULL) {
@@ -2409,6 +2458,18 @@ static void ParamCheck(char *line)
 	//	  if ( strncmp( pg->nameStr, line, len1 ) != 0 ||
 	//		   line[len1] != ' ' )
 	//		  continue;
+	/* The dialog's own OK and Cancel buttons aren't fields. */
+	if (strncmp(line + len1 + 1, "ok ", 3) == 0 ||
+	    strncmp(line + len1 + 1, "cancel ", 7) == 0) {
+		BOOL_T isOk = line[len1 + 1] == 'o';
+		const char *want = line + len1 + 1 + (isOk ? 3 : 7);
+
+		if (!ParamCheckActive((wControl_p)(isOk ? pg->okB : pg->cancelB), want,
+		                      &actVal)) {
+			ParamCheckReport(pg, isOk ? "ok" : "cancel", want, actVal);
+		}
+		return;
+	}
 	for (p = pg->paramPtr, inx = 0; inx < pg->paramCnt; p++, inx++) {
 		if (p->nameStr == NULL) {
 			continue;
@@ -2426,6 +2487,11 @@ static void ParamCheck(char *line)
 		len = len1 + 1 + len2 + 1;
 		switch (p->type) {
 		case PD_BUTTON:
+			if (!ParamCheckActive(p->control, line + len,
+			                      &actVal)) {
+				expVal = line + len;
+				hasError = TRUE;
+			}
 			break;
 		case PD_LONG:
 		case PD_RADIO:
@@ -2525,8 +2591,9 @@ static void ParamCheck(char *line)
 			}
 			break;
 		case PD_TEXT: {
-			/* The whole text; a line break in it compares as "\n", so a
-			 * script line can check several lines of notes. */
+			/* The whole text; a line break in it compares as "\n" and a tab
+			 * as "\t", so a script line can check several lines of notes
+			 * or pretty-printed JSON. */
 			static char textAct[STR_LONG_SIZE];
 			char *textP;
 			int size, out = 0;
@@ -2542,9 +2609,9 @@ static void ParamCheck(char *line)
 				if (*cp == '\r') {
 					continue;
 				}
-				if (*cp == '\n') {
+				if (*cp == '\n' || *cp == '\t') {
 					textAct[out++] = '\\';
-					textAct[out++] = 'n';
+					textAct[out++] = *cp == '\n' ? 'n' : 't';
 				} else {
 					textAct[out++] = *cp;
 				}
@@ -2572,25 +2639,8 @@ static void ParamCheck(char *line)
 		case PD_EXPANDER:
 			break;
 		}
-		if (hasError && bRunTests) {
-			// Nobody is there to dismiss a notice during -T.
-			lprintf("  FAIL: PARAMCHECK %d: %s-%s: exp: %s, act=%s\n",
-			        paramLineNum, pg->nameStr, p->nameStr, expVal, actVal);
-			nRegressionFail++;
-		} else if (hasError) {
-			f = fopen("error.log", "a");
-			if (f == NULL) {
-				NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, "PARAMCHECK LOG",
-				              "error.log", strerror(errno));
-			} else {
-				fprintf(f, "CHECK: %s:%d: %s-%s: exp: %s, act=%s\n", paramFileName,
-				        paramLineNum, pg->nameStr, p->nameStr, expVal, actVal);
-				fclose(f);
-			}
-			if (paramCheckShowErrors)
-				NoticeMessage("CHECK: %d: %s-%s: exp: %s, act=%s", _("Ok"), NULL,
-				              paramLineNum, pg->nameStr, p->nameStr, expVal, actVal);
-			paramCheckErrorCount++;
+		if (hasError) {
+			ParamCheckReport(pg, p->nameStr, expVal, actVal);
 		}
 		return;
 		//	 }

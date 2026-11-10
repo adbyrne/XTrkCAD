@@ -124,6 +124,27 @@ void wControlActive(
 }
 
 /**
+ * Whether the control \a b can be used: the state wControlActive() set.
+ * Used by playback's PARAMCHECK, which checks that a button such as OK is
+ * or isn't available, as the user would see it.
+ *
+ * \param b IN the control
+ * \return TRUE if it's active (sensitive)
+ */
+
+wBool_t wControlIsActive(
+        wControl_p b)
+{
+	if (b->widget == NULL) {
+		return FALSE;
+	}
+	if (b->type == B_LIST) {
+		return gtk_widget_get_sensitive(gtk_bin_get_child(GTK_BIN(b->widget)));
+	}
+	return gtk_widget_get_sensitive(GTK_WIDGET(b->widget));
+}
+
+/**
  * Get width of a control
  *
  * \param b IN Control

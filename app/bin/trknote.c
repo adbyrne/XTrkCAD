@@ -668,6 +668,16 @@ static BOOL_T QueryNote( track_p trk, int query )
 	return FALSE;
 }
 
+/**
+ * Regression check: does the actual note match the expected one? Compares
+ * position, type and content (text, link title and URL, or file title and
+ * path).
+ *
+ * \param trk1 IN actual note
+ * \param trk2 IN expected note
+ * \return TRUE if they match; otherwise FALSE, with the difference appended
+ *         to message
+ */
 static wBool_t CompareNote( track_cp trk1, track_cp trk2 )
 {
 	const struct extraDataNote_t *xx1 = GET_EXTRA_DATA( trk1, T_NOTE,
@@ -677,6 +687,24 @@ static wBool_t CompareNote( track_cp trk1, track_cp trk2 )
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
 	REGRESS_CHECK_INT( "Op", xx1, xx2, op )
+	/* What the note says, not only where it is: without this a demo could
+	 * save the wrong text, or a JSON note the wrong JSON, and still pass. */
+	switch ( xx1->op ) {
+	case OP_NOTETEXT:
+	case OP_NOTEJSON:
+		REGRESS_CHECK_STR( "Text", xx1, xx2, noteData.text )
+		break;
+	case OP_NOTELINK:
+		REGRESS_CHECK_STR( "Title", xx1, xx2, noteData.linkData.title )
+		REGRESS_CHECK_STR( "Url", xx1, xx2, noteData.linkData.url )
+		break;
+	case OP_NOTEFILE:
+		REGRESS_CHECK_STR( "Title", xx1, xx2, noteData.fileData.title )
+		REGRESS_CHECK_STR( "Path", xx1, xx2, noteData.fileData.path )
+		break;
+	default:
+		break;
+	}
 	return TRUE;
 }
 

@@ -1338,8 +1338,8 @@ static wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
 	return trackCmds( GetTrkType( trk1 ) )->compare( trk1, trk2 );
 }
 
-EXPORT int CheckRegressionResult( long regressVersion,const char * sFileName,
-                                  wBool_t bQuiet )
+static int CheckRegressionTracks( long regressVersion,
+                                  const char * sFileName, wBool_t bQuiet )
 {
 	wBool_t bWroteActualTracks = FALSE;
 	int nFail = 0;
@@ -1437,6 +1437,35 @@ EXPORT int CheckRegressionResult( long regressVersion,const char * sFileName,
 		lprintf( "  FAIL: Track count: Actual %d, Expected %d\n", nActual, nExpected );
 	}
 	return nFail;
+}
+
+/**
+ * Compare the layout with the expected tracks of a REGRESSION block, which
+ * follow in the playback file up to REGRESSION END.
+ *
+ * Reading an expected track creates it with NewTrack(), which records it in
+ * the current Undo step when Undo is on (UNDORESUME). The temporary tracks
+ * then corrupted the Undo history: the next Undo asserted and didn't restore
+ * the layout. So Undo is suspended while the block is read, and left as it
+ * was.
+ *
+ * \param regressVersion IN file version of the expected tracks
+ * \param sFileName IN playback file, for the failure report
+ * \param bQuiet IN TRUE: don't ask whether to continue after a failure
+ * \return the number of failures, or -1 if the file ended
+ */
+EXPORT int CheckRegressionResult( long regressVersion,const char * sFileName,
+                                  wBool_t bQuiet )
+{
+	BOOL_T undoWasActive = UndoIsActive();
+	int rc;
+
+	UndoSuspend();
+	rc = CheckRegressionTracks( regressVersion, sFileName, bQuiet );
+	if ( undoWasActive ) {
+		UndoResume();
+	}
+	return rc;
 }
 
 

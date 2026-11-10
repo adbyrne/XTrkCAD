@@ -1,0 +1,88 @@
+# JSON Note dialog (jsonnoteui.c). The text must be a JSON object, and the
+# note is saved only then: OK goes inactive after Validate, and OK itself
+# refuses (playback presses OK even when it's inactive, and typing doesn't
+# update it). The field editor rewrites the text: Add appends a key, Update
+# keeps it in place, Delete removes it, a number or true is stored as that,
+# a nested object can be picked, and an empty Name changes nothing. Undo and
+# Redo of the edit. REGRESSION blocks check the saved note's text
+# (CompareNote()); PARAMCHECK compares a tab as \t and a line break as \n.
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 40.000 x 20.000
+SCALE HO
+REDRAW
+# Not an object, trailing text, bad syntax; then OK pressed anyway.
+COMMAND JsonNote
+MOUSE 2 10.000 7.000
+MOUSE 4 10.000 7.000
+PARAMCHECK jsonNote ok active
+PARAMETER jsonNote text [1, 2]
+PARAMETER jsonNote validate
+PARAMCHECK jsonNote ok inactive
+PARAMETER jsonNote text {"kind": "station"} extra
+PARAMETER jsonNote validate
+PARAMCHECK jsonNote ok inactive
+PARAMETER jsonNote text {"kind": }
+PARAMETER jsonNote validate
+PARAMCHECK jsonNote ok inactive
+PARAMETER jsonNote ok
+PARAMETER jsonNote cancel
+# Invalid text and OK without Validate.
+COMMAND JsonNote
+MOUSE 2 12.000 7.000
+MOUSE 4 12.000 7.000
+PARAMETER jsonNote text {"kind": "yard",
+PARAMETER jsonNote ok
+PARAMETER jsonNote cancel
+# A valid note, OK without Validate: saved, and the only note.
+COMMAND JsonNote
+MOUSE 2 14.000 7.000
+MOUSE 4 14.000 7.000
+PARAMETER jsonNote text {"kind": "station", "id": "S1", "tags": ["a"], "loc": {"x": 1}}
+PARAMETER jsonNote ok
+REGRESSION START 13 - only the valid note
+NOTE 1 0 0 0 14.000000 7.000000 0 3 "{""kind"": ""station"", ""id"": ""S1"", ""tags"": [""a""], ""loc"": {""x"": 1}}"
+REGRESSION END
+# Edit it with the field editor.
+UNDORESUME
+COMMAND Describe
+MOUSE 2 14.000 7.000
+MOUSE 4 14.000 7.000
+PARAMCHECK jsonNote text {"kind": "station", "id": "S1", "tags": ["a"], "loc": {"x": 1}}
+PARAMCHECK jsonNote jsonobj 0
+PARAMETER jsonNote jsonname id
+PARAMETER jsonNote jsonvalue S7
+PARAMETER jsonNote jsonfieldsave
+PARAMCHECK jsonNote text {\n\t"kind":\t"station",\n\t"id":\t"S7",\n\t"tags":\t["a"],\n\t"loc":\t{\n\t\t"x":\t1\n\t}\n}
+PARAMETER jsonNote jsonname track
+PARAMETER jsonNote jsonvalue 3
+PARAMETER jsonNote jsonfieldsave
+PARAMETER jsonNote jsonname open
+PARAMETER jsonNote jsonvalue true
+PARAMETER jsonNote jsonfieldsave
+PARAMETER jsonNote jsonname tags
+PARAMETER jsonNote jsonfielddelete
+PARAMCHECK jsonNote text {\n\t"kind":\t"station",\n\t"id":\t"S7",\n\t"loc":\t{\n\t\t"x":\t1\n\t},\n\t"track":\t3,\n\t"open":\ttrue\n}
+PARAMETER jsonNote jsonobj 1
+PARAMETER jsonNote jsonname y
+PARAMETER jsonNote jsonvalue 2
+PARAMETER jsonNote jsonfieldsave
+PARAMCHECK jsonNote text {\n\t"kind":\t"station",\n\t"id":\t"S7",\n\t"loc":\t{\n\t\t"x":\t1,\n\t\t"y":\t2\n\t},\n\t"track":\t3,\n\t"open":\ttrue\n}
+PARAMETER jsonNote jsonobj 0
+PARAMETER jsonNote jsonname
+PARAMETER jsonNote jsonvalue x
+PARAMETER jsonNote jsonfieldsave
+PARAMCHECK jsonNote text {\n\t"kind":\t"station",\n\t"id":\t"S7",\n\t"loc":\t{\n\t\t"x":\t1,\n\t\t"y":\t2\n\t},\n\t"track":\t3,\n\t"open":\ttrue\n}
+PARAMETER jsonNote ok
+REGRESSION START 13 - edited
+NOTE 1 0 0 0 14.000000 7.000000 0 3 "{\n\t""kind"":\t""station"",\n\t""id"":\t""S7"",\n\t""loc"":\t{\n\t\t""x"":\t1,\n\t\t""y"":\t2\n\t},\n\t""track"":\t3,\n\t""open"":\ttrue\n}"
+REGRESSION END
+UNDOSTEP
+REGRESSION START 13 - undone
+NOTE 1 0 0 0 14.000000 7.000000 0 3 "{""kind"": ""station"", ""id"": ""S1"", ""tags"": [""a""], ""loc"": {""x"": 1}}"
+REGRESSION END
+REDOSTEP
+REGRESSION START 13 - redone
+NOTE 1 0 0 0 14.000000 7.000000 0 3 "{\n\t""kind"":\t""station"",\n\t""id"":\t""S7"",\n\t""loc"":\t{\n\t\t""x"":\t1,\n\t\t""y"":\t2\n\t},\n\t""track"":\t3,\n\t""open"":\ttrue\n}"
+REGRESSION END

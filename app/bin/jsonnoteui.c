@@ -767,10 +767,10 @@ JsonDlgUpdate(paramGroup_cp pg, int inx, void *valueP)
 
 /**
  * Handle OK button: create or update the note, then close the dialog.
- * Relies solely on the disabled-OK-button mechanism (JsonDlgUpdate/
- * JsonNoteValidate already keep it accurate on every keystroke) rather
- * than re-validating a third time here -- matching filenoteui.c's
- * FileEditOK(), which does the same.
+ * Validates the text again first and refuses invalid text, leaving the
+ * dialog open: typing doesn't update the OK button (see the comment
+ * inside), so a disabled OK alone doesn't stop invalid JSON being saved.
+ * RegressionParamCheck.jsonnote presses OK on invalid text to check this.
  *
  * \param junk unused
  */
