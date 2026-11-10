@@ -446,7 +446,11 @@ bug:
   that can't connect is refused and the dialog stays open; a right-hand turnout mirrors the left;
   a design with an existing name asks first (`MSG_TODSGN_REPLACE`), and No keeps the old
   definition; a frog number comes back unchanged when the dialog reopens. In a script,
-  `MOUSE 8200 <x> <y>` is the space key (`C_TEXT | ' ' << 8`), which ends a placement.
+  `MOUSE 8200 <x> <y>` is the space key (`C_TEXT | ' ' << 8`), which ends a placement. `layers` covers
+  the Layers dialog: Add Layer and Delete Layer renumber the layers after them, and the tracks,
+  the Layer Groups' members and the current layer have to follow; a layer with objects can't be
+  deleted; edited properties are kept. A list check reads the selected row, so select a row with
+  `PARAMETER <dialog> <list> <n>` before checking its text.
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button

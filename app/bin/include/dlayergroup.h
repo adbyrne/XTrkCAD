@@ -69,6 +69,18 @@ int LayerGroupAddMember(int groupIdx, int layerIdx);
  * if \p groupIdx is invalid. */
 int LayerGroupRemoveMember(int groupIdx, int layerIdx);
 
+/**
+ * A layer was inserted at \p layerIdx (1-based): every member at or above
+ * it moves up by one, so each group keeps the same layers.
+ */
+void LayerGroupInsertLayer(int layerIdx);
+
+/**
+ * Layer \p layerIdx (1-based) was deleted: it leaves every group, and every
+ * member above it moves down by one.
+ */
+void LayerGroupDeleteLayer(int layerIdx);
+
 /** 1 if 1-based layer index \p layerIdx is a member of group \p groupIdx,
  * else 0 (including when \p groupIdx is invalid). */
 int LayerGroupHasMember(int groupIdx, int layerIdx);

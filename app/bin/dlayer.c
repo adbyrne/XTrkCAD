@@ -1125,6 +1125,13 @@ static void LayerAdd()
 	}
 
 	TrackInsertLayer(newLayer);
+	// Everything that names a layer by number follows the shift, or it ends
+	// up on the new layer: the groups' members (1-based) and the current
+	// layer, which new objects go on
+	LayerGroupInsertLayer((int)newLayer + 1);
+	if (curLayer >= newLayer) {
+		curLayer++;
+	}
 
 	LayerSystemDefault(newLayer);
 	strcpy(layers[newLayer].name, "New Layer");
@@ -1159,6 +1166,13 @@ static void LayerDelete()
 	}
 
 	TrackDeleteLayer(layerSelected);
+	// As in LayerAdd(): groups and the current layer follow the shift
+	LayerGroupDeleteLayer((int)layerSelected + 1);
+	if (curLayer > layerSelected) {
+		curLayer--;
+	} else if (curLayer > maxLayer) {
+		curLayer = maxLayer;
+	}
 
 	UpdateLayerDlg(layerSelected);
 
