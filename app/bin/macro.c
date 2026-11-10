@@ -2536,6 +2536,17 @@ static void ParamCheck(char *line)
 					actVal = actNum;
 					hasError = TRUE;
 				}
+			} else if (*valS == '\0') {
+				/* "<index>" alone: the selected row, whatever its text says
+				 * in the user's language. */
+				if (wListGetIndex((wList_p)p->control) != valL) {
+					snprintf(expNum, sizeof expNum, "%ld", valL);
+					snprintf(actNum, sizeof actNum, "%d",
+					         wListGetIndex((wList_p)p->control));
+					expVal = expNum;
+					actVal = actNum;
+					hasError = TRUE;
+				}
 			} else {
 				wListGetValues((wList_p)p->control, message, sizeof message,
 				               &listContext, &itemContext);

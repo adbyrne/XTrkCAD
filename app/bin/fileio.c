@@ -1703,9 +1703,14 @@ EXPORT int LayoutDescribeTest( const char * pathName )
 		lprintf( "  FAIL: can't write %s\n", expected );
 		nFail++;
 	} else {
+		// Written and read back in the C locale, as a layout file is: with a
+		// decimal-comma locale (de_DE) the numbers came out as 2,42 and were
+		// read back into the wrong fields (dev ML #4641)
+		SetCLocale();
 		WriteTracks( f, FALSE );
 		fprintf( f, "REGRESSION END\n" );
 		fclose( f );
+		SetUserLocale();
 
 		int nUndo = DescribeAllTracks();
 		if ( nUndo > 0 ) {
@@ -1717,7 +1722,9 @@ EXPORT int LayoutDescribeTest( const char * pathName )
 		UndoSuspend();
 		paramFile = fopen( expected, "r" );
 		paramLineNum = 0;
+		SetCLocale();
 		int nDiff = CheckRegressionResult( PARAMVERSION, expected, TRUE );
+		SetUserLocale();
 		if ( paramFile ) {
 			fclose( paramFile );
 			paramFile = NULL;

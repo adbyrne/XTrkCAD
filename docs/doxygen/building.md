@@ -427,8 +427,18 @@ bug:
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button
-  answers unless a script says `NOTICEANSWER second` or `third`. A test that expects a message can
-  pass on it with `PASS_REGULAR_EXPRESSION`.
+  answers unless a script says `NOTICEANSWER second` or `third`. A message with an ID (`MSG_...` in
+  `messages.in`) also logs `NOTICE ID: MSG_...` or `ERROR ID: MSG_...` on the line before. A test
+  that expects a message passes on it with `PASS_REGULAR_EXPRESSION`, matching the ID rather than
+  the wording, plus any number or file name it needs from the text.
+- **Languages** — the regression test commands set `LC_MESSAGES=C` (and clear `LC_ALL` and
+  `LANGUAGE`), so messages are in English whatever the developer's language: a few tests match
+  texts that have no ID, such as `strerror()`'s. Only the messages: numbers keep the locale, so with
+  `LANG=de_DE.UTF-8` a decimal comma shows where data is written or read without `SetCLocale()`.
+  Run new tests once that way. Don't match translated text in a new test: match a message ID, a
+  list index (`PARAMCHECK <dialog> <list> <n>` with no text checks the selected row), or a number.
+  The `regression-locale-de` CI job runs the `regression-ci` tests with that locale; it reports only
+  until it has been green for a few runs (dev ML #4641).
 - **What the user is told when something goes wrong (`RegressionNotice.*`)** — `badline` loads a
   layout with a bad number and an unknown line, and `badline_check` checks which tracks survived;
   `newer` opens a file from a newer version, which must not become the current layout (the

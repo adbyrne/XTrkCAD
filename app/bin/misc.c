@@ -410,10 +410,37 @@ EXPORT void SetTestNoticeAnswer(int answer)
 	testNoticeAnswer = answer;
 }
 
+/*
+ * The ID of the message being shown ("MSG_..." before the first tab of the
+ * untranslated text), so a test can match it in any language. Empty when the
+ * message has none.
+ */
+static char testMessageId[64];
+
+static void SetTestMessageId(const char * format)
+{
+	size_t len;
+
+	testMessageId[0] = '\0';
+	if (!bRunTests || format == NULL || strncmp(format, "MSG_", 4) != 0) {
+		return;
+	}
+	len = strcspn(format, "\t");
+	if (format[len] != '\t' || len >= sizeof testMessageId) {
+		return;
+	}
+	memcpy(testMessageId, format, len);
+	testMessageId[len] = '\0';
+}
+
 static void LogTestMessage(const char * kind, const char * msg)
 {
 	char flat[1024];
 	size_t i;
+	if (testMessageId[0]) {
+		lprintf("%s ID: %s\n", kind, testMessageId);
+		testMessageId[0] = '\0';
+	}
 	for (i = 0; i < sizeof flat - 1 && msg[i]; i++) {
 		flat[i] = (msg[i] == '\n' || msg[i] == '\r') ? ' ' : msg[i];
 	}
@@ -443,6 +470,7 @@ static int TestNoticeAnswer(const char * msg, const char * first,
 EXPORT void ErrorMessage(const char * format, ...)
 {
 	va_list ap;
+	SetTestMessageId(format);
 	va_start(ap, format);
 	format = ParseMessage(format);
 	vsnprintf(message2, 1020, format, ap);
@@ -450,6 +478,7 @@ EXPORT void ErrorMessage(const char * format, ...)
 	if (bRunTests) {
 		LogTestMessage("ERROR", message2);
 	}
+	testMessageId[0] = '\0';
 	InfoDefaultControls();
 	SetMessage(message2);
 	wBeep();
@@ -460,11 +489,15 @@ EXPORT int NoticeMessage(const char * format, const char * yes, const char * no,
                          ...)
 {
 	va_list ap;
+	int rc;
+	SetTestMessageId(format);
 	va_start(ap, no);
 	format = ParseMessage(format);
 	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
-	return wNotice(message2, yes, no);
+	rc = wNotice(message2, yes, no);
+	testMessageId[0] = '\0';
+	return rc;
 }
 
 EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes,
@@ -475,6 +508,7 @@ EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes,
 	if (inPlayback && !bRunTests) {
 		return playbackRC;
 	}
+	SetTestMessageId(format);
 	va_start(ap, no);
 	format = ParseMessage(format);
 	vsnprintf(message2, 1020, format, ap);
