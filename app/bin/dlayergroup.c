@@ -190,6 +190,34 @@ int LayerGroupRemoveMember(int groupIdx, int layerIdx)
 	return 1;
 }
 
+void LayerGroupInsertLayer(int layerIdx)
+{
+	for (int gi = 0; gi < groupCount; gi++) {
+		layerGroupEntry_t *g = &groups[gi];
+		for (int i = 0; i < g->memberCount; i++) {
+			if (g->members[i] >= layerIdx) {
+				g->members[i]++;
+			}
+		}
+	}
+}
+
+void LayerGroupDeleteLayer(int layerIdx)
+{
+	for (int gi = 0; gi < groupCount; gi++) {
+		layerGroupEntry_t *g = &groups[gi];
+		int out = 0;
+		for (int i = 0; i < g->memberCount; i++) {
+			if (g->members[i] == layerIdx) {
+				continue;
+			}
+			g->members[out++] = g->members[i] > layerIdx ?
+			                    g->members[i] - 1 : g->members[i];
+		}
+		g->memberCount = out;
+	}
+}
+
 int LayerGroupHasMember(int groupIdx, int layerIdx)
 {
 	if (!GroupValid(groupIdx)) {

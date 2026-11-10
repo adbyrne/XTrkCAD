@@ -508,6 +508,53 @@ static void test_filter_invalid_group_hides_nothing_extra(void **state)
 	assert_int_equal(LayerGroupFilterShows(5, 1, 0, 1), 0);
 }
 
+/* Members are 1-based layer numbers. Inserting a layer moves every member at
+ * or above it up by one, so a group keeps the same layers (dev: Layers
+ * dialog Add Layer used to leave groups pointing at the shifted layers). */
+static void test_insert_layer_shifts_members(void **state)
+{
+	(void) state;
+	LayerGroupResetAll();
+	int g = LayerGroupCreate("Scenic");
+	int h = LayerGroupCreate("Base");
+	LayerGroupParseMembers(g, "2;3");	/* Yard, Town */
+	LayerGroupParseMembers(h, "1");
+
+	LayerGroupInsertLayer(3);		/* new layer where Town was */
+	assert_int_equal(LayerGroupMemberCount(g), 2);
+	assert_int_equal(LayerGroupMemberAt(g, 0), 2);
+	assert_int_equal(LayerGroupMemberAt(g, 1), 4);
+	assert_int_equal(LayerGroupHasMember(g, 3), 0);
+	assert_int_equal(LayerGroupMemberAt(h, 0), 1);
+
+	LayerGroupInsertLayer(1);		/* before everything */
+	assert_int_equal(LayerGroupMemberAt(g, 0), 3);
+	assert_int_equal(LayerGroupMemberAt(g, 1), 5);
+	assert_int_equal(LayerGroupMemberAt(h, 0), 2);
+}
+
+/* Deleting a layer takes it out of every group and moves the members above
+ * it down by one. */
+static void test_delete_layer_shifts_and_drops_members(void **state)
+{
+	(void) state;
+	LayerGroupResetAll();
+	int g = LayerGroupCreate("Scenic");
+	int h = LayerGroupCreate("Other");
+	LayerGroupParseMembers(g, "2;3;5");
+	LayerGroupParseMembers(h, "3");
+
+	LayerGroupDeleteLayer(3);
+	assert_int_equal(LayerGroupMemberCount(g), 2);
+	assert_int_equal(LayerGroupMemberAt(g, 0), 2);
+	assert_int_equal(LayerGroupMemberAt(g, 1), 4);
+	assert_int_equal(LayerGroupMemberCount(h), 0);
+
+	LayerGroupDeleteLayer(7);		/* not a member, above all of them */
+	assert_int_equal(LayerGroupMemberCount(g), 2);
+	assert_int_equal(LayerGroupMemberAt(g, 1), 4);
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
@@ -545,6 +592,8 @@ int main(void)
 		cmocka_unit_test(test_filter_show_only),
 		cmocka_unit_test(test_filter_show_not_mirrors_show_only),
 		cmocka_unit_test(test_filter_invalid_group_hides_nothing_extra),
+		cmocka_unit_test(test_insert_layer_shifts_members),
+		cmocka_unit_test(test_delete_layer_shifts_and_drops_members),
 	};
 	return cmocka_run_group_tests(tests, NULL, NULL);
 }

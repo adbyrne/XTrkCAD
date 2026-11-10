@@ -2510,8 +2510,10 @@ static void ParamCheck(char *line)
 			continue;
 		}
 		/* A message has no value, only whether it's shown; a text field
-		 * keeps its value in the control. */
-		if (p->valueP == NULL && p->type != PD_MESSAGE && p->type != PD_TEXT) {
+		 * and a list without a value keep it in the control. */
+		if (p->valueP == NULL && p->type != PD_MESSAGE && p->type != PD_TEXT &&
+		    p->type != PD_LIST && p->type != PD_DROPLIST &&
+		    p->type != PD_COMBOLIST) {
 			return;
 		}
 		len = len1 + 1 + len2 + 1;
@@ -2558,8 +2560,19 @@ static void ParamCheck(char *line)
 			if (valS[0] == ' ') {
 				valS++;
 			}
-			if ((p->option & PDO_LISTINDEX) != 0) {
-				if (*(long *)p->valueP != valL) {
+			if ((p->option & PDO_LISTINDEX) != 0 && p->valueP == NULL) {
+				if (wListGetIndex((wList_p)p->control) != valL) {
+					snprintf(expNum, sizeof expNum, "%ld", valL);
+					snprintf(actNum, sizeof actNum, "%d",
+					         wListGetIndex((wList_p)p->control));
+					expVal = expNum;
+					actVal = actNum;
+					hasError = TRUE;
+				}
+			} else if ((p->option & PDO_LISTINDEX) != 0) {
+				/* The index is a wIndex_t, as ParamPlayback() stores it; read
+				 * as a long it took bytes past the variable. */
+				if (*(wIndex_t *)p->valueP != valL) {
 					snprintf(expNum, sizeof expNum, "%ld", valL);
 					snprintf(actNum, sizeof actNum, "%d", *(wIndex_t *)p->valueP);
 					expVal = expNum;
