@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "carsprivate.h"
 
@@ -189,4 +190,46 @@ unsigned CarValidateIdentity(
 	}
 
 	return result;
+}
+
+/**
+ * One line of a car's notes for the Car Inventory list. The list draws a
+ * multi-line value as a tall row, so notes with trailing blank lines left
+ * large gaps (Development Issues #76). Leading blank lines are skipped,
+ * tabs become spaces (a tab would start a new column), trailing spaces are
+ * dropped, and " ..." marks further text when it fits.
+ *
+ * \param notes  the car's notes, may be NULL
+ * \param out    receives the text, always terminated
+ * \param outLen size of out, at least 1
+ */
+void CarNotesListText( const char *notes, char *out, size_t outLen )
+{
+	static const char more[] = " ...";
+	size_t len = 0;
+
+	out[0] = '\0';
+	if ( notes == NULL ) {
+		return;
+	}
+	while ( *notes && isspace( (unsigned char)*notes ) ) {
+		notes++;
+	}
+	while ( *notes && *notes != '\n' && *notes != '\r' && len + 1 < outLen ) {
+		out[len++] = ( *notes == '\t' ) ? ' ' : *notes;
+		notes++;
+	}
+	while ( len > 0 && out[len - 1] == ' ' ) {
+		len--;
+	}
+	out[len] = '\0';
+	while ( *notes && *notes != '\n' && *notes != '\r' ) {
+		notes++;
+	}
+	while ( *notes && isspace( (unsigned char)*notes ) ) {
+		notes++;
+	}
+	if ( *notes && len + sizeof more <= outLen ) {
+		memcpy( out + len, more, sizeof more );
+	}
 }

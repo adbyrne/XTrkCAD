@@ -287,6 +287,10 @@ carDim_t SeedProtoDimsFromCatalog( carDim_t catalogDim, wIndex_t scaleInx );
 
 unsigned CarValidateDims( const carDim_t *dims );
 
+/* Notes as shown in the Car Inventory list: the first non-blank line, tabs
+ * as spaces, and " ..." when more text follows (Development Issues #76). */
+void CarNotesListText( const char *notes, char *out, size_t outLen );
+
 
 #define CAR_IDENT_PROTO_EMPTY   (1u << 0)
 #define CAR_IDENT_MANUF_EMPTY   (1u << 1)

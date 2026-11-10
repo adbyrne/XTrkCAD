@@ -446,12 +446,7 @@ static void FormatDisplayItem(carItem_p item)
 	char line[LARGE_STRING_LEN];
 
 	TabStringExtract(item->title, MAX_SUBSTRING_COUNT, tabs);
-	if (item->data.notes) {
-		strncpy(notes, item->data.notes, sizeof notes - 1);
-		notes[sizeof notes - 1] = '\0';
-	} else {
-		notes[0] = '\0';
-	}
+	CarNotesListText(item->data.notes, notes, sizeof notes);
 	condition =
 	        (item->data.condition < CONDITION_NA) ? N_("N/A") :
 	        (item->data.condition < CONDITION_POOR) ? N_("Poor") :
