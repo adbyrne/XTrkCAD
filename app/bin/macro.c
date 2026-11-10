@@ -2392,7 +2392,7 @@ static void ParamCheckReport(paramGroup_cp pg, const char *field,
 		nRegressionFail++;
 		return;
 	}
-	f = fopen("error.log", "a");
+	f = FOpenAppendRestricted("error.log");
 	if (f == NULL) {
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, "PARAMCHECK LOG",
 		              "error.log", strerror(errno));

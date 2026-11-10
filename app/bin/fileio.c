@@ -91,6 +91,25 @@ static FILE * FOpenWriteRestricted( const char * path )
 #endif
 }
 
+/**
+ * Open a file for appending, creating it with the same explicit mode as
+ * FOpenWriteRestricted(), instead of fopen()'s umask-only default.
+ *
+ * \param path IN the file
+ * \return the open file, or NULL
+ */
+EXPORT FILE * FOpenAppendRestricted( const char * path )
+{
+#ifdef WINDOWS
+	int fd = _open( path, _O_CREAT | _O_WRONLY | _O_APPEND,
+	                _S_IREAD | _S_IWRITE );
+	return fd < 0 ? NULL : _fdopen( fd, "a" );
+#else
+	int fd = open( path, O_CREAT | O_WRONLY | O_APPEND, 0644 );
+	return fd < 0 ? NULL : fdopen( fd, "a" );
+#endif
+}
+
 EXPORT int Copyfile( const char * fn1, const char * fn2 )
 {
 	FILE *f1, *f2;
