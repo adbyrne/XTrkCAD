@@ -530,6 +530,10 @@ script is information used by the layout control software to detect block
 occupancy. The script could be a code snippet or I/O device address
 information, etc.
 
+To change a block's name or script later, or to delete a block, use the
+Layout Control Elements dialog (\ref cmdContmgm) on the Manage menu
+(\ref manageM).
+
 */
 
 /**
