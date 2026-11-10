@@ -137,7 +137,6 @@ STRAIGHT 3 0 0 0 0 DEMO 2
 NOTE 4 0 0 0 16.666667 4.250000 0 69
 This is a note about something important
 but I can't remember what.
- 
     END
 DRAW 5 0 0 0 0 4.125000 5.750000 0 0.000000
 	Z 0 0.000000 0.000000 0.000000 0 60.000000 "Goodbye"

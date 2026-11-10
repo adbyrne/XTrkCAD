@@ -303,12 +303,14 @@ up (Development Issues #67). Regression tests besides the demos:
 - `RegressionParamCheck.*`: `PARAMCHECK` in a script checks a dialog's values, and `UNDORESUME`,
   `UNDOSTEP`, `REDOSTEP` test Undo, which playback otherwise suspends. `FILESELECT <file>` answers
   the next file dialog; `PARAMCHECK <dlg> <list> count <n>` and `PARAMETER <dlg> <list> <n>`
-  count and pick list rows (dev guide `building.md` has the rest). `cars*` cover the car dialog.
+  count and pick list rows; `PARAMCHECK <dlg> ok active|inactive` checks a button (dev guide
+  `building.md` has the rest). `cars*` cover the car dialog, `jsonnote` the JSON Note dialog.
 - Under `-T`, notices and status-bar errors go to the log (`NOTICE:`, `NOTICE ANSWER:`, `ERROR:`)
   instead of opening; `NOTICEANSWER first|second|third` picks the button.
 - `RegressionNotice.*`: what the user is told when a load or save goes wrong, and what survives.
 
-`CompareSegs()` really compares turnouts and structures since #66, so changing them can fail a demo.
+`CompareSegs()` really compares turnouts and structures since #66, and `CompareNote()` a note's text,
+so changing them can fail a demo.
 If the new result is right, `-d regression=3` writes new blocks, but read each diff first.
 
 ```sh

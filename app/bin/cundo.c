@@ -141,6 +141,17 @@ void UndoSuspend( void )
 	undoActive = FALSE;
 }
 
+/**
+ * Whether Undo is recording changes, so that code which suspends it for a
+ * while (UndoSuspend()) can put it back as it was.
+ *
+ * \return TRUE if Undo is active
+ */
+BOOL_T UndoIsActive( void )
+{
+	return undoActive;
+}
+
 
 static void DumpStream( FILE * outf, stream_p stream, const char * name )
 {

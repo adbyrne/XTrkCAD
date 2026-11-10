@@ -377,8 +377,12 @@ bug:
   with the live track, and the number of tracks has to match. Positions are compared within 0.1
   layout unit (`IsPosClose()`, `track.c`). The three `RegressionCompare.*` tests check this check:
   one fixture in `app/bin/unittest/testfiles/` has to match, and two have to be reported, a wrong
-  turnout segment and an extra track. When a block fails after a change, work out which side is
-  right before regenerating it (`-d regression=3` writes new blocks to `xtrkcad.regress`).
+  turnout segment and an extra track. A note is compared by what it holds too: its text (text
+  and JSON notes), its link's title and URL, or its file's title and path (`CompareNote()`,
+  `trknote.c`). Undo is suspended while a block is read, as reading the expected tracks creates
+  them and would otherwise record them in the current Undo step. When a block fails after a
+  change, work out which side is right before regenerating it (`-d regression=3` writes new blocks
+  to `xtrkcad.regress`).
 - **Layout round trip (`RegressionRoundTrip.*`)** — one test per layout in `app/lib/examples`: `-T<layout>.xtc`
   loads it, saves it, reloads the save and saves again, and the saves have to match, leaving out the
   date and `MAPSCALE` (it follows from the window size). The same goes for `.xtce`, saved both
@@ -408,13 +412,18 @@ bug:
   `PARAMCHECK <dialog> <list> count <n>` checks the number of rows, and
   `PARAMETER <dialog> <list> <n>` with no text picks row `<n>` (recorded lines name the row by its
   text, which is long in the car inventory). For a text field, `<value>` is the whole text, with
-  `\n` for a line break. `FILESELECT <file>` answers the next file dialog without opening it
+  `\n` for a line break and `\t` for a tab. For a button, and for `ok` and `cancel`, `<value>` is
+  `active` or `inactive`: playback presses a button whether or not it's active, so a script checks
+  what the user could press (`wControlIsActive()`). `FILESELECT <file>` answers the next file dialog without opening it
   (`wFilSelSetPlayback()`); a relative name is in the work directory, which each test has to
   itself. `carnew` follows the car dialog's "New" hints while a car is added (Manage > Car
   Inventory). `carsedit` edits a car and cancels an edit, `carsproto` adds a car of a new
   prototype, `carsdelete` answers No and then Yes to Delete and imports cars whose indexes are
   taken, and `carscsv` exports, deletes and imports the inventory and checks every field. Shelving
-  a car that is on the layout isn't covered.
+  a car that is on the layout isn't covered. `jsonnote` covers the JSON Note dialog: text that
+  isn't a JSON object turns OK inactive and is never saved, even when OK is pressed; the field
+  editor's Add, Update and Delete; and Undo and Redo of the edit. It and `undo` also fail on an
+  `UNDO ASSERT` line, which otherwise only logs.
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button

@@ -31,6 +31,7 @@ void UndoUndo( void * unused );
 void UndoRedo( void * unused );
 void UndoResume( void );
 void UndoSuspend( void );
+BOOL_T UndoIsActive( void );
 void UndoStart( char *, char *, ... );
 BOOL_T UndoModify( track_p );
 BOOL_T UndoDelete( track_p );

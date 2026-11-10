@@ -74,7 +74,7 @@ list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/param
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
-foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep drawlen longsignal manage carnew carsedit carsdelete carscsv carsproto)
+foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep drawlen longsignal manage carnew carsedit carsdelete carscsv carsproto jsonnote)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
@@ -304,7 +304,7 @@ endforeach()
 # Field values in a dialog, through PARAMCHECK. "wrong" has to fail, so a check
 # that reports nothing can't pass as a good result. It passes on the message, not
 # the exit code, as the comparator tests above do.
-foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep drawlen longsignal manage carnew carsedit carsdelete carscsv carsproto)
+foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep drawlen longsignal manage carnew carsedit carsdelete carscsv carsproto jsonnote)
     set(_xtrkcad_paramcheck_home "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
     xtrkcad_add_regression_test("RegressionParamCheck.${_xtrkcad_paramcheck_case}" "${_xtrkcad_paramcheck_home}"
         "${_xtrkcad_test_option}${_xtrkcad_compare_dir}/regress-paramcheck-${_xtrkcad_paramcheck_case}.xtr")
@@ -340,6 +340,12 @@ if(NOT WIN32)
         PROPERTIES FAIL_REGULAR_EXPRESSION "NOTICE:|FAIL: PARAMCHECK")
     set_tests_properties(RegressionParamCheck.carscsv PROPERTIES
         FAIL_REGULAR_EXPRESSION "NOTICE: [^A]|FAIL: PARAMCHECK")
+    # The JSON Note dialog may raise no notice, and its Undo step has to
+    # work: an Undo assertion only logs, so it fails the test here.
+    set_tests_properties(RegressionParamCheck.jsonnote PROPERTIES
+        FAIL_REGULAR_EXPRESSION "NOTICE:|ERROR:|FAIL: PARAMCHECK|UNDO ASSERT")
+    set_tests_properties(RegressionParamCheck.undo PROPERTIES
+        FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK|UNDO ASSERT")
     set_tests_properties(RegressionParamCheck.carsdelete PROPERTIES
         PASS_REGULAR_EXPRESSION "Car Index number duplicated"
         FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK")
