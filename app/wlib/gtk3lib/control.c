@@ -82,6 +82,21 @@ void wControlShow(
 }
 
 /**
+ * Whether the control \a b is set to be shown (wControlShow()). Used by
+ * playback's PARAMCHECK, which checks that a dialog's hint is or isn't
+ * there.
+ *
+ * \param b IN the control
+ * \return TRUE if it's shown, whether or not its window is
+ */
+
+wBool_t wControlIsShown(
+        wControl_p b)
+{
+	return b->widget != NULL && gtk_widget_get_visible(b->widget);
+}
+
+/**
  * Cause the control \a b to be marked active or inactive.
  * Inactive controls do not respond to actions.
  *

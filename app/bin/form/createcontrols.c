@@ -121,6 +121,12 @@ static void ListPush(wIndex_t inx, const char* val, wIndex_t op,
 	switch (p->type) {
 	case PD_COMBOLIST:
 		if (op == LIST_OP_ICONPRESS || op == LIST_OP_FOCUSOUT) {
+			/* Playback has to see the focus-out too: it's what makes a
+			 * dialog like the car dialog accept a new name. */
+			if (op == LIST_OP_FOCUSOUT && DO_MACRO_RECORD(p)) {
+				FormMacroRecord("PARAMETER %s %s FOCUSOUT\n",
+				                p->group->nameStr, p->nameStr);
+			}
 			if ((p->option & PDO_NOPSHACT) == 0 && p->group->changeProc) {
 				/* NULL payload -- distinguishes an icon-press/focus-out from
 				 * a real change, which always passes a valueP above. Both

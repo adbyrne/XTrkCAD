@@ -1,0 +1,43 @@
+# The "New" hints next to Manufacturer and Part in the car dialog have to go
+# once the fields name a part that exists (Development Issues #77, Ken's
+# steps): add car Ken/ken1, start a second car, change the manufacturer to
+# Ken2 and back to Ken with part ken1 again. FOCUSOUT is the entry losing
+# focus, which is when the dialog decides a typed name is new.
+# Adding the first car also checks that a car added during playback is
+# kept: the custom-file save, which playback skips, used to undo it.
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 40.000 x 20.000
+SCALE HO
+REDRAW
+PARAMETER misc cmdCarInventory
+PARAMETER carinv add
+PARAMETER carpart manuf -1 Ken
+PARAMETER carpart manuf FOCUSOUT
+PARAMETER carpart partno-list -1 ken1
+PARAMETER carpart partno-list FOCUSOUT
+PARAMETER carpart desc ken1 desc
+PARAMCHECK carpart manuf-new shown
+PARAMCHECK carpart partno-new shown
+PARAMETER carpart ok
+PARAMETER carinv add
+# The first car was added, so the index moved on.
+PARAMCHECK carpart index 2
+PARAMETER carpart manuf -1 Ken2
+PARAMETER carpart manuf FOCUSOUT
+PARAMCHECK carpart manuf-new shown
+PARAMETER carpart partno-list -1 ken1
+PARAMETER carpart partno-list FOCUSOUT
+PARAMETER carpart desc ken1 desc
+PARAMETER carpart manuf -1 Ken
+PARAMETER carpart manuf FOCUSOUT
+PARAMCHECK carpart manuf-new hidden
+PARAMCHECK carpart partno-new hidden
+# The dialog is back on the existing part, so Ok adds a second car of it
+# without asking whether to update the part (no NOTICE in the log).
+PARAMETER carpart ok
+PARAMETER carinv add
+PARAMCHECK carpart index 3
+PARAMETER carpart cancel
+PARAMETER carinv ok

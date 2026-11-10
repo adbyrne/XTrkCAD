@@ -2168,6 +2168,15 @@ static void ParamPlayback(char *line)
 			case PD_DROPLIST:
 			case PD_COMBOLIST:
 				line += len;
+				/* The entry lost focus (ListPush(), LIST_OP_FOCUSOUT). A
+				 * list value always starts with its index, so the word
+				 * can't be one. */
+				if (p->type == PD_COMBOLIST && strcmp(line, "FOCUSOUT") == 0) {
+					if (pg->changeProc) {
+						pg->changeProc(pg, inx, NULL);
+					}
+					break;
+				}
 				valL = strtol(line, &valS, 10);
 				if (valS) {
 					valS++;
@@ -2401,7 +2410,8 @@ static void ParamCheck(char *line)
 		    (line[len1 + 1 + len2] != ' ' && line[len1 + 1 + len2] != '\0')) {
 			continue;
 		}
-		if (p->valueP == NULL) {
+		/* A message has no value, only whether it's shown. */
+		if (p->valueP == NULL && p->type != PD_MESSAGE) {
 			return;
 		}
 		len = len1 + 1 + len2 + 1;
@@ -2478,8 +2488,26 @@ static void ParamCheck(char *line)
 				hasError = TRUE;
 			}
 			break;
-		case PD_DRAW:
 		case PD_MESSAGE:
+			/* "shown" or "hidden": whether a hint is there. */
+			line += len;
+			if (p->control == NULL) {
+				break;
+			}
+			if (strcmp(line, "shown") == 0 || strcmp(line, "hidden") == 0) {
+				const char *act = wControlIsShown(p->control) ? "shown" : "hidden";
+				if (strcmp(line, act) != 0) {
+					expVal = line;
+					actVal = (char *)act;
+					hasError = TRUE;
+				}
+			} else {
+				expVal = line;
+				actVal = "shown or hidden";
+				hasError = TRUE;
+			}
+			break;
+		case PD_DRAW:
 		case PD_TEXT:
 		case PD_MENU:
 		case PD_MENUITEM:

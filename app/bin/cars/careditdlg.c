@@ -186,6 +186,8 @@ static paramTextData_t notesData = { 500, 156 };
 static wBool_t CarDlgUpdate( paramGroup_cp, int, void * );
 static void CarDlgNewDesc( void );
 static void CarDlgManufFocusOut( void );
+static BOOL_T CarDlgNewModelFocusOut( void );
+static void CarDlgClose( wControl_p win );
 static void CarDlgModelFocusOut( void );
 static void CarDlgProtoFocusOut( void );
 
@@ -2413,6 +2415,54 @@ static void CarDlgNewDesc( void )
 }
 
 
+/* Manufacturer or Part loses focus inside the nested "New catalog model"
+ * panel. Its fields can come to name a part that already exists, e.g. by
+ * changing the manufacturer away and back (Development Issues #77). Then
+ * the model isn't new: go back to the car level with that part, the same
+ * way CarDlgClose() returns from the panel, and drop both "New" hints.
+ * Otherwise only the manufacturer hint is brought up to date. Returns TRUE
+ * when it handled the focus-out (the dialog was in the nested panel). */
+static BOOL_T CarDlgNewModelFocusOut( void )
+{
+	carPart_p partP;
+	BOOL_T manufKnown;
+
+	if ( carDlgStkPtr == 0 || currState != S_PartnoSel || carDlgResolving ) {
+		return FALSE;
+	}
+	wListGetValues( (wList_p)carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufStr,
+	                sizeof carDlgManufStr, NULL, NULL );
+	wListGetValues( (wList_p)carDlgPLs[I_CD_PARTNO_LIST].control, carDlgPartnoStr,
+	                sizeof carDlgPartnoStr, NULL, NULL );
+	partP = NULL;
+	if ( carDlgManufStr[0] && carDlgPartnoStr[0] ) {
+		partP = CarPartFind( carDlgManufStr, (int)strlen( carDlgManufStr ),
+		                     carDlgPartnoStr, (int)strlen( carDlgPartnoStr ),
+		                     carDlgScaleInx );
+	}
+	if ( partP != NULL ) {
+		/* CarDlgClose() reloads the car level from these strings. */
+		strcpy( carDlgProtoStr, partP->parent->proto );
+		carDlgNewPartPtr = NULL;
+		CarDlgClose( NULL );
+		if ( carDlgStkPtr == 0 ) {
+			FormControlShow( &carDlgPG, I_CD_MANUF_NEW, FALSE );
+			FormControlShow( &carDlgPG, I_CD_PARTNO_NEW, resCatalog == RS_NEW );
+			FormControlShow( &carDlgPG, I_CD_PROTOTYPE_NEW, FALSE );
+		}
+		return TRUE;
+	}
+	carDlgManufInx = wListFindValue( carDlgPLs[I_CD_MANUF_LIST].control,
+	                                 carDlgManufStr );
+	manufKnown = carDlgManufInx >= 0 &&
+	             wComboBoxGetItemContext( carDlgPLs[I_CD_MANUF_LIST].control,
+	                                      carDlgManufInx ) != NULL;
+	FormControlShow( &carDlgPG, I_CD_MANUF_NEW,
+	                 carDlgManufStr[0] != '\0' && !manufKnown );
+	FormControlShow( &carDlgPG, I_CD_PARTNO_NEW, carDlgPartnoStr[0] != '\0' );
+	return TRUE;
+}
+
 /* Manufacturer combo loses focus (LVL_CAR only): confirm a typed, unmatched
  * manufacturer name as a new one, in place -- no nested panel, no state
  * change. The name only becomes a real carPartParent_t once a part is
@@ -2422,6 +2472,7 @@ static void CarDlgNewDesc( void )
  * here, and hidden again once the field holds nothing or a real match. */
 static void CarDlgManufFocusOut( void )
 {
+	if ( CarDlgNewModelFocusOut() ) { return; }
 	if ( CUR_LEVEL != LVL_CAR || carDlgResolving ) { return; }
 
 	wListGetValues( (wList_p)carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufStr,
@@ -2481,6 +2532,7 @@ static void CarDlgManufFocusOut( void )
  * than launching the nested panel. */
 static void CarDlgModelFocusOut( void )
 {
+	if ( CarDlgNewModelFocusOut() ) { return; }
 	if ( carDlgResolving ) { return; }
 	wListGetValues( (wList_p)carDlgPLs[I_CD_PARTNO_LIST].control, carDlgPartnoStr,
 	                sizeof carDlgPartnoStr, NULL, NULL );
@@ -2637,7 +2689,14 @@ static void CarDlgCancel( paramGroup_cp pg )
  * part edit, not just renames. */
 static BOOL_T CarDlgSaveCustom( void )
 {
-	FILE * f = OpenCustom("w");
+	FILE * f;
+	/* OpenCustom() never writes the custom file during playback, so a demo
+	 * can't change the user's parts. That isn't a failed save: without this,
+	 * CommitStaged() rolled back every car added in playback. */
+	if ( inPlayback ) {
+		return TRUE;
+	}
+	f = OpenCustom("w");
 	if ( f == NULL ) {
 		return FALSE;
 	}
