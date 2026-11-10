@@ -2387,7 +2387,7 @@ static void ParamCheck(char *line)
 	void *listContext, *itemContext;
 	char *valS;
 	char *expVal = NULL, *actVal = NULL;
-	char expNum[20], actNum[20];
+	char expNum[32], actNum[32];
 	BOOL_T hasError = FALSE;
 	FILE *f;
 
@@ -2432,8 +2432,8 @@ static void ParamCheck(char *line)
 		case PD_TOGGLE:
 			valL = atol(line + len);
 			if (*(long *)p->valueP != valL) {
-				sprintf(expNum, "%ld", valL);
-				sprintf(actNum, "%ld", *(long *)p->valueP);
+				snprintf(expNum, sizeof expNum, "%ld", valL);
+				snprintf(actNum, sizeof actNum, "%ld", *(long *)p->valueP);
 				expVal = expNum;
 				actVal = actNum;
 				hasError = TRUE;
@@ -2450,8 +2450,8 @@ static void ParamCheck(char *line)
 			if (strncmp(line, "count ", 6) == 0) {
 				valL = atol(line + 6);
 				if (wListGetCount((wList_p)p->control) != valL) {
-					sprintf(expNum, "%ld", valL);
-					sprintf(actNum, "%d", wListGetCount((wList_p)p->control));
+					snprintf(expNum, sizeof expNum, "%ld", valL);
+					snprintf(actNum, sizeof actNum, "%d", wListGetCount((wList_p)p->control));
 					expVal = expNum;
 					actVal = actNum;
 					hasError = TRUE;
@@ -2464,8 +2464,8 @@ static void ParamCheck(char *line)
 			}
 			if ((p->option & PDO_LISTINDEX) != 0) {
 				if (*(long *)p->valueP != valL) {
-					sprintf(expNum, "%ld", valL);
-					sprintf(actNum, "%d", *(wIndex_t *)p->valueP);
+					snprintf(expNum, sizeof expNum, "%ld", valL);
+					snprintf(actNum, sizeof actNum, "%d", *(wIndex_t *)p->valueP);
 					expVal = expNum;
 					actVal = actNum;
 					hasError = TRUE;
@@ -2486,8 +2486,8 @@ static void ParamCheck(char *line)
 			valF = atof(line + len);
 			diffF = fabs(*(FLOAT_T *)p->valueP - valF);
 			if (diffF > 0.001) {
-				sprintf(expNum, "%0.3f", valF);
-				sprintf(actNum, "%0.3f", *(FLOAT_T *)p->valueP);
+				snprintf(expNum, sizeof expNum, "%0.3f", valF);
+				snprintf(actNum, sizeof actNum, "%0.3f", *(FLOAT_T *)p->valueP);
 				expVal = expNum;
 				actVal = actNum;
 				hasError = TRUE;
