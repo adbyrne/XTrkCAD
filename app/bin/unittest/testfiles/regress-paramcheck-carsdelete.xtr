@@ -1,0 +1,59 @@
+# Car Inventory: Delete asks first, and No keeps the car; Yes deletes only
+# the selected car. Then export and import the two that are left: their
+# indexes 1 and 3 are taken, so the imported copies get 2 and 4, and one
+# notice says so (checked by the test's PASS_REGULAR_EXPRESSION).
+# Shelving (a car placed on the layout) is not covered.
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 40.000 x 20.000
+SCALE HO
+REDRAW
+PARAMETER misc cmdCarInventory
+PARAMETER carinv add
+PARAMETER carpart manuf -1 Ken
+PARAMETER carpart manuf FOCUSOUT
+PARAMETER carpart partno-list -1 ken1
+PARAMETER carpart partno-list FOCUSOUT
+PARAMETER carpart desc ken1 desc
+PARAMETER carpart road -1 Reading
+PARAMETER carpart repmark RDG
+PARAMETER carpart number 100
+PARAMETER carpart quantity 3
+PARAMETER carpart multinum 1
+PARAMETER carpart ok
+PARAMCHECK carinv list count 3
+NOTICEANSWER second
+PARAMETER carinv list 0
+PARAMETER carinv delete
+PARAMCHECK carinv list count 3
+NOTICEANSWER first
+PARAMETER carinv list 1
+PARAMETER carinv delete
+PARAMCHECK carinv list count 2
+PARAMETER carinv list 0
+PARAMETER carinv edit
+PARAMCHECK carpart number 100
+PARAMETER carpart cancel
+PARAMETER carinv list 1
+PARAMETER carinv edit
+PARAMCHECK carpart index 3
+PARAMCHECK carpart number 102
+PARAMETER carpart cancel
+FILESELECT cars.csv
+PARAMETER carinv export
+FILESELECT cars.csv
+PARAMETER carinv import
+PARAMCHECK carinv list count 4
+# The list is in index order: 1, 2 (imported), 3, 4 (imported).
+PARAMETER carinv list 1
+PARAMETER carinv edit
+PARAMCHECK carpart index 2
+PARAMCHECK carpart number 100
+PARAMETER carpart cancel
+PARAMETER carinv list 3
+PARAMETER carinv edit
+PARAMCHECK carpart index 4
+PARAMCHECK carpart number 102
+PARAMETER carpart cancel
+PARAMETER carinv ok

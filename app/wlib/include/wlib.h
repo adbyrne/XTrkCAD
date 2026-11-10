@@ -343,6 +343,7 @@ struct wFilSel_t *wFilSelCreate(wControl_p parent, wFilSelMode_e mode,
                                 wFilSelCallBack_p action, void *context);
 
 int wFilSelect(struct wFilSel_t *fs, const char *directoryName);
+void wFilSelSetPlayback(const char *fileName);
 
 /*------------------------------------------------------------------------------
  *

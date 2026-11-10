@@ -33,6 +33,9 @@
 #include "gtkint.h"
 #include "i18n.h"
 
+/** File the next wFilSelect() selects without a dialog (playback) */
+static char *playbackFileName = NULL;
+
 /** Key under which the default extension is stored on a GtkFileFilter */
 #define DEFAULTEXTENSION "defaultext"
 
@@ -392,12 +395,26 @@ struct wFilSel_t * wFilSelCreate(
  *
  * \param fs        IN  file selection
  * \param dirName   IN  starting directory, may be NULL
+ * If wFilSelSetPlayback() gave a file name, the action is called with that
+ * name and no dialog is shown.
+ *
  * \return          always TRUE
  */
 
 int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 {
 	g_assert(fs->type == W_FILESELECT);
+
+	if (playbackFileName != NULL) {
+		char *names[2] = { playbackFileName, NULL };
+
+		playbackFileName = NULL;
+		if (fs->action) {
+			fs->action(1, names, fs->context);
+		}
+		g_free(names[0]);
+		return TRUE;
+	}
 
 	if (fs->window == NULL) {
 
@@ -492,4 +509,21 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 	}
 
 	return TRUE;
+}
+
+/**
+ * Make the next wFilSelect() select a file without showing the dialog, as if
+ * the user had picked it. Playback uses this, so a script can export to and
+ * import from a file. The name is used once; NULL clears it.
+ *
+ * The name is used as given: no extension is added, and there is no
+ * confirmation before an existing file is overwritten.
+ *
+ * \param fileName  IN  full path of the file, copied
+ */
+
+void wFilSelSetPlayback(const char *fileName)
+{
+	g_free(playbackFileName);
+	playbackFileName = fileName ? g_strdup(fileName) : NULL;
 }

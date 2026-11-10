@@ -212,6 +212,49 @@ static void NoPatternNoFilters(void **state)
 	FreeSelector(fs);
 }
 
+static int playbackCalls;
+static char playbackSeen[64];
+
+static int
+PlaybackAction(int files, char **fileNames, void *context)
+{
+	assert_int_equal(files, 1);
+	assert_string_equal((char *)context, "ctx");
+	assert_null(fileNames[1]);
+	snprintf(playbackSeen, sizeof playbackSeen, "%s", fileNames[0]);
+	playbackCalls++;
+	return TRUE;
+}
+
+/* A name set for playback is selected once, without a dialog. */
+static void PlaybackSelectsOnce(void **state)
+{
+	(void)state;
+	struct wFilSel_t *fs = wFilSelCreate(NULL, FS_SAVE, 0, "Export",
+	                                     "CSV|*.csv", PlaybackAction, "ctx");
+
+	playbackCalls = 0;
+	wFilSelSetPlayback("/tmp/cars");
+	assert_true(wFilSelect(fs, NULL));
+	assert_int_equal(playbackCalls, 1);
+	/* Used as given: playback names the file, no extension is added. */
+	assert_string_equal(playbackSeen, "/tmp/cars");
+	assert_null(playbackFileName);
+	assert_null(fs->window);
+	FreeSelector(fs);
+}
+
+/* NULL clears a name that was set and never used. */
+static void PlaybackCleared(void **state)
+{
+	(void)state;
+	wFilSelSetPlayback("/tmp/a.csv");
+	wFilSelSetPlayback("/tmp/b.csv");
+	assert_string_equal(playbackFileName, "/tmp/b.csv");
+	wFilSelSetPlayback(NULL);
+	assert_null(playbackFileName);
+}
+
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
@@ -225,6 +268,8 @@ int main(void)
 		cmocka_unit_test(TrailingBarAllowed),
 		cmocka_unit_test(PictureFiltersHaveNoExtension),
 		cmocka_unit_test(NoPatternNoFilters),
+		cmocka_unit_test(PlaybackSelectsOnce),
+		cmocka_unit_test(PlaybackCleared),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);
