@@ -629,3 +629,66 @@ set_tests_properties(RegressionParams.check PROPERTIES
     FIXTURES_REQUIRED "regression_install;regression_clean_homes;regression_params"
     LABELS "regression;regression-ci"
 )
+
+# ---------------------------------------------------------------------------
+# Test levels (XTRKCAD_REGRESSION_LEVEL, top-level CMakeLists.txt)
+#
+# critical (label regression-critical): checks of code that changes data and
+# of bugs we have fixed, seconds each: dialog values and Undo (ParamCheck),
+# what the user is told when something goes wrong (Notice), the demo check
+# itself (Compare), parameter files, the round-trip fixtures, and round trip
+# and Properties on a few small example layouts. The default for a local
+# build, and what Windows and macOS run on a pull request.
+# ci (label regression-ci): critical plus every example layout and the demos
+# (RegressionSuite, or the per-demo tests on Windows).
+# full (label regression): ci plus the per-demo cold starts, the largest
+# layouts and export.
+# A test above the level is disabled, not left out, so ctest -N still lists
+# it, and the labels stay as they were for jobs that select by label.
+set(_xtrkcad_critical_tests
+    "^RegressionParamCheck\\."
+    "^RegressionNotice\\."
+    "^RegressionCompare\\."
+    "^RegressionParams\\."
+    "^RegressionRoundTrip\\.(objects|objects_check|empty_text|empty_text_check|badmanifest)$"
+    "^Regression(RoundTrip|Describe)\\.(timesavr|Control_Panels|pmi)$"
+)
+get_property(_xtrkcad_all_tests DIRECTORY PROPERTY TESTS)
+set(_xtrkcad_level_counts_critical 0)
+set(_xtrkcad_level_counts_disabled 0)
+foreach(_xtrkcad_t ${_xtrkcad_all_tests})
+    get_test_property("${_xtrkcad_t}" LABELS _xtrkcad_labels)
+    get_test_property("${_xtrkcad_t}" FIXTURES_SETUP _xtrkcad_setup)
+    # Every regression test needs the install and the clean homes; the
+    # other setup tests are at the level of the tests that need them.
+    if(NOT _xtrkcad_labels OR _xtrkcad_setup MATCHES "^regression_(install|clean_homes)$")
+        continue()
+    endif()
+    if(NOT "regression" IN_LIST _xtrkcad_labels)
+        continue()
+    endif()
+    set(_xtrkcad_is_critical FALSE)
+    foreach(_xtrkcad_re ${_xtrkcad_critical_tests})
+        if(_xtrkcad_t MATCHES "${_xtrkcad_re}")
+            set(_xtrkcad_is_critical TRUE)
+        endif()
+    endforeach()
+    if(_xtrkcad_is_critical)
+        list(APPEND _xtrkcad_labels regression-critical)
+        set_tests_properties("${_xtrkcad_t}" PROPERTIES LABELS "${_xtrkcad_labels}")
+        math(EXPR _xtrkcad_level_counts_critical "${_xtrkcad_level_counts_critical} + 1")
+    endif()
+    set(_xtrkcad_disable FALSE)
+    if(XTRKCAD_REGRESSION_LEVEL STREQUAL "critical" AND NOT _xtrkcad_is_critical)
+        set(_xtrkcad_disable TRUE)
+    elseif(XTRKCAD_REGRESSION_LEVEL STREQUAL "ci" AND NOT "regression-ci" IN_LIST _xtrkcad_labels)
+        set(_xtrkcad_disable TRUE)
+    endif()
+    if(_xtrkcad_disable)
+        set_tests_properties("${_xtrkcad_t}" PROPERTIES DISABLED TRUE)
+        math(EXPR _xtrkcad_level_counts_disabled "${_xtrkcad_level_counts_disabled} + 1")
+    endif()
+endforeach()
+message(STATUS "Regression tests: level ${XTRKCAD_REGRESSION_LEVEL}, "
+    "${_xtrkcad_level_counts_critical} critical, ${_xtrkcad_level_counts_disabled} disabled "
+    "(-DXTRKCAD_REGRESSION_LEVEL=critical|ci|full)")

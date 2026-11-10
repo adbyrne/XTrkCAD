@@ -187,7 +187,9 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
   published as "Compiler warnings" pages on the GitHub Pages site; look there for current counts
   rather than in this guide. The macOS and Windows jobs are `continue-on-error`, so a runner
   problem doesn't hold up the Pages deploy; the site then says that report is missing.
-- **`coverage`** — generates an lcov HTML report and uploads it as an artifact.
+- **`coverage`** — generates an lcov HTML report and uploads it as an artifact. A percentage is
+  red below 65%, yellow from 65% and green from 90% (`genhtml_med_limit=65`; lcov's default is
+  75).
 
 ## Toolchain preview (advisory)
 
@@ -228,6 +230,7 @@ any other build is. The coverage job:
 
 ```sh
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
+    -DXTRKCAD_REGRESSION_LEVEL=full \
     -DCMAKE_C_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage"
 cmake --build build
 ctest --test-dir build --output-on-failure   # unit tests + full regression suite
@@ -235,7 +238,8 @@ lcov --capture --directory build --output-file build/coverage.info \
     --ignore-errors mismatch --rc branch_coverage=1
 lcov --remove build/coverage.info '/usr/*' '*/build/*' '*/unittest/*' '*/tools/*' \
     --output-file build/coverage-filtered.info --ignore-errors unused --rc branch_coverage=1
-genhtml build/coverage-filtered.info --output-directory coverage-html --rc branch_coverage=1
+genhtml build/coverage-filtered.info --output-directory coverage-html --rc branch_coverage=1 \
+    --rc genhtml_med_limit=65
 ```
 
 `cppcheck-deep`/`clang-tidy`/`codespell` each run their own analysis command straight from

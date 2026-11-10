@@ -287,8 +287,10 @@ Useful CMake options:
 Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and
 `app/dynstring/unittest/`. Hg `default` has 134 tests, 25 of them outside the `regression` label
 (r7981, `ctest -N`, with `poppler-utils` installed; the 2 `RegressionExport.*` tests need it).
-The full run including the regression demo-playback suite takes ~10 minutes; run it in the
-background.
+Regression tests have levels (`-DXTRKCAD_REGRESSION_LEVEL=critical|ci|full`, `RegressionTests.cmake`):
+a local build defaults to `critical` (~4 min with the unit tests), CI to `full` (~23 min; run it in
+the background). Configure scratch builds with `full` before claiming a full pass. Windows and macOS
+run `critical` on PRs and `ci` on `main`.
 
 Run new load, save or parse code under ASan too (`-DXTRKCAD_SANITIZE=ON`, clang). Its fill pattern
 exposes uninitialised values that a normal build sees as 0: that's how the `ReadJoint()` bug showed

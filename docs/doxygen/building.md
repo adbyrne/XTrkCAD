@@ -316,6 +316,21 @@ bug:
   (`app/wlib/gtk3lib/unittests/CMakeLists.txt`).
 - **Valgrind** — `ctest -T memcheck --overwrite MemoryCheckCommand=$(which valgrind)`.
   `-LE gtk-display` here too, for the same GTK3-internals reason.
+- **Regression test levels** — `-DXTRKCAD_REGRESSION_LEVEL=critical|ci|full` picks which
+  regression tests run; the ones above it are added but disabled, so `ctest` lists them as not run.
+  - `critical` (label `regression-critical`): the checks of code that changes data and of bugs
+    already fixed, each a few seconds: `RegressionParamCheck.*`, `RegressionNotice.*`,
+    `RegressionCompare.*`, `RegressionParams.*`, the round-trip fixtures, and round trip and
+    Properties on a few small examples. About 4 minutes with the unit tests. The default for a local
+    build, and what `regression-windows` and `regression-macos` run on a pull request.
+  - `ci` (label `regression-ci`): critical plus every example layout and the demos
+    (`RegressionSuite`, or the per-demo tests on Windows). The Linux PR jobs run it, and Windows and
+    macOS on `main`.
+  - `full` (label `regression`): everything, with the per-demo cold starts, the largest layouts and
+    export. The default when `CI` is set; run it before pushing a change to shared code.
+
+  The list of critical tests is at the end of `app/bin/RegressionTests.cmake`. A new test belongs
+  there when it checks data-changing code and takes seconds.
 - **Regression demo-playback suite** — `-DXTRKCAD_REGRESSION_TESTING=ON` (auto-enabled on Linux
   when `xvfb-run` or an existing `DISPLAY` is found) adds ~47 per-demo `ctest` targets, one per
   entry in `app/lib/xtrkcad.xtq`'s `DEMO` list, for targeting a single demo during local

@@ -60,6 +60,23 @@ endif()
 option(XTRKCAD_REGRESSION_TESTING
     "Build GUI demo-playback regression tests (requires xvfb-run or an existing X DISPLAY)"
     ${_xtrkcad_regression_default})
+# Which regression tests run (app/bin/RegressionTests.cmake): "critical",
+# the checks of code that changes data, a few minutes; "ci", what PR CI runs
+# on every platform; "full", everything. Tests above the level are added but
+# disabled, so ctest lists them as not run. CI builds default to full; a
+# workflow picks a lower level where it wants one.
+if(DEFINED ENV{CI})
+    set(_xtrkcad_regression_level_default full)
+else()
+    set(_xtrkcad_regression_level_default critical)
+endif()
+set(XTRKCAD_REGRESSION_LEVEL "${_xtrkcad_regression_level_default}" CACHE STRING
+    "Regression tests to run: critical, ci or full")
+set_property(CACHE XTRKCAD_REGRESSION_LEVEL PROPERTY STRINGS critical ci full)
+if(NOT XTRKCAD_REGRESSION_LEVEL MATCHES "^(critical|ci|full)$")
+    message(FATAL_ERROR
+        "XTRKCAD_REGRESSION_LEVEL is \"${XTRKCAD_REGRESSION_LEVEL}\": use critical, ci or full")
+endif()
 
 option(XTRKCAD_SANITIZE "Build unit tests with AddressSanitizer + UBSan (Linux/GCC or Clang only)" OFF)
 option(XTRKCAD_FUZZ "Build libFuzzer harnesses (Clang only, requires -fsanitize=fuzzer support)" OFF)
