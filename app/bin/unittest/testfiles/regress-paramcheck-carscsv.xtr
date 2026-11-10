@@ -1,0 +1,57 @@
+# Car Inventory: export to CSV, delete every car, import, and every field
+# comes back: index, part, road, number, prices, dates, condition and notes.
+# The notes have quotes and a comma, which CSV has to escape. FILESELECT
+# answers the next file dialog with a file in the work directory.
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 40.000 x 20.000
+SCALE HO
+REDRAW
+PARAMETER misc cmdCarInventory
+PARAMETER carinv add
+PARAMETER carpart manuf -1 Ken
+PARAMETER carpart manuf FOCUSOUT
+PARAMETER carpart partno-list -1 ken1
+PARAMETER carpart partno-list FOCUSOUT
+PARAMETER carpart desc ken1 desc
+PARAMETER carpart road -1 Reading
+PARAMETER carpart repmark RDG
+PARAMETER carpart number 100
+PARAMETER carpart quantity 2
+PARAMETER carpart multinum 1
+PARAMETER carpart purchPrice 12.50
+PARAMETER carpart currPrice 20.00
+PARAMETER carpart purchDate 20200504
+PARAMETER carpart serviceDate 20230101
+PARAMETER carpart condition 2
+PARAMETER carpart notes Bought at "the show", 2020
+PARAMETER carpart ok
+PARAMCHECK carinv list count 2
+FILESELECT cars.csv
+PARAMETER carinv export
+PARAMETER carinv list 0
+PARAMETER carinv delete
+PARAMETER carinv list 0
+PARAMETER carinv delete
+PARAMCHECK carinv list count 0
+FILESELECT cars.csv
+PARAMETER carinv import
+PARAMCHECK carinv list count 2
+PARAMETER carinv list 1
+PARAMETER carinv edit
+PARAMCHECK carpart index 2
+PARAMCHECK carpart manuf 0 Ken
+PARAMCHECK carpart partno-list 0 ken1
+PARAMCHECK carpart desc ken1 desc
+PARAMCHECK carpart road 0 Reading
+PARAMCHECK carpart repmark RDG
+PARAMCHECK carpart number 101
+PARAMCHECK carpart purchPrice 12.50
+PARAMCHECK carpart currPrice 20.00
+PARAMCHECK carpart purchDate 20200504
+PARAMCHECK carpart serviceDate 20230101
+PARAMCHECK carpart condition 2 Excellent
+PARAMCHECK carpart notes Bought at "the show", 2020
+PARAMETER carpart cancel
+PARAMETER carinv ok

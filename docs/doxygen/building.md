@@ -404,8 +404,17 @@ bug:
   dialog, `<dialog>` is `Describe <type>` and `<field>` is the field's position, from 1. `drawlen`
   checks a field that a dialog fills in again after refusing a value. For a message field, such as
   a "New" hint, `<value>` is `shown` or `hidden`. `PARAMETER <dialog> <field> FOCUSOUT` plays back
-  a combo box's entry losing focus, which recording now writes too. `carnew` follows the car
-  dialog's "New" hints while a car is added (Manage > Car Inventory).
+  a combo box's entry losing focus, which recording now writes too. For a list,
+  `PARAMCHECK <dialog> <list> count <n>` checks the number of rows, and
+  `PARAMETER <dialog> <list> <n>` with no text picks row `<n>` (recorded lines name the row by its
+  text, which is long in the car inventory). For a text field, `<value>` is the whole text, with
+  `\n` for a line break. `FILESELECT <file>` answers the next file dialog without opening it
+  (`wFilSelSetPlayback()`); a relative name is in the work directory, which each test has to
+  itself. `carnew` follows the car dialog's "New" hints while a car is added (Manage > Car
+  Inventory). `carsedit` edits a car and cancels an edit, `carsproto` adds a car of a new
+  prototype, `carsdelete` answers No and then Yes to Delete and imports cars whose indexes are
+  taken, and `carscsv` exports, deletes and imports the inventory and checks every field. Shelving
+  a car that is on the layout isn't covered.
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button

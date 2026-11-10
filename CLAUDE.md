@@ -301,7 +301,9 @@ up (Development Issues #67). Regression tests besides the demos:
 - `RegressionExport.*`: `-Texport:<layout>` prints to PDF and exports SVG, DXF and PNG; checks printed
   text is at its point size.
 - `RegressionParamCheck.*`: `PARAMCHECK` in a script checks a dialog's values, and `UNDORESUME`,
-  `UNDOSTEP`, `REDOSTEP` test Undo, which playback otherwise suspends.
+  `UNDOSTEP`, `REDOSTEP` test Undo, which playback otherwise suspends. `FILESELECT <file>` answers
+  the next file dialog; `PARAMCHECK <dlg> <list> count <n>` and `PARAMETER <dlg> <list> <n>`
+  count and pick list rows (dev guide `building.md` has the rest). `cars*` cover the car dialog.
 - Under `-T`, notices and status-bar errors go to the log (`NOTICE:`, `NOTICE ANSWER:`, `ERROR:`)
   instead of opening; `NOTICEANSWER first|second|third` picks the button.
 - `RegressionNotice.*`: what the user is told when a load or save goes wrong, and what survives.

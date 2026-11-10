@@ -1,0 +1,55 @@
+# Car Inventory: editing a car changes that car only, and Cancel changes
+# nothing. Three cars numbered 100-102 (Numbers: sequential); the second is
+# edited. "PARAMETER carinv list <n>" picks row n; the rows are too long to
+# name.
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 40.000 x 20.000
+SCALE HO
+REDRAW
+PARAMETER misc cmdCarInventory
+PARAMETER carinv add
+PARAMETER carpart manuf -1 Ken
+PARAMETER carpart manuf FOCUSOUT
+PARAMETER carpart partno-list -1 ken1
+PARAMETER carpart partno-list FOCUSOUT
+PARAMETER carpart desc ken1 desc
+PARAMETER carpart road -1 Reading
+PARAMETER carpart repmark RDG
+PARAMETER carpart number 100
+PARAMETER carpart quantity 3
+PARAMETER carpart multinum 1
+PARAMETER carpart ok
+PARAMCHECK carinv list count 3
+PARAMETER carinv list 1
+PARAMETER carinv edit
+PARAMCHECK carpart number 101
+PARAMETER carpart repmark RDGX
+PARAMETER carpart number 150
+PARAMETER carpart purchPrice 15.00
+PARAMETER carpart ok
+PARAMCHECK carinv list count 3
+PARAMETER carinv list 1
+PARAMETER carinv edit
+PARAMCHECK carpart index 2
+PARAMCHECK carpart repmark RDGX
+PARAMCHECK carpart number 150
+PARAMCHECK carpart purchPrice 15.00
+PARAMETER carpart cancel
+PARAMETER carinv list 0
+PARAMETER carinv edit
+PARAMCHECK carpart repmark RDG
+PARAMCHECK carpart number 100
+PARAMETER carpart number 999
+PARAMETER carpart cancel
+PARAMETER carinv list 0
+PARAMETER carinv edit
+PARAMCHECK carpart number 100
+PARAMETER carpart cancel
+PARAMETER carinv list 2
+PARAMETER carinv edit
+PARAMCHECK carpart number 102
+PARAMCHECK carpart repmark RDG
+PARAMETER carpart cancel
+PARAMETER carinv ok

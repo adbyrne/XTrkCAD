@@ -2177,16 +2177,24 @@ static void ParamPlayback(char *line)
 					}
 					break;
 				}
+				/* "<index> <text>" picks the row whose text matches;
+				 * "<index>" alone picks the row by index, for lists
+				 * whose rows are long (the car inventory). -1 sets an
+				 * entry's text. */
 				valL = strtol(line, &valS, 10);
-				if (valS) {
+				if (*valS == ' ') {
 					valS++;
-				} else {
-					valS = "";
 				}
 				if (p->control != NULL) {
 					if ((p->option & PDO_LISTINDEX) == 0) {
 						if (valL < 0) {
 							wListSetValue((wList_p)p->control, valS);
+						} else if (*valS == '\0') {
+							if (valL >= wListGetCount((wList_p)p->control)) {
+								NoticeMessage(MSG_PLAYBACK_LISTENTRY, _("Ok"), NULL, line);
+								break;
+							}
+							wListSetIndex((wList_p)p->control, (wIndex_t)valL);
 						} else {
 							valL = wListFindValue((wList_p)p->control, valS);
 							if (valL < 0) {
@@ -2410,8 +2418,9 @@ static void ParamCheck(char *line)
 		    (line[len1 + 1 + len2] != ' ' && line[len1 + 1 + len2] != '\0')) {
 			continue;
 		}
-		/* A message has no value, only whether it's shown. */
-		if (p->valueP == NULL && p->type != PD_MESSAGE) {
+		/* A message has no value, only whether it's shown; a text field
+		 * keeps its value in the control. */
+		if (p->valueP == NULL && p->type != PD_MESSAGE && p->type != PD_TEXT) {
 			return;
 		}
 		len = len1 + 1 + len2 + 1;
@@ -2437,13 +2446,21 @@ static void ParamCheck(char *line)
 			if (p->control == NULL) {
 				break;
 			}
-			valL = strtol(line, &valS, 10);
-			if (valS) {
-				if (valS[0] == ' ') {
-					valS++;
+			/* "count <n>": the number of rows. */
+			if (strncmp(line, "count ", 6) == 0) {
+				valL = atol(line + 6);
+				if (wListGetCount((wList_p)p->control) != valL) {
+					sprintf(expNum, "%ld", valL);
+					sprintf(actNum, "%d", wListGetCount((wList_p)p->control));
+					expVal = expNum;
+					actVal = actNum;
+					hasError = TRUE;
 				}
-			} else {
-				valS = "";
+				break;
+			}
+			valL = strtol(line, &valS, 10);
+			if (valS[0] == ' ') {
+				valS++;
 			}
 			if ((p->option & PDO_LISTINDEX) != 0) {
 				if (*(long *)p->valueP != valL) {
@@ -2507,8 +2524,45 @@ static void ParamCheck(char *line)
 				hasError = TRUE;
 			}
 			break;
+		case PD_TEXT: {
+			/* The whole text; a line break in it compares as "\n", so a
+			 * script line can check several lines of notes. */
+			static char textAct[STR_LONG_SIZE];
+			char *textP;
+			int size, out = 0;
+
+			line += len;
+			if (p->control == NULL) {
+				break;
+			}
+			size = wTextGetSize((wText_p)p->control);   /* counts the NUL */
+			textP = MyMalloc(size);
+			wTextGetText((wText_p)p->control, textP, size);
+			for (char *cp = textP; *cp && out < (int)sizeof textAct - 2; cp++) {
+				if (*cp == '\r') {
+					continue;
+				}
+				if (*cp == '\n') {
+					textAct[out++] = '\\';
+					textAct[out++] = 'n';
+				} else {
+					textAct[out++] = *cp;
+				}
+			}
+			textAct[out] = '\0';
+			MyFree(textP);
+			/* A text view can end with a line break the user didn't type. */
+			if (out >= 2 && strcmp(textAct + out - 2, "\\n") == 0) {
+				textAct[out - 2] = '\0';
+			}
+			if (strcmp(line, textAct) != 0) {
+				expVal = line;
+				actVal = textAct;
+				hasError = TRUE;
+			}
+			break;
+		}
 		case PD_DRAW:
-		case PD_TEXT:
 		case PD_MENU:
 		case PD_MENUITEM:
 		case PD_BITMAP:
@@ -2734,6 +2788,31 @@ static void NoticeAnswerPlayback(char *line)
 	}
 }
 
+/*
+ * FILESELECT <file>: the next file dialog selects <file> without opening, so a
+ * script can export to and import from a file. A relative name is in the work
+ * directory, which each regression test has to itself.
+ */
+static void FileSelectPlayback(char *line)
+{
+	const char *workDir = wGetAppWorkDir();
+	char *path;
+	size_t pathLen;
+
+	while (*line == ' ') {
+		line++;
+	}
+	if (*line == '/' || *line == '\\' || (line[0] != '\0' && line[1] == ':')) {
+		wFilSelSetPlayback(line);
+		return;
+	}
+	pathLen = strlen(workDir) + strlen(FILE_SEP_CHAR) + strlen(line) + 1;
+	path = MyMalloc(pathLen);
+	snprintf(path, pathLen, "%s%s%s", workDir, FILE_SEP_CHAR, line);
+	wFilSelSetPlayback(path);
+	MyFree(path);
+}
+
 static void UndoResumePlayback(char *line)
 {
 	UndoResume();
@@ -2841,6 +2920,7 @@ EXPORT BOOL_T MacroInit(void)
 	AddPlaybackProc("HELP ", HelpPlayback, NULL);
 	AddPlaybackProc("UNDORESUME", UndoResumePlayback, NULL);
 	AddPlaybackProc("NOTICEANSWER", NoticeAnswerPlayback, NULL);
+	AddPlaybackProc("FILESELECT", FileSelectPlayback, NULL);
 	AddPlaybackProc("UNDOSTEP", UndoStepPlayback, NULL);
 	AddPlaybackProc("REDOSTEP", RedoStepPlayback, NULL);
 

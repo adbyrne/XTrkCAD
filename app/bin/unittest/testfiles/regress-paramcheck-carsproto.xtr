@@ -1,0 +1,37 @@
+# Car Inventory: a car of a new prototype. The prototype is created with the
+# dimensions given, the car keeps it, and the next car's dialog no longer
+# calls it new.
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 40.000 x 20.000
+SCALE HO
+REDRAW
+PARAMETER misc cmdCarInventory
+PARAMETER carinv add
+PARAMETER carpart manuf -1 Ken
+PARAMETER carpart manuf FOCUSOUT
+PARAMETER carpart partno-list -1 ken9
+PARAMETER carpart partno-list FOCUSOUT
+PARAMETER carpart desc ken9 desc
+PARAMETER carpart prototype -1 Test Hopper
+PARAMETER carpart prototype FOCUSOUT
+PARAMCHECK carpart prototype-new shown
+PARAMETER carpart carLength 12.0
+PARAMETER carpart carWidth 2.0
+PARAMETER carpart trkCenter 9.0
+PARAMETER carpart cpldLen 12.8
+PARAMETER carpart ok
+PARAMCHECK carinv list count 1
+PARAMETER carinv list 0
+PARAMETER carinv edit
+PARAMCHECK carpart prototype 0 Test Hopper
+PARAMCHECK carpart carLength 12.0
+PARAMCHECK carpart cpldLen 12.8
+PARAMETER carpart cancel
+PARAMETER carinv add
+PARAMETER carpart prototype -1 Test Hopper
+PARAMETER carpart prototype FOCUSOUT
+PARAMCHECK carpart prototype-new hidden
+PARAMETER carpart cancel
+PARAMETER carinv ok
