@@ -307,6 +307,30 @@ endif()
 
 add_test(CarEditLogicTest careditlogictest)
 
+# cars/carcommit.c -- CommitStaged(), the car dialog's atomic Ok: creates
+# the prototype, part and cars, saves once, and on any failure deletes only
+# what it created. The record functions are stubs in the test file that log
+# each call, so the order of creation and rollback can be checked.
+
+add_executable(carcommittest
+	carcommittest.c
+	../cars/carcommit.c
+)
+
+target_include_directories(carcommittest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../cars
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+)
+
+target_link_libraries(carcommittest PRIVATE CMocka::cmocka)
+if(UNIX)
+	target_link_libraries(carcommittest PRIVATE m)
+endif()
+
+add_test(CarCommitTest carcommittest)
+
 # reports.c's pure row-formatting function (Reports feature, SF #217 phase
 # 1), split into reportsformat.c so this target stays a small pure-logic
 # link like careditlogictest, instead of stubbing reports.c's wlib/track-
