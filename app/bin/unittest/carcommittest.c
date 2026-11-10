@@ -57,6 +57,33 @@ static carProto_t existingProto;
 static carPart_t existingPart;
 static carItem_t existingItem;
 
+/* Records the create stubs allocated and no delete stub freed yet;
+ * Teardown() frees them, as the real registries would own them. */
+#define MAX_OWNED 32
+static void *owned[MAX_OWNED];
+static BOOL_T ownedIsItem[MAX_OWNED];
+static int nOwned;
+
+static void *Own(void *p, BOOL_T isItem)
+{
+	assert_true(nOwned < MAX_OWNED);
+	ownedIsItem[nOwned] = isItem;
+	owned[nOwned++] = p;
+	return p;
+}
+
+static void Disown(void *p)
+{
+	for (int i = 0; i < nOwned; i++) {
+		if (owned[i] == p) {
+			owned[i] = owned[--nOwned];
+			ownedIsItem[i] = ownedIsItem[nOwned];
+			return;
+		}
+	}
+	fail_msg("deleted a record the stubs never created");
+}
+
 /* -----------------------------------------------------------------------
  * Stubs
  * ----------------------------------------------------------------------- */
@@ -85,13 +112,14 @@ carProto_p CarProtoNew(carProto_p proto, int paramFileIndex, char *desc,
 	if (protoNewFails) { return NULL; }
 	if (proto) { return proto; }
 	if (protoFindRet) { return protoFindRet; }   /* coalesced */
-	return (carProto_p)calloc(1, sizeof(carProto_t));
+	return (carProto_p)Own(calloc(1, sizeof(carProto_t)), FALSE);
 }
 
 void CarProtoDelete(carProto_p protoP)
 {
 	LogEvent("proto-");
 	assert_ptr_not_equal(protoP, &existingProto);
+	Disown(protoP);
 	free(protoP);
 }
 
@@ -112,13 +140,14 @@ carPart_p CarPartNew(carPart_p partP, int paramFileIndex, SCALEINX_T scaleInx,
 	if (partNewFails) { return NULL; }
 	if (partP) { return partP; }
 	if (partFindRet) { return partFindRet; }     /* coalesced */
-	return (carPart_p)calloc(1, sizeof(carPart_t));
+	return (carPart_p)Own(calloc(1, sizeof(carPart_t)), FALSE);
 }
 
 void CarPartDelete(carPart_p partP)
 {
 	LogEvent("part-");
 	assert_ptr_not_equal(partP, &existingPart);
+	Disown(partP);
 	free(partP);
 }
 
@@ -138,7 +167,7 @@ carItem_p CarItemNew(carItem_p item, int paramFileIndex, long itemIndex,
 		return NULL;
 	}
 	LogEvent("item+ %ld %s%s", itemIndex, title, item ? " (edit)" : "");
-	it = item ? item : (carItem_p)calloc(1, sizeof(carItem_t));
+	it = item ? item : (carItem_p)Own(calloc(1, sizeof(carItem_t)), TRUE);
 	it->index = itemIndex;
 	if (itemNewLeavesNotes) {
 		it->data.notes = strdup("old notes");
@@ -150,6 +179,7 @@ void CarItemDelete(carItem_p item)
 {
 	LogEvent("item- %ld", item->index);
 	assert_ptr_not_equal(item, &existingItem);
+	Disown(item);
 	free(item->data.notes);
 	free(item);
 }
@@ -184,6 +214,21 @@ static int Setup(void **state)
 	memset(&existingProto, 0, sizeof existingProto);
 	memset(&existingPart, 0, sizeof existingPart);
 	memset(&existingItem, 0, sizeof existingItem);
+	nOwned = 0;
+	return 0;
+}
+
+static int Teardown(void **state)
+{
+	(void)state;
+	while (nOwned > 0) {
+		nOwned--;
+		if (ownedIsItem[nOwned]) {
+			free(((carItem_p)owned[nOwned])->data.notes);
+		}
+		free(owned[nOwned]);
+	}
+	free(existingItem.data.notes);
 	return 0;
 }
 
@@ -218,15 +263,6 @@ static void ExpectEvents(const char **expected, int n)
 	assert_int_equal(nEvents, n);
 }
 
-static void FreeResult(commitResult_t *res, long nItems)
-{
-	(void)nItems;
-	/* The stubs' objects are only freed by the delete stubs; a successful
-	 * commit keeps them, as the real registries would. Leaks are harmless
-	 * in a test process. */
-	(void)res;
-}
-
 #define T(n) "Ken\tBoxcar\tken1 desc\tken1\tRoad\tRM\t" n
 
 /* -----------------------------------------------------------------------
@@ -258,7 +294,6 @@ static void CreatesInOrderThenSavesOnce(void **state)
 	assert_string_equal(res.lastItemP->data.notes, "a note\n");
 	assert_ptr_equal(segFreed, segPtr);
 	assert_string_equal(plan.number, "41");   /* never changed */
-	FreeResult(&res, 3);
 }
 
 static void SaveFailureDeletesNewestFirst(void **state)
@@ -386,7 +421,6 @@ static void EditsAreNeverDeleted(void **state)
 	saveRet = FALSE;
 	assert_false(CommitStaged(&plan, SaveStub, NULL, &res));
 	ExpectEvents(exp, 4);
-	free(existingItem.data.notes);
 }
 
 /* Only a plain positive number counts up; anything else is shared. */
@@ -400,6 +434,7 @@ static void NumbersThatDontCountUp(void **state)
 		commitResult_t res;
 		char exp1[128], exp2[128];
 
+		Teardown(NULL);
 		Setup(NULL);
 		plan = NewPlan(2, numbers[n], TRUE);
 		plan.makeProto = FALSE;
@@ -449,16 +484,16 @@ static void EmptyNotesClearOldNotes(void **state)
 int main(void)
 {
 	const struct CMUnitTest tests[] = {
-		cmocka_unit_test_setup(CreatesInOrderThenSavesOnce, Setup),
-		cmocka_unit_test_setup(SaveFailureDeletesNewestFirst, Setup),
-		cmocka_unit_test_setup(ItemFailureUndoesWhatWasMade, Setup),
-		cmocka_unit_test_setup(PartFailureUndoesPrototypeOnly, Setup),
-		cmocka_unit_test_setup(ProtoFailureCreatesNothing, Setup),
-		cmocka_unit_test_setup(ExistingRecordsSurviveRollback, Setup),
-		cmocka_unit_test_setup(EditsAreNeverDeleted, Setup),
-		cmocka_unit_test_setup(NumbersThatDontCountUp, Setup),
-		cmocka_unit_test_setup(NoAutoNumberSharesTheNumber, Setup),
-		cmocka_unit_test_setup(EmptyNotesClearOldNotes, Setup),
+		cmocka_unit_test_setup_teardown(CreatesInOrderThenSavesOnce, Setup, Teardown),
+		cmocka_unit_test_setup_teardown(SaveFailureDeletesNewestFirst, Setup, Teardown),
+		cmocka_unit_test_setup_teardown(ItemFailureUndoesWhatWasMade, Setup, Teardown),
+		cmocka_unit_test_setup_teardown(PartFailureUndoesPrototypeOnly, Setup, Teardown),
+		cmocka_unit_test_setup_teardown(ProtoFailureCreatesNothing, Setup, Teardown),
+		cmocka_unit_test_setup_teardown(ExistingRecordsSurviveRollback, Setup, Teardown),
+		cmocka_unit_test_setup_teardown(EditsAreNeverDeleted, Setup, Teardown),
+		cmocka_unit_test_setup_teardown(NumbersThatDontCountUp, Setup, Teardown),
+		cmocka_unit_test_setup_teardown(NoAutoNumberSharesTheNumber, Setup, Teardown),
+		cmocka_unit_test_setup_teardown(EmptyNotesClearOldNotes, Setup, Teardown),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);
