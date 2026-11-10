@@ -1111,6 +1111,23 @@ static void SaveVisualDiffSnapshot(char *demoFile, const char *suffix)
 static int log_regression = 0;
 static int nRegressionFail = 0;
 
+/**
+ * Report that a playback line couldn't do what it says, such as select an
+ * object that isn't there. In a test run (-T) it's a failure, as a wrong
+ * PARAMCHECK value is; otherwise the line is only logged, as before.
+ *
+ * \param what IN what went wrong, with the line's argument
+ */
+EXPORT void PlaybackFail(const char *what)
+{
+	if (bRunTests) {
+		lprintf("  FAIL: playback %d: %s\n", paramLineNum, what);
+		nRegressionFail++;
+	} else {
+		LOG(log_playback, 1, ("playback %d: %s\n", paramLineNum, what));
+	}
+}
+
 static BOOL_T DoRegression(char *sFileName)
 {
 	typedef enum {
@@ -2458,6 +2475,19 @@ static void ParamCheck(char *line)
 	//	  if ( strncmp( pg->nameStr, line, len1 ) != 0 ||
 	//		   line[len1] != ' ' )
 	//		  continue;
+	/* "window shown|hidden": whether the dialog is open, e.g. still open
+	 * after OK refused the values. */
+	if (strncmp(line + len1 + 1, "window ", 7) == 0) {
+		const char *want = line + len1 + 1 + 7;
+		const char *act = pg->win != NULL && wWinIsVisible((wControl_p)pg->win) ?
+		                  "shown" : "hidden";
+		if (strcmp(want, "shown") != 0 && strcmp(want, "hidden") != 0) {
+			ParamCheckReport(pg, "window", want, "shown or hidden");
+		} else if (strcmp(want, act) != 0) {
+			ParamCheckReport(pg, "window", want, act);
+		}
+		return;
+	}
 	/* The dialog's own OK and Cancel buttons aren't fields. */
 	if (strncmp(line + len1 + 1, "ok ", 3) == 0 ||
 	    strncmp(line + len1 + 1, "cancel ", 7) == 0) {

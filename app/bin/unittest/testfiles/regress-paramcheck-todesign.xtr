@@ -1,0 +1,420 @@
+# Turnout Designer (ctodesgn.c): every design type is designed, placed from
+# the hotbar and compared with a REGRESSION block, so the geometry it builds
+# (segments, paths, end points) is checked, not just that Ok closes.
+# - A design that can't connect is refused and the dialog stays open.
+# - A right-hand turnout mirrors the left.
+# - A new design with the name of an existing turnout asks first
+#   (MSG_TODSGN_REPLACE): No keeps the old definition and the dialog open,
+#   Yes replaces it. It used to replace it without asking.
+# - A frog number comes back unchanged when the dialog reopens. The Designer
+#   converts it as angle = asin(1/N).
+# MOUSE 8200 is the space key (C_TEXT | ' ' << 8), which ends a placement.
+VERSION 13
+DEMOINIT
+ORIG 0.000 0.000 0.000
+ROOMSIZE 60.000 x 80.000
+SCALE HO
+REDRAW
+# Refused: a #10 frog can't reach 1.0 off the straight in 6.0
+CTURNOUT DESIGNER SHOW Regular Turnout
+PARAMETER turnout-designer anglemode 0
+PARAMETER turnout-designer td_reg_len1 6.000
+PARAMETER turnout-designer td_reg_len2 6.000
+PARAMETER turnout-designer td_reg_off2 1.000
+PARAMETER turnout-designer td_reg_ang2 10.000
+PARAMETER turnout-designer manuf TestCo
+PARAMETER turnout-designer desc1 Test Left
+PARAMETER turnout-designer partno1 TL1
+PARAMETER turnout-designer desc2 Test Right
+PARAMETER turnout-designer partno2 TR1
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window shown
+# Fixed: 10 degrees, 0.5 off the straight; left and right placed
+PARAMETER turnout-designer anglemode 1
+PARAMETER turnout-designer td_reg_len1 6.000
+PARAMETER turnout-designer td_reg_len2 6.000
+PARAMETER turnout-designer td_reg_off2 0.500
+PARAMETER turnout-designer td_reg_ang2 10.000
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window hidden
+HOTBARSELECT TestCo	Test Left	TL1
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 3.000
+MOUSE 4 5.000 3.000
+MOUSE 8200 5.000 3.000
+COMMAND Describe
+HOTBARSELECT TestCo	Test Right	TR1
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 9.000
+MOUSE 4 5.000 9.000
+MOUSE 8200 5.000 9.000
+COMMAND Describe
+# Same name again, No: the old definition stays, the dialog stays open
+NOTICEANSWER second
+CTURNOUT DESIGNER SHOW Regular Turnout
+PARAMETER turnout-designer anglemode 1
+PARAMETER turnout-designer td_reg_len1 8.000
+PARAMETER turnout-designer td_reg_len2 6.000
+PARAMETER turnout-designer td_reg_off2 0.500
+PARAMETER turnout-designer td_reg_ang2 10.000
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window shown
+PARAMETER turnout-designer cancel
+HOTBARSELECT TestCo	Test Left	TL1
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 15.000
+MOUSE 4 5.000 15.000
+MOUSE 8200 5.000 15.000
+COMMAND Describe
+# Yes: replaced, straight leg 8.0
+NOTICEANSWER first
+CTURNOUT DESIGNER SHOW Regular Turnout
+PARAMETER turnout-designer anglemode 1
+PARAMETER turnout-designer td_reg_len1 8.000
+PARAMETER turnout-designer td_reg_len2 6.000
+PARAMETER turnout-designer td_reg_off2 0.500
+PARAMETER turnout-designer td_reg_ang2 10.000
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window hidden
+HOTBARSELECT TestCo	Test Left	TL1
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 21.000
+MOUSE 4 5.000 21.000
+MOUSE 8200 5.000 21.000
+COMMAND Describe
+# A #6 frog; reopened, the dialog shows #6 again
+CTURNOUT DESIGNER SHOW Regular Turnout
+PARAMETER turnout-designer anglemode 0
+PARAMETER turnout-designer td_reg_len1 8.000
+PARAMETER turnout-designer td_reg_len2 8.000
+PARAMETER turnout-designer td_reg_off2 0.750
+PARAMETER turnout-designer td_reg_ang2 6.000
+PARAMETER turnout-designer manuf TestCo
+PARAMETER turnout-designer desc1 FrogReg
+PARAMETER turnout-designer partno1 F1
+PARAMETER turnout-designer desc2 FrogRegR
+PARAMETER turnout-designer partno2 F1R
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window hidden
+HOTBARSELECT TestCo	FrogReg	F1
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 27.000
+MOUSE 4 5.000 27.000
+MOUSE 8200 5.000 27.000
+COMMAND Describe
+CTURNOUT DESIGNER SHOW Regular Turnout
+PARAMCHECK turnout-designer anglemode 0
+PARAMCHECK turnout-designer td_reg_ang2 6.000
+PARAMCHECK turnout-designer td_reg_off2 0.750
+PARAMETER turnout-designer cancel
+# Curved Turnout
+CTURNOUT DESIGNER SHOW Curved Turnout
+PARAMETER turnout-designer anglemode 1
+PARAMETER turnout-designer td_crv_len1 6.000
+PARAMETER turnout-designer td_crv_off1 0.500
+PARAMETER turnout-designer td_crv_ang1 10.000
+PARAMETER turnout-designer td_crv_len2 7.000
+PARAMETER turnout-designer td_crv_off2 1.250
+PARAMETER turnout-designer td_crv_ang2 20.000
+PARAMETER turnout-designer manuf TestCo
+PARAMETER turnout-designer desc1 CurvL
+PARAMETER turnout-designer partno1 C1
+PARAMETER turnout-designer desc2 CurvLR
+PARAMETER turnout-designer partno2 C1R
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window hidden
+HOTBARSELECT TestCo	CurvL	C1
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 33.000
+MOUSE 4 5.000 33.000
+MOUSE 8200 5.000 33.000
+COMMAND Describe
+# Wye Turnout
+CTURNOUT DESIGNER SHOW Wye Turnout
+PARAMETER turnout-designer anglemode 1
+PARAMETER turnout-designer td_wye_len1 6.000
+PARAMETER turnout-designer td_wye_off1 0.500
+PARAMETER turnout-designer td_wye_ang1 10.000
+PARAMETER turnout-designer td_wye_len2 6.000
+PARAMETER turnout-designer td_wye_off2 0.500
+PARAMETER turnout-designer td_wye_ang2 10.000
+PARAMETER turnout-designer manuf TestCo
+PARAMETER turnout-designer desc1 Wye
+PARAMETER turnout-designer partno1 W1
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window hidden
+HOTBARSELECT TestCo	Wye	W1
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 39.000
+MOUSE 4 5.000 39.000
+MOUSE 8200 5.000 39.000
+COMMAND Describe
+# 3-way Turnout
+CTURNOUT DESIGNER SHOW 3-way Turnout
+PARAMETER turnout-designer anglemode 1
+PARAMETER turnout-designer td_3way_len1 6.000
+PARAMETER turnout-designer td_3way_off1 0.500
+PARAMETER turnout-designer td_3way_ang1 10.000
+PARAMETER turnout-designer td_3way_len2 6.000
+PARAMETER turnout-designer td_3way_len3 6.000
+PARAMETER turnout-designer td_3way_off3 0.500
+PARAMETER turnout-designer td_3way_ang3 10.000
+PARAMETER turnout-designer manuf TestCo
+PARAMETER turnout-designer desc1 Three
+PARAMETER turnout-designer partno1 T3
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window hidden
+HOTBARSELECT TestCo	Three	T3
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 45.000
+MOUSE 4 5.000 45.000
+MOUSE 8200 5.000 45.000
+COMMAND Describe
+# Crossing
+CTURNOUT DESIGNER SHOW Crossing
+PARAMETER turnout-designer anglemode 1
+PARAMETER turnout-designer td_crossing_len1 6.000
+PARAMETER turnout-designer td_crossing_len2 6.000
+PARAMETER turnout-designer td_crossing_ang 30.000
+PARAMETER turnout-designer manuf TestCo
+PARAMETER turnout-designer desc1 Cross
+PARAMETER turnout-designer partno1 X1
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window hidden
+HOTBARSELECT TestCo	Cross	X1
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 51.000
+MOUSE 4 5.000 51.000
+MOUSE 8200 5.000 51.000
+COMMAND Describe
+# Double Slipswitch
+CTURNOUT DESIGNER SHOW Double Slipswitch
+PARAMETER turnout-designer anglemode 1
+PARAMETER turnout-designer slippath 1
+PARAMETER turnout-designer td_dslip_len1 8.000
+PARAMETER turnout-designer td_dslip_len2 8.000
+PARAMETER turnout-designer td_dslip_ang 15.000
+PARAMETER turnout-designer manuf TestCo
+PARAMETER turnout-designer desc1 DSlip
+PARAMETER turnout-designer partno1 D1
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window hidden
+HOTBARSELECT TestCo	DSlip	D1
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 57.000
+MOUSE 4 5.000 57.000
+MOUSE 8200 5.000 57.000
+COMMAND Describe
+# Double Crossover
+CTURNOUT DESIGNER SHOW Double Crossover
+PARAMETER turnout-designer td_dcross_len 14.000
+PARAMETER turnout-designer td_dcross_off 2.000
+PARAMETER turnout-designer manuf TestCo
+PARAMETER turnout-designer desc1 DCross
+PARAMETER turnout-designer partno1 DX
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window hidden
+HOTBARSELECT TestCo	DCross	DX
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 63.000
+MOUSE 4 5.000 63.000
+MOUSE 8200 5.000 63.000
+COMMAND Describe
+# Straight Section
+CTURNOUT DESIGNER SHOW Straight Section
+PARAMETER turnout-designer td_strsect_len 9.000
+PARAMETER turnout-designer manuf TestCo
+PARAMETER turnout-designer desc1 Str
+PARAMETER turnout-designer partno1 S9
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window hidden
+HOTBARSELECT TestCo	Str	S9
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 69.000
+MOUSE 4 5.000 69.000
+MOUSE 8200 5.000 69.000
+COMMAND Describe
+# Curved Section
+CTURNOUT DESIGNER SHOW Curved Section
+PARAMETER turnout-designer td_crvsect_rad 18.000
+PARAMETER turnout-designer td_crvsect_ang 30.000
+PARAMETER turnout-designer manuf TestCo
+PARAMETER turnout-designer desc1 Crv
+PARAMETER turnout-designer partno1 R18
+PARAMETER turnout-designer ok
+PARAMCHECK turnout-designer window hidden
+HOTBARSELECT TestCo	Crv	R18
+COMMAND TurnoutHotBar
+MOUSE 2 5.000 75.000
+MOUSE 4 5.000 75.000
+MOUSE 8200 5.000 75.000
+COMMAND Describe
+REGRESSION START 13 - every design placed
+TURNOUT  1 0 0 0 0 HO 2 5.000000 3.000000 0 0.000000 "TestCo	Test Left	TL1"
+	E4 5.000000 3.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 3.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 3.500000 80.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.934574 0.000000
+	S 0 0.000000 0.934574 0.000000 6.000000 0.000000
+	C 0 0.000000 -25.486562 0.934574 25.486562 170.000000 10.000000
+	S 0 0.000000 5.360269 0.387198 6.000000 0.500000
+	END$SEGS
+TURNOUT  2 0 0 0 0 HO 2 5.000000 9.000000 0 0.000000 "TestCo	Test Right	TR1"
+	E4 5.000000 9.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 9.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 8.500000 100.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 -0.000000 0.934574 -0.000000
+	S 0 0.000000 0.934574 -0.000000 6.000000 -0.000000
+	C 0 0.000000 25.486562 0.934574 -25.486562 0.000000 10.000000
+	S 0 0.000000 5.360269 -0.387198 6.000000 -0.500000
+	END$SEGS
+TURNOUT  3 0 0 0 0 HO 2 5.000000 15.000000 0 0.000000 "TestCo	Test Left	TL1"
+	E4 5.000000 15.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 15.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 15.500000 80.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.934574 0.000000
+	S 0 0.000000 0.934574 0.000000 6.000000 0.000000
+	C 0 0.000000 -25.486562 0.934574 25.486562 170.000000 10.000000
+	S 0 0.000000 5.360269 0.387198 6.000000 0.500000
+	END$SEGS
+TURNOUT  4 0 0 0 0 HO 2 5.000000 21.000000 0 0.000000 "TestCo	Test Left	TL1"
+	E4 5.000000 21.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 13.000000 21.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 21.500000 80.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.934574 0.000000
+	S 0 0.000000 0.934574 0.000000 8.000000 0.000000
+	C 0 0.000000 -25.486562 0.934574 25.486562 170.000000 10.000000
+	S 0 0.000000 5.360269 0.387198 6.000000 0.500000
+	END$SEGS
+TURNOUT  5 0 0 0 0 HO 2 5.000000 27.000000 0 0.000000 "TestCo	FrogReg	F1"
+	E4 5.000000 27.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 13.000000 27.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 13.000000 27.750000 80.405932 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.649600 0.000000
+	S 0 0.000000 0.649600 0.000000 8.000000 0.000000
+	C 0 0.000000 -34.715594 0.649600 34.715594 170.405932 9.594068
+	S 0 0.000000 6.435532 0.485557 8.000000 0.750000
+	END$SEGS
+TURNOUT  6 0 0 0 0 HO 2 5.000000 33.000000 0 0.000000 "TestCo	CurvL	C1"
+	E4 5.000000 33.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 12.000000 34.250000 70.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 33.500000 80.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Normal" 1 4 5
+	P "Reverse" 1 6 2 3
+	S 0 0.000000 0.000000 0.000000 0.649600 0.000000
+	C 0 0.000000 -25.486562 0.934574 25.486562 170.000000 10.000000
+	S 0 0.000000 5.360269 0.387198 6.000000 0.500000
+	C 0 0.000000 -16.537760 0.649600 16.537760 160.000000 20.000000
+	S 0 0.000000 6.305847 0.997349 7.000000 1.250000
+	S 0 0.000000 0.649600 0.000000 0.934574 0.000000
+	END$SEGS
+TURNOUT  7 0 0 0 0 HO 2 5.000000 39.000000 0 0.000000 "TestCo	Wye	W1"
+	E4 5.000000 39.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 39.500000 80.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 38.500000 100.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Left" 1 2 3
+	P "Right" 1 4 5
+	S 0 0.000000 0.000000 0.000000 0.934574 0.000000
+	C 0 0.000000 -25.486562 0.934574 25.486562 170.000000 10.000000
+	S 0 0.000000 5.360269 0.387198 6.000000 0.500000
+	C 0 0.000000 25.486562 0.934574 -25.486562 0.000000 10.000000
+	S 0 0.000000 5.360269 -0.387198 6.000000 -0.500000
+	END$SEGS
+TURNOUT  8 0 0 0 0 HO 2 5.000000 45.000000 0 0.000000 "TestCo	Three	T3"
+	E4 5.000000 45.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 45.500000 80.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 44.500000 100.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 45.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Left" 1 2 3
+	P "Normal" 1 6
+	P "Right" 1 4 5
+	S 0 0.000000 0.000000 0.000000 0.934574 0.000000
+	C 0 0.000000 -25.486562 0.934574 25.486562 170.000000 10.000000
+	S 0 0.000000 5.360269 0.387198 6.000000 0.500000
+	C 0 0.000000 25.486562 0.934574 -25.486562 0.000000 10.000000
+	S 0 0.000000 5.360269 -0.387198 6.000000 -0.500000
+	S 0 0.000000 0.934574 0.000000 6.000000 0.000000
+	END$SEGS
+TURNOUT  9 0 0 0 0 HO 2 5.000000 51.000000 0 0.000000 "TestCo	Cross	X1"
+	E4 5.000000 51.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 11.000000 51.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 5.401924 52.500000 300.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 10.598076 49.500000 120.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Normal" 1 0 2
+	S 0 0.000000 0.000000 0.000000 6.000000 0.000000
+	S 0 0.000000 0.401924 1.500000 5.598076 -1.500000
+	END$SEGS
+TURNOUT  10 0 512 0 0 HO 2 5.000000 57.000000 0 0.000000 "TestCo	DSlip	D1"
+	E4 5.000000 57.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 13.000000 57.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 5.136297 58.035276 285.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 12.863703 55.964724 105.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
+	S 0 0.000000 0.000000 0.000000 1.299200 0.000000
+	S 0 0.000000 1.299200 0.000000 6.700800 0.000000
+	S 0 0.000000 6.700800 0.000000 8.000000 0.000000
+	S 0 0.000000 0.136297 1.035276 1.391228 0.699018
+	S 0 0.000000 1.391228 0.699018 6.608772 -0.699018
+	S 0 0.000000 6.608772 -0.699018 7.863703 -1.035276
+	C 0 0.000000 20.514613 1.299200 -20.514613 0.000000 15.000000
+	C 0 0.000000 -20.514613 6.700800 20.514613 180.000000 15.000000
+	END$SEGS
+TURNOUT  11 0 0 0 0 HO 2 5.000000 63.000000 0 0.000000 "TestCo	DCross	DX"
+	E4 5.000000 63.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 19.000000 63.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 5.000000 65.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 19.000000 65.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Normal" 1 2 3 0 4 5 6
+	P "Reverse" 1 7 8 9 6 0 4 10 11 12 3
+	S 0 0.000000 0.000000 0.000000 1.145452 0.000000
+	S 0 0.000000 1.145452 0.000000 12.854548 0.000000
+	S 0 0.000000 12.854548 0.000000 14.000000 0.000000
+	S 0 0.000000 0.000000 2.000000 1.145452 2.000000
+	S 0 0.000000 1.145452 2.000000 12.854548 2.000000
+	S 0 0.000000 12.854548 2.000000 14.000000 2.000000
+	C 0 0.000000 -17.426876 1.145452 17.426876 162.518659 17.481341
+	S 0 0.000000 6.380402 0.804863 7.619598 1.195137
+	C 0 0.000000 17.426876 12.854548 -15.426876 342.518659 17.481341
+	C 0 0.000000 17.426876 1.145452 -15.426876 0.000000 17.481341
+	S 0 0.000000 6.380402 1.195137 7.619598 0.804863
+	C 0 0.000000 -17.426876 12.854548 17.426876 180.000000 17.481341
+	END$SEGS
+TURNOUT  12 0 0 0 0 HO 2 5.000000 69.000000 0 0.000000 "TestCo	Str	S9"
+	E4 5.000000 69.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 14.000000 69.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Normal" 1
+	S 0 0.000000 0.000000 0.000000 9.000000 0.000000
+	END$SEGS
+TURNOUT  13 0 0 0 0 HO 2 5.000000 75.000000 0 0.000000 "TestCo	Crv	R18"
+	E4 5.000000 75.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 14.000000 77.411543 60.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	D 0.000000 0.000000
+	P "Normal" 1
+	C 0 0.000000 -18.000000 0.000000 18.000000 150.000000 30.000000
+	END$SEGS
+REGRESSION END

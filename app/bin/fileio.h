@@ -139,6 +139,7 @@ void EditClone( void * unused );
 
 void DoRecord( void * );
 void AddPlaybackProc( const char *, playbackProc_p, void * );
+void PlaybackFail( const char * what );
 EXPORT void TakeSnapshot( drawCmd_p );
 void PlaybackMessage( char * );
 void DoPlayBack( void * );
