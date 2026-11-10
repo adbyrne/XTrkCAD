@@ -45,7 +45,8 @@ PARAMETER carinv export
 FILESELECT cars.csv
 PARAMETER carinv import
 PARAMCHECK carinv list count 4
-PARAMETER carinv list 2
+# The list is in index order: 1, 2 (imported), 3, 4 (imported).
+PARAMETER carinv list 1
 PARAMETER carinv edit
 PARAMCHECK carpart index 2
 PARAMCHECK carpart number 100

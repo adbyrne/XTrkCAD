@@ -340,6 +340,16 @@ static carItem_p FindCurrentItem(void)
 	                                      inx);
 }
 
+/** -1, 0 or 1 as a is less than, equal to or greater than b */
+#define CMP_VALUES(a, b) (((a) > (b)) - ((a) < (b)))
+
+/**
+ * qsort() comparison for the inventory list: the sort criteria the user
+ * picked, in order, then the index. qsort() isn't stable, so without the
+ * index, cars that tie (all of them when no criterion is picked) came out
+ * in a different order on each platform and could swap places on Windows
+ * whenever the list was reloaded.
+ */
 static int Cmp_carInvItem(
         const void* ptr1,
         const void* ptr2)
@@ -389,10 +399,11 @@ static int Cmp_carInvItem(
 			                 max(tabs1[T_REPMARK].len, tabs2[T_REPMARK].len));
 			break;
 		case S_PURCHPRICE:
-			rc = (int)(item1->data.purchPrice - item2->data.purchPrice);
+			/* (int) of the difference made 12.50 and 12.90 equal */
+			rc = CMP_VALUES(item1->data.purchPrice, item2->data.purchPrice);
 			break;
 		case S_CURRPRICE:
-			rc = (int)(item1->data.currPrice - item2->data.currPrice);
+			rc = CMP_VALUES(item1->data.currPrice, item2->data.currPrice);
 			break;
 		case S_CONDITION:
 			rc = (int)(item1->data.condition - item2->data.condition);
@@ -406,6 +417,9 @@ static int Cmp_carInvItem(
 		default:
 			break;
 		}
+	}
+	if (rc == 0) {
+		rc = CMP_VALUES(item1->index, item2->index);
 	}
 	return rc;
 }
