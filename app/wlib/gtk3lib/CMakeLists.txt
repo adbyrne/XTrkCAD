@@ -141,5 +141,6 @@ if(TARGET resource-target AND TARGET symbols-target)
 endif()
 
 if(XTRKCAD_TESTING)
+    add_subdirectory(test_drawcairo)
     add_subdirectory(unittests)
 endif()
