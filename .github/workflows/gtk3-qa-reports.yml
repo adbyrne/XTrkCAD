@@ -54,7 +54,9 @@ jobs:
     # list) for the full writeup.
     if: inputs.coverage
     runs-on: ${{ inputs.runner }}
-    timeout-minutes: 30
+    # 45: every test, at level full, under --coverage. 21 minutes on 2026-11-11
+    # before RegressionUndo.* (54 demos, about 7 minutes uninstrumented) joined.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps
