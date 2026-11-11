@@ -158,11 +158,9 @@ jobs:
     # without SetCLocale() shows up here (RegressionDescribe.* did, 46
     # tests). The test commands keep messages in English (LC_MESSAGES=C, see
     # RegressionTests.cmake), so this checks numbers, not translations.
-    # Report-only for now, as regression-macos was: once it has been green
-    # for a few runs, drop continue-on-error to make it gate.
+    # It gates: it was report-only until it had been green for a few runs.
     runs-on: ubuntu-24.04
     timeout-minutes: 45
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps

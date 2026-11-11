@@ -464,8 +464,8 @@ bug:
   `LANG=de_DE.UTF-8` a decimal comma shows where data is written or read without `SetCLocale()`.
   Run new tests once that way. Don't match translated text in a new test: match a message ID, a
   list index (`PARAMCHECK <dialog> <list> <n>` with no text checks the selected row), or a number.
-  The `regression-locale-de` CI job runs the `regression-ci` tests with that locale; it reports only
-  until it has been green for a few runs (dev ML #4641).
+  The `regression-locale-de` CI job runs the `regression-ci` tests with that locale, and gates like
+  the other regression jobs (dev ML #4641).
 - **What the user is told when something goes wrong (`RegressionNotice.*`)** — `badline` loads a
   layout with a bad number and an unknown line, and `badline_check` checks which tracks survived;
   `newer` opens a file from a newer version, which must not become the current layout (the
@@ -488,7 +488,8 @@ bug:
 - **Print and export (`RegressionExport.*`)** — `-Texport:<layout>` prints a small layout to PDF
   without the dialog (`wPrintSetExportFile()`), exports SVG, DXF and PNG and imports the DXF file back,
   all through the normal code (`LayoutExportTest()`, `fileio.c`). `tools/check-export-test.sh` then
-  checks the files, including that printed text is at its point size. It needs `poppler-utils`
+  checks the files, including that printed text is at its point size and that an SVG arc over
+  180 degrees is drawn the long way round. It needs `poppler-utils`
   (`pdfinfo`, `pdftohtml`), so the tests are only added if those are found. They're labelled
   `regression` but not `regression-ci`: `regression-gtk3-standalone` and the coverage job install
   `poppler-utils` and run them, so the package jobs don't have to.
