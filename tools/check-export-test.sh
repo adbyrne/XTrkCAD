@@ -4,8 +4,9 @@
 # Usage: tools/check-export-test.sh <directory holding export.pdf/.svg/.dxf/.png>
 #
 # The layout is app/bin/unittest/testfiles/export-test.xtc: a straight track, a
-# line and a text of size 288, which prints at 18 pt at the default print scale
-# of 1:16. Needs pdfinfo and pdftohtml (poppler-utils).
+# line, a text of size 288, which prints at 18 pt at the default print scale
+# of 1:16, and a 270 degree arc starting at 200 degrees. Needs pdfinfo and
+# pdftohtml (poppler-utils).
 
 DIR=$1
 RC=0
@@ -40,6 +41,16 @@ fi
 if [ -f "$SVG" ]; then
 	grep -q CHECKTEXT "$SVG" || fail "CHECKTEXT isn't in the SVG"
 	[ "$(grep -c '<line\|<path\|<polyline' "$SVG")" -ge 3 ] || fail "SVG has too few lines"
+	# The arc is the only one in the layout. It sweeps more than 180 degrees,
+	# so its large-arc flag has to be 1. Comparing the sweep minus the start
+	# angle instead gave 0, and viewers drew the short way round between the
+	# same end points (Hg r8031).
+	ARCS=$(sed -n 's/.*<path d="M [-0-9]* [-0-9]* A [0-9]* [0-9]* [0-9]* \([01]\) [01] .*/\1/p' "$SVG")
+	if [ -z "$ARCS" ]; then
+		fail "the arc isn't in the SVG"
+	elif [ "$ARCS" != 1 ]; then
+		fail "the 270 degree arc has large-arc flag $ARCS, not 1"
+	fi
 else
 	echo "no SVG, assuming a build without SVG support"
 fi
