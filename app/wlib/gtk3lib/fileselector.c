@@ -409,7 +409,8 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		char *names[2] = { playbackFileName, NULL };
 
 		playbackFileName = NULL;
-		if (fs->action) {
+		// An empty name is Cancel: like the dialog, select nothing
+		if (fs->action && names[0][0] != '\0') {
 			fs->action(1, names, fs->context);
 		}
 		g_free(names[0]);
@@ -514,7 +515,8 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 /**
  * Make the next wFilSelect() select a file without showing the dialog, as if
  * the user had picked it. Playback uses this, so a script can export to and
- * import from a file. The name is used once; NULL clears it.
+ * import from a file. The name is used once; NULL clears it. An empty name
+ * makes the next wFilSelect() act as if the user had pressed Cancel.
  *
  * The name is used as given: no extension is added, and there is no
  * confirmation before an existing file is overwritten.
