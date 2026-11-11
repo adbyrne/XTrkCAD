@@ -3714,7 +3714,8 @@ EXPORT track_p NewText(
 EXPORT BOOL_T ReadText( char * line )
 {
 	coOrd pos;
-	CSIZE_T textSize;
+	// GetArgs() 'l' writes a long; CSIZE_T is an int, which a long overran
+	long textSize;
 	char * text;
 	wIndex_t index;
 	wIndex_t layer;
@@ -3739,8 +3740,8 @@ EXPORT BOOL_T ReadText( char * line )
 		}
 	}
 
-	trk = NewText( index, pos, angle, text, textSize, color, FALSE, FALSE,
-	               bg_color );
+	trk = NewText( index, pos, angle, text, (CSIZE_T)textSize, color, FALSE,
+	               FALSE, bg_color );
 	SetTrkLayer( trk, layer );
 	MyFree(text);
 	return TRUE;
