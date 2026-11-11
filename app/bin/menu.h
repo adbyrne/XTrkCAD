@@ -42,6 +42,7 @@ extern wControl_p zoomExtentsB;
 extern wControl_p mapShowB;
 extern wControl_p mapShowMI;
 extern wControl_p fileList_ml;
+void RecentFilesMenuUpdate(void);
 extern wMenuToggle_p snapGridEnableMI;
 extern wMenuToggle_p snapGridShowMI;
 

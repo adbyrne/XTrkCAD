@@ -993,6 +993,8 @@ void wMenuRadioSetActive(wControl_p mi);
 
 void wMenuPushEnable(wControl_p mi, wBool_t enable);
 
+void wMenuMenuEnable(wControl_p m, wBool_t enable);
+
 typedef enum { NEWEST_TOP, OLDEST_TOP } SORTORDER;
 wControl_p wMenuListCreate(wControl_p m, const char *helpStr, SORTORDER sorder,
                            int max, wMenuListCallBack_p action);
