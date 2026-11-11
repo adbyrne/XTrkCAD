@@ -308,10 +308,13 @@ Flatpak builds don't use this option; they have their own, `XTRKCAD_FLATPAK_NOVE
 Not part of the everyday build/test loop, but available if you're chasing a specific class of
 bug:
 
-- **Sanitizers** — `-DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang` builds with ASan/UBSan.
-  Leave out the GTK widget tests with `-LE gtk-display` when running under it: GTK3's own
-  internal allocations trip ASan's leak detector. They still run normally elsewhere, e.g.
-  under `c-tests-linux`'s `xvfb-run`. Tests labelled `gtk-display` create GTK widgets and
+- **Sanitizers** — `-DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang` builds everything with
+  ASan/UBSan, the program included, so the regression tests run under them too. If the compiler can't
+  link them (GCC without libasan and libubsan), configure stops and says so. Run those with
+  `ASAN_OPTIONS=detect_leaks=0`, as `regression-gtk3-sanitizers` does: GTK and GLib keep
+  allocations to the end of the program, so every test would report leaks. For the unit tests,
+  leave leak detection on and leave out the GTK widget tests with `-LE gtk-display`, for the
+  same reason. They still run elsewhere, e.g. under `c-tests-linux`'s `xvfb-run`. Tests labelled `gtk-display` create GTK widgets and
   need a display; give any new test that calls into GTK the same label
   (`app/wlib/gtk3lib/unittests/CMakeLists.txt`).
 - **Valgrind** — `ctest -T memcheck --overwrite MemoryCheckCommand=$(which valgrind)`.
@@ -437,8 +440,11 @@ bug:
   itself. `carnew` follows the car dialog's "New" hints while a car is added (Manage > Car
   Inventory). `carsedit` edits a car and cancels an edit, `carsproto` adds a car of a new
   prototype, `carsdelete` answers No and then Yes to Delete and imports cars whose indexes are
-  taken, and `carscsv` exports, deletes and imports the inventory and checks every field. Shelving
-  a car that is on the layout isn't covered. `jsonnote` covers the JSON Note dialog: text that
+  taken, and `carscsv` exports, deletes and imports the inventory and checks every field. `carfind`
+  places a car off screen and presses Find (Development Issues #78); `VIEWCHECK <x> <y>` then checks
+  the main window is centred on the car, to a twentieth of its size. Shelving a car that is on the
+  layout isn't covered. A script line that doesn't parse (`INPUT ERROR`) fails these tests: before,
+  the script stopped there and the test still passed. `jsonnote` covers the JSON Note dialog: text that
   isn't a JSON object turns OK inactive and is never saved, even when OK is pressed; the field
   editor's Add, Update and Delete; and Undo and Redo of the edit. It and `undo` also fail on an
   `UNDO ASSERT` line, which otherwise only logs. `todesign` covers the Turnout Designer: each
@@ -450,7 +456,11 @@ bug:
   the Layers dialog: Add Layer and Delete Layer renumber the layers after them, and the tracks,
   the Layer Groups' members and the current layer have to follow; a layer with objects can't be
   deleted; edited properties are kept. A list check reads the selected row, so select a row with
-  `PARAMETER <dialog> <list> <n>` before checking its text.
+  `PARAMETER <dialog> <list> <n>` before checking its text. `modify` covers Modify on a Cornu
+  and on a Bezier track (`ModifyCornu()`, `ModifyBezier()`, `cmodify.c`): pick the track, drag an
+  end or a control point, then `MOUSE 3336 <x> <y>`, the Enter key (`C_TEXT | 13 << 8`); each is
+  checked after the change, after Undo and after Redo. A dragged end dropped near another track's
+  end snaps to it, so the drag ends away from other tracks.
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button
@@ -508,6 +518,18 @@ bug:
   to leave it in place, and a save that works removes it. `wFilSelSetPlayback("")` makes the next
   file dialog act as if Cancel was pressed. `objects` (`roundtrip-objects.xtc`) is `regression-ci`,
   `timesavr` only `regression`.
+- **Clipboard (`RegressionClipboard.*`)** — `-Tclipboard:<layout>` selects every object but the
+  cars, which the clipboard leaves out (`ExportTracks()`), and checks Copy and Paste, Cut with Undo
+  and Redo, and Clone (`LayoutClipboardTest()`, `fileio.c`). Each Undo has to give back the layout
+  as saved before. A clone has to sit at one offset from the original, connected among itself as
+  the original is and to none of it. Blocks and switch motors are left out of the offset check:
+  they have no position of their own. Same two layouts and labels as the checkpoint test.
+- **Export and Import (`RegressionXti.*`)** — `-Txti:<layout>` exports every object but the cars to
+  `.xti` through File > Export and imports it three ways (`LayoutXtiTest()`, `fileio.c`). Into an
+  empty layout, exporting the result again has to give the same file: an export holds positions
+  relative to the selection. Into the layout itself, the copies connect among themselves as the
+  originals do and to none of them, and Undo gives back the saved layout. As a module, they go on
+  one new layer, "Module - <file>", marked as a module. Same two layouts and labels as above.
 - **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
   platforms. Both gate like the Linux jobs. macOS runners can be scarce, so a `regression-macos`
   job that never starts may need a rerun. Locally, pass

@@ -69,6 +69,7 @@ static wControl_p magnetsB;
 EXPORT wControl_p mapShowMI;
 static wMenuToggle_p magnetsMI;
 wControl_p fileList_ml;
+static wControl_p recentFilesM;
 EXPORT wMenuToggle_p snapGridEnableMI;
 EXPORT wMenuToggle_p snapGridShowMI;
 
@@ -351,6 +352,15 @@ static void ChkFileList(int index, const char * label, void * data)
 {
 	fileListPathName = (char*) data;
 	Confirm(_("Load"), AfterFileList);
+}
+
+/*
+ * File > Recent files is greyed out while its list is empty (Development
+ * Issues #79). Call it after adding to fileList_ml.
+ */
+EXPORT void RecentFilesMenuUpdate(void)
+{
+	wMenuMenuEnable(recentFilesM, wMenuListGetCount(fileList_ml) > 0);
 }
 
 
@@ -1346,11 +1356,12 @@ EXPORT void CreateMenus(void)
 	wMenuPushCreate(fileM, "load", _("_Open ..."), ACCL_OPEN,
 	                ChkLoad, NULL);
 
-	wMenu_p recentuseMenu = wMenuMenuCreate(fileM, "menuRecentlyUsedFiles",
-	                                        _("Recent files"));
-	fileList_ml = wMenuListCreate(recentuseMenu, "fileListMenu", NEWEST_TOP,
+	recentFilesM = wMenuMenuCreate(fileM, "menuRecentlyUsedFiles",
+	                               _("Recent files"));
+	fileList_ml = wMenuListCreate(recentFilesM, "fileListMenu", NEWEST_TOP,
 	                              NUM_FILELIST,
 	                              ChkFileList);
+	RecentFilesMenuUpdate();
 
 	wMenuSeparatorCreate(fileM);
 

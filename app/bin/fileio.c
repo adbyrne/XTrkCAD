@@ -685,6 +685,7 @@ void AddToRecentFiles(const char* displayFileName, const char* fullFileName)
 		const char* copyFile = MyStrdup(fullFileName);
 		const char* listName = FindFilename(strdup(fullFileName));
 		wMenuListAdd(fileList_ml, 0, listName, copyFile);
+		RecentFilesMenuUpdate();
 
 		SaveRecentFileList();
 	}
@@ -951,6 +952,7 @@ static int SaveTracks(
 	if (success) {
 		nameOfFile = FindFilename(fileName[0]);
 		wMenuListAdd(fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]));
+		RecentFilesMenuUpdate();
 		checkPtMark = changed = 0;
 
 		SetLayoutFullPath(fileName[0]);
@@ -1511,6 +1513,7 @@ EXPORT void LoadFileList(void)
 	}
 
 	DynStringFree(&key);
+	RecentFilesMenuUpdate();
 }
 
 
@@ -1855,6 +1858,427 @@ done:
 	free( restored );
 	free( backup );
 	free( missing );
+	MyFree( source );
+	return nFail;
+}
+
+/**
+ * Save the layout in memory to path and compare it with reference.
+ */
+static BOOL_T ClipboardTestMatches( char * path, const char * reference,
+                                    const char * step )
+{
+	if ( !SaveTracks( 1, &path, NULL ) || !SavedLayoutsMatch( reference, path ) ) {
+		lprintf( "  FAIL: after %s the layout isn't the original\n", step );
+		return FALSE;
+	}
+	return TRUE;
+}
+
+/**
+ * Select every object but the cars, which the clipboard leaves out.
+ */
+static void ClipboardTestSelectAll( void )
+{
+	track_p trk;
+	SetAllTrackSelect( TRUE );
+	TRK_ITERATE( trk ) {
+		if ( QueryTrack( trk, Q_ISTRAIN ) ) {
+			ClrTrkBits( trk, TB_SELECTED );
+		}
+	}
+	SelectRecount();
+}
+
+/**
+ * Count the endpoints of the tracks from first on that are connected to
+ * another track, and those connected to a track before first.
+ */
+static void ClipboardTestConnections( track_p first, int * connected,
+                                      int * outside )
+{
+	*connected = *outside = 0;
+	for ( track_p trk = first; trk; trk = GetNextTrack( trk ) ) {
+		if ( IsTrackDeleted( trk ) ) {
+			continue;
+		}
+		for ( EPINX_T ep = 0; ep < GetTrkEndPtCnt( trk ); ep++ ) {
+			track_p other = GetTrkEndTrk( trk, ep );
+			if ( other == NULL ) {
+				continue;
+			}
+			(*connected)++;
+			if ( GetTrkIndex( other ) < GetTrkIndex( first ) ) {
+				(*outside)++;
+			}
+		}
+	}
+}
+
+/**
+ * Regression test for -Tclipboard:&lt;layout&gt;: Copy, Cut, Paste and Clone
+ * on the whole layout, with Undo and Redo. Load the layout, save it as the
+ * reference, select everything, then check that:
+ * - Copy and Paste add a copy of every object, selected, and Undo takes it
+ *   away again;
+ * - Cut leaves nothing, Undo brings the layout back and Redo cuts it again;
+ * - Clone puts a copy of every object at one offset from it, connected
+ *   among themselves as the originals are and to none of the originals.
+ *
+ * \param pathName IN the layout
+ * \return number of failed checks
+ */
+EXPORT int LayoutClipboardTest( const char * pathName )
+{
+	char * source = MyStrdup( pathName );
+	char * dir = NULL, * reference = NULL, * work = NULL;
+	int nFail = 0;
+	int count = RoundTripLoad( source );
+	long selected;
+
+	if ( count <= 0 ) {
+		MyFree( source );
+		return 1;
+	}
+	lprintf( "%s: %d tracks\n", source, count );
+	MakeFullpath( &dir, workingDir, "clipboard", NULL );
+	SafeCreateDir( dir );
+	MakeFullpath( &reference, dir, "reference.xtc", NULL );
+	MakeFullpath( &work, dir, "work.xtc", NULL );
+	if ( !SaveTracks( 1, &reference, NULL ) ) {
+		lprintf( "  FAIL: can't save %s\n", reference );
+		nFail++;
+		goto done;
+	}
+
+	// Copy and Paste. The clipboard leaves out cars (ExportTracks()).
+	SetAllTrackSelect( TRUE );
+	selected = 0;
+	track_p car;
+	TRK_ITERATE( car ) {
+		if ( GetTrkSelected( car ) && !QueryTrack( car, Q_ISTRAIN ) ) {
+			selected++;
+		}
+	}
+	if ( selected <= 0 ) {
+		lprintf( "  FAIL: Select All selected nothing\n" );
+		nFail++;
+		goto done;
+	}
+	EditCopy( NULL );
+	if ( !editStatus || access( clipBoardN, R_OK ) != 0 ) {
+		lprintf( "  FAIL: Copy wrote no clipboard file\n" );
+		nFail++;
+		goto done;
+	}
+	EditPaste( NULL );
+	if ( !editStatus || CheckpointTestCount() != count + selected ) {
+		lprintf( "  FAIL: Paste of %ld objects gave %d, not %ld\n", selected,
+		         CheckpointTestCount(), count + selected );
+		nFail++;
+	}
+	if ( selectedTrackCount != selected ) {
+		lprintf( "  FAIL: %ld of the %ld pasted objects are selected\n",
+		         selectedTrackCount, selected );
+		nFail++;
+	}
+	UndoUndo( NULL );
+	if ( CheckpointTestCount() != count ) {
+		lprintf( "  FAIL: Undo of Paste left %d objects, not %d\n",
+		         CheckpointTestCount(), count );
+		nFail++;
+	}
+	nFail += !ClipboardTestMatches( work, reference, "Paste and Undo" );
+
+	// Cut, Undo, Redo. Delete, so Cut, only works in Select mode. Cars are
+	// left out: Cut takes them off the layout, but Copy doesn't copy them.
+	DoCommandB( I2VP( selectCmdInx ) );
+	ClipboardTestSelectAll();
+	EditCut( NULL );
+	if ( !editStatus || CheckpointTestCount() != count - selected ) {
+		lprintf( "  FAIL: Cut of %ld objects left %d, not %ld\n", selected,
+		         CheckpointTestCount(), count - selected );
+		nFail++;
+	}
+	UndoUndo( NULL );
+	if ( CheckpointTestCount() != count ) {
+		lprintf( "  FAIL: Undo of Cut gave %d objects, not %d\n",
+		         CheckpointTestCount(), count );
+		nFail++;
+	}
+	nFail += !ClipboardTestMatches( work, reference, "Cut and Undo" );
+	UndoRedo( NULL );
+	if ( CheckpointTestCount() != count - selected ) {
+		lprintf( "  FAIL: Redo of Cut left %d objects, not %ld\n",
+		         CheckpointTestCount(), count - selected );
+		nFail++;
+	}
+	UndoUndo( NULL );
+
+	// Clone: a copy of everything at one offset, connected as the original
+	track_p last = NULL, trk;
+	int connectedBefore, outsideBefore, connectedClone, outsideClone;
+	TRK_ITERATE( trk ) {
+		last = trk;
+	}
+	ClipboardTestConnections( GetFirstTrack(), &connectedBefore,
+	                          &outsideBefore );
+	ClipboardTestSelectAll();
+	EditClone( NULL );
+
+	if ( !editStatus || CheckpointTestCount() != count + selected ) {
+		lprintf( "  FAIL: Clone of %ld objects gave %d, not %ld\n", selected,
+		         CheckpointTestCount(), count + selected );
+		nFail++;
+	} else if ( last != NULL && GetNextTrack( last ) != NULL ) {
+		track_p orig = GetFirstTrack();
+		track_p clone = GetNextTrack( last );
+		coOrd offset = zero;
+		BOOL_T first = TRUE;
+		int mismatch = 0;
+		ClipboardTestConnections( clone, &connectedClone, &outsideClone );
+		if ( connectedClone != connectedBefore || outsideClone != 0 ) {
+			lprintf( "  FAIL: the clone has %d connected endpoints, %d of them to"
+			         " the original; the original has %d\n", connectedClone,
+			         outsideClone, connectedBefore );
+			nFail++;
+		}
+		for ( ; orig && clone && orig != GetNextTrack( last );
+		      orig = GetNextTrack( orig ), clone = GetNextTrack( clone ) ) {
+			coOrd hi0, lo0, hi1, lo1;
+			GetBoundingBox( orig, &hi0, &lo0 );
+			GetBoundingBox( clone, &hi1, &lo1 );
+			// A block or switch motor has no position of its own, only
+			// its tracks or turnout. A switch motor's box is computed from
+			// its turnout when it's read and doesn't follow when the
+			// turnout moves (MoveSwitchMotor() is empty): a question for
+			// the dev ML, not checked here.
+			const char * type = GetTrkTypeName( orig );
+			if ( strcmp( type, "BLOCK" ) == 0
+			     || strcmp( type, "SWITCHMOTOR" ) == 0 ) {
+				continue;
+			}
+			if ( first ) {
+				offset.x = lo1.x - lo0.x;
+				offset.y = lo1.y - lo0.y;
+				first = FALSE;
+			}
+			if ( fabs( lo1.x - lo0.x - offset.x ) > 0.001
+			     || fabs( lo1.y - lo0.y - offset.y ) > 0.001
+			     || fabs( hi1.x - hi0.x - offset.x ) > 0.001
+			     || fabs( hi1.y - hi0.y - offset.y ) > 0.001 ) {
+				if ( mismatch++ == 0 ) {
+					lprintf( "  FAIL: clone T%d [%0.3f %0.3f]-[%0.3f %0.3f] isn't at"
+					         " the offset [%0.3f %0.3f] from T%d [%0.3f %0.3f]-[%0.3f %0.3f]\n",
+					         GetTrkIndex( clone ), lo1.x, lo1.y, hi1.x, hi1.y,
+					         offset.x, offset.y, GetTrkIndex( orig ),
+					         lo0.x, lo0.y, hi0.x, hi0.y );
+				}
+			}
+		}
+		if ( mismatch ) {
+			lprintf( "  FAIL: %d clones aren't at the offset\n", mismatch );
+			nFail++;
+		}
+	}
+	UndoUndo( NULL );
+	nFail += !ClipboardTestMatches( work, reference, "Clone and Undo" );
+
+done:
+	free( dir );
+	free( reference );
+	free( work );
+	MyFree( source );
+	return nFail;
+}
+
+/**
+ * Export the selection to path through File > Export, as if the user had
+ * picked path in the file dialog.
+ */
+static void XtiTestExport( const char * path )
+{
+	wFilSelSetPlayback( path );
+	DoExport( NULL );
+}
+
+/**
+ * Import path through File > Import or Import Module.
+ */
+static void XtiTestImport( const char * path, BOOL_T module )
+{
+	wFilSelSetPlayback( path );
+	if ( module ) {
+		DoImportModule( NULL );
+	} else {
+		DoImportObjects( NULL );
+	}
+}
+
+/**
+ * Regression test for -Txti:&lt;layout&gt;: File > Export and Import of the
+ * .xti format. Load the layout, save it as the reference, select every object
+ * but the cars and export them, then check that:
+ * - imported into an empty layout, every object comes back, selected, and
+ *   exporting them again gives the same file: an export holds positions
+ *   relative to the selection, so that is the same objects at the same
+ *   places relative to each other;
+ * - imported into the layout itself, the copies get new indexes, connect
+ *   among themselves as the originals do and to none of them, and Undo
+ *   gives back the layout as saved;
+ * - imported as a module, they go on one new layer, named after the file
+ *   and marked as a module.
+ *
+ * \param pathName IN the layout
+ * \return number of failed checks
+ */
+EXPORT int LayoutXtiTest( const char * pathName )
+{
+	char * source = MyStrdup( pathName );
+	char * dir = NULL, * reference = NULL, * work = NULL;
+	char * export1 = NULL, * export2 = NULL;
+	int nFail = 0;
+	int count = RoundTripLoad( source );
+	long selected = 0;
+	track_p trk, last = NULL;
+
+	if ( count <= 0 ) {
+		MyFree( source );
+		return 1;
+	}
+	lprintf( "%s: %d tracks\n", source, count );
+	MakeFullpath( &dir, workingDir, "xti", NULL );
+	SafeCreateDir( dir );
+	MakeFullpath( &reference, dir, "reference.xtc", NULL );
+	MakeFullpath( &work, dir, "work.xtc", NULL );
+	MakeFullpath( &export1, dir, "export1.xti", NULL );
+	MakeFullpath( &export2, dir, "export2.xti", NULL );
+	if ( !SaveTracks( 1, &reference, NULL ) ) {
+		lprintf( "  FAIL: can't save %s\n", reference );
+		nFail++;
+		goto done;
+	}
+
+	ClipboardTestSelectAll();
+	selected = selectedTrackCount;
+	XtiTestExport( export1 );
+	if ( access( export1, R_OK ) != 0 ) {
+		lprintf( "  FAIL: Export wrote no file\n" );
+		nFail++;
+		goto done;
+	}
+
+	// Into an empty layout, and out again
+	CheckpointTestClear();
+	XtiTestImport( export1, FALSE );
+	if ( CheckpointTestCount() != selected || selectedTrackCount != selected ) {
+		lprintf( "  FAIL: Import into an empty layout gave %d objects, %ld"
+		         " selected, not %ld\n", CheckpointTestCount(), selectedTrackCount,
+		         selected );
+		nFail++;
+	}
+	XtiTestExport( export2 );
+	if ( !SavedLayoutsMatch( export1, export2 ) ) {
+		lprintf( "  FAIL: exporting the imported objects gave another file\n" );
+		nFail++;
+	}
+
+	// Into the layout itself
+	if ( RoundTripLoad( reference ) != count ) {
+		lprintf( "  FAIL: can't reload %s\n", reference );
+		nFail++;
+		goto done;
+	}
+	TRK_ITERATE( trk ) {
+		last = trk;
+	}
+	int connectedBefore, outsideBefore, connectedImport, outsideImport;
+	ClipboardTestConnections( GetFirstTrack(), &connectedBefore, &outsideBefore );
+	XtiTestImport( export1, FALSE );
+	if ( CheckpointTestCount() != count + selected
+	     || selectedTrackCount != selected ) {
+		lprintf( "  FAIL: Import into the layout gave %d objects, %ld selected;"
+		         " expected %ld, %ld\n", CheckpointTestCount(), selectedTrackCount,
+		         count + selected, selected );
+		nFail++;
+	} else if ( last != NULL && GetNextTrack( last ) != NULL ) {
+		ClipboardTestConnections( GetNextTrack( last ), &connectedImport,
+		                          &outsideImport );
+		// Cars aren't exported: their couplings to each other aren't either
+		int connectedCars = 0;
+		TRK_ITERATE( trk ) {
+			if ( trk == GetNextTrack( last ) ) {
+				break;
+			}
+			if ( QueryTrack( trk, Q_ISTRAIN ) ) {
+				for ( EPINX_T ep = 0; ep < GetTrkEndPtCnt( trk ); ep++ ) {
+					if ( GetTrkEndTrk( trk, ep ) ) {
+						connectedCars++;
+					}
+				}
+			}
+		}
+		if ( connectedImport != connectedBefore - connectedCars
+		     || outsideImport != 0 ) {
+			lprintf( "  FAIL: the import has %d connected endpoints, %d of them"
+			         " to the layout; the layout has %d without cars\n",
+			         connectedImport, outsideImport,
+			         connectedBefore - connectedCars );
+			nFail++;
+		}
+	}
+	UndoUndo( NULL );
+	if ( CheckpointTestCount() != count ) {
+		lprintf( "  FAIL: Undo of Import left %d objects, not %d\n",
+		         CheckpointTestCount(), count );
+		nFail++;
+	}
+	nFail += !ClipboardTestMatches( work, reference, "Import and Undo" );
+
+	// As a module
+	if ( RoundTripLoad( reference ) != count ) {
+		lprintf( "  FAIL: can't reload %s\n", reference );
+		nFail++;
+		goto done;
+	}
+	TRK_ITERATE( trk ) {
+		last = trk;
+	}
+	XtiTestImport( export1, TRUE );
+	if ( CheckpointTestCount() != count + selected ) {
+		lprintf( "  FAIL: Import Module gave %d objects, not %ld\n",
+		         CheckpointTestCount(), count + selected );
+		nFail++;
+	} else if ( last != NULL && GetNextTrack( last ) != NULL ) {
+		unsigned int layer = GetTrkLayer( GetNextTrack( last ) );
+		char expected[STR_SIZE];
+		int elsewhere = 0;
+		sprintf( expected, _( "Module - %s" ), FindFilename( export1 ) );
+		for ( trk = GetNextTrack( last ); trk; trk = GetNextTrack( trk ) ) {
+			if ( !IsTrackDeleted( trk ) && GetTrkLayer( trk ) != layer ) {
+				elsewhere++;
+			}
+		}
+		if ( elsewhere ) {
+			lprintf( "  FAIL: %d imported objects aren't on the module's layer\n",
+			         elsewhere );
+			nFail++;
+		}
+		if ( strcmp( GetLayerName( layer ), expected ) != 0
+		     || !GetLayerModule( layer ) ) {
+			lprintf( "  FAIL: the module's layer %u is \"%s\"%s, not a module"
+			         " layer \"%s\"\n", layer + 1, GetLayerName( layer ),
+			         GetLayerModule( layer ) ? " (module)" : "", expected );
+			nFail++;
+		}
+	}
+
+done:
+	free( dir );
+	free( reference );
+	free( work );
+	free( export1 );
+	free( export2 );
 	MyFree( source );
 	return nFail;
 }

@@ -367,20 +367,20 @@ jobs:
         run: ctest --test-dir build -L regression-ci --output-on-failure
 
   regression-gtk3-sanitizers:
-    # Closes the gap SF #682 documented: c-tests-sanitizers (gtk3-toolchain.yml) excludes the
-    # demo-playback regression suite (-LE regression), and regression-gtk3
-    # (also gtk3-toolchain.yml) isn't sanitizer-instrumented, so the two were never combined in
-    # CI -- only by a human happening to run them together locally, which is
-    # exactly how SF #675, #677-#680 were found (see docs/doxygen/advanced.md's
-    # "Static tools and a live sanitizer run catch different classes of bug").
-    # Scoped to RegressionSuite only (label regression-ci), not the ~47
-    # per-demo standalone tests regression-gtk3-standalone runs -- that's the
-    # combination that actually found those bugs, and doubling to standalone
-    # would multiply per-demo cold-start overhead under ASan instrumentation
-    # for unproven additional benefit; can be revisited if that job's own
-    # cold-start code path ever needs sanitizer coverage too.
+    # The regression-ci tests with the program itself built with ASan/UBSan.
+    # Closes the gap SF #682 documented: c-tests-sanitizers (gtk3-toolchain.yml)
+    # leaves out the playback tests (-LE regression), and regression-gtk3 isn't
+    # instrumented. SF #675, #677-#680 were found by running the two together
+    # locally (docs/doxygen/advanced.md, "Static tools and a live sanitizer run
+    # catch different classes of bug").
+    # Until 2026-11 XTRKCAD_SANITIZE only instrumented the unit-test targets, so
+    # this job ran an uninstrumented xtrkcad and could not find anything. Since
+    # it covers the whole build, it found ReadText()'s stack overrun on every
+    # old-format TEXT line (RegressionRoundTrip.timesavr).
+    # 40 minutes: instrumented, the tests take about 18 minutes locally,
+    # against 11 for the same tests uninstrumented in CI.
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps
@@ -392,7 +392,10 @@ jobs:
         run: cmake --build build
       - name: Regression suite
         env:
-          ASAN_OPTIONS: "abort_on_error=1:detect_leaks=1"
+          # detect_leaks=0: GTK, fontconfig and GLib keep allocations to
+          # the end of the program, about 1 MB in 26000 blocks per run, so
+          # every test would fail. Overruns, use after free and UBSan stay on.
+          ASAN_OPTIONS: "abort_on_error=1:detect_leaks=0"
           UBSAN_OPTIONS: "abort_on_error=1:print_stacktrace=1"
         run: ctest --test-dir build -L regression-ci --output-on-failure -VV
 

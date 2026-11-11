@@ -1363,7 +1363,12 @@ BOOL_T RebuildBezier (track_p trk)
 	CHECK( trk != NULL && !IsTrackDeleted(trk) );
 	struct extraDataBezier_t *xx;
 	xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataBezier_t);
-	DYNARR_RESET( trkSeg_t, xx->arcSegs );
+	// Only Undo calls this (ReadObject()), after copying the saved extra
+	// data back in, so arcSegs.ptr is the array as it was when the object
+	// was saved. A change since may have reallocated and freed it, so start
+	// a new array, as RebuildCornu() does. DYNARR_RESET kept the old
+	// pointer: Modify, Undo, Redo on a Bezier wrote into freed memory.
+	DYNARR_INIT( trkSeg_t, xx->arcSegs );
 	FixUpBezier(xx->pos,xx,IsTrack(trk));
 	ComputeBezierBoundingBox(trk, xx);
 	return TRUE;

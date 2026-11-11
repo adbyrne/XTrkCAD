@@ -73,12 +73,22 @@ list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notic
 foreach(_xtrkcad_checkpoint_case objects timesavr)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/checkpoint-${_xtrkcad_checkpoint_case}")
 endforeach()
+foreach(_xtrkcad_clipboard_case objects timesavr)
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/clipboard-${_xtrkcad_clipboard_case}")
+endforeach()
+foreach(_xtrkcad_xti_case objects timesavr)
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/xti-${_xtrkcad_xti_case}")
+endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/params-load")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/hints-main")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
-foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep drawlen longsignal manage carnew carsedit carsdelete carscsv carsproto jsonnote todesign layers)
+# The paramcheck test cases (RegressionParamCheck.<case>, script
+# regress-paramcheck-<case>.xtr). Set once: the home dirs, the tests and the
+# INPUT ERROR pattern below all use it.
+set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify)
+foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
@@ -315,7 +325,7 @@ endforeach()
 # Field values in a dialog, through PARAMCHECK. "wrong" has to fail, so a check
 # that reports nothing can't pass as a good result. It passes on the message, not
 # the exit code, as the comparator tests above do.
-foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep drawlen longsignal manage carnew carsedit carsdelete carscsv carsproto jsonnote todesign layers)
+foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     set(_xtrkcad_paramcheck_home "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
     xtrkcad_add_regression_test("RegressionParamCheck.${_xtrkcad_paramcheck_case}" "${_xtrkcad_paramcheck_home}"
         "${_xtrkcad_test_option}${_xtrkcad_compare_dir}/regress-paramcheck-${_xtrkcad_paramcheck_case}.xtr")
@@ -373,6 +383,24 @@ if(NOT WIN32)
     set_tests_properties(RegressionParamCheck.longsignal PROPERTIES
         PASS_REGULAR_EXPRESSION "NOTICE ID: MSG_ENTERED_STRING_TRUNCATED\nNOTICE: [^\n]*79"
         FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK")
+endif()
+# A script line that doesn't parse ends the script with an INPUT ERROR
+# notice, and the test still passed. Added to each test's own pattern, set
+# above, since setting the property replaces it. Not "wrong", which has to fail.
+if(NOT WIN32)
+    set(_xtrkcad_paramcheck_input_cases ${_xtrkcad_paramcheck_cases})
+    list(REMOVE_ITEM _xtrkcad_paramcheck_input_cases wrong)
+    foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_input_cases)
+        get_test_property("RegressionParamCheck.${_xtrkcad_paramcheck_case}"
+            FAIL_REGULAR_EXPRESSION _xtrkcad_fail_regex)
+        if(_xtrkcad_fail_regex)
+            set(_xtrkcad_fail_regex "${_xtrkcad_fail_regex}|NOTICE: INPUT ERROR")
+        else()
+            set(_xtrkcad_fail_regex "NOTICE: INPUT ERROR")
+        endif()
+        set_tests_properties("RegressionParamCheck.${_xtrkcad_paramcheck_case}" PROPERTIES
+            FAIL_REGULAR_EXPRESSION "${_xtrkcad_fail_regex}")
+    endforeach()
 endif()
 
 # Every menu item and button of the main window, and of Car Inventory, has a
@@ -611,6 +639,52 @@ foreach(_xtrkcad_checkpoint_case objects timesavr)
         LABELS "${_xtrkcad_checkpoint_labels}"
         TIMEOUT 120
         ENVIRONMENT "HOME=${_xtrkcad_checkpoint_home}"
+        RUN_SERIAL TRUE
+    )
+endforeach()
+
+# Copy, Cut, Paste and Clone of a whole layout, with Undo and Redo
+# (LayoutClipboardTest(), fileio.c): every step has to give back the layout it
+# started from, and a clone has to sit at one offset, connected as the original.
+foreach(_xtrkcad_clipboard_case objects timesavr)
+    if(_xtrkcad_clipboard_case STREQUAL "objects")
+        set(_xtrkcad_clipboard_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc")
+        set(_xtrkcad_clipboard_labels "regression;regression-ci")
+    else()
+        set(_xtrkcad_clipboard_source "${CMAKE_SOURCE_DIR}/app/lib/examples/timesavr.xtc")
+        set(_xtrkcad_clipboard_labels "regression")
+    endif()
+    set(_xtrkcad_clipboard_home "${XTRKCAD_REGRESSION_HOME_ROOT}/clipboard-${_xtrkcad_clipboard_case}")
+    xtrkcad_add_regression_test("RegressionClipboard.${_xtrkcad_clipboard_case}" "${_xtrkcad_clipboard_home}"
+        "${_xtrkcad_test_option}clipboard:${_xtrkcad_clipboard_source}")
+    set_tests_properties("RegressionClipboard.${_xtrkcad_clipboard_case}" PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "${_xtrkcad_clipboard_labels}"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_clipboard_home}"
+        RUN_SERIAL TRUE
+    )
+endforeach()
+
+# File > Export and Import of the .xti format, and Import Module
+# (LayoutXtiTest(), fileio.c): into an empty layout and back out, into the
+# layout itself with Undo, and as a module on a layer of its own.
+foreach(_xtrkcad_xti_case objects timesavr)
+    if(_xtrkcad_xti_case STREQUAL "objects")
+        set(_xtrkcad_xti_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc")
+        set(_xtrkcad_xti_labels "regression;regression-ci")
+    else()
+        set(_xtrkcad_xti_source "${CMAKE_SOURCE_DIR}/app/lib/examples/timesavr.xtc")
+        set(_xtrkcad_xti_labels "regression")
+    endif()
+    set(_xtrkcad_xti_home "${XTRKCAD_REGRESSION_HOME_ROOT}/xti-${_xtrkcad_xti_case}")
+    xtrkcad_add_regression_test("RegressionXti.${_xtrkcad_xti_case}" "${_xtrkcad_xti_home}"
+        "${_xtrkcad_test_option}xti:${_xtrkcad_xti_source}")
+    set_tests_properties("RegressionXti.${_xtrkcad_xti_case}" PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "${_xtrkcad_xti_labels}"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_xti_home}"
         RUN_SERIAL TRUE
     )
 endforeach()

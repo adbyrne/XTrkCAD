@@ -1,0 +1,24 @@
+# Car Inventory: Find centres the main window on the selected car
+# (Development Issues #78). The view starts zoomed in at the far corner of
+# the room, so the car is off screen until Find moves it.
+VERSION 13 5.4.0
+DEMOINIT
+ROOMSIZE 200.000000 x 120.000000
+SCALE HO
+STRAIGHT 1 0 0 0 0 HO 2 0.000000 0.000000
+	E4 140.000000 80.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 160.000000 80.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END$SEGS
+CAR 1077 HO "Accurail	Box, 50'		5007	Baltimore & Ohio	B&O	45547" 512 30100 6.980 1.378 0 0 5.235 7.480 255 0.000 0.000 0 0 0 0 0 0 0 0 0 "" 2 0 150.000000 80.000000 90.000000
+	E4 153.490000 80.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 146.510000 80.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END$SEGS
+ORIG 1.000 0.000 0.000
+REDRAW
+PARAMETER misc cmdCarInventory
+PARAMCHECK carinv list count 1
+PARAMETER carinv list 0
+PARAMCHECK carinv find active
+PARAMETER carinv find
+VIEWCHECK 150.000 80.000
+PARAMETER carinv ok
