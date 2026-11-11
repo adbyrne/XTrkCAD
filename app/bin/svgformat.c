@@ -387,7 +387,7 @@ PolarToCartesian(double cx, double cy, double radius, double angle, double *px,
  * \param 		   y		 The y coordinate.
  * \param 		   r		 IN radius.
  * \param 		   a0		 IN starting angle.
- * \param 		   a1		 IN ending angle.
+ * \param 		   a1		 IN sweep angle (arc runs from a0 to a0+a1).
  * \param 		   center    IN draw center mark if true.
  * \param 		   w		 line width.
  * \param 		   c		 line color.
@@ -403,7 +403,7 @@ SvgArcCommand(SVGParent *svg, double x, double y,
 	double startY;
 	double endX;
 	double endY;
-	char largeArcFlag = (a1 - a0 <= 180 ? '0' : '1');
+	char largeArcFlag = (a1 <= 180 ? '0' : '1');
 	DynString pathArc;
 	mxml_node_t *xmlData;
 
