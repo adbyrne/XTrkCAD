@@ -2019,6 +2019,9 @@ EXPORT int RegressionTestAll(const char *target)
 	if (target != NULL && strncmp(target, "checkpoint:", 11) == 0) {
 		return LayoutCheckpointTest(target + 11);
 	}
+	if (target != NULL && strncmp(target, "clipboard:", 10) == 0) {
+		return LayoutClipboardTest(target + 10);
+	}
 	if (target != NULL) {
 		const char *ext = FindFileExtension(FindFilename((char *)target));
 		if (ext != NULL && (strcmp(ext, "xtc") == 0 || strcmp(ext, "xtce") == 0)) {

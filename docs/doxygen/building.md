@@ -502,6 +502,12 @@ bug:
   to leave it in place, and a save that works removes it. `wFilSelSetPlayback("")` makes the next
   file dialog act as if Cancel was pressed. `objects` (`roundtrip-objects.xtc`) is `regression-ci`,
   `timesavr` only `regression`.
+- **Clipboard (`RegressionClipboard.*`)** — `-Tclipboard:<layout>` selects every object but the
+  cars, which the clipboard leaves out (`ExportTracks()`), and checks Copy and Paste, Cut with Undo
+  and Redo, and Clone (`LayoutClipboardTest()`, `fileio.c`). Each Undo has to give back the layout
+  as saved before. A clone has to sit at one offset from the original, connected among itself as
+  the original is and to none of it. Blocks and switch motors are left out of the offset check:
+  they have no position of their own. Same two layouts and labels as the checkpoint test.
 - **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
   platforms. Both gate like the Linux jobs. macOS runners can be scarce, so a `regression-macos`
   job that never starts may need a rerun. Locally, pass
