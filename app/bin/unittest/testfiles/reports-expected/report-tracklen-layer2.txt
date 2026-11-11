@@ -1,0 +1,7 @@
+XTrackCAD Track Lengths Report
+XTrackCAD
+Demo
+
+
+  Lyr  Name                  Feet     Inches    T/O   Cars   % Tot
+    2  Second                 1.7       20.1      0      3  100.0%

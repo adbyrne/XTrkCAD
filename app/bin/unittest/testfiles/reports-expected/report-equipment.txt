@@ -1,0 +1,21 @@
+XTrackCAD Equipment Suitability Report
+XTrackCAD
+Demo
+
+
+PASS
+  Short freight car (< 40 ft)                       15.0"
+  Standard freight car (40-50 ft)                   18.0"
+  Long freight car (55-60 ft flatcar)               22.0"
+  4-axle diesel (GP/RS-type)                        18.0"
+  6-axle diesel (SD40/ES44)                         22.0"
+  Small/medium steam (2-6-0, 2-8-0, 4-6-0)          18.0"
+  Medium steam (4-6-2, 2-8-2, 4-6-4)                22.0"
+  Standard passenger car (85 ft)                    22.0"
+
+MARGINAL
+  Large steam (4-8-4, 2-10-4, 4-8-2)                24.0"
+
+FAIL
+  Articulated steam (2-8-8-2, 4-8-8-4)              28.0"
+  Long passenger car (Superliner)                   28.0"

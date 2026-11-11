@@ -1,0 +1,11 @@
+XTrackCAD Turnout Density Report
+XTrackCAD
+Demo
+
+
+  Lyr  Name                  Feet    T/O   Density/100ft
+    1  Main                  19.2      6            31.2  HEAVY
+    2  Second                 1.7      0             0.0
+
+PARTIAL TURNOUTS (fewer than 3 endpoints -- may be broken/incomplete)
+  None found.

@@ -461,6 +461,11 @@ bug:
   end or a control point, then `MOUSE 3336 <x> <y>`, the Enter key (`C_TEXT | 13 << 8`); each is
   checked after the change, after Undo and after Redo. A dragged end dropped near another track's
   end snaps to it, so the drag ends away from other tracks.
+  `reports` opens every report under Manage > Reports on the Timesaver example with a second
+  layer added: Refresh, Save (`FILESELECT`), select the first row, and for Track Lengths a layer
+  filter (`reportsfilter`). `reports_check` (`tools/check-reports-test.sh`) compares each saved
+  report with `testfiles/reports-expected/`, leaving out line 4, the date. If a report's output
+  changes on purpose, copy the new file there with that line removed (`sed 4d`).
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button

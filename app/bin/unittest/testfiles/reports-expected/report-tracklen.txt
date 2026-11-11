@@ -1,0 +1,8 @@
+XTrackCAD Track Lengths Report
+XTrackCAD
+Demo
+
+
+  Lyr  Name                  Feet     Inches    T/O   Cars   % Tot
+    1  Main                  19.2      230.5      6     38   92.0%
+    2  Second                 1.7       20.1      0      3    8.0%

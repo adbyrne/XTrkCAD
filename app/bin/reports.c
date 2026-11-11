@@ -705,6 +705,9 @@ void ReportsUnconnectedEndpoints( void * unused )
 	DYNARR_INIT( reportsEndPt_t, reportsCurrentList_da );
 
 	TRK_ITERATE( trk ) {
+		if ( QueryTrack( trk, Q_ISTRAIN ) ) {
+			continue;       // a car is on the track, not track
+		}
 		EPINX_T ep;
 		if ( !ReportsFilterLayerIncluded( &reportsFilter, GetTrkLayer(trk) ) ) {
 			continue;
@@ -936,6 +939,9 @@ void ReportsTurnoutDensity( void * unused )
 	DYNARR_INIT( reportsPartialTurnout_t, reportsTurnoutPartial_da );
 
 	TRK_ITERATE( trk ) {
+		if ( QueryTrack( trk, Q_ISTRAIN ) ) {
+			continue;       // a car is on the track, not track
+		}
 		unsigned int trkLayer = GetTrkLayer(trk);
 		DIST_T lengthFt;
 		if ( !ReportsFilterLayerIncluded( &reportsTurnoutFilter, trkLayer ) ) {
@@ -1161,6 +1167,9 @@ void ReportsTrackLengths( void * unused )
 	DYNARR_INIT( reportsTrackLenLayer_t, reportsTrackLenList_da );
 
 	TRK_ITERATE( trk ) {
+		if ( QueryTrack( trk, Q_ISTRAIN ) ) {
+			continue;       // a car is on the track, not track
+		}
 		unsigned int trkLayer = GetTrkLayer(trk);
 		DIST_T lengthFt;
 		BOOL_T isTurnout;
@@ -1877,6 +1886,9 @@ void ReportsGaps( void * unused )
 	DYNARR_INIT( reportsGapOpenEndPt_t, open_da );
 
 	TRK_ITERATE( trk ) {
+		if ( QueryTrack( trk, Q_ISTRAIN ) ) {
+			continue;       // a car is on the track, not track
+		}
 		EPINX_T ep;
 		/* Turntable stalls are open by design -- excluded from the
 		 * pairing analysis entirely (counted separately), matching the
@@ -2148,6 +2160,9 @@ void ReportsKinkedJoints( void * unused )
 	DYNARR_INIT( reportsKinkedJoint_t, reportsKinkedList_da );
 
 	TRK_ITERATE( trk ) {
+		if ( QueryTrack( trk, Q_ISTRAIN ) ) {
+			continue;       // a car is on the track, not track
+		}
 		EPINX_T ep;
 
 		for ( ep = 0; ep < GetTrkEndPtCnt(trk); ep++ ) {
