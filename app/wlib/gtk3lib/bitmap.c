@@ -169,6 +169,10 @@ wBool_t wBitmapWriteFile(wControl_p drawingControl, const char* fileName)
 	const char* writeFormat;
 
 	writeFormat = CheckFileFormat(fileName);
+	if (!writeFormat) {
+		// gdk_pixbuf_save() needs a format; CheckFileFormat() has said why
+		return FALSE;
+	}
 
 	pixbuf = gdk_pixbuf_get_from_surface(drawArea->surface, 0, 0, drawArea->width,
 	                                     drawArea->height);
@@ -179,13 +183,16 @@ wBool_t wBitmapWriteFile(wControl_p drawingControl, const char* fileName)
 	}
 
 	res = gdk_pixbuf_save(pixbuf, fileName, writeFormat, &error, NULL);
+	g_object_unref(pixbuf);
 
 	if (res == FALSE) {
+		if (error) {
+			g_error_free(error);
+		}
 		wNoticeWithIcon(NT_ERROR, "WriteBitMap: pixbuf_save failed", "Ok", NULL);
 		return FALSE;
 	}
 
-	g_object_unref(pixbuf);
 	return TRUE;
 }
 

@@ -132,6 +132,15 @@ A Bitmap must be less than 32000 pixels in height or width. Try increasing the D
 Refer to \k{cmdOutputbitmap} for detail.
 END
 
+# dbitmap.c
+MESSAGE MSG_BITMAP_BAD_EXTENSION
+Can't write %s: a bitmap file name must end in .png or .jpg.
+HELP
+A bitmap can be written in PNG or JPEG format, and the format is chosen by the end of the file name: \c{.png}, \c{.jpg} or \c{.jpeg}. The file dialog adds \c{.png} or \c{.jpg} only when the name you type has no extension. A name with a dot in it, such as \c{layout v5.4}, already counts as having one, so add \c{.png} or \c{.jpg} to the end of it.
+
+Refer to \k{cmdOutputbitmap} for detail.
+END
+
 # cprofile.c
 MESSAGE MSG_CHANGE_ELEV_MODE
 Cannot change elevation mode.

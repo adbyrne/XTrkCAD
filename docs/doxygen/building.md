@@ -492,7 +492,8 @@ bug:
   180 degrees is drawn the long way round. It needs `poppler-utils`
   (`pdfinfo`, `pdftohtml`), so the tests are only added if those are found. They're labelled
   `regression` but not `regression-ci`: `regression-gtk3-standalone` and the coverage job install
-  `poppler-utils` and run them, so the package jobs don't have to.
+  `poppler-utils` and run them, so the package jobs don't have to. A bitmap export to
+  `export.bmp` has to fail with one `MSG_BITMAP_BAD_EXTENSION` notice and write no file.
 - **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
   platforms. Both gate like the Linux jobs. macOS runners can be scarce, so a `regression-macos`
   job that never starts may need a rerun. Locally, pass

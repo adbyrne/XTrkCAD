@@ -1744,7 +1744,9 @@ EXPORT int LayoutDescribeTest( const char * pathName )
  * Regression test for -Texport:&lt;layout&gt;: load a layout, then print it to
  * export.pdf and export it to export.svg, export.dxf and export.png, in the
  * working directory, through the normal code, and import the DXF file back.
- * tools/check-export-test.sh checks the files.
+ * tools/check-export-test.sh checks the files. A bitmap export to export.bmp,
+ * a name the bitmap export can't write, has to fail without writing a file;
+ * RegressionTests.cmake checks which notice it showed.
  *
  * \param pathName IN the layout
  * \return number of failed checks
@@ -1753,6 +1755,7 @@ EXPORT int LayoutExportTest( const char * pathName )
 {
 	char * source = MyStrdup( pathName );
 	char * pdf = NULL, * svg = NULL, * dxf = NULL, * png = NULL;
+	char * bmp = NULL;
 	int nFail = 0;
 	int count = RoundTripLoad( source );
 
@@ -1764,10 +1767,20 @@ EXPORT int LayoutExportTest( const char * pathName )
 	MakeFullpath( &svg, workingDir, "export.svg", NULL );
 	MakeFullpath( &dxf, workingDir, "export.dxf", NULL );
 	MakeFullpath( &png, workingDir, "export.png", NULL );
+	MakeFullpath( &bmp, workingDir, "export.bmp", NULL );
 
 	PrintAllPagesToFile( pdf );
 	if ( !ExportBitmapToFile( png ) ) {
 		lprintf( "  FAIL: bitmap export\n" );
+		nFail++;
+	}
+	remove( bmp );
+	if ( ExportBitmapToFile( bmp ) ) {
+		lprintf( "  FAIL: bitmap export to a .bmp file reported success\n" );
+		nFail++;
+	}
+	if ( access( bmp, F_OK ) == 0 ) {
+		lprintf( "  FAIL: bitmap export wrote a .bmp file\n" );
 		nFail++;
 	}
 #if XTRKCAD_CREATE_SVG
@@ -1802,6 +1815,7 @@ EXPORT int LayoutExportTest( const char * pathName )
 	free( svg );
 	free( dxf );
 	free( png );
+	free( bmp );
 	MyFree( source );
 	return nFail;
 }
