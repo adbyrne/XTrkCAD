@@ -292,7 +292,8 @@ a local build defaults to `critical` (~4 min with the unit tests), CI to `full` 
 the background). Configure scratch builds with `full` before claiming a full pass. Windows and macOS
 run `critical` on PRs and `ci` on `main`.
 
-Run new load, save or parse code under ASan too (`-DXTRKCAD_SANITIZE=ON`, clang). Its fill pattern
+Run new load, save or parse code under ASan too (`-DXTRKCAD_SANITIZE=ON`, clang; it builds the program
+too, so run regression tests with `ASAN_OPTIONS=detect_leaks=0`, GTK's allocations count as leaks). Its fill pattern
 exposes uninitialised values that a normal build sees as 0: that's how the `ReadJoint()` bug showed
 up (Development Issues #67). Regression tests besides the demos:
 - `RegressionCompare.*`: the demo check itself has to detect a wrong segment and an extra track.
