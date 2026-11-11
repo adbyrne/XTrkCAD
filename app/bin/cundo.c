@@ -134,7 +134,7 @@ static void (*undoStartHook)( int ) = NULL;
  * Call \a hook at the end of every UndoStart() that opens a step, with the
  * step's slot in the Undo stack. Nothing has changed yet at that point, so
  * the hook sees the layout as it was before the step. NULL removes it.
- * Only the Undo/Redo test uses it (-Tundo:<demo>, macro.c).
+ * Only the Undo/Redo test uses it (-Tundo:&lt;demo&gt;, macro.c).
  */
 void UndoSetStartHook( void (*hook)( int slot ) )
 {

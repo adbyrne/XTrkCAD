@@ -1110,7 +1110,7 @@ static void SaveVisualDiffSnapshot(char *demoFile, const char *suffix)
 /** @logcmd @showrefby `regression=n` `macro.c` */
 static int log_regression = 0;
 static int nRegressionFail = 0;
-static BOOL_T undoCheck = FALSE;    // -Tundo:<demo>, see UndoCheckRun()
+static BOOL_T undoCheck = FALSE;    // -Tundo:&lt;demo&gt;, see UndoCheckRun()
 static void UndoCheckRun( const char * demo );
 
 /**
@@ -2008,10 +2008,10 @@ static void FilterDemoList(const char *target)
 
 /****************************************************************************
  *
- * UNDO/REDO TEST (-Tundo:<demo>, #75)
+ * UNDO/REDO TEST (-Tundo:&lt;demo&gt;, #75)
  *
  * Each time a step opens (UndoStart()), the layout as it is then, before the
- * step, is written to undo-before-<slot>.expected. When the demo ends, every
+ * step, is written to undo-before-&lt;slot&gt;.expected. When the demo ends, every
  * step Undo still holds (at most 10) is undone and the layout compared with
  * that step's file; then each step is redone and the layout compared with
  * the one written just before its Undo.
