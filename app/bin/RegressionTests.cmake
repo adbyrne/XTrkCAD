@@ -73,6 +73,9 @@ list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notic
 foreach(_xtrkcad_checkpoint_case objects timesavr)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/checkpoint-${_xtrkcad_checkpoint_case}")
 endforeach()
+foreach(_xtrkcad_clipboard_case objects timesavr)
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/clipboard-${_xtrkcad_clipboard_case}")
+endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/params-load")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
@@ -592,6 +595,29 @@ foreach(_xtrkcad_checkpoint_case objects timesavr)
         LABELS "${_xtrkcad_checkpoint_labels}"
         TIMEOUT 120
         ENVIRONMENT "HOME=${_xtrkcad_checkpoint_home}"
+        RUN_SERIAL TRUE
+    )
+endforeach()
+
+# Copy, Cut, Paste and Clone of a whole layout, with Undo and Redo
+# (LayoutClipboardTest(), fileio.c): every step has to give back the layout it
+# started from, and a clone has to sit at one offset, connected as the original.
+foreach(_xtrkcad_clipboard_case objects timesavr)
+    if(_xtrkcad_clipboard_case STREQUAL "objects")
+        set(_xtrkcad_clipboard_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc")
+        set(_xtrkcad_clipboard_labels "regression;regression-ci")
+    else()
+        set(_xtrkcad_clipboard_source "${CMAKE_SOURCE_DIR}/app/lib/examples/timesavr.xtc")
+        set(_xtrkcad_clipboard_labels "regression")
+    endif()
+    set(_xtrkcad_clipboard_home "${XTRKCAD_REGRESSION_HOME_ROOT}/clipboard-${_xtrkcad_clipboard_case}")
+    xtrkcad_add_regression_test("RegressionClipboard.${_xtrkcad_clipboard_case}" "${_xtrkcad_clipboard_home}"
+        "${_xtrkcad_test_option}clipboard:${_xtrkcad_clipboard_source}")
+    set_tests_properties("RegressionClipboard.${_xtrkcad_clipboard_case}" PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "${_xtrkcad_clipboard_labels}"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_clipboard_home}"
         RUN_SERIAL TRUE
     )
 endforeach()
