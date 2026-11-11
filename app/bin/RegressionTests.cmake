@@ -52,6 +52,13 @@ foreach(_xtrkcad_demo_line ${_xtrkcad_demo_lines})
     string(REGEX REPLACE "^DEMO \"[^\"]*\" +([^ ]+\\.xtr).*$" "\\1" _xtrkcad_demo_file "${_xtrkcad_demo_line}")
     list(APPEND _xtrkcad_demo_names "${_xtrkcad_demo_file}")
 endforeach()
+# The demos whose last steps RegressionUndo.<demo> undoes and redoes (below).
+# Left out, until it's fixed:
+# - dmlines2.xtr: Move Objects Below, then Undo, empties the layout. Undo
+#   takes a step's new tracks off by cutting the track list where the first
+#   of them is, and Below moved it to the front (SelectBelow(), UndoUndo()).
+set(_xtrkcad_undo_demos ${_xtrkcad_demo_names})
+list(REMOVE_ITEM _xtrkcad_undo_demos dmlines2.xtr)
 
 set(_xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/RegressionSuite")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/export")
@@ -85,6 +92,9 @@ foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep drawle
 endforeach()
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/${_xtrkcad_demo}")
+endforeach()
+foreach(_xtrkcad_demo IN LISTS _xtrkcad_undo_demos)
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/undo-${_xtrkcad_demo}")
 endforeach()
 
 # The home directories go to a file, one per line, which RegressionCleanHomes
@@ -241,6 +251,23 @@ foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
         LABELS "${_xtrkcad_demo_labels}"
         TIMEOUT ${_xtrkcad_demo_timeout}
         ENVIRONMENT "HOME=${_xtrkcad_demo_home}"
+        RUN_SERIAL TRUE
+    )
+endforeach()
+
+# Undo and Redo of each demo's last steps, as many as Undo holds (10):
+# -Tundo:<demo>, UndoCheckRun() in macro.c (Development Issues #75). Each
+# Undo has to give back the layout as it was before the step, each Redo the
+# layout as it was after it. Level full (label regression) for now.
+foreach(_xtrkcad_demo IN LISTS _xtrkcad_undo_demos)
+    set(_xtrkcad_undo_home "${XTRKCAD_REGRESSION_HOME_ROOT}/undo-${_xtrkcad_demo}")
+    xtrkcad_add_regression_test("RegressionUndo.${_xtrkcad_demo}" "${_xtrkcad_undo_home}"
+        "${_xtrkcad_test_option}undo:${_xtrkcad_demo}")
+    set_tests_properties("RegressionUndo.${_xtrkcad_demo}" PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "regression"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_undo_home}"
         RUN_SERIAL TRUE
     )
 endforeach()

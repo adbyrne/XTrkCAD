@@ -39,5 +39,10 @@ BOOL_T UndoNew( track_p );
 void UndoEnd( void );
 void UndoClear( void );
 void UndoDeferFree( void* );
+// For the Undo/Redo test (-Tundo:<demo>, macro.c)
+int UndoDoneCount( void );
+int UndoHeadSlot( void );
+const char * UndoHeadLabel( void );
+void UndoSetStartHook( void (*hook)( int slot ) );
 
 #endif // !HAVE_CUNDO_H

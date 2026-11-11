@@ -94,6 +94,7 @@ void AddParam( char *name, readParam_t proc );
 
 FILE * OpenCustom( const char * );
 FILE * FOpenAppendRestricted( const char * path );
+FILE * FOpenWriteRestricted( const char * path );
 
 void SetWindowTitle( void );
 char * PutTitle( char * cp );

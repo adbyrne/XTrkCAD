@@ -1110,6 +1110,8 @@ static void SaveVisualDiffSnapshot(char *demoFile, const char *suffix)
 /** @logcmd @showrefby `regression=n` `macro.c` */
 static int log_regression = 0;
 static int nRegressionFail = 0;
+static BOOL_T undoCheck = FALSE;    // -Tundo:<demo>, see UndoCheckRun()
+static void UndoCheckRun( const char * demo );
 
 /**
  * Report that a playback line couldn't do what it says, such as select an
@@ -1324,6 +1326,9 @@ static void Playback(void)
 			if (paramFile) {
 				fclose(paramFile);
 				paramFile = NULL;
+			}
+			if (undoCheck && paramFileName != NULL) {
+				UndoCheckRun(FindFilename(paramFileName));
 			}
 			if (documentFile) {
 				fclose(documentFile);
@@ -2001,6 +2006,123 @@ static void FilterDemoList(const char *target)
 	demoList_da = filtered;
 }
 
+/****************************************************************************
+ *
+ * UNDO/REDO TEST (-Tundo:<demo>, #75)
+ *
+ * Each time a step opens (UndoStart()), the layout as it is then, before the
+ * step, is written to undo-before-<slot>.expected. When the demo ends, every
+ * step Undo still holds (at most 10) is undone and the layout compared with
+ * that step's file; then each step is redone and the layout compared with
+ * the one written just before its Undo.
+ */
+
+#define UNDO_CHECK_SLOTS (32)
+
+static char * UndoCheckPath( const char * kind, int n )
+{
+	char name[40];
+	char * path = NULL;
+	snprintf( name, sizeof name, "undo-%s-%d.expected", kind, n );
+	MakeFullpath( &path, workingDir, name, NULL );
+	return path;
+}
+
+// Playback runs in the C locale, the locale layout files are written in
+static BOOL_T UndoCheckWrite( const char * path )
+{
+	FILE * f = FOpenWriteRestricted( path );
+	if ( f == NULL ) {
+		lprintf( "  FAIL: undo: can't write %s\n", path );
+		return FALSE;
+	}
+	// Redo renumbers the tracks (RenumberTracks()), so layouts are written
+	// and compared numbered 1, 2, 3... in list order
+	TrackNumbersCompact();
+	WriteTracks( f, FALSE );
+	TrackNumbersRestore();
+	fprintf( f, "REGRESSION END\n" );
+	fclose( f );
+	return TRUE;
+}
+
+static void UndoCheckSnapshot( int slot )
+{
+	if ( slot < 0 || slot >= UNDO_CHECK_SLOTS ) {
+		return;
+	}
+	char * path = UndoCheckPath( "before", slot );
+	if ( !UndoCheckWrite( path ) ) {
+		nRegressionFail++;
+	}
+	free( path );
+}
+
+// Number of objects that differ from the layout written to path
+static int UndoCheckCompare( const char * path )
+{
+	FILE * saveFile = paramFile;
+	wIndex_t saveLine = paramLineNum;
+	int nDiff;
+
+	paramFile = fopen( path, "r" );
+	if ( paramFile == NULL ) {
+		paramFile = saveFile;
+		lprintf( "  FAIL: undo: can't read %s\n", path );
+		return 1;
+	}
+	paramLineNum = 0;
+	TrackNumbersCompact();
+	nDiff = CheckRegressionResult( PARAMVERSION, path, TRUE );
+	TrackNumbersRestore();
+	fclose( paramFile );
+	paramFile = saveFile;
+	paramLineNum = saveLine;
+	return nDiff;
+}
+
+static void UndoCheckRun( const char * demo )
+{
+	int slots[UNDO_CHECK_SLOTS];
+	const char * labels[UNDO_CHECK_SLOTS];
+	int n = UndoDoneCount();
+	int k;
+
+	if ( n > UNDO_CHECK_SLOTS ) {
+		n = UNDO_CHECK_SLOTS;
+	}
+	for ( k = 0; k < n; k++ ) {
+		char * after = UndoCheckPath( "after", k );
+		slots[k] = UndoHeadSlot();
+		labels[k] = UndoHeadLabel();
+		if ( !UndoCheckWrite( after ) ) {
+			nRegressionFail++;
+		}
+		free( after );
+		UndoUndo( NULL );
+		char * before = UndoCheckPath( "before", slots[k] );
+		int nDiff = UndoCheckCompare( before );
+		free( before );
+		if ( nDiff != 0 ) {
+			lprintf( "  FAIL: undo: %s: Undo of \"%s\" left %d objects different\n",
+			         demo, labels[k], nDiff );
+			nRegressionFail++;
+		}
+	}
+	for ( k = n - 1; k >= 0; k-- ) {
+		UndoRedo( NULL );
+		char * after = UndoCheckPath( "after", k );
+		int nDiff = UndoCheckCompare( after );
+		free( after );
+		if ( nDiff != 0 ) {
+			lprintf( "  FAIL: undo: %s: Redo of \"%s\" left %d objects different\n",
+			         demo, labels[k], nDiff );
+			nRegressionFail++;
+		}
+	}
+	lprintf( "undo: %s: %d steps undone and redone\n", demo, n );
+}
+
 /**
  * Run regression tests. If target is non-NULL, only the named demo(s) run
  * (see FilterDemoList) instead of the full suite in xtrkcad.xtq.
@@ -2018,6 +2140,12 @@ EXPORT int RegressionTestAll(const char *target)
 	}
 	if (target != NULL && strncmp(target, "checkpoint:", 11) == 0) {
 		return LayoutCheckpointTest(target + 11);
+	}
+	if (target != NULL && strncmp(target, "undo:", 5) == 0) {
+		// The demo runs as usual, and UndoCheckRun() checks it at its end
+		undoCheck = TRUE;
+		UndoSetStartHook( UndoCheckSnapshot );
+		target += 5;
 	}
 	if (target != NULL && strncmp(target, "clipboard:", 10) == 0) {
 		return LayoutClipboardTest(target + 10);
