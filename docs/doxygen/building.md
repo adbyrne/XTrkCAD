@@ -308,10 +308,13 @@ Flatpak builds don't use this option; they have their own, `XTRKCAD_FLATPAK_NOVE
 Not part of the everyday build/test loop, but available if you're chasing a specific class of
 bug:
 
-- **Sanitizers** — `-DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang` builds with ASan/UBSan.
-  Leave out the GTK widget tests with `-LE gtk-display` when running under it: GTK3's own
-  internal allocations trip ASan's leak detector. They still run normally elsewhere, e.g.
-  under `c-tests-linux`'s `xvfb-run`. Tests labelled `gtk-display` create GTK widgets and
+- **Sanitizers** — `-DXTRKCAD_SANITIZE=ON -DCMAKE_C_COMPILER=clang` builds everything with
+  ASan/UBSan, the program included, so the regression tests run under them too. If the compiler can't
+  link them (GCC without libasan and libubsan), configure stops and says so. Run those with
+  `ASAN_OPTIONS=detect_leaks=0`, as `regression-gtk3-sanitizers` does: GTK and GLib keep
+  allocations to the end of the program, so every test would report leaks. For the unit tests,
+  leave leak detection on and leave out the GTK widget tests with `-LE gtk-display`, for the
+  same reason. They still run elsewhere, e.g. under `c-tests-linux`'s `xvfb-run`. Tests labelled `gtk-display` create GTK widgets and
   need a display; give any new test that calls into GTK the same label
   (`app/wlib/gtk3lib/unittests/CMakeLists.txt`).
 - **Valgrind** — `ctest -T memcheck --overwrite MemoryCheckCommand=$(which valgrind)`.
@@ -437,8 +440,11 @@ bug:
   itself. `carnew` follows the car dialog's "New" hints while a car is added (Manage > Car
   Inventory). `carsedit` edits a car and cancels an edit, `carsproto` adds a car of a new
   prototype, `carsdelete` answers No and then Yes to Delete and imports cars whose indexes are
-  taken, and `carscsv` exports, deletes and imports the inventory and checks every field. Shelving
-  a car that is on the layout isn't covered. `jsonnote` covers the JSON Note dialog: text that
+  taken, and `carscsv` exports, deletes and imports the inventory and checks every field. `carfind`
+  places a car off screen and presses Find (Development Issues #78); `VIEWCHECK <x> <y>` then checks
+  the main window is centred on the car, to a twentieth of its size. Shelving a car that is on the
+  layout isn't covered. A script line that doesn't parse (`INPUT ERROR`) fails these tests: before,
+  the script stopped there and the test still passed. `jsonnote` covers the JSON Note dialog: text that
   isn't a JSON object turns OK inactive and is never saved, even when OK is pressed; the field
   editor's Add, Update and Delete; and Undo and Redo of the edit. It and `undo` also fail on an
   `UNDO ASSERT` line, which otherwise only logs. `todesign` covers the Turnout Designer: each

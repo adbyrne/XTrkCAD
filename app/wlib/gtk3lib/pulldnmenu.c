@@ -355,6 +355,24 @@ void wMenuPushEnable(
 	gtk_widget_set_sensitive( GTK_WIDGET( mi->widget ), enable );
 }
 
+/**
+ * Enable or grey out the entry that opens a submenu.
+ *
+ * \param m 		IN submenu, as returned by wMenuMenuCreate()
+ * \param enable 	IN TRUE to enable, FALSE to grey out
+ */
+
+void wMenuMenuEnable(
+        wControl_p m,
+        wBool_t enable )
+{
+	GtkWidget *item = gtk_menu_get_attach_widget( GTK_MENU( m->widget ) );
+
+	if ( item ) {
+		gtk_widget_set_sensitive( item, enable );
+	}
+}
+
 
 /*-----------------------------------------------------------------*/
 /**

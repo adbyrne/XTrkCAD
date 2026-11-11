@@ -22,6 +22,7 @@
 
 #include "glib.h"
 #include <assert.h>
+#include <glib-object.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_MALLOC_H
@@ -103,7 +104,6 @@ static unsigned long GtkDrawSetColor(
 }
 
 static cairo_t *gtkDrawCreateCairoContext(struct draw *bd,
-                cairo_surface_t *surface,
                 wDrawWidth width,
                 wDrawLineType_e lineType,
                 wDrawColor color, wDrawOpts opts)
@@ -114,57 +114,53 @@ static cairo_t *gtkDrawCreateCairoContext(struct draw *bd,
 	currCalls++;
 
 	if (!cairoCtx) {
-		if (surface) {
-			cairo = cairo_create(surface);
-		} else {
-			if (opts & wDrawOptTemp) {
-				if (!bd->bTempMode) {
-					printf("Temp draw in Main Mode. Contact Developers. See %s:%d\n",
-					       __FILE__, __LINE__ + 1);
-				}
-				/* Temp Draw In Main Mode:
-				        You are seeing this message because there is a wDraw*() call on
-				   tempD but you are not in the context of TempRedraw() Typically this
-				   happens when Cmd<Object>() is processing a C_DOWN or C_MOVE action
-				   and it writes directly to tempD Instead it should set some state which
-				   allows c_redraw to do the actual drawing If you set a break point on
-				   the printf you'll see the offending wDraw*() call in the traceback It
-				   should be sufficient to remove that draw code or move it to C_REDRAW
-				        This is not fatal but the draw will be ineffective because the
-				   next TempRedraw() will erase the temp surface before the expose event
-				   can copy (or bitblt) it
-				*/
-				if (iDrawLog > 4) {
-					printf("%ld: cairo_create temp\n", lDrawCnt++);
-				}
-				cairo = cairo_create(bd->temp_surface);
-			} else {
-				if (bd->bTempMode) {
-					printf("Main draw in Temp Mode. Contact Developers. See %s:%d\n",
-					       "gtkdraw-cairo.c", __LINE__ + 1);
-				}
-				/* Main Draw In Temp Mode:
-				        You are seeing this message because there is a wDraw*() call on
-				   mainD but you are in the context of TempRedraw() Typically this
-				   happens when C_REDRAW action calls wDraw*() on mainD, in which case
-				   it should be writing to tempD. Or the wDraw*() call should be removed
-				   if it is redundant. If you set a break point on the printf you'll see
-				   the offending wDraw*() call in the traceback This is not fatal but
-				   could result in garbage being left on the screen if the command is
-				   cancelled.
-				*/
-				if (iDrawLog > 4) {
-					printf("%ld: cairo_create main\n", lDrawCnt++);
-				}
-				cairo = cairo_create(bd->surface);
+
+		if (opts & wDrawOptTemp) {
+			if (!bd->bTempMode) {
+				printf("Temp draw in Main Mode. Contact Developers. See %s:%d\n",
+				       __FILE__, __LINE__ + 1);
 			}
-
-			cairo_set_line_cap(cairo, CAIRO_LINE_CAP_BUTT);
-			cairo_set_line_join(cairo, CAIRO_LINE_JOIN_MITER);
-			cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
-			cairo_set_antialias(cairo, CAIRO_ANTIALIAS_FAST);
-
+			/* Temp Draw In Main Mode:
+			        You are seeing this message because there is a wDraw*() call on
+			   tempD but you are not in the context of TempRedraw() Typically this
+			   happens when Cmd<Object>() is processing a C_DOWN or C_MOVE action
+			   and it writes directly to tempD Instead it should set some state which
+			   allows c_redraw to do the actual drawing If you set a break point on
+			   the printf you'll see the offending wDraw*() call in the traceback It
+			   should be sufficient to remove that draw code or move it to C_REDRAW
+			        This is not fatal but the draw will be ineffective because the
+			   next TempRedraw() will erase the temp surface before the expose event
+			   can copy (or bitblt) it
+			*/
+			if (iDrawLog > 4) {
+				printf("%ld: cairo_create temp\n", lDrawCnt++);
+			}
+			cairo = cairo_create(bd->temp_surface);
+		} else {
+			if (bd->bTempMode) {
+				printf("Main draw in Temp Mode. Contact Developers. See %s:%d\n",
+				       __FILE__, __LINE__ + 1);
+			}
+			/* Main Draw In Temp Mode:
+			        You are seeing this message because there is a wDraw*() call on
+			   mainD but you are in the context of TempRedraw() Typically this
+			   happens when C_REDRAW action calls wDraw*() on mainD, in which case
+			   it should be writing to tempD. Or the wDraw*() call should be removed
+			   if it is redundant. If you set a break point on the printf you'll see
+			   the offending wDraw*() call in the traceback This is not fatal but
+			   could result in garbage being left on the screen if the command is
+			   cancelled.
+			*/
+			if (iDrawLog > 4) {
+				printf("%ld: cairo_create main\n", lDrawCnt++);
+			}
+			cairo = cairo_create(bd->surface);
 		}
+
+		cairo_set_line_cap(cairo, CAIRO_LINE_CAP_BUTT);
+		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_MITER);
+		cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
+		cairo_set_antialias(cairo, CAIRO_ANTIALIAS_FAST);
 	} else {
 		/* Batching active: flush any pending path before legacy code
 		 * changes cairo state (color, line width, dash, clip). */
@@ -304,7 +300,7 @@ prepare_drawing(struct draw *bd, wDrawWidth width, wDrawLineType_e lineType,
 {
 	/* Legacy mode — no batching */
 	if (!cairoCtx) {
-		return gtkDrawCreateCairoContext(bd, NULL, width, lineType, color, opts);
+		return gtkDrawCreateCairoContext(bd, width, lineType, color, opts);
 	}
 
 	/* Batch mode: flush if attributes changed or batch is full */
@@ -351,24 +347,13 @@ void wDrawDelayUpdate(
         wControl_p bd,
         wBool_t delay )
 {
-	cairo_rectangle_int_t update_rect;
-	wWinPix_t width, height;
-
 	if ( (!delay) && bd->attributes.draw.delayUpdate ) {
 		if ( iDrawLog >= 1 ) { printf( "wDrawDelayUpdate( %u -> %d ) - update\n", bd->attributes.draw.delayUpdate, delay ); }
-		update_rect.x = 0;
-		update_rect.y = 0;
-		// wWinPix_t is a long: reading it straight into the rectangle's int
-		// fields wrote 4 bytes past update_rect on the stack (Dev Issues #46)
-		wDrawGetSize(bd, &width, &height);
-		update_rect.width = (int)width;
-		update_rect.height = (int)height;
-		cairo_region_t * cairo_region = cairo_region_create_rectangle(&update_rect);
-		gtk_widget_queue_draw_region(bd->widget, cairo_region);
-		cairo_region_destroy(cairo_region);
-		gtk_widget_queue_draw(bd->widget);
+		if(bd->widget) {
+			gtk_widget_queue_draw(bd->widget);
+		}
 	} else {
-		if ( iDrawLog >= 2 ) { printf( "wDrawDelayUpdate( %u -> %d ) - update\n", bd->attributes.draw.delayUpdate, delay ); }
+		if ( iDrawLog >= 2 ) { printf( "wDrawDelayUpdate( %u -> %d ) - no update\n", bd->attributes.draw.delayUpdate, delay ); }
 	}
 	bd->attributes.draw.delayUpdate = delay;
 }
@@ -549,7 +534,7 @@ void wDrawString(
 		flush_path_if_open(bd, cairoCtx);
 		cairo = cairoCtx;
 	} else {
-		cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opts);
+		cairo = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid, color, opts);
 	}
 
 	layout = wlibFontCreatePangoLayout(drawingArea->widget, cairo, fp, fs, s,
@@ -613,7 +598,7 @@ void wDrawGetTextSize(
 	*h = 0;
 
 	/* draw text */
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid,
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid,
 	                 wDrawColorBlack, bd->bTempMode?wDrawOptTemp:0 );
 
 	cairo_save(cairo);
@@ -699,7 +684,7 @@ void wDrawFilledRectangle(
 			flush_path_if_open(bd, cairoCtx);
 			cairo = cairoCtx;
 		} else {
-			cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opt);
+			cairo = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid, color, opt);
 		}
 		cairo_move_to(cairo, x, y);
 		cairo_rel_line_to(cairo, w, 0);
@@ -712,6 +697,9 @@ void wDrawFilledRectangle(
 		/* Opaque fill: batchable — same color rects accumulate in one path */
 		cairo_t* cr = prepare_drawing(bd, 0, wDrawLineSolid, color, opt, TRUE);
 		cairo_rectangle(cr, x, y, w, h);
+		if(cr != cairoCtx) {
+			cairo_fill(cr);
+		}
 		finish_drawing(bd, cr);
 	}
 
@@ -740,6 +728,10 @@ void wDrawPolygon(
 	int i;
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
+
+	if(cnt <= 0 ) {
+		return;
+	}
 
 	if (bd->drawDestination == DIRECTCAIRO) {
 		wBasicDrawFillPolygon(drawingArea, p, type, cnt, color, opt, fill, open);
@@ -770,7 +762,7 @@ void wDrawPolygon(
 		if (points[i].y < min_y) { min_y = points[i].y; }
 	}
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, fill?0:dw,
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, fill?0:dw,
 	                 fill?wDrawLineSolid:lt, color, opt);
 
 	for(i = 0; i < cnt; ++i) {
@@ -884,7 +876,7 @@ void wDrawFilledCircle(
 	w = 2*r;
 	h = 2*r;
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid, color,
 	                 opt);
 	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), r, 0, 2 * M_PI);
 	wlibDrawFilled( cairo, color, opt );
@@ -1050,7 +1042,7 @@ void wDrawBitMap(
 	x = INMAPX( bd, x-bm->x );
 	y = INMAPY( bd, y-bm->y )-bm->h;
 
-	cairo_t* cr = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color,
+	cairo_t* cr = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid, color,
 	                                        opts );
 
 	cairo_save(cr);
@@ -1142,11 +1134,18 @@ void wDrawGetSize(
         wWinPix_t *w,
         wWinPix_t *h )
 {
-	if (drawingArea->widget) {
-		wlibControlGetSize( (wControl_p)drawingArea );
-	}
-
+	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	GtkAllocation allocation;
+
+	g_assert(drawingArea->type == B_DRAW);
+
+	if (drawingArea->widget == NULL) {
+		/* widget-less control (print target): no allocation to query,
+		 * report the size recorded by the control's owner */
+		*w = d->width;
+		*h = d->height;
+		return;
+	}
 
 	gtk_widget_get_allocation(drawingArea->widget, &allocation);
 	*w = allocation.width;
@@ -1257,7 +1256,9 @@ int wDrawSetBackground(    wControl_p drawingArea, char * path, char ** error)
 	if (path) {
 		bd->background = gdk_pixbuf_new_from_file (path, &err);
 		if (!bd->background) {
-			*error = strdup(err->message);
+			if(error) {
+				*error = strdup(err->message);
+			}
 			g_error_free(err);
 			return -1;
 		}
@@ -1281,10 +1282,16 @@ wDrawCloneBackground(wControl_p from, wControl_p to)
 {
 	struct draw* fromDraw = CONTROL_GET_ATTRIBUTES_PTR(from, draw);
 	struct draw* toDraw = CONTROL_GET_ATTRIBUTES_PTR(to, draw);
+	GdkPixbuf *saveBackground = toDraw->background;
+
 	if (fromDraw->background) {
 		toDraw->background = g_object_ref(fromDraw->background);
 	} else {
 		toDraw->background = NULL;
+	}
+
+	if(saveBackground) {
+		g_object_unref(saveBackground);
 	}
 }
 
@@ -1293,7 +1300,7 @@ wDrawUnrefBackground(wControl_p drawControl)
 {
 	struct draw* drawing = CONTROL_GET_ATTRIBUTES_PTR(drawControl, draw);
 
-	if(drawing) {
+	if(drawing && drawing->background) {
 		g_object_unref(drawing->background);
 		drawing->background = NULL;
 	}
@@ -1312,7 +1319,7 @@ void wDrawShowBackground( wControl_p drawingArea, wWinPix_t pos_x,
 	g_assert(drawingArea->type == B_DRAW);
 
 	if (drawControl->background) {
-		cairo_t* cairo = gtkDrawCreateCairoContext(drawControl, NULL, 0, wDrawLineSolid,
+		cairo_t* cairo = gtkDrawCreateCairoContext(drawControl, 0, wDrawLineSolid,
 		                 wDrawColorWhite, drawControl->bTempMode?wDrawOptTemp:0 );
 
 		/* --- New Clipping Logic --- */

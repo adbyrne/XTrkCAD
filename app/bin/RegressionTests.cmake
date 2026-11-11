@@ -83,7 +83,11 @@ list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/param
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
-foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep drawlen longsignal manage carnew carsedit carsdelete carscsv carsproto jsonnote todesign layers modify)
+# The paramcheck test cases (RegressionParamCheck.<case>, script
+# regress-paramcheck-<case>.xtr). Set once: the home dirs, the tests and the
+# INPUT ERROR pattern below all use it.
+set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify)
+foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
 foreach(_xtrkcad_demo ${_xtrkcad_demo_names})
@@ -320,7 +324,7 @@ endforeach()
 # Field values in a dialog, through PARAMCHECK. "wrong" has to fail, so a check
 # that reports nothing can't pass as a good result. It passes on the message, not
 # the exit code, as the comparator tests above do.
-foreach(_xtrkcad_paramcheck_case block wrong undo props longname longkeep drawlen longsignal manage carnew carsedit carsdelete carscsv carsproto jsonnote todesign layers modify)
+foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     set(_xtrkcad_paramcheck_home "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
     xtrkcad_add_regression_test("RegressionParamCheck.${_xtrkcad_paramcheck_case}" "${_xtrkcad_paramcheck_home}"
         "${_xtrkcad_test_option}${_xtrkcad_compare_dir}/regress-paramcheck-${_xtrkcad_paramcheck_case}.xtr")
@@ -378,6 +382,24 @@ if(NOT WIN32)
     set_tests_properties(RegressionParamCheck.longsignal PROPERTIES
         PASS_REGULAR_EXPRESSION "NOTICE ID: MSG_ENTERED_STRING_TRUNCATED\nNOTICE: [^\n]*79"
         FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK")
+endif()
+# A script line that doesn't parse ends the script with an INPUT ERROR
+# notice, and the test still passed. Added to each test's own pattern, set
+# above, since setting the property replaces it. Not "wrong", which has to fail.
+if(NOT WIN32)
+    set(_xtrkcad_paramcheck_input_cases ${_xtrkcad_paramcheck_cases})
+    list(REMOVE_ITEM _xtrkcad_paramcheck_input_cases wrong)
+    foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_input_cases)
+        get_test_property("RegressionParamCheck.${_xtrkcad_paramcheck_case}"
+            FAIL_REGULAR_EXPRESSION _xtrkcad_fail_regex)
+        if(_xtrkcad_fail_regex)
+            set(_xtrkcad_fail_regex "${_xtrkcad_fail_regex}|NOTICE: INPUT ERROR")
+        else()
+            set(_xtrkcad_fail_regex "NOTICE: INPUT ERROR")
+        endif()
+        set_tests_properties("RegressionParamCheck.${_xtrkcad_paramcheck_case}" PROPERTIES
+            FAIL_REGULAR_EXPRESSION "${_xtrkcad_fail_regex}")
+    endforeach()
 endif()
 
 # Load each example layout, save it, reload it and save again, in both .xtc and

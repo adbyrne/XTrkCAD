@@ -143,8 +143,8 @@ jobs:
         # display, and GTK3's internal allocations show up as ASan leaks.
         # c-tests-linux runs them under xvfb-run.
         # -LE regression: keeps this job's fast unit-test feedback loop from
-        # being held up by the ~3 minute sanitizer-instrumented playback run --
-        # see ci-gtk3.yml's regression-gtk3-sanitizers, which covers it separately.
+        # being held up by the instrumented playback tests (about 18 minutes);
+        # ci-gtk3.yml's regression-gtk3-sanitizers runs those.
         run: ctest --test-dir build --output-on-failure -LE "regression|gtk-display"
 
   cppcheck:

@@ -685,6 +685,7 @@ void AddToRecentFiles(const char* displayFileName, const char* fullFileName)
 		const char* copyFile = MyStrdup(fullFileName);
 		const char* listName = FindFilename(strdup(fullFileName));
 		wMenuListAdd(fileList_ml, 0, listName, copyFile);
+		RecentFilesMenuUpdate();
 
 		SaveRecentFileList();
 	}
@@ -951,6 +952,7 @@ static int SaveTracks(
 	if (success) {
 		nameOfFile = FindFilename(fileName[0]);
 		wMenuListAdd(fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]));
+		RecentFilesMenuUpdate();
 		checkPtMark = changed = 0;
 
 		SetLayoutFullPath(fileName[0]);
@@ -1511,6 +1513,7 @@ EXPORT void LoadFileList(void)
 	}
 
 	DynStringFree(&key);
+	RecentFilesMenuUpdate();
 }
 
 
