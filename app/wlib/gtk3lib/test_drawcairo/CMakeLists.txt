@@ -30,7 +30,10 @@ set(WLIB_INCLUDE_DIR "" CACHE PATH
     "Directory containing wlib.h (empty = automatic search)")
 set(DRAWCAIRO_EXTRA_INCLUDES "" CACHE STRING
     "Additional include paths (e.g. for config.h), semicolon separated")
-option(DRAWCAIRO_SANITIZE "Enable ASan + UBSan (GCC/Clang, Linux)" ON)
+# OFF by default: with it on, every build with tests needs libasan and
+# libubsan, and the test can't run under Valgrind (c-tests-valgrind).
+# -DXTRKCAD_SANITIZE=ON instruments it with the rest of the tree.
+option(DRAWCAIRO_SANITIZE "Enable ASan + UBSan (GCC/Clang, Linux)" OFF)
 
 # ---- locate drawcairo.c ---------------------------------------------------
 if(DRAWCAIRO_SRC)

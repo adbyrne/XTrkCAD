@@ -115,52 +115,52 @@ static cairo_t *gtkDrawCreateCairoContext(struct draw *bd,
 
 	if (!cairoCtx) {
 
-			if (opts & wDrawOptTemp) {
-				if (!bd->bTempMode) {
-					printf("Temp draw in Main Mode. Contact Developers. See %s:%d\n",
-					       __FILE__, __LINE__ + 1);
-				}
-				/* Temp Draw In Main Mode:
-				        You are seeing this message because there is a wDraw*() call on
-				   tempD but you are not in the context of TempRedraw() Typically this
-				   happens when Cmd<Object>() is processing a C_DOWN or C_MOVE action
-				   and it writes directly to tempD Instead it should set some state which
-				   allows c_redraw to do the actual drawing If you set a break point on
-				   the printf you'll see the offending wDraw*() call in the traceback It
-				   should be sufficient to remove that draw code or move it to C_REDRAW
-				        This is not fatal but the draw will be ineffective because the
-				   next TempRedraw() will erase the temp surface before the expose event
-				   can copy (or bitblt) it
-				*/
-				if (iDrawLog > 4) {
-					printf("%ld: cairo_create temp\n", lDrawCnt++);
-				}
-				cairo = cairo_create(bd->temp_surface);
-			} else {
-				if (bd->bTempMode) {
-					printf("Main draw in Temp Mode. Contact Developers. See %s:%d\n",
-					       __FILE__, __LINE__ + 1);
-				}
-				/* Main Draw In Temp Mode:
-				        You are seeing this message because there is a wDraw*() call on
-				   mainD but you are in the context of TempRedraw() Typically this
-				   happens when C_REDRAW action calls wDraw*() on mainD, in which case
-				   it should be writing to tempD. Or the wDraw*() call should be removed
-				   if it is redundant. If you set a break point on the printf you'll see
-				   the offending wDraw*() call in the traceback This is not fatal but
-				   could result in garbage being left on the screen if the command is
-				   cancelled.
-				*/
-				if (iDrawLog > 4) {
-					printf("%ld: cairo_create main\n", lDrawCnt++);
-				}
-				cairo = cairo_create(bd->surface);
+		if (opts & wDrawOptTemp) {
+			if (!bd->bTempMode) {
+				printf("Temp draw in Main Mode. Contact Developers. See %s:%d\n",
+				       __FILE__, __LINE__ + 1);
 			}
+			/* Temp Draw In Main Mode:
+			        You are seeing this message because there is a wDraw*() call on
+			   tempD but you are not in the context of TempRedraw() Typically this
+			   happens when Cmd<Object>() is processing a C_DOWN or C_MOVE action
+			   and it writes directly to tempD Instead it should set some state which
+			   allows c_redraw to do the actual drawing If you set a break point on
+			   the printf you'll see the offending wDraw*() call in the traceback It
+			   should be sufficient to remove that draw code or move it to C_REDRAW
+			        This is not fatal but the draw will be ineffective because the
+			   next TempRedraw() will erase the temp surface before the expose event
+			   can copy (or bitblt) it
+			*/
+			if (iDrawLog > 4) {
+				printf("%ld: cairo_create temp\n", lDrawCnt++);
+			}
+			cairo = cairo_create(bd->temp_surface);
+		} else {
+			if (bd->bTempMode) {
+				printf("Main draw in Temp Mode. Contact Developers. See %s:%d\n",
+				       __FILE__, __LINE__ + 1);
+			}
+			/* Main Draw In Temp Mode:
+			        You are seeing this message because there is a wDraw*() call on
+			   mainD but you are in the context of TempRedraw() Typically this
+			   happens when C_REDRAW action calls wDraw*() on mainD, in which case
+			   it should be writing to tempD. Or the wDraw*() call should be removed
+			   if it is redundant. If you set a break point on the printf you'll see
+			   the offending wDraw*() call in the traceback This is not fatal but
+			   could result in garbage being left on the screen if the command is
+			   cancelled.
+			*/
+			if (iDrawLog > 4) {
+				printf("%ld: cairo_create main\n", lDrawCnt++);
+			}
+			cairo = cairo_create(bd->surface);
+		}
 
-			cairo_set_line_cap(cairo, CAIRO_LINE_CAP_BUTT);
-			cairo_set_line_join(cairo, CAIRO_LINE_JOIN_MITER);
-			cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
-			cairo_set_antialias(cairo, CAIRO_ANTIALIAS_FAST);
+		cairo_set_line_cap(cairo, CAIRO_LINE_CAP_BUTT);
+		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_MITER);
+		cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
+		cairo_set_antialias(cairo, CAIRO_ANTIALIAS_FAST);
 	} else {
 		/* Batching active: flush any pending path before legacy code
 		 * changes cairo state (color, line width, dash, clip). */
@@ -1134,22 +1134,22 @@ void wDrawGetSize(
         wWinPix_t *w,
         wWinPix_t *h )
 {
-    struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
-    GtkAllocation allocation;
+	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
+	GtkAllocation allocation;
 
-    g_assert(drawingArea->type == B_DRAW);
+	g_assert(drawingArea->type == B_DRAW);
 
-    if (drawingArea->widget == NULL) {
-      /* widget-less control (print target): no allocation to query,
-       * report the size recorded by the control's owner */
-      *w = d->width;
-      *h = d->height;
-      return;
-    }
+	if (drawingArea->widget == NULL) {
+		/* widget-less control (print target): no allocation to query,
+		 * report the size recorded by the control's owner */
+		*w = d->width;
+		*h = d->height;
+		return;
+	}
 
-    gtk_widget_get_allocation(drawingArea->widget, &allocation);
-    *w = allocation.width;
-    *h = allocation.height;
+	gtk_widget_get_allocation(drawingArea->widget, &allocation);
+	*w = allocation.width;
+	*h = allocation.height;
 }
 
 /**

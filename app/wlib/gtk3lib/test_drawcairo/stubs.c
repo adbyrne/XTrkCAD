@@ -45,7 +45,8 @@ void gtk_widget_queue_draw(GtkWidget *widget)
 	rec.n_all++;
 }
 
-void gtk_widget_queue_draw_region(GtkWidget *widget, const cairo_region_t *region)
+void gtk_widget_queue_draw_region(GtkWidget *widget,
+                                  const cairo_region_t *region)
 {
 	(void)widget;
 	(void)region;

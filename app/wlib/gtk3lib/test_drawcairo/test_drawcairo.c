@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fnmatch.h> /* POSIX: glob matching for the test filter */
 #include <cmocka.h>
 
 #include "gtkint.h"
@@ -150,7 +149,8 @@ static int covered(int x, int y)
 }
 
 /* Number of changed pixels that were NOT invalidated */
-static int uncovered_changes(const unsigned char *before, cairo_surface_t *after)
+static int uncovered_changes(const unsigned char *before,
+                             cairo_surface_t *after)
 {
 	int x, y, bad = 0;
 	int stride = cairo_image_surface_get_stride(after);
@@ -320,7 +320,8 @@ static void test_batch_equals_legacy_basic(void **state)
 }
 
 /* Filled triangle. Device coordinates (20,79) (80,79) (50,19), centroid ~(50,59). */
-static const uint64_t GOLDEN_TRIANGLE = 0xb42211c10b6fc94b; /* 0 = not recorded yet */
+static const uint64_t GOLDEN_TRIANGLE =
+        0xb42211c10b6fc94b; /* 0 = not recorded yet */
 
 static void test_polygon_filled_triangle(void **state)
 {
@@ -408,7 +409,7 @@ static void test_dirty_rect_legacy(void **state)
 static GdkPixbuf *new_pixbuf(void)
 {
 	GdkPixbuf *pb = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 1, 1);
- 
+
 	assert_non_null(pb);
 	return pb;
 }
@@ -428,13 +429,13 @@ static void test_releases_old_target_background(void **state)
 	GdkPixbuf *old_pb = new_pixbuf();
 	GdkPixbuf *weak = old_pb;
 	int shares, released;
- 
+
 	d->background = src_pb;         /* the source owns one reference */
 	od->background = old_pb;        /* the target is the only owner */
 	g_object_add_weak_pointer(G_OBJECT(old_pb), (gpointer *)&weak);
- 
+
 	wDrawCloneBackground(c, other);
- 
+
 	shares = (od->background == src_pb);
 	released = (weak == NULL);
 	if (!released) {
@@ -443,11 +444,11 @@ static void test_releases_old_target_background(void **state)
 		g_object_unref(old_pb);
 	}
 	teardown(&other_state);
- 
+
 	assert_true(shares);
 	assert_true(released);          /* fails today: old pixbuf is still alive */
 }
- 
+
 /* the source has no background, so the target's pointer is
  * set to NULL. The old target background must be released here as well. */
 static void test_empty_source_releases_old_target(void **state)
@@ -459,13 +460,13 @@ static void test_empty_source_releases_old_target(void **state)
 	GdkPixbuf *old_pb = new_pixbuf();
 	GdkPixbuf *weak = old_pb;
 	int target_empty, released;
- 
+
 	d->background = NULL;
 	od->background = old_pb;
 	g_object_add_weak_pointer(G_OBJECT(old_pb), (gpointer *)&weak);
- 
+
 	wDrawCloneBackground(c, other);
- 
+
 	target_empty = (od->background == NULL);
 	released = (weak == NULL);
 	if (!released) {
@@ -473,11 +474,11 @@ static void test_empty_source_releases_old_target(void **state)
 		g_object_unref(old_pb);
 	}
 	teardown(&other_state);
- 
+
 	assert_true(target_empty);
 	assert_true(released);          /* fails today */
 }
- 
+
 /* cloning a control into itself.
  * The control owns one reference. After the call it must still own exactly
  * one (ref_count 1) and the pixbuf must be alive.
@@ -491,16 +492,16 @@ static void test_clone_into_itself(void **state)
 	CTX();
 	GdkPixbuf *pb = new_pixbuf();
 	int same, refs;
- 
+
 	d->background = pb;             /* single reference, owned by c */
 	wDrawCloneBackground(c, c);
- 
+
 	same = (d->background == pb);
 	refs = (int)G_OBJECT(pb)->ref_count;
 	if (refs > 1) {
 		g_object_unref(pb);     /* drop the leaked reference ourselves */
 	}
- 
+
 	assert_true(same);
 	assert_int_equal(refs, 1);      /* fails today: it is 2 */
 }
@@ -611,7 +612,8 @@ static void test_filled_rect_legacy(void **state)
 	assert_false(is_set(d->surface, 9, 79));    /* left  */
 	assert_false(is_set(d->surface, 30, 79));   /* right */
 	assert_false(is_set(d->surface, 20, 68));   /* above */
-	assert_false(is_set(d->surface, 20, 89));   /* below: the row a line at y=10 would use */	
+	assert_false(is_set(d->surface, 20,
+	                    89));   /* below: the row a line at y=10 would use */
 }
 
 /* Batch path draws the opaque rectangle already: same geometry as bug 2. */
@@ -775,21 +777,16 @@ static void test_known_bug_N6_dirty_rect_stroke_width(void **state)
  * which cmocka itself would silently report as "0 tests, all passed". */
 static int matches_filter(const char *name, const char *pattern)
 {
-	char *copy = strdup(pattern);
-	char *save = NULL;
-	char *tok;
+	/* GLib, not POSIX fnmatch() and strtok_r(), which MinGW lacks */
+	gchar **toks = g_strsplit(pattern, ":", -1);
 	int hit = 0;
 
-	if (copy == NULL) {
-		abort(); /* not inside a cmocka test: no assert_* here */
-	}
-	for (tok = strtok_r(copy, ":", &save); tok != NULL;
-	     tok = strtok_r(NULL, ":", &save)) {
-		if (fnmatch(tok, name, 0) == 0) {
+	for (gchar **tok = toks; *tok != NULL; tok++) {
+		if (**tok != '\0' && g_pattern_match_simple(*tok, name)) {
 			hit = 1;
 		}
 	}
-	free(copy);
+	g_strfreev(toks);
 	return hit;
 }
 
@@ -800,24 +797,24 @@ int main(int argc, char **argv)
 		cmocka_unit_test_setup_teardown(test_filled_rect_batch, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_filled_rect_legacy, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_unref_without_background, setup_nowidget, teardown),
-		cmocka_unit_test_setup_teardown(test_getsize_without_widget, setup_nowidget, teardown),		
+		cmocka_unit_test_setup_teardown(test_getsize_without_widget, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_line_legacy, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_line_clip_legacy, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_directcairo_routing, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_batch_equals_legacy_basic, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_polygon_filled_triangle, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_dirty_rect_legacy, setup_widget, teardown),
-        cmocka_unit_test_setup_teardown(test_releases_old_target_background, setup_nowidget, teardown),
-        cmocka_unit_test_setup_teardown(test_empty_source_releases_old_target, setup_nowidget, teardown),
-        cmocka_unit_test_setup_teardown(test_clone_into_itself, setup_nowidget, teardown),
-	    cmocka_unit_test_setup_teardown(test_delayupdate_stores_value_and_is_quiet, setup_widget, teardown),
-    	cmocka_unit_test_setup_teardown(test_delayupdate_delays_and_releases_invalidation, setup_widget, teardown),
+		cmocka_unit_test_setup_teardown(test_releases_old_target_background, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_empty_source_releases_old_target, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_clone_into_itself, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_delayupdate_stores_value_and_is_quiet, setup_widget, teardown),
+		cmocka_unit_test_setup_teardown(test_delayupdate_delays_and_releases_invalidation, setup_widget, teardown),
 		cmocka_unit_test_setup_teardown(test_release_is_single_invalidation, setup_widget, teardown),
-    	cmocka_unit_test_setup_teardown(test_release_without_widget, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_release_without_widget, setup_nowidget, teardown),
 		/* keep last: under ASan this test aborts the whole process */
 		cmocka_unit_test_setup_teardown(test_polygon_zero_points, setup_nowidget, teardown),
 		/* known bugs */
-		
+
 		cmocka_unit_test_setup_teardown(test_known_bug_3_arc_after_rect_batch, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_known_bug_7e_bitmap_invalidation, setup_widget, teardown),
 		cmocka_unit_test_setup_teardown(test_known_bug_1a_clip_ignored_in_batch, setup_nowidget, teardown),
