@@ -450,7 +450,11 @@ bug:
   the Layers dialog: Add Layer and Delete Layer renumber the layers after them, and the tracks,
   the Layer Groups' members and the current layer have to follow; a layer with objects can't be
   deleted; edited properties are kept. A list check reads the selected row, so select a row with
-  `PARAMETER <dialog> <list> <n>` before checking its text.
+  `PARAMETER <dialog> <list> <n>` before checking its text. `modify` covers Modify on a Cornu
+  and on a Bezier track (`ModifyCornu()`, `ModifyBezier()`, `cmodify.c`): pick the track, drag an
+  end or a control point, then `MOUSE 3336 <x> <y>`, the Enter key (`C_TEXT | 13 << 8`); each is
+  checked after the change, after Undo and after Redo. A dragged end dropped near another track's
+  end snaps to it, so the drag ends away from other tracks.
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button
