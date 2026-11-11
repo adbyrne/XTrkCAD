@@ -1933,7 +1933,8 @@ static BOOL_T ReadDemo(char *line)
 		demoList(demoList_da.cnt - 1).title = MyStrdup(_(line + 6));
 		MakeFullpath(&path, libDir, "demos", cp, NULL);
 		demoList(demoList_da.cnt - 1).fileName = path;
-		wMenuPushCreate(m, NULL, _(line + 6), 0, DoDemo, I2VP(demoList_da.cnt - 1));
+		wMenuPushCreate(m, "cmdDemo", _(line + 6), 0, DoDemo,
+		                I2VP(demoList_da.cnt - 1));
 	}
 	return TRUE;
 error:

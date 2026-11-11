@@ -52,6 +52,18 @@ void wInitTooltip( wTooltip_t * bh, unsigned int count )
 }
 
 /**
+ * Print "Missing Help String: <name>" for each control created from now on
+ * without a tooltip, so a test can check that every one has a hint.
+ *
+ * \param list IN TRUE to list them
+ */
+
+void wTooltipListMissing( wBool_t list )
+{
+	listMissingHelpStrings = list;
+}
+
+/**
  * Set the help topic string for \a b to \a help.
  *
  * \param b IN control

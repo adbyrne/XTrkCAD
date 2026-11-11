@@ -320,7 +320,7 @@ bug:
   regression tests run; the ones above it are added but disabled, so `ctest` lists them as not run.
   - `critical` (label `regression-critical`): the checks of code that changes data and of bugs
     already fixed, each a few seconds: `RegressionParamCheck.*`, `RegressionNotice.*`,
-    `RegressionCompare.*`, `RegressionParams.*`, the round-trip fixtures, and round trip and
+    `RegressionCompare.*`, `RegressionParams.*`, `RegressionHints.*`, the round-trip fixtures, and round trip and
     Properties on a few small examples. About 4 minutes with the unit tests. The default for a local
     build, and what `regression-windows` and `regression-macos` run on a pull request.
   - `ci` (label `regression-ci`): critical plus every example layout and the demos
@@ -478,6 +478,12 @@ bug:
   it on with `UNDORESUME`, then steps with `UNDOSTEP` and `REDOSTEP`. Undo saves an object's data as
   raw bytes, pointers included, so an Update function must not free a string that `UndoModify()` has
   just saved. `manage` does the same through Manage > Layout Control Elements, for each element type.
+- **Hover hints (`RegressionHints.main`)** — every menu item and button of the main window, and of
+  Car Inventory, needs a hint in `app/help/tooltiptext.json` (Development Issues #80). With
+  `-d missinghints=1` the program prints `Missing Help String: <name>` for each control created
+  without one, `(no name)` and its label for a menu item that has no help name at all; the test
+  fails on that line. A new control needs a hint, or this test fails. Not on Windows, where the
+  output doesn't reach ctest.
 - **Parameter files (`RegressionParams.*`)** — every `.xtp` installed with the program has to load.
   A new user starts with only a few of them, so nothing else reads the rest. `setup` writes a
   preferences file that lists them all (`unittest/ParamFilesIni.cmake`); it fails on a file without a

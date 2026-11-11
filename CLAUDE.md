@@ -315,6 +315,8 @@ up (Development Issues #67). Regression tests besides the demos:
 - Regression tests run with `LC_MESSAGES=C` but keep the numeric locale. Run new tests once with
   `LANG=de_DE.UTF-8` (decimal comma; dev ML #4641); CI's `regression-locale-de` does the same.
 - `RegressionNotice.*`: what the user is told when a load or save goes wrong, and what survives.
+- `RegressionHints.main`: every menu item and button has a hover hint in `app/help/tooltiptext.json`
+  (`-d missinghints=1` lists the ones without).
 
 `CompareSegs()` really compares turnouts and structures since #66, and `CompareNote()` a note's text,
 so changing them can fail a demo.

@@ -1,0 +1,11 @@
+# RegressionHints.main: every menu item and button of the main window, and of
+# the Car Inventory dialog, has a hover hint (Development Issues #80).
+# -d missinghints=1 prints "Missing Help String: <name>" for each control
+# created without one, and the test fails on that line.
+VERSION 13 5.4.0
+DEMOINIT
+ROOMSIZE 40.000000 x 20.000000
+SCALE HO
+REDRAW
+PARAMETER misc cmdCarInventory
+PARAMETER carinv ok

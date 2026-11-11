@@ -91,6 +91,8 @@ unsigned TooltipsGetCount(void);
 
 void wInitTooltip(wTooltip_t *, unsigned int count);
 
+void wTooltipListMissing(wBool_t list);
+
 /*----------------------------------------------------------------------------
 
 extern long debugWindow;

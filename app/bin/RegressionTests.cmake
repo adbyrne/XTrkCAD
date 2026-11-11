@@ -74,6 +74,7 @@ foreach(_xtrkcad_checkpoint_case objects timesavr)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/checkpoint-${_xtrkcad_checkpoint_case}")
 endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/params-load")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/hints-main")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
 endforeach()
@@ -372,6 +373,24 @@ if(NOT WIN32)
     set_tests_properties(RegressionParamCheck.longsignal PROPERTIES
         PASS_REGULAR_EXPRESSION "NOTICE ID: MSG_ENTERED_STRING_TRUNCATED\nNOTICE: [^\n]*79"
         FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK")
+endif()
+
+# Every menu item and button of the main window, and of Car Inventory, has a
+# hover hint (Development Issues #80): -d missinghints=1 prints a line for
+# each one created without one. Outside Windows, where the output reaches ctest.
+if(NOT WIN32)
+    set(_xtrkcad_hints_home "${XTRKCAD_REGRESSION_HOME_ROOT}/hints-main")
+    xtrkcad_add_regression_test(RegressionHints.main "${_xtrkcad_hints_home}"
+        "-d" "missinghints=1" "${_xtrkcad_test_option}${_xtrkcad_compare_dir}/regress-hints.xtr")
+    set_tests_properties(RegressionHints.main PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "regression;regression-ci"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_hints_home}"
+        RUN_SERIAL TRUE
+        PASS_REGULAR_EXPRESSION "Regression Tests Pass"
+        FAIL_REGULAR_EXPRESSION "Missing Help String|NOTICE: INPUT ERROR"
+    )
 endif()
 
 # Load each example layout, save it, reload it and save again, in both .xtc and
@@ -691,6 +710,7 @@ set(_xtrkcad_critical_tests
     "^RegressionNotice\\."
     "^RegressionCompare\\."
     "^RegressionParams\\."
+    "^RegressionHints\\."
     "^RegressionRoundTrip\\.(objects|objects_check|empty_text|empty_text_check|badmanifest)$"
     "^Regression(RoundTrip|Describe)\\.(timesavr|Control_Panels|pmi)$"
 )

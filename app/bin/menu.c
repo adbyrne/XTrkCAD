@@ -1205,6 +1205,12 @@ EXPORT void CreateMenus(void)
 	InitToolbar();
 
 	wInitTooltip( tooltipTexts, TooltipsGetCount() );
+	// -d missinghints=1 lists the menu items and buttons without a hint
+	// (RegressionHints.main).
+	int log_missinghints = LogFindIndex( "missinghints" );
+	if ( log_missinghints > 0 && logTable( log_missinghints ).level > 0 ) {
+		wTooltipListMissing( TRUE );
+	}
 	fileM = wMenuBarAdd(mainW, "menuFile", _("_File"));
 	editM = wMenuBarAdd(mainW, "menuEdit", _("_Edit"));
 	viewM = wMenuBarAdd(mainW, "menuView", _("_View"));
