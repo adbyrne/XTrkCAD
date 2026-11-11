@@ -30,10 +30,16 @@ set(WLIB_INCLUDE_DIR "" CACHE PATH
     "Directory containing wlib.h (empty = automatic search)")
 set(DRAWCAIRO_EXTRA_INCLUDES "" CACHE STRING
     "Additional include paths (e.g. for config.h), semicolon separated")
-# OFF by default: with it on, every build with tests needs libasan and
-# libubsan, and the test can't run under Valgrind (c-tests-valgrind).
-# -DXTRKCAD_SANITIZE=ON instruments it with the rest of the tree.
-option(DRAWCAIRO_SANITIZE "Enable ASan + UBSan (GCC/Clang, Linux)" OFF)
+# Built on its own, the test uses ASan + UBSan by default. In the XTrkCAD
+# tree it follows XTRKCAD_SANITIZE, which instruments the whole tree: an ASan
+# build can't run under Valgrind (c-tests-valgrind), and needs the sanitizer
+# runtimes (libasan, libubsan) that not every machine has.
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  set(_dc_sanitize_default ON)
+else()
+  set(_dc_sanitize_default ${XTRKCAD_SANITIZE})
+endif()
+option(DRAWCAIRO_SANITIZE "Enable ASan + UBSan (GCC/Clang, Linux)" ${_dc_sanitize_default})
 
 # ---- locate drawcairo.c ---------------------------------------------------
 if(DRAWCAIRO_SRC)
@@ -128,6 +134,19 @@ else()
 endif()
 
 if(DRAWCAIRO_SANITIZE)
+  # Say so at configure time if the runtimes are missing, instead of a
+  # link error at the end of the build.
+  include(CheckCSourceCompiles)
+  set(CMAKE_REQUIRED_FLAGS "-fsanitize=address,undefined")
+  set(CMAKE_REQUIRED_LINK_OPTIONS "-fsanitize=address,undefined")
+  check_c_source_compiles("int main(void) { return 0; }" DRAWCAIRO_SANITIZE_LINKS)
+  unset(CMAKE_REQUIRED_FLAGS)
+  unset(CMAKE_REQUIRED_LINK_OPTIONS)
+  if(NOT DRAWCAIRO_SANITIZE_LINKS)
+    message(FATAL_ERROR "DRAWCAIRO_SANITIZE: ${CMAKE_C_COMPILER_ID} can't link "
+      "-fsanitize=address,undefined. Install its sanitizer runtimes (GCC: "
+      "libasan and libubsan), use clang, or pass -DDRAWCAIRO_SANITIZE=OFF.")
+  endif()
   target_compile_options(test_drawcairo PRIVATE
     -fsanitize=address,undefined -fno-omit-frame-pointer)
   target_link_options(test_drawcairo PRIVATE -fsanitize=address,undefined)
