@@ -437,8 +437,11 @@ bug:
   itself. `carnew` follows the car dialog's "New" hints while a car is added (Manage > Car
   Inventory). `carsedit` edits a car and cancels an edit, `carsproto` adds a car of a new
   prototype, `carsdelete` answers No and then Yes to Delete and imports cars whose indexes are
-  taken, and `carscsv` exports, deletes and imports the inventory and checks every field. Shelving
-  a car that is on the layout isn't covered. `jsonnote` covers the JSON Note dialog: text that
+  taken, and `carscsv` exports, deletes and imports the inventory and checks every field. `carfind`
+  places a car off screen and presses Find (Development Issues #78); `VIEWCHECK <x> <y>` then checks
+  the main window is centred on the car, to a twentieth of its size. Shelving a car that is on the
+  layout isn't covered. A script line that doesn't parse (`INPUT ERROR`) fails these tests: before,
+  the script stopped there and the test still passed. `jsonnote` covers the JSON Note dialog: text that
   isn't a JSON object turns OK inactive and is never saved, even when OK is pressed; the field
   editor's Add, Update and Delete; and Undo and Redo of the edit. It and `undo` also fail on an
   `UNDO ASSERT` line, which otherwise only logs. `todesign` covers the Turnout Designer: each

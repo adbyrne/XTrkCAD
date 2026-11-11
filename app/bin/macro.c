@@ -2935,6 +2935,39 @@ static void RedoStepPlayback(char *line)
 	UndoRedo(NULL);
 }
 
+/*
+ * VIEWCHECK <x> <y>: the main window is centred on (x, y), to a twentieth
+ * of its size. For buttons that show something on the layout, such as Find.
+ */
+static void ViewCheckPlayback(char *line)
+{
+	coOrd want, center;
+	FILE *f;
+
+	if (!GetArgs(line, "p", &want)) {
+		return;
+	}
+	center.x = mainD.orig.x + mainD.size.x / 2.0;
+	center.y = mainD.orig.y + mainD.size.y / 2.0;
+	if (fabs(center.x - want.x) <= mainD.size.x / 20.0 &&
+	    fabs(center.y - want.y) <= mainD.size.y / 20.0) {
+		return;
+	}
+	if (bRunTests) {
+		lprintf("  FAIL: VIEWCHECK %d: centre exp: %0.3f %0.3f, act=%0.3f %0.3f\n",
+		        paramLineNum, want.x, want.y, center.x, center.y);
+		nRegressionFail++;
+		return;
+	}
+	f = FOpenAppendRestricted("error.log");
+	if (f != NULL) {
+		fprintf(f, "CHECK: %s:%d: VIEWCHECK centre exp: %0.3f %0.3f, act=%0.3f %0.3f\n",
+		        paramFileName, paramLineNum, want.x, want.y, center.x, center.y);
+		fclose(f);
+	}
+	paramCheckErrorCount++;
+}
+
 EXPORT void ParamRestoreAll(void)
 {
 	for (paramGroup_cp *ppg = DialogGroupIter(NULL); ppg;
@@ -3030,6 +3063,7 @@ EXPORT BOOL_T MacroInit(void)
 	AddPlaybackProc("FILESELECT", FileSelectPlayback, NULL);
 	AddPlaybackProc("UNDOSTEP", UndoStepPlayback, NULL);
 	AddPlaybackProc("REDOSTEP", RedoStepPlayback, NULL);
+	AddPlaybackProc("VIEWCHECK", ViewCheckPlayback, NULL);
 
 	recordMouseMoves = (getenv("XTRKCADNORECORDMOUSEMOVES") == NULL);
 
