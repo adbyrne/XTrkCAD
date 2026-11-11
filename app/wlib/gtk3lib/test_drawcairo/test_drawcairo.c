@@ -855,7 +855,8 @@ int main(int argc, char **argv)
 		}
 		/* explicitly selecting a known-bug test means: run it */
 		if (strstr(pattern, "known_bug") != NULL) {
-			setenv("DRAWCAIRO_KNOWN_BUGS", "1", 0);
+			/* GLib, not POSIX setenv(), which Windows lacks */
+			g_setenv("DRAWCAIRO_KNOWN_BUGS", "1", FALSE);
 		}
 		cmocka_set_test_filter(pattern);
 	}
