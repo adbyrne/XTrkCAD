@@ -279,6 +279,7 @@ int LayoutRoundTripTest(const char *pathName);
 int LayoutExportTest(const char *pathName);
 int LayoutCheckpointTest(const char *pathName);
 int LayoutClipboardTest(const char *pathName);
+int LayoutXtiTest(const char *pathName);
 int LayoutDescribeTest(const char *pathName);
 extern FILE * recordF;
 void RecordPrintf(const char *format, ...);

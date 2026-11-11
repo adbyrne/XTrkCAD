@@ -456,7 +456,11 @@ bug:
   the Layers dialog: Add Layer and Delete Layer renumber the layers after them, and the tracks,
   the Layer Groups' members and the current layer have to follow; a layer with objects can't be
   deleted; edited properties are kept. A list check reads the selected row, so select a row with
-  `PARAMETER <dialog> <list> <n>` before checking its text.
+  `PARAMETER <dialog> <list> <n>` before checking its text. `modify` covers Modify on a Cornu
+  and on a Bezier track (`ModifyCornu()`, `ModifyBezier()`, `cmodify.c`): pick the track, drag an
+  end or a control point, then `MOUSE 3336 <x> <y>`, the Enter key (`C_TEXT | 13 << 8`); each is
+  checked after the change, after Undo and after Redo. A dragged end dropped near another track's
+  end snaps to it, so the drag ends away from other tracks.
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button
@@ -514,6 +518,12 @@ bug:
   as saved before. A clone has to sit at one offset from the original, connected among itself as
   the original is and to none of it. Blocks and switch motors are left out of the offset check:
   they have no position of their own. Same two layouts and labels as the checkpoint test.
+- **Export and Import (`RegressionXti.*`)** — `-Txti:<layout>` exports every object but the cars to
+  `.xti` through File > Export and imports it three ways (`LayoutXtiTest()`, `fileio.c`). Into an
+  empty layout, exporting the result again has to give the same file: an export holds positions
+  relative to the selection. Into the layout itself, the copies connect among themselves as the
+  originals do and to none of them, and Undo gives back the saved layout. As a module, they go on
+  one new layer, "Module - <file>", marked as a module. Same two layouts and labels as above.
 - **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
   platforms. Both gate like the Linux jobs. macOS runners can be scarce, so a `regression-macos`
   job that never starts may need a rerun. Locally, pass
