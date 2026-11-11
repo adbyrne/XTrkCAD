@@ -67,6 +67,7 @@ static void DeleteTag(void *context );
 static void LaunchItemEditor(void);
 static void DeleteOrShelveSelected(void);
 static carItem_p FindCurrentItem(void);
+static void FindOnLayout(void *unused);
 static void ImportCsv(void);
 static void ExportCsv(void);
 static void SaveText(void);
@@ -119,7 +120,7 @@ static paramData_t carInvPLs[] = {
 	[I_CI_SORT3] = { PD_TAG, DeleteTag, "sort3", .context = I2VP(2)},
 	[I_CI_SORT4] = { PD_TAG, DeleteTag, "sort4", .context = I2VP(3)},
 	[I_CI_LIST] = { PD_LIST, &carInvInx, "list", 0, NULL, NULL, 0 },
-	[I_CI_FIND] = { PD_BUTTON, FindCurrentItem, "find", 0, NULL },
+	[I_CI_FIND] = { PD_BUTTON, FindOnLayout, "find", 0, NULL },
 	[I_CI_EDIT] = { PD_BUTTON, LaunchItemEditor, "edit", 0, NULL },
 	[I_CI_ADD] = { PD_BUTTON, AddItem, "add", 0, NULL  },
 	[I_CI_DELETE] = { PD_BUTTON, DeleteOrShelveSelected, "delete", 0, NULL },
@@ -1490,8 +1491,11 @@ void CarInvListUpdate(carItem_p item)
 	}
 }
 
-#ifdef TODO_UNUSED
-static void DlgFind(void* unused)
+/*
+ * Find: centre the main window on the selected car. The button is only
+ * active when one car is selected and it's on the layout.
+ */
+static void FindOnLayout(void *unused)
 {
 	carItem_p item = FindCurrentItem();
 	coOrd pos;
@@ -1504,7 +1508,6 @@ static void DlgFind(void* unused)
 	                       panCenter.y));
 	PanHere(I2VP(0));		// CarInvDlgFind
 }
-#endif
 
 static void ButtonOk(const void *unused)
 {

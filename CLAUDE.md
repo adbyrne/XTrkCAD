@@ -310,7 +310,7 @@ up (Development Issues #67). Regression tests besides the demos:
   `UNDOSTEP`, `REDOSTEP` test Undo, which playback otherwise suspends. `FILESELECT <file>` answers
   the next file dialog; `PARAMCHECK <dlg> <list> count <n>` and `PARAMETER <dlg> <list> <n>`
   count and pick list rows; `PARAMCHECK <dlg> ok active|inactive` checks a button (dev guide
-  `building.md` has the rest). `cars*` cover the car dialog, `jsonnote` the JSON Note dialog, `todesign` the Turnout Designer, `layers` the Layers dialog.
+  `building.md` has the rest). `cars*` cover the car dialog (`carfind` checks Find with `VIEWCHECK <x> <y>`, the main window's centre), `jsonnote` the JSON Note dialog, `todesign` the Turnout Designer, `layers` the Layers dialog.
 - Under `-T`, notices and status-bar errors go to the log (`NOTICE:`, `NOTICE ANSWER:`, `ERROR:`)
   instead of opening; `NOTICEANSWER first|second|third` picks the button. A message with an ID logs
   `NOTICE ID: MSG_...` first: tests match the ID, never translated text.
