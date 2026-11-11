@@ -585,6 +585,12 @@ if(XTRKCAD_PDFTOHTML_EXECUTABLE AND XTRKCAD_PDFINFO_EXECUTABLE)
         TIMEOUT 120
         ENVIRONMENT "HOME=${_xtrkcad_export_home}"
         RUN_SERIAL TRUE
+        # The export to export.bmp has to give one notice that says what's
+        # wrong with the name, not wlib's "WriteBitMap: ..." notices and the
+        # general bitmap failure that used to follow it. A PASS expression
+        # replaces the exit code, so the run's own result is matched too.
+        PASS_REGULAR_EXPRESSION "NOTICE ID: MSG_BITMAP_BAD_EXTENSION\nNOTICE: [^\n]*export\\.bmp[^\n]*\nNOTICE ANSWER: [^\n]*\n(.*\n)?Regression Tests Pass"
+        FAIL_REGULAR_EXPRESSION "NOTICE: WriteBitMap|NOTICE ID: MSG_WBITMAP_FAILED|Regression Tests Fail"
     )
     add_test(NAME RegressionExport.check
         COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-export-test.sh"

@@ -128,6 +128,28 @@ DrawProductInfo( char *preFix, wFontSize_t fontSize, POS_T yPos )
 }
 
 /**
+ * Check that a bitmap file name ends in an extension wBitmapWriteFile() can
+ * write: .png, .jpg or .jpeg, in any case. The file dialog only adds one when
+ * the name has none, so "layout v5.4" gets here as it is.
+ *
+ * \param [in] fileName name of the file
+ * \returns true if the bitmap can be written under that name
+ */
+
+static bool BitmapExtensionOK( const char * fileName )
+{
+	const char * ext = strrchr( FindFilename( (char *)fileName ), '.' );
+
+	if( ext == NULL ) {
+		return false;
+	}
+	ext++;
+	return strcasecmp( ext, "png" ) == 0 ||
+	       strcasecmp( ext, "jpg" ) == 0 ||
+	       strcasecmp( ext, "jpeg" ) == 0;
+}
+
+/**
  * Saves a bitmap file
  *
  * \param 		   files    number of files, must be 1
@@ -147,6 +169,12 @@ static int SaveBitmapFile(
 	CHECK( fileName != NULL );
 	CHECK( files == 1 );
 
+	if( !BitmapExtensionOK( fileName[0] ) ) {
+		NoticeMessage( MSG_BITMAP_BAD_EXTENSION, _( "Ok" ), NULL,
+		               FindFilename( fileName[0] ) );
+		return false;
+	}
+
 	wSetCursor( mainD.d, wCursorWait );
 	InfoMessage( _( "Drawing tracks to bitmap" ) );
 
@@ -155,6 +183,7 @@ static int SaveBitmapFile(
 	bitmap_d.d = wBitmapCreate( bitmap_w, bitmap_h, EXPORTBITMAP );
 
 	if( !bitmap_d.d ) {
+		wSetCursor( mainD.d, defaultCursor );
 		NoticeMessage( MSG_WBITMAP_FAILED, _( "Ok" ), NULL );
 		return false;
 	}
