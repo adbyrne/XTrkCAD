@@ -273,7 +273,7 @@
 		{"line": "carpart-notes", "contents": "Notes about the car" },
 		{"line": "carpart-new", "contents": "Create a new car Part or Prototype definitions" },
 		{"line": "carpart-new-menu", "contents": "Create a new car Part or Prototype definitions" },
-		{"line": "carinv-find", "contents": "Show the selected Car Item on the layout" },
+		{"line": "carinv-find", "contents": "Finds the selected Car Item on the layout" },
 		{"line": "carinv-sort1", "contents": "Sort the Item list" },
 		{"line": "carinv-sort2", "contents": "Sort the Item list" },
 		{"line": "carinv-sort3", "contents": "Sort the Item list" },
