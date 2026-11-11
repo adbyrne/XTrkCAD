@@ -153,11 +153,15 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
   \ref index "Developer Documentation" page for the full `XTRKCAD_REGRESSION_TESTING` writeup).
   Kept out of `c-tests-linux` rather than folded in, since its ~9-minute single-process playback
   baseline would slow down that job's fast unit-test feedback loop.
-- **`regression-gtk3-sanitizers`** — the same `RegressionSuite` run as `regression-gtk3`, but
-  ASan/UBSan-instrumented (mirrors `c-tests-sanitizers`' configure line). Closes the SF #682 gap:
-  `c-tests-sanitizers` excludes regression (`-LE regression`) and `regression-gtk3` isn't
-  sanitizer-instrumented, so the combination that found SF #675/#677–#680 previously only happened
-  when someone ran it locally — see the "Static tools and a live sanitizer run" bullet below.
+- **`regression-gtk3-sanitizers`** — the same `regression-ci` tests as `regression-gtk3`, with the
+  program built with ASan/UBSan (`-DXTRKCAD_SANITIZE=ON`, as in `c-tests-sanitizers`). Leak
+  detection is off (`detect_leaks=0`), since GTK and GLib keep allocations to the end of the
+  program. Closes the SF #682 gap: `c-tests-sanitizers` leaves out the regression tests
+  (`-LE regression`) and `regression-gtk3` isn't instrumented, so the combination that found
+  SF #675/#677–#680 had only happened when someone ran it locally — see the "Static tools and a
+  live sanitizer run" bullet below. Until 2026-11 `XTRKCAD_SANITIZE` only instrumented the unit
+  tests, so this job ran an uninstrumented program; once it covered the whole build, it found a
+  stack overrun in `ReadText()` on every old-format `TEXT` line.
 - **`cppcheck`** — cppcheck's default check set only, `--error-exitcode=1`
   (`tools/cppcheck-gate.sh`).
 - **`astyle-check`** — AStyle 3.6.13 (built from source, pinned — an unpinned version once
@@ -730,13 +734,11 @@ category, not yet started.
   findings for the same files, because none of those tools model "this `void *` gets reinterpreted
   as a different-sized type at runtime based on a tag" or "this loop condition dereferences before
   its own bounds guard." SF #682 documented a concrete gap this exposed: CI's sanitizer job and its
-  regression-suite job had never actually been run together. Closed by adding
-  `regression-gtk3-sanitizers` (`ci-gtk3.yml`), which runs the full `RegressionSuite` under
-  `-DXTRKCAD_SANITIZE=ON` — the same combination that found #675/#677–#680, now on every PR instead
-  of only when someone thinks to run it locally. Scoped to `RegressionSuite` itself, not
-  `regression-gtk3-standalone`'s ~47 per-demo cold-start tests, to keep the added CI time bounded
-  (~3 minutes observed locally) against unproven additional benefit from sanitizing the standalone
-  path too.
+  regression-suite job had never actually been run together. `regression-gtk3-sanitizers`
+  (`ci-gtk3.yml`) was added for it, but `-DXTRKCAD_SANITIZE=ON` then only instrumented the unit
+  tests, so the program it ran wasn't instrumented. Check that a sanitizer job's binary really is
+  (`nm <binary> | grep __asan_report`) rather than trusting the option's name. Since 2026-11 the
+  option covers the whole build, and the job runs the `regression-ci` tests on every PR.
 
 ## Bug patterns found in this codebase
 

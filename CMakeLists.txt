@@ -78,7 +78,26 @@ if(NOT XTRKCAD_REGRESSION_LEVEL MATCHES "^(critical|ci|full)$")
         "XTRKCAD_REGRESSION_LEVEL is \"${XTRKCAD_REGRESSION_LEVEL}\": use critical, ci or full")
 endif()
 
-option(XTRKCAD_SANITIZE "Build unit tests with AddressSanitizer + UBSan (Linux/GCC or Clang only)" OFF)
+option(XTRKCAD_SANITIZE "Build everything, the program included, with AddressSanitizer + UBSan (Linux/GCC or Clang only)" OFF)
+# For the whole tree, so the regression tests run an instrumented program.
+# Until 2026-11 only the unit-test targets were built with these flags, so
+# regression-gtk3-sanitizers ran an uninstrumented xtrkcad.
+if(XTRKCAD_SANITIZE AND UNIX)
+    # Say so now if the runtimes are missing, not with a link error at the end.
+    include(CheckCSourceCompiles)
+    set(CMAKE_REQUIRED_FLAGS "-fsanitize=address,undefined")
+    set(CMAKE_REQUIRED_LINK_OPTIONS "-fsanitize=address,undefined")
+    check_c_source_compiles("int main(void) { return 0; }" XTRKCAD_SANITIZE_LINKS)
+    unset(CMAKE_REQUIRED_FLAGS)
+    unset(CMAKE_REQUIRED_LINK_OPTIONS)
+    if(NOT XTRKCAD_SANITIZE_LINKS)
+        message(FATAL_ERROR "XTRKCAD_SANITIZE: ${CMAKE_C_COMPILER_ID} can't link "
+            "-fsanitize=address,undefined. Install its sanitizer runtimes (GCC: "
+            "libasan and libubsan) or use clang (-DCMAKE_C_COMPILER=clang).")
+    endif()
+    add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address,undefined)
+endif()
 option(XTRKCAD_FUZZ "Build libFuzzer harnesses (Clang only, requires -fsanitize=fuzzer support)" OFF)
 
 # Tools
