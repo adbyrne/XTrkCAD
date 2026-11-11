@@ -300,6 +300,8 @@ up (Development Issues #67). Regression tests besides the demos:
   `.xtce`.
 - `RegressionDescribe.*`: `-Tdescribe:<layout>` opens Properties on every object and presses Done;
   nothing may change or start an Undo step. The five largest layouts are `regression` only.
+- `RegressionCheckpoint.*`: `-Tcheckpoint:<layout>` writes, backs up and restores a checkpoint; a failed
+  or cancelled save or Open must keep it.
 - `RegressionExport.*`: `-Texport:<layout>` prints to PDF and exports SVG, DXF and PNG; checks printed
   text is at its point size.
 - `RegressionParamCheck.*`: `PARAMCHECK` in a script checks a dialog's values, and `UNDORESUME`,

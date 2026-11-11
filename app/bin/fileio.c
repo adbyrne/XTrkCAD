@@ -641,6 +641,9 @@ int LoadTracks(
 		SetWindowTitle();
 
 		AddToRecentFiles(nameOfFile, fileName[0]);
+		// The work the checkpoint held has been replaced. Not before: after
+		// a failed load the checkpoint is the only copy of it.
+		CleanupCheckpointFiles();
 
 		ResolveIndex();
 		LOG( log_timereadfile, 1, ( "Read time (%s) = %lu mS \n", fileName[0],
@@ -951,6 +954,10 @@ static int SaveTracks(
 		checkPtMark = changed = 0;
 
 		SetLayoutFullPath(fileName[0]);
+		// Only now is the checkpoint obsolete. After a failed save it may
+		// be the only copy of the work left, as saving empties the old
+		// file first; after Cancel nothing was saved at all.
+		CleanupCheckpointFiles();
 	}
 
 	if (doAfterSave) {
@@ -981,7 +988,6 @@ static void SetAutoSave()
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	checkPtMark = 1;
 	SetWindowTitle();
-	CleanupCheckpointFiles();  //Remove old checkpoint
 	SaveState();
 
 }
@@ -1000,7 +1006,6 @@ EXPORT void DoSave( void * doAfterSaveVP )
 		SaveTracks( 1, &temp, NULL );
 	}
 	SetWindowTitle();
-	CleanupCheckpointFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1013,7 +1018,6 @@ EXPORT void DoSaveAs( void * doAfterSaveVP )
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	checkPtMark = 1;
 	SetWindowTitle();
-	CleanupCheckpointFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1026,7 +1030,6 @@ EXPORT void DoLoad( void )
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	paste_offset = zero;
 	cursor_offset = zero;
-	CleanupCheckpointFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1041,7 +1044,6 @@ EXPORT void DoExamples( void )
 	bExample = TRUE;
 	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );
 	wFilSelect( examplesFile_fs, message );
-	CleanupCheckpointFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1657,6 +1659,202 @@ EXPORT int LayoutRoundTripTest( const char * pathName )
 	free( save2 );
 	free( archive );
 	free( save3 );
+	MyFree( source );
+	return nFail;
+}
+
+/**
+ * Clear the layout as File > New does (DoClearAfter(), misc.c), without the
+ * dialogs: what a crash leaves before the restart restores a checkpoint.
+ */
+static void CheckpointTestClear( void )
+{
+	Reset();
+	ClearTracks();
+	ResetLayers();
+	checkPtMark = changed = 0;
+	SetLayoutFullPath( "" );
+}
+
+/**
+ * Count the tracks of the layout in memory.
+ */
+static int CheckpointTestCount( void )
+{
+	int count = 0;
+	track_p trk;
+	TRK_ITERATE( trk ) {
+		count++;
+	}
+	return count;
+}
+
+/**
+ * Regression test for -Tcheckpoint:&lt;layout&gt;: the checkpoint is the only
+ * copy of unsaved work after a crash. Load a layout and save it as the
+ * reference, then check that:
+ * - TryCheckPoint() writes a checkpoint once checkPtInterval changes have
+ *   been made, and not before, and that it matches the reference;
+ * - the next checkpoint keeps the previous one as a backup;
+ * - LoadCheckpoint(), as the restart after a crash calls it, restores the
+ *   layout: under its old name ("Resume") or under none ("Resume with New
+ *   Name"), counting as changed either way;
+ * - a save that fails, or a Save or Open dialog that is cancelled, leaves
+ *   the checkpoint in place, and a save that succeeds removes it.
+ *
+ * \param pathName IN the layout
+ * \return number of failed checks
+ */
+EXPORT int LayoutCheckpointTest( const char * pathName )
+{
+	char * source = MyStrdup( pathName );
+	char * dir = NULL, * reference = NULL, * restored = NULL;
+	char * backup = NULL, * missing = NULL;
+	char backupName[STR_LONG_SIZE];
+	long savedInterval = checkPtInterval;
+	long savedAutosave = autosaveChkPoints;
+	int nFail = 0;
+	int count = RoundTripLoad( source );
+
+	if ( count <= 0 ) {
+		MyFree( source );
+		return 1;
+	}
+	lprintf( "%s: %d tracks\n", source, count );
+	MakeFullpath( &dir, workingDir, "checkpoint", NULL );
+	SafeCreateDir( dir );
+	MakeFullpath( &reference, dir, "reference.xtc", NULL );
+	MakeFullpath( &restored, dir, "restored.xtc", NULL );
+	MakeFullpath( &missing, dir, "missing", "reference.xtc", NULL );
+	if ( !SaveTracks( 1, &reference, NULL ) ) {
+		lprintf( "  FAIL: can't save %s\n", reference );
+		nFail++;
+		goto done;
+	}
+	SaveState();            // "lastlayout", which Resume reopens
+	CleanupCheckpointFiles();
+	if ( ExistsCheckpoint() ) {
+		lprintf( "  FAIL: a checkpoint is left from before the test\n" );
+		nFail++;
+	}
+
+	checkPtInterval = 10;
+	autosaveChkPoints = 0;
+	checkPtMark = 0;
+	changed = 9;
+	TryCheckPoint();
+	if ( ExistsCheckpoint() ) {
+		lprintf( "  FAIL: checkpoint written after %d of %ld changes\n",
+		         changed, checkPtInterval );
+		nFail++;
+	}
+	changed = 10;
+	TryCheckPoint();
+	if ( !ExistsCheckpoint() ) {
+		lprintf( "  FAIL: no checkpoint after %ld changes\n", checkPtInterval );
+		nFail++;
+		goto done;
+	}
+	if ( !SavedLayoutsMatch( reference, checkPtFileName1 ) ) {
+		lprintf( "  FAIL: the checkpoint isn't the layout\n" );
+		nFail++;
+	}
+
+	// The second checkpoint keeps the first as <layout>01.bkp
+	changed = 20;
+	TryCheckPoint();
+	sprintf( backupName, "%s01.bkp", GetLayoutFilename() );
+	MakeFullpath( &backup, workingDir, backupName, NULL );
+	if ( access( backup, F_OK ) != 0 ) {
+		lprintf( "  FAIL: no backup %s of the previous checkpoint\n", backup );
+		nFail++;
+	} else if ( !SavedLayoutsMatch( reference, backup ) ) {
+		lprintf( "  FAIL: the backup isn't the previous checkpoint\n" );
+		nFail++;
+	}
+
+	// The program crashed; the restart offers the checkpoint. Resume with
+	// New Name first: the checkpoint has to be there for the steps after it.
+	CheckpointTestClear();
+	LoadCheckpoint( FALSE );
+	if ( CheckpointTestCount() != count ) {
+		lprintf( "  FAIL: Resume with New Name restored %d of %d tracks\n",
+		         CheckpointTestCount(), count );
+		nFail++;
+	}
+	if ( GetLayoutFullPath()[0] != '\0' ) {
+		lprintf( "  FAIL: Resume with New Name kept the name \"%s\"\n",
+		         GetLayoutFullPath() );
+		nFail++;
+	}
+
+	// ... or Resume
+	CheckpointTestClear();
+	LoadCheckpoint( TRUE );
+	if ( CheckpointTestCount() != count ) {
+		lprintf( "  FAIL: Resume restored %d of %d tracks\n",
+		         CheckpointTestCount(), count );
+		nFail++;
+	}
+	if ( strcmp( GetLayoutFullPath(), reference ) != 0 ) {
+		lprintf( "  FAIL: Resume named the layout \"%s\", not %s\n",
+		         GetLayoutFullPath(), reference );
+		nFail++;
+	}
+	if ( changed <= 0 ) {
+		lprintf( "  FAIL: the restored layout doesn't count as changed\n" );
+		nFail++;
+	}
+
+	// A save that fails keeps the checkpoint: by then the old file may
+	// already be emptied, and the checkpoint is the only copy left
+	SetLayoutFullPath( missing );
+	bReadOnly = FALSE;
+	DoSave( NULL );
+	if ( !ExistsCheckpoint() ) {
+		lprintf( "  FAIL: a failed save removed the checkpoint\n" );
+		nFail++;
+	}
+
+	// So does Cancel in the Save dialog of a layout with no name
+	SetLayoutFullPath( "" );
+	wFilSelSetPlayback( "" );
+	DoSave( NULL );
+	if ( !ExistsCheckpoint() ) {
+		lprintf( "  FAIL: cancelling Save removed the checkpoint\n" );
+		nFail++;
+	}
+
+	// ... and Cancel in the Open dialog
+	wFilSelSetPlayback( "" );
+	DoLoad();
+	if ( !ExistsCheckpoint() ) {
+		lprintf( "  FAIL: cancelling Open removed the checkpoint\n" );
+		nFail++;
+	}
+
+	// A save that works makes the checkpoint obsolete, and has to hold
+	// what the checkpoint restored
+	SetLayoutFullPath( restored );
+	bReadOnly = FALSE;
+	DoSave( NULL );
+	if ( ExistsCheckpoint() ) {
+		lprintf( "  FAIL: the checkpoint is still there after a save\n" );
+		nFail++;
+	}
+	if ( !SavedLayoutsMatch( reference, restored ) ) {
+		lprintf( "  FAIL: the restored layout isn't the layout\n" );
+		nFail++;
+	}
+
+done:
+	checkPtInterval = savedInterval;
+	autosaveChkPoints = savedAutosave;
+	free( dir );
+	free( reference );
+	free( restored );
+	free( backup );
+	free( missing );
 	MyFree( source );
 	return nFail;
 }

@@ -494,6 +494,14 @@ bug:
   `regression` but not `regression-ci`: `regression-gtk3-standalone` and the coverage job install
   `poppler-utils` and run them, so the package jobs don't have to. A bitmap export to
   `export.bmp` has to fail with one `MSG_BITMAP_BAD_EXTENSION` notice and write no file.
+- **Checkpoints (`RegressionCheckpoint.*`)** — `-Tcheckpoint:<layout>` checks the checkpoint, the
+  only copy of unsaved work after a crash (`LayoutCheckpointTest()`, `fileio.c`). It's written once
+  the Preferences' checkpoint interval of changes has been made and not before, matches the layout,
+  and keeps the previous one as `<layout>01.bkp`. `LoadCheckpoint()` restores it under the old name
+  (Resume) or none (Resume with New Name). A failed save, or Cancel in the Save or Open dialog, has
+  to leave it in place, and a save that works removes it. `wFilSelSetPlayback("")` makes the next
+  file dialog act as if Cancel was pressed. `objects` (`roundtrip-objects.xtc`) is `regression-ci`,
+  `timesavr` only `regression`.
 - **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
   platforms. Both gate like the Linux jobs. macOS runners can be scarce, so a `regression-macos`
   job that never starts may need a rerun. Locally, pass

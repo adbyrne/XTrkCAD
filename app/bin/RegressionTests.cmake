@@ -70,6 +70,9 @@ list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notic
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/archive-badmanifest")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-frozen")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-diskfull")
+foreach(_xtrkcad_checkpoint_case objects timesavr)
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/checkpoint-${_xtrkcad_checkpoint_case}")
+endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/params-load")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
@@ -567,6 +570,31 @@ set_tests_properties(RegressionNotice.badline_check PROPERTIES
     FIXTURES_REQUIRED regression_badline
     LABELS "regression;regression-ci"
 )
+
+# Checkpoints, the only copy of unsaved work after a crash (LayoutCheckpointTest(),
+# fileio.c): written on time, kept as backups, restored by Resume and Resume with
+# New Name, kept by a failed or cancelled save and removed by one that works.
+# The checkpoint is written like a save, which the round trips check for every
+# example, so two layouts are enough: the unusual object types and an example.
+foreach(_xtrkcad_checkpoint_case objects timesavr)
+    if(_xtrkcad_checkpoint_case STREQUAL "objects")
+        set(_xtrkcad_checkpoint_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc")
+        set(_xtrkcad_checkpoint_labels "regression;regression-ci")
+    else()
+        set(_xtrkcad_checkpoint_source "${CMAKE_SOURCE_DIR}/app/lib/examples/timesavr.xtc")
+        set(_xtrkcad_checkpoint_labels "regression")
+    endif()
+    set(_xtrkcad_checkpoint_home "${XTRKCAD_REGRESSION_HOME_ROOT}/checkpoint-${_xtrkcad_checkpoint_case}")
+    xtrkcad_add_regression_test("RegressionCheckpoint.${_xtrkcad_checkpoint_case}" "${_xtrkcad_checkpoint_home}"
+        "${_xtrkcad_test_option}checkpoint:${_xtrkcad_checkpoint_source}")
+    set_tests_properties("RegressionCheckpoint.${_xtrkcad_checkpoint_case}" PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "${_xtrkcad_checkpoint_labels}"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_checkpoint_home}"
+        RUN_SERIAL TRUE
+    )
+endforeach()
 
 # Print and export a small layout through the normal code, then check the files
 # (Development Issues #68). The check needs poppler-utils, which isn't something
