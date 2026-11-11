@@ -14,8 +14,14 @@ for exp in "$EXPECTED"/report-*.txt; do
 	if [ ! -f "$DIR/$name" ]; then
 		echo "FAIL: $name wasn't saved"
 		RC=1
-	elif ! sed 4d "$DIR/$name" | diff -u "$exp" - ; then
+	# Compared without carriage returns (Windows writes CRLF) and without diff,
+	# which the Windows runners' shell doesn't have; the diff is shown where
+	# there is one.
+	elif [ "$(sed 4d "$DIR/$name" | tr -d '\r')" != "$(tr -d '\r' < "$exp")" ]; then
 		echo "FAIL: $name differs from the expected report"
+		if command -v diff > /dev/null 2>&1; then
+			sed 4d "$DIR/$name" | tr -d '\r' | diff -u "$exp" -
+		fi
 		RC=1
 	fi
 done
