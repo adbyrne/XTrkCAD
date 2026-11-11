@@ -3576,7 +3576,7 @@ EXPORT void InitNewTurn( wMenu_p m )
 
 	for ( i=0; i<COUNT( designDescs ); i++ ) {
 		toDesignDesc_t * dp = designDescs[i];
-		wMenuPushCreate( m, NULL, _(dp->label), 0,
+		wMenuPushCreate( m, "cmdTurnoutNew", _(dp->label), 0,
 		                 ShowTurnoutDesigner, dp );
 		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, dp->label );
 		AddPlaybackProc( message, ShowTurnoutDesignerPlayback, dp );

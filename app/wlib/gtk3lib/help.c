@@ -80,8 +80,8 @@ void wDoAccelHelp(wAccelKey_e key, void * context)
 
 void wMenuAddHelp(wControl_p m)
 {
-	wMenuPushCreate(m, NULL, _("_Contents"), 0, DoHelpMenu,
+	wMenuPushCreate(m, "menuHelpContents", _("_Contents"), 0, DoHelpMenu,
 	                (void*)SHOWHELPCONTENTS);
-	wMenuPushCreate(m, NULL, _("Co_mmand Context help"), 0, DoHelpMenu,
+	wMenuPushCreate(m, "menuHelpContext", _("Co_mmand Context help"), 0, DoHelpMenu,
 	                (void*)SHOWHELPFORCOMMAND);
 }

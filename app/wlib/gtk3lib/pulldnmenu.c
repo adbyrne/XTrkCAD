@@ -31,6 +31,8 @@
 #include "gtkint.h"
 #include "i18n.h"
 
+extern wBool_t listMissingHelpStrings;
+
 /*
  *****************************************************************************
  *
@@ -256,6 +258,9 @@ static void CreateMenuItem(
 
 	if (helpStr != NULL) {
 		wlibAddTooltip( mi->widget, NULL, helpStr );
+	} else if (listMissingHelpStrings && labelStr != NULL && *labelStr) {
+		// No help name, so no tooltip can be found for it.
+		printf( "Missing Help String: (no name) %s\n", labelStr );
 	}
 
 	return;
