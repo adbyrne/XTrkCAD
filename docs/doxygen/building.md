@@ -508,6 +508,12 @@ bug:
   as saved before. A clone has to sit at one offset from the original, connected among itself as
   the original is and to none of it. Blocks and switch motors are left out of the offset check:
   they have no position of their own. Same two layouts and labels as the checkpoint test.
+- **Export and Import (`RegressionXti.*`)** — `-Txti:<layout>` exports every object but the cars to
+  `.xti` through File > Export and imports it three ways (`LayoutXtiTest()`, `fileio.c`). Into an
+  empty layout, exporting the result again has to give the same file: an export holds positions
+  relative to the selection. Into the layout itself, the copies connect among themselves as the
+  originals do and to none of them, and Undo gives back the saved layout. As a module, they go on
+  one new layer, "Module - <file>", marked as a module. Same two layouts and labels as above.
 - **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
   platforms. Both gate like the Linux jobs. macOS runners can be scarce, so a `regression-macos`
   job that never starts may need a rerun. Locally, pass

@@ -2090,6 +2090,197 @@ done:
 }
 
 /**
+ * Export the selection to path through File > Export, as if the user had
+ * picked path in the file dialog.
+ */
+static void XtiTestExport( const char * path )
+{
+	wFilSelSetPlayback( path );
+	DoExport( NULL );
+}
+
+/**
+ * Import path through File > Import or Import Module.
+ */
+static void XtiTestImport( const char * path, BOOL_T module )
+{
+	wFilSelSetPlayback( path );
+	if ( module ) {
+		DoImportModule( NULL );
+	} else {
+		DoImportObjects( NULL );
+	}
+}
+
+/**
+ * Regression test for -Txti:&lt;layout&gt;: File > Export and Import of the
+ * .xti format. Load the layout, save it as the reference, select every object
+ * but the cars and export them, then check that:
+ * - imported into an empty layout, every object comes back, selected, and
+ *   exporting them again gives the same file: an export holds positions
+ *   relative to the selection, so that is the same objects at the same
+ *   places relative to each other;
+ * - imported into the layout itself, the copies get new indexes, connect
+ *   among themselves as the originals do and to none of them, and Undo
+ *   gives back the layout as saved;
+ * - imported as a module, they go on one new layer, named after the file
+ *   and marked as a module.
+ *
+ * \param pathName IN the layout
+ * \return number of failed checks
+ */
+EXPORT int LayoutXtiTest( const char * pathName )
+{
+	char * source = MyStrdup( pathName );
+	char * dir = NULL, * reference = NULL, * work = NULL;
+	char * export1 = NULL, * export2 = NULL;
+	int nFail = 0;
+	int count = RoundTripLoad( source );
+	long selected = 0;
+	track_p trk, last = NULL;
+
+	if ( count <= 0 ) {
+		MyFree( source );
+		return 1;
+	}
+	lprintf( "%s: %d tracks\n", source, count );
+	MakeFullpath( &dir, workingDir, "xti", NULL );
+	SafeCreateDir( dir );
+	MakeFullpath( &reference, dir, "reference.xtc", NULL );
+	MakeFullpath( &work, dir, "work.xtc", NULL );
+	MakeFullpath( &export1, dir, "export1.xti", NULL );
+	MakeFullpath( &export2, dir, "export2.xti", NULL );
+	if ( !SaveTracks( 1, &reference, NULL ) ) {
+		lprintf( "  FAIL: can't save %s\n", reference );
+		nFail++;
+		goto done;
+	}
+
+	ClipboardTestSelectAll();
+	selected = selectedTrackCount;
+	XtiTestExport( export1 );
+	if ( access( export1, R_OK ) != 0 ) {
+		lprintf( "  FAIL: Export wrote no file\n" );
+		nFail++;
+		goto done;
+	}
+
+	// Into an empty layout, and out again
+	CheckpointTestClear();
+	XtiTestImport( export1, FALSE );
+	if ( CheckpointTestCount() != selected || selectedTrackCount != selected ) {
+		lprintf( "  FAIL: Import into an empty layout gave %d objects, %ld"
+		         " selected, not %ld\n", CheckpointTestCount(), selectedTrackCount,
+		         selected );
+		nFail++;
+	}
+	XtiTestExport( export2 );
+	if ( !SavedLayoutsMatch( export1, export2 ) ) {
+		lprintf( "  FAIL: exporting the imported objects gave another file\n" );
+		nFail++;
+	}
+
+	// Into the layout itself
+	if ( RoundTripLoad( reference ) != count ) {
+		lprintf( "  FAIL: can't reload %s\n", reference );
+		nFail++;
+		goto done;
+	}
+	TRK_ITERATE( trk ) {
+		last = trk;
+	}
+	int connectedBefore, outsideBefore, connectedImport, outsideImport;
+	ClipboardTestConnections( GetFirstTrack(), &connectedBefore, &outsideBefore );
+	XtiTestImport( export1, FALSE );
+	if ( CheckpointTestCount() != count + selected
+	     || selectedTrackCount != selected ) {
+		lprintf( "  FAIL: Import into the layout gave %d objects, %ld selected;"
+		         " expected %ld, %ld\n", CheckpointTestCount(), selectedTrackCount,
+		         count + selected, selected );
+		nFail++;
+	} else if ( last != NULL && GetNextTrack( last ) != NULL ) {
+		ClipboardTestConnections( GetNextTrack( last ), &connectedImport,
+		                          &outsideImport );
+		// Cars aren't exported: their couplings to each other aren't either
+		int connectedCars = 0;
+		TRK_ITERATE( trk ) {
+			if ( trk == GetNextTrack( last ) ) {
+				break;
+			}
+			if ( QueryTrack( trk, Q_ISTRAIN ) ) {
+				for ( EPINX_T ep = 0; ep < GetTrkEndPtCnt( trk ); ep++ ) {
+					if ( GetTrkEndTrk( trk, ep ) ) {
+						connectedCars++;
+					}
+				}
+			}
+		}
+		if ( connectedImport != connectedBefore - connectedCars
+		     || outsideImport != 0 ) {
+			lprintf( "  FAIL: the import has %d connected endpoints, %d of them"
+			         " to the layout; the layout has %d without cars\n",
+			         connectedImport, outsideImport,
+			         connectedBefore - connectedCars );
+			nFail++;
+		}
+	}
+	UndoUndo( NULL );
+	if ( CheckpointTestCount() != count ) {
+		lprintf( "  FAIL: Undo of Import left %d objects, not %d\n",
+		         CheckpointTestCount(), count );
+		nFail++;
+	}
+	nFail += !ClipboardTestMatches( work, reference, "Import and Undo" );
+
+	// As a module
+	if ( RoundTripLoad( reference ) != count ) {
+		lprintf( "  FAIL: can't reload %s\n", reference );
+		nFail++;
+		goto done;
+	}
+	TRK_ITERATE( trk ) {
+		last = trk;
+	}
+	XtiTestImport( export1, TRUE );
+	if ( CheckpointTestCount() != count + selected ) {
+		lprintf( "  FAIL: Import Module gave %d objects, not %ld\n",
+		         CheckpointTestCount(), count + selected );
+		nFail++;
+	} else if ( last != NULL && GetNextTrack( last ) != NULL ) {
+		unsigned int layer = GetTrkLayer( GetNextTrack( last ) );
+		char expected[STR_SIZE];
+		int elsewhere = 0;
+		sprintf( expected, _( "Module - %s" ), FindFilename( export1 ) );
+		for ( trk = GetNextTrack( last ); trk; trk = GetNextTrack( trk ) ) {
+			if ( !IsTrackDeleted( trk ) && GetTrkLayer( trk ) != layer ) {
+				elsewhere++;
+			}
+		}
+		if ( elsewhere ) {
+			lprintf( "  FAIL: %d imported objects aren't on the module's layer\n",
+			         elsewhere );
+			nFail++;
+		}
+		if ( strcmp( GetLayerName( layer ), expected ) != 0
+		     || !GetLayerModule( layer ) ) {
+			lprintf( "  FAIL: the module's layer %u is \"%s\"%s, not a module"
+			         " layer \"%s\"\n", layer + 1, GetLayerName( layer ),
+			         GetLayerModule( layer ) ? " (module)" : "", expected );
+			nFail++;
+		}
+	}
+
+done:
+	free( dir );
+	free( reference );
+	free( work );
+	free( export1 );
+	free( export2 );
+	MyFree( source );
+	return nFail;
+}
+
+/**
  * Regression test for -Tdescribe:&lt;layout&gt;: load a layout, then open
  * Properties on every object and press Done without changing anything
  * (DescribeAllTracks()). No dialog may start an Undo step, and every object

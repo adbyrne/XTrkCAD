@@ -304,6 +304,8 @@ up (Development Issues #67). Regression tests besides the demos:
   or cancelled save or Open must keep it.
 - `RegressionClipboard.*`: `-Tclipboard:<layout>` Copy/Paste, Cut with Undo/Redo, Clone of a whole
   layout; each Undo gives back the saved layout.
+- `RegressionXti.*`: `-Txti:<layout>` File > Export to `.xti`, then Import into an empty layout, into
+  itself (with Undo) and as a module.
 - `RegressionExport.*`: `-Texport:<layout>` prints to PDF and exports SVG, DXF and PNG; checks printed
   text is at its point size.
 - `RegressionParamCheck.*`: `PARAMCHECK` in a script checks a dialog's values, and `UNDORESUME`,

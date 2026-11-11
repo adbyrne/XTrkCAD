@@ -76,6 +76,9 @@ endforeach()
 foreach(_xtrkcad_clipboard_case objects timesavr)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/clipboard-${_xtrkcad_clipboard_case}")
 endforeach()
+foreach(_xtrkcad_xti_case objects timesavr)
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/xti-${_xtrkcad_xti_case}")
+endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/params-load")
 foreach(_xtrkcad_compare_case match segment extra)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/compare-${_xtrkcad_compare_case}")
@@ -618,6 +621,29 @@ foreach(_xtrkcad_clipboard_case objects timesavr)
         LABELS "${_xtrkcad_clipboard_labels}"
         TIMEOUT 120
         ENVIRONMENT "HOME=${_xtrkcad_clipboard_home}"
+        RUN_SERIAL TRUE
+    )
+endforeach()
+
+# File > Export and Import of the .xti format, and Import Module
+# (LayoutXtiTest(), fileio.c): into an empty layout and back out, into the
+# layout itself with Undo, and as a module on a layer of its own.
+foreach(_xtrkcad_xti_case objects timesavr)
+    if(_xtrkcad_xti_case STREQUAL "objects")
+        set(_xtrkcad_xti_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc")
+        set(_xtrkcad_xti_labels "regression;regression-ci")
+    else()
+        set(_xtrkcad_xti_source "${CMAKE_SOURCE_DIR}/app/lib/examples/timesavr.xtc")
+        set(_xtrkcad_xti_labels "regression")
+    endif()
+    set(_xtrkcad_xti_home "${XTRKCAD_REGRESSION_HOME_ROOT}/xti-${_xtrkcad_xti_case}")
+    xtrkcad_add_regression_test("RegressionXti.${_xtrkcad_xti_case}" "${_xtrkcad_xti_home}"
+        "${_xtrkcad_test_option}xti:${_xtrkcad_xti_source}")
+    set_tests_properties("RegressionXti.${_xtrkcad_xti_case}" PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "${_xtrkcad_xti_labels}"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_xti_home}"
         RUN_SERIAL TRUE
     )
 endforeach()

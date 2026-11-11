@@ -2022,6 +2022,9 @@ EXPORT int RegressionTestAll(const char *target)
 	if (target != NULL && strncmp(target, "clipboard:", 10) == 0) {
 		return LayoutClipboardTest(target + 10);
 	}
+	if (target != NULL && strncmp(target, "xti:", 4) == 0) {
+		return LayoutXtiTest(target + 4);
+	}
 	if (target != NULL) {
 		const char *ext = FindFileExtension(FindFilename((char *)target));
 		if (ext != NULL && (strcmp(ext, "xtc") == 0 || strcmp(ext, "xtce") == 0)) {
