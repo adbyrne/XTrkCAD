@@ -592,9 +592,7 @@ static void test_release_without_widget(void **state)
 	assert_int_equal(d->delayUpdate, 0);          /* value still updated */
 }
 
-/* ===================================================================
- * Known-bug tests (red before the fix, only with DRAWCAIRO_KNOWN_BUGS=1)
- * =================================================================== */
+
 
 /* Bug 2: opaque wDrawFilledRectangle draws nothing in legacy mode.
  * Rectangle (x=10, y=10, w=20, h=20): top row = 99 - 10 - 20 = 69, so rows
@@ -627,12 +625,11 @@ static void test_filled_rect_batch(void **state)
 	assert_int_equal(pixel(d->surface, 20, 79), PX_RED);
 }
 
-/* Bug 3: bd->fill stays TRUE after a batch with a rectangle, so a legacy arc
+/* bd->fill stays TRUE after a batch with a rectangle, so a legacy arc
  * is filled instead of stroked */
-static void test_known_bug_3_arc_after_rect_batch(void **state)
+static void test_arc_after_rect_batch(void **state)
 {
 	CTX();
-	KNOWN_BUG("3");
 	wDrawStart(c);
 	wDrawFilledRectangle(c, 10, 10, 20, 20, COL_RED, 0);
 	wDrawFinish(c);
@@ -647,6 +644,7 @@ static void test_known_bug_3_arc_after_rect_batch(void **state)
 	assert_false(is_set(d->surface, 50, 49));
 	assert_true(is_set(d->surface, 69, 49) || is_set(d->surface, 70, 49));
 }
+
 
 /* Bug 4: wDrawGetSize without a widget */
 static void test_getsize_without_widget(void **state)
@@ -686,12 +684,15 @@ static void test_polygon_zero_points(void **state)
 {
 	CTX();
 	wDrawPix_t (*p)[2];
-	KNOWN_BUG("7c");
 	p = malloc(1); /* deliberately too small: p[0] is out of bounds */
 	assert_non_null(p);
 	wDrawPolygon(c, p, NULL, 0, COL_BLACK, 1, wDrawLineSolid, 0, 0, 0);
 	free(p);
 }
+
+/* ===================================================================
+ * Known-bug tests (red before the fix, only with DRAWCAIRO_KNOWN_BUGS=1)
+ * =================================================================== */
 
 /* 7e: wDrawBitMap does not invalidate.
  * A missing resource yields a 1x1 transparent bitmap. */
@@ -768,6 +769,43 @@ static void test_known_bug_N6_dirty_rect_stroke_width(void **state)
 	free(before);
 }
 
+/* N4 scene: a wide dashed line, then a transparent filled rectangle.
+ * Line y = 90 -> row 9, width 9 -> rows 5..13, far away from the rectangle.
+ * Rectangle (30, 20, 40, 40): columns 30..69, rows 99-20-40 = 39 .. 78. */
+static void scene_transparent_after_wide(struct control *c)
+{
+	wDrawLine(c, 10, 90, 90, 90, 9, wDrawLineDash, COL_BLACK, 0);
+	wDrawFilledRectangle(c, 30, 20, 40, 40, COL_RED, wDrawOptTransparent);
+}
+
+/* N4 (fixed): the transparent wDrawFilledRectangle in batch mode stroked its
+ * outline with the width and dash left over from the previous batched segment.
+ * Legacy: outline width 1, solid. The left edge lies on x = 30.0, so a 1 px
+ * stroke covers 29.5 .. 30.5 and column 27 (3 px outside) stays empty.
+ * Batch (before the fix): width 9 covers 25.5 .. 34.5, so column 27 is painted. */
+static void test_transparent_rect_batch_width(void **state)
+{
+	CTX();
+	size_t lenA, lenB;
+	unsigned char *a, *b;
+
+	scene_transparent_after_wide(c);
+	a = snapshot(d->surface, &lenA);
+	assert_false(is_set(d->surface, 27, 59));   /* legacy: thin outline */
+
+	clear_surface(d->surface);
+	wDrawStart(c);
+	scene_transparent_after_wide(c);
+	wDrawFinish(c);
+	b = snapshot(d->surface, &lenB);
+	assert_false(is_set(d->surface, 27, 59));   /* batch: must match */
+
+	assert_int_equal(lenA, lenB);
+	assert_memory_equal(a, b, lenA);
+	free(a);
+	free(b);
+}
+
 
 
 /* ------------------------------------------------------------------ main */
@@ -811,11 +849,14 @@ int main(int argc, char **argv)
 		cmocka_unit_test_setup_teardown(test_delayupdate_delays_and_releases_invalidation, setup_widget, teardown),
 		cmocka_unit_test_setup_teardown(test_release_is_single_invalidation, setup_widget, teardown),
 		cmocka_unit_test_setup_teardown(test_release_without_widget, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_arc_after_rect_batch, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_transparent_rect_batch_width, setup_nowidget, teardown),
+
 		/* keep last: under ASan this test aborts the whole process */
 		cmocka_unit_test_setup_teardown(test_polygon_zero_points, setup_nowidget, teardown),
+
 		/* known bugs */
 
-		cmocka_unit_test_setup_teardown(test_known_bug_3_arc_after_rect_batch, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_known_bug_7e_bitmap_invalidation, setup_widget, teardown),
 		cmocka_unit_test_setup_teardown(test_known_bug_1a_clip_ignored_in_batch, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_known_bug_1b_clip_leaks_in_batch, setup_widget, teardown),

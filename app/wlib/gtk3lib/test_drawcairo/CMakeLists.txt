@@ -172,7 +172,7 @@ set_tests_properties(drawcairo PROPERTIES
 # or a linker problem therefore turns the entry red instead of looking "ok".
 # Once a bug is fixed its entry turns red: remove the KNOWN_BUG line from the
 # test and delete the id from the list below.
-set(KNOWN_BUG_IDS 3 1a 1b 6 7e N6)
+set(KNOWN_BUG_IDS 1a 1b 6 7e N6)
 if(DRAWCAIRO_SANITIZE)
   # 7c is an out-of-bounds read, only detectable with ASan.
 #  list(APPEND KNOWN_BUG_IDS 7c)
