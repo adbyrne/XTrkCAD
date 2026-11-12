@@ -815,7 +815,7 @@ static BOOL_T CopyDependency(char * name, char * target_dir)
 		if (target != NULL) {
 			char *buffer = MyMalloc(COPYBLOCKSIZE);
 			while (!feof(source)) {
-				size_t bytes = fread(buffer, 1, sizeof(buffer), source);
+				size_t bytes = fread(buffer, 1, COPYBLOCKSIZE, source);
 				if (bytes) {
 					fwrite(buffer, 1, bytes, target);
 				}
@@ -1862,6 +1862,111 @@ done:
 	MyFree( source );
 	return nFail;
 }
+
+/** Whether the files at \a path1 and \a path2 hold the same bytes. */
+static BOOL_T BackgroundTestSameFile( const char * path1, const char * path2 )
+{
+	FILE * f1 = fopen( path1, "rb" );
+	FILE * f2 = fopen( path2, "rb" );
+	BOOL_T same = ( f1 != NULL && f2 != NULL );
+	while ( same ) {
+		int c1 = getc( f1 );
+		int c2 = getc( f2 );
+		if ( c1 != c2 ) {
+			same = FALSE;
+		} else if ( c1 == EOF ) {
+			break;
+		}
+	}
+	if ( f1 ) {
+		fclose( f1 );
+	}
+	if ( f2 ) {
+		fclose( f2 );
+	}
+	return same;
+}
+
+/**
+ * Regression test for -Tbackground:&lt;layout&gt;,&lt;image&gt;: a background image
+ * goes into a .xtce archive and comes back from it. Load the layout, give it
+ * the image as background as the Layout dialog does (LoadImageFile()), save it
+ * as .xtce, which copies the image into the archive (CopyDependency()) and
+ * names it in the manifest, clear the background, and load the archive again.
+ * The layout has to come back with a background, named as the image and
+ * holding the same bytes.
+ *
+ * \param target IN "&lt;layout&gt;,&lt;image&gt;"
+ * \return number of failed checks
+ */
+EXPORT int LayoutBackgroundTest( const char * target )
+{
+	char * source = MyStrdup( target );
+	char * image = strchr( source, ',' );
+	char * dir = NULL, * archive = NULL;
+	int nFail = 0;
+	int count;
+
+	if ( image == NULL ) {
+		lprintf( "  FAIL: background: expected <layout>,<image>\n" );
+		MyFree( source );
+		return 1;
+	}
+	*image++ = '\0';
+	count = RoundTripLoad( source );
+	if ( count <= 0 ) {
+		lprintf( "  FAIL: background: %s didn't load\n", source );
+		MyFree( source );
+		return 1;
+	}
+	lprintf( "%s: %d tracks, background %s\n", source, count, image );
+	MakeFullpath( &dir, workingDir, "background", NULL );
+	SafeCreateDir( dir );
+	MakeFullpath( &archive, dir, "background.xtce", NULL );
+
+	LoadImageFile( 1, &image, NULL );
+	if ( !HasBackGround() ) {
+		lprintf( "  FAIL: background: %s wasn't taken as background\n", image );
+		nFail++;
+		goto done;
+	}
+	if ( !SaveTracks( 1, &archive, NULL ) ) {
+		lprintf( "  FAIL: background: can't save %s\n", archive );
+		nFail++;
+		goto done;
+	}
+	// A layout loaded from another file doesn't keep the background
+	LayoutBackGroundInit( TRUE );
+	if ( HasBackGround() ) {
+		lprintf( "  FAIL: background: still there after it was cleared\n" );
+		nFail++;
+	}
+
+	if ( RoundTripLoad( archive ) != count ) {
+		lprintf( "  FAIL: background: the archive doesn't hold %d tracks\n", count );
+		nFail++;
+	}
+	char * loaded = GetLayoutBackGroundFullPath();
+	if ( !HasBackGround() || loaded == NULL || loaded[0] == '\0' ) {
+		lprintf( "  FAIL: background: the archive brought no background back\n" );
+		nFail++;
+	} else if ( strcmp( FindFilename( loaded ), FindFilename( image ) ) != 0 ) {
+		lprintf( "  FAIL: background: came back as %s, not %s\n",
+		         FindFilename( loaded ), FindFilename( image ) );
+		nFail++;
+	} else if ( !BackgroundTestSameFile( loaded, image ) ) {
+		lprintf( "  FAIL: background: %s isn't a copy of %s\n", loaded, image );
+		nFail++;
+	}
+	lprintf( "background: %s: %d failed checks\n", source, nFail );
+
+done:
+	free( dir );
+	free( archive );
+	MyFree( source );
+	return nFail;
+}
+
 
 /**
  * Save the layout in memory to path and compare it with reference.

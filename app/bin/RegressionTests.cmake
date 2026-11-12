@@ -78,6 +78,7 @@ endforeach()
 foreach(_xtrkcad_clipboard_case objects timesavr)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/clipboard-${_xtrkcad_clipboard_case}")
 endforeach()
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/background-objects")
 foreach(_xtrkcad_ops_case objects timesavr)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/ops-${_xtrkcad_ops_case}")
 endforeach()
@@ -724,6 +725,20 @@ foreach(_xtrkcad_clipboard_case objects timesavr)
         RUN_SERIAL TRUE
     )
 endforeach()
+
+# A background image saved into a .xtce archive and loaded back from it
+# (LayoutBackgroundTest(), fileio.c): Copyfile()/CopyDependency() and the
+# manifest's background entry had no test.
+set(_xtrkcad_background_home "${XTRKCAD_REGRESSION_HOME_ROOT}/background-objects")
+xtrkcad_add_regression_test("RegressionBackground.objects" "${_xtrkcad_background_home}"
+    "${_xtrkcad_test_option}background:${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc,${CMAKE_SOURCE_DIR}/app/lib/xtrkcad.png")
+set_tests_properties("RegressionBackground.objects" PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    LABELS "regression;regression-ci"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_background_home}"
+    RUN_SERIAL TRUE
+)
 
 # Rotate, Flip, Rescale and Move of a whole layout, each and its reverse, with
 # Undo and Redo (LayoutOpsTest(), fileio.c): every pair and every Undo has to
