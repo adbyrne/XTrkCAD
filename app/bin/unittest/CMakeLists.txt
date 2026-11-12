@@ -371,6 +371,10 @@ target_include_directories(problemreptest PRIVATE
 )
 
 target_link_libraries(problemreptest PRIVATE dynstring CMocka::cmocka)
+if(WIN32)
+	# getline() for Windows, as the program gets it from wlib
+	target_sources(problemreptest PRIVATE ${CMAKE_SOURCE_DIR}/app/wlib/gtk3lib/win32/getline.c)
+endif()
 
 add_test(ProblemrepTest problemreptest)
 

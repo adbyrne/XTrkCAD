@@ -397,7 +397,7 @@ FilterQuotedPath(FILE* out, const char* in, const char* start,
 
 /**
  * Filter path information from a NOTE line. Only a file note holds a path:
- * NOTE <index> <layer> 0 0 <x> <y> 0 2 "<path>" "<title>". In case the path
+ * NOTE &lt;index&gt; &lt;layer&gt; 0 0 &lt;x&gt; &lt;y&gt; 0 2 "&lt;path&gt;" "&lt;title&gt;". In case the path
  * is in the home directory, it starts with a place holder. Every other NOTE
  * line, such as the main note (NOTE MAIN ...) or a text note, is written as
  * it is.
@@ -436,8 +436,8 @@ FilterLayoutNote(FILE* out, const char* in)
 }
 
 /**
- * Filter path information from a LAYERS line. Only LAYERS SET <layer>
- * "<file>" holds a path, the layer's settings file: it is remembered for the
+ * Filter path information from a LAYERS line. Only LAYERS SET &lt;layer&gt;
+ * "&lt;file&gt;" holds a path, the layer's settings file: it is remembered for the
  * report, and in case it is in the home directory, it starts with a place
  * holder. Every other LAYERS line is written as it is.
  *
