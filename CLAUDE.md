@@ -285,8 +285,9 @@ Useful CMake options:
 ## Tests
 
 Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and
-`app/dynstring/unittest/`. Hg `default` has 134 tests, 25 of them outside the `regression` label
-(r7981, `ctest -N`, with `poppler-utils` installed; the 2 `RegressionExport.*` tests need it).
+`app/dynstring/unittest/`. Hg `default` has 212 tests at the `full` level, 26 of them outside the
+`regression` label and 40 labelled `regression-critical` (r8030, `ctest -N`, with `poppler-utils`
+installed; the 2 `RegressionExport.*` tests need it).
 Regression tests have levels (`-DXTRKCAD_REGRESSION_LEVEL=critical|ci|full`, `RegressionTests.cmake`):
 a local build defaults to `critical` (~4 min with the unit tests), CI to `full` (~23 min; run it in
 the background). Configure scratch builds with `full` before claiming a full pass. Windows and macOS
@@ -315,7 +316,7 @@ up (Development Issues #67). Regression tests besides the demos:
   `UNDOSTEP`, `REDOSTEP` test Undo, which playback otherwise suspends. `FILESELECT <file>` answers
   the next file dialog; `PARAMCHECK <dlg> <list> count <n>` and `PARAMETER <dlg> <list> <n>`
   count and pick list rows; `PARAMCHECK <dlg> ok active|inactive` checks a button (dev guide
-  `building.md` has the rest). `cars*` cover the car dialog (`carfind` checks Find with `VIEWCHECK <x> <y>`, the main window's centre), `jsonnote` the JSON Note dialog, `todesign` the Turnout Designer, `layers` the Layers dialog, `modify` Modify on Cornu and Bezier, `reports` every report saved and compared with
+  `building.md` has the rest). `cars*` cover the car dialog (`carfind` checks Find with `VIEWCHECK <x> <y>`, the main window's centre), `jsonnote` the JSON Note dialog, `todesign` the Turnout Designer, `layers` the Layers dialog, `modify` Modify on Cornu and Bezier, `movebelow` Move Objects Below and Above with Undo and Redo, `reports` every report saved and compared with
   `testfiles/reports-expected/`.
 - Under `-T`, notices and status-bar errors go to the log (`NOTICE:`, `NOTICE ANSWER:`, `ERROR:`)
   instead of opening; `NOTICEANSWER first|second|third` picks the button. A message with an ID logs

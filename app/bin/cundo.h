@@ -39,6 +39,7 @@ BOOL_T UndoNew( track_p );
 void UndoEnd( void );
 void UndoClear( void );
 void UndoDeferFree( void* );
+void UndoRecordOrder( void );
 // For the Undo/Redo test (-Tundo:&lt;demo&gt;, macro.c)
 int UndoDoneCount( void );
 int UndoHeadSlot( void );

@@ -1581,6 +1581,8 @@ EXPORT void SelectAbove( void * unused )
 		return;
 	}
 	UndoStart( _("Move Objects Above"), "above" );
+	// Undo has to put the order back
+	UndoRecordOrder();
 	xtrk = NULL;
 	ExciseSelectedTracks( &xtrk, &ltrk );
 	if (xtrk) {
@@ -1600,7 +1602,9 @@ EXPORT void SelectBelow( void * unused )
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 		return;
 	}
-	UndoStart( _("Mode Objects Below"), "below" );
+	UndoStart( _("Move Objects Below"), "below" );
+	// Undo has to put the order back
+	UndoRecordOrder();
 	xtrk = NULL;
 	ExciseSelectedTracks( &xtrk, &ltrk );
 	if (xtrk) {

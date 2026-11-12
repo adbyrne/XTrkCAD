@@ -38,6 +38,11 @@
  *  to recreate modified and deleted tracks.
  *  New tracks are snipped from the tracklist
  *
+ * A step that reorders the track list (Move Objects Above/Below) records the
+ * order first (UndoRecordOrder()): Undo puts that order back and Redo the one
+ * the step left. Without it the step's new tracks would no longer be the
+ * list's tail, which is where Undo takes them off.
+ *
  * Undone records can be copied to redoStream for subsequent redo ops
  *
  * The undo transactions are stored in a circular buffer (undoStack).
@@ -104,6 +109,9 @@ typedef struct {
 	track_p * newTail;
 	char * label;
 	dynArr_t deferFree_da;
+	dynArr_t order_da;	/**< track list order before the step, or empty */
+	dynArr_t redoOrder_da;	/**< track list order the step left, for Redo */
+	dynArr_t new_da;	/**< the step's new tracks, in creation order */
 } undoStack_t, *undoStack_p;
 
 static undoStack_t undoStack[UNDO_STACK_SIZE];
@@ -720,6 +728,9 @@ void UndoStart(
 		}
 	}
 	us->label = label;
+	DYNARR_RESET( track_p, us->order_da );
+	DYNARR_RESET( track_p, us->redoOrder_da );
+	DYNARR_RESET( track_p, us->new_da );
 	us->modCnt = 0;
 	us->newCnt = 0;
 	us->delCnt = 0;
@@ -782,6 +793,94 @@ void UndoDeferFree( void * p )
 	DYNARR_LAST( void*, us->deferFree_da ) = p;
 	LOG( log_undo, 2, ( "  deferFree defer: "SLOG_FMT"\n", p ) );
 }
+
+/**
+ * Save the track list's order into \a order.
+ */
+static void SaveOrder( dynArr_t * order )
+{
+	track_p trk;
+	DYNARR_RESET( track_p, *order );
+	for ( trk = to_first; trk; trk = trk->next ) {
+		DYNARR_APPEND( track_p, *order, 100 );
+		DYNARR_LAST( track_p, *order ) = trk;
+	}
+}
+
+
+static int ComparePtr( const void * a, const void * b )
+{
+	uintptr_t pa = (uintptr_t)*(const track_p *)a;
+	uintptr_t pb = (uintptr_t)*(const track_p *)b;
+	return pa < pb ? -1 : pa > pb ? 1 : 0;
+}
+
+
+/**
+ * Relink the track list in the order saved in \a order.
+ *
+ * Only the tracks on the list now are linked: a track the saved order names
+ * may have been freed since (DeleteInStream() when the Undo stack wraps), so
+ * a saved pointer is only used once it's found on the list. A track the saved
+ * order lacks keeps its place after the others.
+ */
+static void RestoreOrder( const dynArr_t * order )
+{
+	static dynArr_t cur_da;		// the list now, in list order
+	static dynArr_t sorted_da;	// the same, sorted for lookups
+	static dynArr_t linked_da;	// per sorted_da entry: already linked
+	track_p trk;
+	track_p * found;
+	int inx;
+
+	SaveOrder( &cur_da );
+	if ( cur_da.cnt == 0 ) {
+		return;
+	}
+	DYNARR_SET( track_p, sorted_da, cur_da.cnt );
+	DYNARR_SET( char, linked_da, cur_da.cnt );
+	memcpy( sorted_da.ptr, cur_da.ptr, cur_da.cnt * sizeof(track_p) );
+	qsort( sorted_da.ptr, sorted_da.cnt, sizeof(track_p), ComparePtr );
+	memset( linked_da.ptr, 0, linked_da.cnt );
+	to_first = NULL;
+	to_last = &to_first;
+	// The tracks the saved order names, then any it lacks
+	for ( int pass = 0; pass < 2; pass++ ) {
+		const dynArr_t * from = pass == 0 ? order : &cur_da;
+		for ( inx = 0; inx < from->cnt; inx++ ) {
+			trk = DYNARR_N( track_p, *from, inx );
+			found = bsearch( &trk, sorted_da.ptr, sorted_da.cnt,
+			                 sizeof(track_p), ComparePtr );
+			if ( found == NULL ) {
+				continue;
+			}
+			char * linked = &DYNARR_N( char, linked_da,
+			                           found - (track_p *)sorted_da.ptr );
+			if ( *linked ) {
+				continue;
+			}
+			*linked = 1;
+			*to_last = trk;
+			to_last = &trk->next;
+		}
+	}
+	*to_last = NULL;
+}
+
+
+/**
+ * Record the track list's order for the current Undo step, before the
+ * caller reorders the list (Move Objects Above/Below). Undo of the step puts
+ * this order back, and Redo the one the step left.
+ */
+void UndoRecordOrder( void )
+{
+	if ( !undoActive || undoHead < 0 ) {
+		return;
+	}
+	SaveOrder( &undoStack[undoHead].order_da );
+}
+
 
 /**
  * Record Modify'd track for Undo
@@ -871,6 +970,15 @@ BOOL_T UndoDelete( track_p trk )
 			to_last = ptrk;
 		}
 		*ptrk = trk->next;
+		for ( int inx = 0; inx < us->new_da.cnt; inx++ ) {
+			if ( DYNARR_N( track_p, us->new_da, inx ) == trk ) {
+				memmove( &DYNARR_N( track_p, us->new_da, inx ),
+				         &DYNARR_N( track_p, us->new_da, inx + 1 ),
+				         (us->new_da.cnt - inx - 1) * sizeof(track_p) );
+				us->new_da.cnt--;
+				break;
+			}
+		}
 		FreeTrack( trk );
 		us->newCnt--;
 		return TRUE;
@@ -910,6 +1018,8 @@ BOOL_T UndoNew( track_p trk )
 		us->newTrks = trk;
 	}
 	us->newCnt++;
+	DYNARR_APPEND( track_p, us->new_da, 10 );
+	DYNARR_LAST( track_p, us->new_da ) = trk;
 
 	return TRUE;
 }
@@ -947,12 +1057,71 @@ void UndoClear( void )
 		undoStack_p us = &undoStack[inx];
 		us->undoStart = us->undoEnd = 0;
 		DYNARR_INIT( void*, us->deferFree_da );
+		DYNARR_FREE( track_p, us->order_da );
+		DYNARR_FREE( track_p, us->redoOrder_da );
+		DYNARR_FREE( track_p, us->new_da );
 	}
 	SetButtons( FALSE, FALSE );
 }
 
 
 EXPORT wBool_t undoStatus = TRUE;
+
+
+/**
+ * Take the new tracks of step \a us off the track list, for Undo.
+ *
+ * They're usually the list's tail, which is then cut where the first of them
+ * is. If other tracks follow them (added with Undo suspended), only the new
+ * tracks are unlinked, and chained in creation order for Redo and for
+ * UndoStart(), which frees them once the step can't be redone.
+ *
+ * \return FALSE if us->newTrks isn't on the list (UndoFail() was called)
+ */
+static BOOL_T UnlinkNewTracks( undoStack_p us )
+{
+	track_p trk;
+	track_p * ptrk;
+	int cnt = 0;
+
+	us->oldTail = FindParent( us->newTrks, __LINE__ );
+	if ( !us->oldTail ) {
+		return FALSE;
+	}
+	for ( trk = *us->oldTail; trk; trk = trk->next ) {
+		cnt++;
+	}
+	if ( cnt == us->newCnt ) {
+		us->newTail = to_last;
+		to_last = us->oldTail;
+		*to_last = NULL;
+		return TRUE;
+	}
+	LOG( log_undo, 1,
+	     ( "    UnlinkNewTracks: %d tracks after the first new one, %d new\n",
+	       cnt, us->newCnt ) );
+	UASSERT( us->new_da.cnt == us->newCnt, us->new_da.cnt );
+	for ( int inx = 0; inx < us->new_da.cnt; inx++ ) {
+		track_p newTrk = DYNARR_N( track_p, us->new_da, inx );
+		ptrk = FindParent( newTrk, __LINE__ );
+		if ( !ptrk ) {
+			return FALSE;
+		}
+		*ptrk = newTrk->next;
+	}
+	for ( ptrk = &to_first; *ptrk; ptrk = &(*ptrk)->next )
+		;
+	to_last = ptrk;
+	us->oldTail = to_last;
+	ptrk = &us->newTrks;
+	for ( int inx = 0; inx < us->new_da.cnt; inx++ ) {
+		*ptrk = DYNARR_N( track_p, us->new_da, inx );
+		ptrk = &(*ptrk)->next;
+	}
+	*ptrk = NULL;
+	us->newTail = ptrk;
+	return TRUE;
+}
 
 /**
  * Undo the last transaction
@@ -999,13 +1168,16 @@ void UndoUndo( void * unused )
 	if (us->needRedo) {
 		us->redoStart = us->redoEnd = redoStream.end;
 	}
-	us->oldTail=FindParent(us->newTrks,__LINE__);
-	if (!us->oldTail) {
+	if ( us->order_da.cnt > 0 ) {
+		// Reordered the list (Move Objects Above/Below): keep the order it
+		// left for Redo, and put the one before it back, which also makes
+		// the step's new tracks the tail again
+		SaveOrder( &us->redoOrder_da );
+		RestoreOrder( &us->order_da );
+	}
+	if ( !UnlinkNewTracks( us ) ) {
 		return;
 	}
-	us->newTail = to_last;
-	to_last = us->oldTail;
-	*to_last = NULL;
 	needAttachTrains = FALSE;
 	undoStream.curr = us->undoStart;
 	while ( undoStream.curr < us->undoEnd ) {
@@ -1085,9 +1257,14 @@ void UndoRedo( void * unused )
 	}
 
 	UASSERT2( us->newTail != NULL, (uintptr_t)us->newTail );
-	*to_last = us->newTrks;
-	to_last = us->newTail;
+	if ( us->newTrks != NULL ) {
+		*to_last = us->newTrks;
+		to_last = us->newTail;
+	}
 	UASSERT2( (*to_last) == NULL, (uintptr_t)*to_last );
+	if ( us->order_da.cnt > 0 ) {
+		RestoreOrder( &us->redoOrder_da );
+	}
 	RenumberTracks();
 
 	needAttachTrains = FALSE;

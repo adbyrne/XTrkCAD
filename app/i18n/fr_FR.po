@@ -7018,7 +7018,7 @@ msgid "Move Objects Above"
 msgstr "Déplacer les objets ci-dessus"
 
 #: ../bin/track.c:1512
-msgid "Mode Objects Below"
+msgid "Move Objects Below"
 msgstr "Objets ci-dessous"
 
 #: ../bin/track.c:1810

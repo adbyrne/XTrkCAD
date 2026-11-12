@@ -53,12 +53,7 @@ foreach(_xtrkcad_demo_line ${_xtrkcad_demo_lines})
     list(APPEND _xtrkcad_demo_names "${_xtrkcad_demo_file}")
 endforeach()
 # The demos whose last steps RegressionUndo.<demo> undoes and redoes (below).
-# Left out, until it's fixed:
-# - dmlines2.xtr: Move Objects Below, then Undo, empties the layout. Undo
-#   takes a step's new tracks off by cutting the track list where the first
-#   of them is, and Below moved it to the front (SelectBelow(), UndoUndo()).
 set(_xtrkcad_undo_demos ${_xtrkcad_demo_names})
-list(REMOVE_ITEM _xtrkcad_undo_demos dmlines2.xtr)
 
 set(_xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/RegressionSuite")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/export")
@@ -94,7 +89,7 @@ endforeach()
 # The paramcheck test cases (RegressionParamCheck.<case>, script
 # regress-paramcheck-<case>.xtr). Set once: the home dirs, the tests and the
 # INPUT ERROR pattern below all use it.
-set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports)
+set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow)
 foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
@@ -414,6 +409,10 @@ if(NOT WIN32)
         FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK|FAIL: playback|ERROR:|UNDO ASSERT")
     set_tests_properties(RegressionParamCheck.layers PROPERTIES
         FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK|FAIL: playback|ERROR:|UNDO ASSERT")
+    # Move Objects Below/Above, then Undo and Redo: nothing may be lost
+    # (UndoUndo() used to cut the track list at a step's first new track).
+    set_tests_properties(RegressionParamCheck.movebelow PROPERTIES
+        FAIL_REGULAR_EXPRESSION "FAIL:|ERROR:|UNDO ASSERT")
     set_tests_properties(RegressionParamCheck.undo PROPERTIES
         FAIL_REGULAR_EXPRESSION "FAIL: PARAMCHECK|UNDO ASSERT")
     set_tests_properties(RegressionParamCheck.carsdelete PROPERTIES

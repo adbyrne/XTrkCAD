@@ -7192,7 +7192,7 @@ msgid "Move Objects Above"
 msgstr "Siirrä objekteja ylemmäs"
 
 #: ../bin/track.c:1512
-msgid "Mode Objects Below"
+msgid "Move Objects Below"
 msgstr "Siirrä objekteja alemmas"
 
 #: ../bin/track.c:1810
