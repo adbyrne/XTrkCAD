@@ -731,7 +731,7 @@ endforeach()
 # manifest's background entry had no test.
 set(_xtrkcad_background_home "${XTRKCAD_REGRESSION_HOME_ROOT}/background-objects")
 xtrkcad_add_regression_test("RegressionBackground.objects" "${_xtrkcad_background_home}"
-    "${_xtrkcad_test_option}background:${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc,${CMAKE_SOURCE_DIR}/app/lib/xtrkcad.png")
+    "${_xtrkcad_test_option}background:${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc")
 set_tests_properties("RegressionBackground.objects" PROPERTIES
     FIXTURES_REQUIRED "regression_install;regression_clean_homes"
     LABELS "regression;regression-ci"
