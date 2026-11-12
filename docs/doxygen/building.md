@@ -476,6 +476,12 @@ bug:
   easement, each undone after. Split refuses an easement (`Q_MODIFY_CAN_SPLIT`). The parallel
   Bezier's far end lands on another track's open end, and Parallel has to connect them: it takes
   the new track's ends from `MakeParallelBezier()`, which gave a control point as the far end.
+  `trimmerge` splits a curve and joins the halves again (`MergeCurve()`), and places a turnout on a
+  Bezier and on a Cornu, which splits each, takes out the piece under the turnout and trims the rest
+  to its ends (`AddTurnout()`, `TrimBezier()`, `TrimCornu()`), each with Undo. The turnout comes
+  from the Turnout Designer, as a test run loads no parameter file. Join can't merge a Bezier or a
+  Cornu (it refuses them, or with a Cornu easement builds a Cornu), so `MergeBezier()` and
+  `MergeCornu()` aren't reached.
   `blockends` loads a block of two connected straights and one on a Bezier. A block's ends aren't
   in the file (`WriteBlock()`): `ResolveBlockTrack()` works them out once its tracks are read, as
   its tracks' outer ends. The regression compare checks a block's ends against its tracks, in any
