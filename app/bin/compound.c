@@ -104,7 +104,14 @@ EXPORT void SetPaths( track_p trk, PATHPTR_T paths )
 	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK,
 	                                  extraDataCompound_t );
 	if ( xx->paths ) {
-		MyFree( xx->paths );
+		// Undo keeps a copy of the extra data, paths pointer and all
+		// (UndoModify()): Undo of a Split Turnout gives the turnout back its
+		// old paths, so they can't be freed while a step may still be undone
+		if ( UndoIsActive() ) {
+			UndoDeferFree( xx->paths );
+		} else {
+			MyFree( xx->paths );
+		}
 	}
 	if ( paths == NULL ) {
 		xx->paths = NULL;

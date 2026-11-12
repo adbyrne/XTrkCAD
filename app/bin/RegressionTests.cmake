@@ -281,6 +281,11 @@ foreach(_xtrkcad_demo IN LISTS _xtrkcad_undo_demos)
         RUN_SERIAL TRUE
     )
 endforeach()
+# Also regression-ci, so the sanitizer job runs it: Undo of Split Turnout gave
+# the turnout back paths SetPaths() had freed (compound.c). A normal build only
+# failed now and then, when the freed memory had been reused.
+set_tests_properties("RegressionUndo.dmtotrim.xtr" PROPERTIES
+    LABELS "regression;regression-ci")
 
 # What CI actually gates on: one process, one X session, matching the full -T
 # suite's ~535s baseline from the GTK3 issue #26 investigation. The per-demo
