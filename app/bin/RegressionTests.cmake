@@ -89,7 +89,7 @@ endforeach()
 # The paramcheck test cases (RegressionParamCheck.<case>, script
 # regress-paramcheck-<case>.xtr). Set once: the home dirs, the tests and the
 # INPUT ERROR pattern below all use it.
-set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends)
+set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends splitops)
 foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
@@ -414,6 +414,10 @@ if(NOT WIN32)
     # A loaded block's ends are its tracks' outer ends (ResolveBlockTrack()),
     # not what the last read left in TempEndPts (CompareBlock() checks them).
     set_tests_properties(RegressionParamCheck.blockends PROPERTIES
+        FAIL_REGULAR_EXPRESSION "FAIL:|ERROR:|UNDO ASSERT")
+    # Split and Parallel on Bezier, Cornu and easement, with Undo; the
+    # parallel Bezier has to connect at its far end (MakeParallelBezier()).
+    set_tests_properties(RegressionParamCheck.splitops PROPERTIES
         FAIL_REGULAR_EXPRESSION "FAIL:|ERROR:|UNDO ASSERT")
     set_tests_properties(RegressionParamCheck.movebelow PROPERTIES
         FAIL_REGULAR_EXPRESSION "FAIL:|ERROR:|UNDO ASSERT")

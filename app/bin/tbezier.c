@@ -1346,8 +1346,10 @@ static BOOL_T MakeParallelBezier(
 		for (int i=0; i<4; i++) { tempSegs(0).u.b.pos[i] = np[i]; }
 		FixUpBezierSeg(tempSegs(0).u.b.pos,&tempSegs(0),track);
 	}
+	// The new track's ends, where Parallel connects it to an open end
+	// (cparalle.c). np[1] and np[2] are control points.
 	if ( p0R ) { *p0R = np[0]; }
-	if ( p1R ) { *p1R = np[1]; }
+	if ( p1R ) { *p1R = np[3]; }
 	return TRUE;
 }
 

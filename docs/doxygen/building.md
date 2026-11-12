@@ -472,6 +472,10 @@ bug:
   list's order (`UndoRecordOrder()`, `cundo.c`), which Undo puts back and Redo reapplies; Undo
   takes a step's new tracks off the list's tail, and without the order the reordered list lost
   every track behind the first new one.
+  `splitops` splits a Bezier and a Cornu, and draws a parallel of a Bezier, a Cornu and an
+  easement, each undone after. Split refuses an easement (`Q_MODIFY_CAN_SPLIT`). The parallel
+  Bezier's far end lands on another track's open end, and Parallel has to connect them: it takes
+  the new track's ends from `MakeParallelBezier()`, which gave a control point as the far end.
   `blockends` loads a block of two connected straights and one on a Bezier. A block's ends aren't
   in the file (`WriteBlock()`): `ResolveBlockTrack()` works them out once its tracks are read, as
   its tracks' outer ends. The regression compare checks a block's ends against its tracks, in any
