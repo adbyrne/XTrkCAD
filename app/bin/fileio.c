@@ -79,7 +79,7 @@ static int log_timereadfile = 0;
  * \param path IN the file
  * \return the open file, or NULL
  */
-static FILE * FOpenWriteRestricted( const char * path )
+EXPORT FILE * FOpenWriteRestricted( const char * path )
 {
 #ifdef WINDOWS
 	int fd = _open( path, _O_CREAT | _O_WRONLY | _O_TRUNC,

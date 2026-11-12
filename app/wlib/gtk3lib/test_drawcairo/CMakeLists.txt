@@ -133,23 +133,28 @@ else()
   target_link_libraries(test_drawcairo PRIVATE ${CMOCKA_LIBRARY})
 endif()
 
-if(DRAWCAIRO_SANITIZE)
+# In the tree with XTRKCAD_SANITIZE on, the whole tree is already built with
+# the sanitizers, and the top-level CMakeLists.txt has checked them.
+if(DRAWCAIRO_SANITIZE AND NOT XTRKCAD_SANITIZE)
+  if(NOT DEFINED XTRKCAD_SANITIZE_FLAGS)
+    set(XTRKCAD_SANITIZE_FLAGS -fsanitize=address,undefined)
+  endif()
   # Say so at configure time if the runtimes are missing, instead of a
   # link error at the end of the build.
   include(CheckCSourceCompiles)
-  set(CMAKE_REQUIRED_FLAGS "-fsanitize=address,undefined")
-  set(CMAKE_REQUIRED_LINK_OPTIONS "-fsanitize=address,undefined")
+  string(REPLACE ";" " " CMAKE_REQUIRED_FLAGS "${XTRKCAD_SANITIZE_FLAGS}")
+  set(CMAKE_REQUIRED_LINK_OPTIONS ${XTRKCAD_SANITIZE_FLAGS})
   check_c_source_compiles("int main(void) { return 0; }" DRAWCAIRO_SANITIZE_LINKS)
   unset(CMAKE_REQUIRED_FLAGS)
   unset(CMAKE_REQUIRED_LINK_OPTIONS)
   if(NOT DRAWCAIRO_SANITIZE_LINKS)
     message(FATAL_ERROR "DRAWCAIRO_SANITIZE: ${CMAKE_C_COMPILER_ID} can't link "
-      "-fsanitize=address,undefined. Install its sanitizer runtimes (GCC: "
+      "${XTRKCAD_SANITIZE_FLAGS}. Install its sanitizer runtimes (GCC: "
       "libasan and libubsan), use clang, or pass -DDRAWCAIRO_SANITIZE=OFF.")
   endif()
   target_compile_options(test_drawcairo PRIVATE
-    -fsanitize=address,undefined -fno-omit-frame-pointer)
-  target_link_options(test_drawcairo PRIVATE -fsanitize=address,undefined)
+    ${XTRKCAD_SANITIZE_FLAGS} -fno-omit-frame-pointer)
+  target_link_options(test_drawcairo PRIVATE ${XTRKCAD_SANITIZE_FLAGS})
 endif()
 
 enable_testing()

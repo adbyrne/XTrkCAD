@@ -128,6 +128,39 @@ static stream_t undoStream;
 static stream_t redoStream;
 
 static BOOL_T needAttachTrains = FALSE;
+static void (*undoStartHook)( int ) = NULL;
+
+/**
+ * Call \a hook at the end of every UndoStart() that opens a step, with the
+ * step's slot in the Undo stack. Nothing has changed yet at that point, so
+ * the hook sees the layout as it was before the step. NULL removes it.
+ * Only the Undo/Redo test uses it (-Tundo:&lt;demo&gt;, macro.c).
+ */
+void UndoSetStartHook( void (*hook)( int slot ) )
+{
+	undoStartHook = hook;
+}
+
+/** Number of steps Undo can take back now. */
+int UndoDoneCount( void )
+{
+	return doCount;
+}
+
+/** Slot of the step the next Undo takes back. */
+int UndoHeadSlot( void )
+{
+	return undoHead;
+}
+
+/** Label of the step the next Undo takes back, e.g. "Move Tracks". */
+const char * UndoHeadLabel( void )
+{
+	if ( undoHead < 0 || undoStack[undoHead].label == NULL ) {
+		return "";
+	}
+	return undoStack[undoHead].label;
+}
 
 void UndoResume( void )
 {
@@ -711,6 +744,9 @@ void UndoStart(
 		doCount++;
 	}
 	SetButtons( TRUE, FALSE );
+	if ( undoStartHook ) {
+		undoStartHook( undoHead );
+	}
 }
 
 

@@ -1035,6 +1035,45 @@ EXPORT void RenumberTracks( void )
 	}
 }
 
+static dynArr_t savedTrackIndex_da;
+static TRKINX_T savedMaxIndex;
+
+/**
+ * Number the tracks that aren't deleted 1, 2, 3... in list order, and
+ * keep the real numbers for TrackNumbersRestore(). Redo renumbers the whole
+ * layout (RenumberTracks()), so two states of it that hold the same tracks
+ * can differ only in their numbers; the Undo/Redo test (-Tundo:, macro.c)
+ * writes and compares layouts numbered this way. Deleted tracks stay in the
+ * list while Undo can bring them back, so they aren't counted.
+ */
+EXPORT void TrackNumbersCompact( void )
+{
+	track_p trk;
+	DYNARR_RESET( TRKINX_T, savedTrackIndex_da );
+	for (trk=to_first; trk!=NULL; trk=trk->next) {
+		DYNARR_APPEND( TRKINX_T, savedTrackIndex_da, 100 );
+		DYNARR_LAST( TRKINX_T, savedTrackIndex_da ) = trk->index;
+	}
+	savedMaxIndex = max_index;
+	TRKINX_T inx = 0;
+	for (trk=to_first; trk!=NULL; trk=trk->next) {
+		if ( !IsTrackDeleted( trk ) ) {
+			trk->index = ++inx;
+		}
+	}
+}
+
+/** Give the tracks back the numbers TrackNumbersCompact() kept. */
+EXPORT void TrackNumbersRestore( void )
+{
+	track_p trk;
+	int inx = 0;
+	for (trk=to_first; trk!=NULL && inx<savedTrackIndex_da.cnt; trk=trk->next) {
+		trk->index = DYNARR_N( TRKINX_T, savedTrackIndex_da, inx++ );
+	}
+	max_index = savedMaxIndex;
+}
+
 
 EXPORT track_p NewTrack( TRKINX_T index, TRKTYP_T type, EPINX_T endCnt,
                          CSIZE_T extraSize )

@@ -301,6 +301,8 @@ up (Development Issues #67). Regression tests besides the demos:
   `.xtce`.
 - `RegressionDescribe.*`: `-Tdescribe:<layout>` opens Properties on every object and presses Done;
   nothing may change or start an Undo step. The five largest layouts are `regression` only.
+- `RegressionUndo.*`: `-Tundo:<demo>` undoes and redoes each demo's last steps (at most 10) and compares
+  the layout each time; tracks are compared renumbered, as Redo renumbers them.
 - `RegressionCheckpoint.*`: `-Tcheckpoint:<layout>` writes, backs up and restores a checkpoint; a failed
   or cancelled save or Open must keep it.
 - `RegressionClipboard.*`: `-Tclipboard:<layout>` Copy/Paste, Cut with Undo/Redo, Clone of a whole

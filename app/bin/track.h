@@ -414,6 +414,8 @@ void HilightSelectedEndPt( BOOL_T, track_p, EPINX_T );
 track_p FindTrack( TRKINX_T );
 void ResolveIndex( void );
 void RenumberTracks( void );
+void TrackNumbersCompact( void );
+void TrackNumbersRestore( void );
 BOOL_T ReadTrack( char * );
 BOOL_T WriteTracks( FILE *, wBool_t );
 BOOL_T ExportTracks( FILE *, coOrd * );

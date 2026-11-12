@@ -515,6 +515,14 @@ bug:
   `regression` but not `regression-ci`: `regression-gtk3-standalone` and the coverage job install
   `poppler-utils` and run them, so the package jobs don't have to. A bitmap export to
   `export.bmp` has to fail with one `MSG_BITMAP_BAD_EXTENSION` notice and write no file.
+- **Undo and Redo after each demo (`RegressionUndo.*`)** — `-Tundo:<demo>` runs a demo as usual,
+  writing the layout to `undo-before-<slot>.expected` each time an Undo step opens
+  (`UndoSetStartHook()`). When the demo ends, `UndoCheckRun()` (`macro.c`) undoes every step Undo
+  still holds, at most 10, and compares the layout with the file of that step; then it redoes them,
+  comparing with the layout from before each Undo. Redo renumbers the tracks (`RenumberTracks()`),
+  so layouts are written and compared with the live tracks numbered 1, 2, 3… in list order
+  (`TrackNumbersCompact()`). Level `full`. `dmlines2.xtr` is left out until its bug is fixed: Move
+  Objects Below, then Undo, empties the layout.
 - **Checkpoints (`RegressionCheckpoint.*`)** — `-Tcheckpoint:<layout>` checks the checkpoint, the
   only copy of unsaved work after a crash (`LayoutCheckpointTest()`, `fileio.c`). It's written once
   the Preferences' checkpoint interval of changes has been made and not before, matches the layout,
