@@ -486,6 +486,10 @@ bug:
   in the file (`WriteBlock()`): `ResolveBlockTrack()` works them out once its tracks are read, as
   its tracks' outer ends. The regression compare checks a block's ends against its tracks, in any
   order (`CompareBlock()`, `Q_ENDPTS_FROM_TRACKS`), not against the expected block, which has none.
+  `blockmove` moves a block's tracks without the block: its ends have to follow them, and Undo gives
+  both back. A block's ends are always its tracks' ends, so Move, Rotate, Flip and Rescale leave
+  them alone (`MoveTrack()` and the like), and `UpdateBlockEnds()` works them out again when an Undo
+  step ends and after Undo and Redo.
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button
@@ -501,6 +505,8 @@ bug:
   list index (`PARAMCHECK <dialog> <list> <n>` with no text checks the selected row), or a number.
   The `regression-locale-de` CI job runs the `regression-ci` tests with that locale, and gates like
   the other regression jobs (dev ML #4641).
+  The commands also set `NO_AT_BRIDGE=1`: a test run has no session bus, and GTK's accessibility
+  bridge would log "AT-SPI: Error retrieving accessibility bus address" every time it starts.
 - **What the user is told when something goes wrong (`RegressionNotice.*`)** — `badline` loads a
   layout with a bad number and an unknown line, and `badline_check` checks which tracks survived;
   `newer` opens a file from a newer version, which must not become the current layout (the

@@ -652,6 +652,7 @@ void ChangeHotBar( long );
 /* cblock.c */
 void CheckDeleteBlock( track_p t );
 void ResolveBlockTrack ( track_p trk );
+void UpdateBlockEnds( void );
 /* cswitchmotor.c */
 void CheckDeleteSwitchmotor( track_p t );
 void ResolveSwitchmotorTurnout ( track_p trk );
