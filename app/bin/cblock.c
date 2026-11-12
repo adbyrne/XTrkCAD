@@ -529,6 +529,22 @@ static void BlockOuterEnds( track_p blk, dynArr_t * ends )
 	}
 }
 
+/**
+ * Set the ends of block \a trk to its tracks' outer ends, connected to
+ * nothing: like the ones BlockOk() makes (blockCheckContiguousPath()).
+ */
+static void SetBlockEnds( track_p trk )
+{
+	static dynArr_t ends_da;
+	BlockOuterEnds( trk, &ends_da );
+	SetTrkEndPtCnt( trk, (EPINX_T)ends_da.cnt );
+	for ( EPINX_T ep = 0; ep < ends_da.cnt; ep++ ) {
+		blockEnd_t * end = &DYNARR_N( blockEnd_t, ends_da, ep );
+		SetTrkEndPoint( trk, ep, end->pos, end->angle );
+		SetEndPtTrack( GetTrkEndPt( trk, ep ), NULL );
+	}
+}
+
 EXPORT void ResolveBlockTrack ( track_p trk )
 {
 	LOG( log_block, 1, ("*** ResolveBlockTrack(%p)\n",trk))
@@ -548,15 +564,24 @@ EXPORT void ResolveBlockTrack ( track_p trk )
 		LOG( log_block, 1, ("*** ResolveBlockTrack(): %d (%d): %p\n",iTrack,
 		                    tracklist(iTrack).i,t_trk))
 	}
-	// The block's ends are its tracks' outer ends, connected to nothing:
-	// like the ones BlockOk() makes (blockCheckContiguousPath())
-	static dynArr_t ends_da;
-	BlockOuterEnds( trk, &ends_da );
-	SetTrkEndPtCnt( trk, (EPINX_T)ends_da.cnt );
-	for ( EPINX_T ep = 0; ep < ends_da.cnt; ep++ ) {
-		blockEnd_t * end = &DYNARR_N( blockEnd_t, ends_da, ep );
-		SetTrkEndPoint( trk, ep, end->pos, end->angle );
-		SetEndPtTrack( GetTrkEndPt( trk, ep ), NULL );
+	SetBlockEnds( trk );
+}
+
+
+/**
+ * Work out the ends of every block again, from its tracks. A block isn't a
+ * thing of its own on the layout, and its ends are always its tracks' ends
+ * (Robert Heller, dev ML #4671): Move, Rotate, Flip and Rescale leave a
+ * block's ends alone (Q_ENDPTS_FROM_TRACKS), and this runs when an Undo step
+ * ends, and after Undo and Redo (cundo.c), once the tracks are where they
+ * stay.
+ */
+EXPORT void UpdateBlockEnds( void )
+{
+	for ( track_p blk = first_block; blk; blk = GetblockData( blk )->next_block ) {
+		if ( !IsTrackDeleted( blk ) ) {
+			SetBlockEnds( blk );
+		}
 	}
 }
 

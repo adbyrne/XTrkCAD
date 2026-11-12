@@ -92,7 +92,7 @@ endforeach()
 # The paramcheck test cases (RegressionParamCheck.<case>, script
 # regress-paramcheck-<case>.xtr). Set once: the home dirs, the tests and the
 # INPUT ERROR pattern below all use it.
-set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends splitops)
+set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends splitops blockmove)
 foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
@@ -204,6 +204,10 @@ set(_xtrkcad_wayland_guard "if [ -n \"$WAYLAND_DISPLAY\" ]; then export GDK_BACK
 # written or read in it (dev ML #4641). LC_ALL would override LC_MESSAGES,
 # and LANGUAGE would override it for gettext.
 string(APPEND _xtrkcad_wayland_guard "unset LC_ALL LANGUAGE; export LC_MESSAGES=C; ")
+# No accessibility bridge: a test run has no session bus to find it on, and
+# GTK logs "AT-SPI: Error retrieving accessibility bus address" every start
+# (the icon conversion in bitmaps/CMakeLists.txt does the same)
+string(APPEND _xtrkcad_wayland_guard "export NO_AT_BRIDGE=1; ")
 if(WIN32)
     # Keep MSYS from rewriting /T as a path
     string(APPEND _xtrkcad_wayland_guard "export MSYS2_ARG_CONV_EXCL='*'; ")
@@ -422,6 +426,10 @@ if(NOT WIN32)
     # A loaded block's ends are its tracks' outer ends (ResolveBlockTrack()),
     # not what the last read left in TempEndPts (CompareBlock() checks them).
     set_tests_properties(RegressionParamCheck.blockends PROPERTIES
+        FAIL_REGULAR_EXPRESSION "FAIL:|ERROR:|UNDO ASSERT")
+    # A block's ends follow its tracks when they move without it
+    # (UpdateBlockEnds()).
+    set_tests_properties(RegressionParamCheck.blockmove PROPERTIES
         FAIL_REGULAR_EXPRESSION "FAIL:|ERROR:|UNDO ASSERT")
     # Split and Parallel on Bezier, Cornu and easement, with Undo; the
     # parallel Bezier has to connect at its far end (MakeParallelBezier()).
