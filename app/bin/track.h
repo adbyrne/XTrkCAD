@@ -139,6 +139,7 @@ typedef struct {
 #define Q_IS_TURNOUT                    (31)
 #define Q_GET_NODES						(32)
 #define Q_ENDPTS_FROM_TRACKS			(33)	// Is T_BLOCK: its ends are its tracks' outer ends, which its compare checks
+#define Q_HAS_NO_POSITION				(34)	// Is T_BLOCK or T_SWITCHMOTOR: in place of its tracks or turnout, no box of its own
 
 typedef struct traverseTrack_t {
 	track_p trk;							// IN Current Track OUT Next Track

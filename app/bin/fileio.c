@@ -40,6 +40,7 @@
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
+#include "scale.h"
 #include "include/stringxtc.h"
 #include "track.h"
 #include "version.h"
@@ -2113,6 +2114,240 @@ static void XtiTestImport( const char * path, BOOL_T module )
 	} else {
 		DoImportObjects( NULL );
 	}
+}
+
+static const char * opsTestNames[] = { "rotate", "flip", "rescale", "move" };
+#define OPS_TEST_COUNT (4)
+
+/**
+ * Select what the operations test moves: everything but the cars, which
+ * would leave their track (ClipboardTestSelectAll()).
+ */
+static void OpsTestSelect( void )
+{
+	ClipboardTestSelectAll();
+}
+
+/**
+ * Apply operation \a op of the operations test (OpsTestSelect()): Rotate 90
+ * degrees, Flip in a vertical line, Rescale to 50 % or Move by (5, 3); with
+ * \a back, the one that undoes it. Rescale shrinks first; a layout that
+ * grows past the room's edge is moved back onto it (RescaleSelected()), so
+ * LayoutOpsTest() first gives it a margin.
+ */
+static void OpsTestApply( int op, BOOL_T back, coOrd center )
+{
+	coOrd offset;
+	OpsTestSelect();
+	switch ( op ) {
+	case 0:
+		SelectedTracksRotate( center, back ? 270.0 : 90.0 );
+		break;
+	case 1:
+		SelectedTracksFlip( center, 0.0 );
+		break;
+	case 2:
+		RescaleSelectedByRatio( back ? 200.0 : 50.0 );
+		break;
+	default:
+		offset.x = back ? -5.0 : 5.0;
+		offset.y = back ? -3.0 : 3.0;
+		SelectedTracksMove( offset );
+		break;
+	}
+}
+
+/** Whether two files have different contents; no messages. */
+static BOOL_T OpsTestFilesDiffer( const char * path1, const char * path2 )
+{
+	FILE * f1 = fopen( path1, "r" );
+	FILE * f2 = fopen( path2, "r" );
+	BOOL_T differ = TRUE;
+	if ( f1 && f2 ) {
+		int c1, c2;
+		do {
+			c1 = getc( f1 );
+			c2 = getc( f2 );
+		} while ( c1 == c2 && c1 != EOF );
+		differ = ( c1 != c2 );
+	}
+	if ( f1 ) {
+		fclose( f1 );
+	}
+	if ( f2 ) {
+		fclose( f2 );
+	}
+	return differ;
+}
+
+static char * OpsTestPath( const char * dir, const char * kind )
+{
+	char name[40];
+	char * path = NULL;
+	snprintf( name, sizeof name, "%s.expected", kind );
+	MakeFullpath( &path, dir, name, NULL );
+	return path;
+}
+
+/**
+ * Regression test for -Tops:&lt;layout&gt;: Rotate, Flip, Rescale and Move of
+ * every object but the cars (OpsTestSelect()), each followed by the one that
+ * undoes it (Rotate back, Flip again, Rescale back to 100 %, Move back). Load
+ * the layout, make the room bigger and move the layout away from its edges,
+ * which Rescale would otherwise push it back from, then check that:
+ * - each operation changes the layout, and the second of each pair gives it
+ *   back. Not for Rescale: it turns about the centre of the selection's box,
+ *   and the box of a sensor, signal or control doesn't scale, so the centre
+ *   moves a little. Rescale has to keep that centre to within 1;
+ * - Undo of the eight steps gives back each layout before it, and Redo the
+ *   one after it.
+ * Layouts are compared within the regression tolerances
+ * (RegressionSnapshotCompare()), as the operations round to them.
+ *
+ * \param pathName IN the layout
+ * \return number of failed checks
+ */
+EXPORT int LayoutOpsTest( const char * pathName )
+{
+	char * source = MyStrdup( pathName );
+	char * dir = NULL;
+	char * before[OPS_TEST_COUNT] = { NULL };
+	char * after[OPS_TEST_COUNT] = { NULL };
+	char * back[OPS_TEST_COUNT] = { NULL };
+	char name[40];
+	int nFail = 0;
+	int count = RoundTripLoad( source );
+	int op, nDiff;
+	coOrd lo, hi, center, room, margin;
+
+	if ( count <= 0 ) {
+		MyFree( source );
+		return 1;
+	}
+	lprintf( "%s: %d tracks\n", source, count );
+	MakeFullpath( &dir, workingDir, "ops", NULL );
+	SafeCreateDir( dir );
+	for ( op = 0; op < OPS_TEST_COUNT; op++ ) {
+		snprintf( name, sizeof name, "%s-before", opsTestNames[op] );
+		before[op] = OpsTestPath( dir, name );
+		after[op] = OpsTestPath( dir, opsTestNames[op] );
+		snprintf( name, sizeof name, "%s-back", opsTestNames[op] );
+		back[op] = OpsTestPath( dir, name );
+	}
+	DoCommandB( I2VP( selectCmdInx ) );
+	OpsTestSelect();
+	if ( selectedTrackCount <= 0 ) {
+		lprintf( "  FAIL: ops: Select All selected nothing\n" );
+		nFail++;
+		goto done;
+	}
+	// A margin of 10 all round, as one more Undo step before the eight
+	GetSelectedBounds( &lo, &hi );
+	room.x = hi.x - lo.x + 20.0;
+	room.y = hi.y - lo.y + 20.0;
+	if ( room.x < RoomSize.x ) {
+		room.x = RoomSize.x;
+	}
+	if ( room.y < RoomSize.y ) {
+		room.y = RoomSize.y;
+	}
+	SetRoomSize( room );
+	margin.x = 10.0 - lo.x;
+	margin.y = 10.0 - lo.y;
+	SelectedTracksMove( margin );
+	OpsTestSelect();
+	GetSelectedBounds( &lo, &hi );
+	center.x = ( lo.x + hi.x ) / 2.0;
+	center.y = ( lo.y + hi.y ) / 2.0;
+
+	for ( op = 0; op < OPS_TEST_COUNT; op++ ) {
+		if ( !RegressionSnapshotWrite( before[op] ) ) {
+			nFail++;
+			goto done;
+		}
+		OpsTestApply( op, FALSE, center );
+		if ( !RegressionSnapshotWrite( after[op] ) ) {
+			nFail++;
+			goto done;
+		}
+		if ( !OpsTestFilesDiffer( before[op], after[op] ) ) {
+			lprintf( "  FAIL: ops: %s changed nothing\n", opsTestNames[op] );
+			nFail++;
+		}
+		if ( strcmp( opsTestNames[op], "rescale" ) == 0 ) {
+			// Rescale turns about the selection's centre, which stays,
+			// to within the boxes that don't scale: an object with no box
+			// of its own (a block's is never set) would pull it to (0,0)
+			coOrd lo1, hi1, center1;
+			OpsTestSelect();
+			GetSelectedBounds( &lo1, &hi1 );
+			center1.x = ( lo1.x + hi1.x ) / 2.0;
+			center1.y = ( lo1.y + hi1.y ) / 2.0;
+			if ( FindDistance( center, center1 ) > 1.0 ) {
+				lprintf( "  FAIL: ops: rescale moved the selection's centre from"
+				         " [%0.3f %0.3f] to [%0.3f %0.3f]\n", center.x, center.y,
+				         center1.x, center1.y );
+				nFail++;
+			}
+		}
+		OpsTestApply( op, TRUE, center );
+		if ( strcmp( opsTestNames[op], "rescale" ) != 0 ) {
+			nDiff = RegressionSnapshotCompare( before[op] );
+			if ( nDiff != 0 ) {
+				lprintf( "  FAIL: ops: %s and back left %d objects different\n",
+				         opsTestNames[op], nDiff );
+				nFail++;
+			}
+		}
+		if ( !RegressionSnapshotWrite( back[op] ) ) {
+			nFail++;
+			goto done;
+		}
+	}
+
+	for ( op = OPS_TEST_COUNT - 1; op >= 0; op-- ) {
+		UndoUndo( NULL );
+		nDiff = RegressionSnapshotCompare( after[op] );
+		if ( nDiff != 0 ) {
+			lprintf( "  FAIL: ops: Undo of %s back left %d objects different\n",
+			         opsTestNames[op], nDiff );
+			nFail++;
+		}
+		UndoUndo( NULL );
+		nDiff = RegressionSnapshotCompare( before[op] );
+		if ( nDiff != 0 ) {
+			lprintf( "  FAIL: ops: Undo of %s left %d objects different\n",
+			         opsTestNames[op], nDiff );
+			nFail++;
+		}
+	}
+	for ( op = 0; op < OPS_TEST_COUNT; op++ ) {
+		UndoRedo( NULL );
+		nDiff = RegressionSnapshotCompare( after[op] );
+		if ( nDiff != 0 ) {
+			lprintf( "  FAIL: ops: Redo of %s left %d objects different\n",
+			         opsTestNames[op], nDiff );
+			nFail++;
+		}
+		UndoRedo( NULL );
+		nDiff = RegressionSnapshotCompare( back[op] );
+		if ( nDiff != 0 ) {
+			lprintf( "  FAIL: ops: Redo of %s back left %d objects different\n",
+			         opsTestNames[op], nDiff );
+			nFail++;
+		}
+	}
+	lprintf( "ops: %s: %d failed checks\n", source, nFail );
+
+done:
+	for ( op = 0; op < OPS_TEST_COUNT; op++ ) {
+		free( before[op] );
+		free( after[op] );
+		free( back[op] );
+	}
+	free( dir );
+	MyFree( source );
+	return nFail;
 }
 
 /**

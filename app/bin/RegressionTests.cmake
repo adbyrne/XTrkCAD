@@ -78,6 +78,9 @@ endforeach()
 foreach(_xtrkcad_clipboard_case objects timesavr)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/clipboard-${_xtrkcad_clipboard_case}")
 endforeach()
+foreach(_xtrkcad_ops_case objects timesavr)
+    list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/ops-${_xtrkcad_ops_case}")
+endforeach()
 foreach(_xtrkcad_xti_case objects timesavr)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/xti-${_xtrkcad_xti_case}")
 endforeach()
@@ -706,6 +709,30 @@ foreach(_xtrkcad_clipboard_case objects timesavr)
         LABELS "${_xtrkcad_clipboard_labels}"
         TIMEOUT 120
         ENVIRONMENT "HOME=${_xtrkcad_clipboard_home}"
+        RUN_SERIAL TRUE
+    )
+endforeach()
+
+# Rotate, Flip, Rescale and Move of a whole layout, each and its reverse, with
+# Undo and Redo (LayoutOpsTest(), fileio.c): every pair and every Undo has to
+# give back the layout it started from. roundtrip-objects.xtc has one object of
+# every type, so this runs each type's rotate, flip, rescale and move code.
+foreach(_xtrkcad_ops_case objects timesavr)
+    if(_xtrkcad_ops_case STREQUAL "objects")
+        set(_xtrkcad_ops_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc")
+        set(_xtrkcad_ops_labels "regression;regression-ci")
+    else()
+        set(_xtrkcad_ops_source "${CMAKE_SOURCE_DIR}/app/lib/examples/timesavr.xtc")
+        set(_xtrkcad_ops_labels "regression")
+    endif()
+    set(_xtrkcad_ops_home "${XTRKCAD_REGRESSION_HOME_ROOT}/ops-${_xtrkcad_ops_case}")
+    xtrkcad_add_regression_test("RegressionOps.${_xtrkcad_ops_case}" "${_xtrkcad_ops_home}"
+        "${_xtrkcad_test_option}ops:${_xtrkcad_ops_source}")
+    set_tests_properties("RegressionOps.${_xtrkcad_ops_case}" PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "${_xtrkcad_ops_labels}"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_ops_home}"
         RUN_SERIAL TRUE
     )
 endforeach()

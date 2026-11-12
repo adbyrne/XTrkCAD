@@ -44,6 +44,8 @@ BOOL_T DoSetScale( const char * );
 
 void ScaleLengthIncrement( SCALEINX_T, DIST_T );
 void ScaleLengthEnd( void );
+// For the operations test (-Tops:&lt;layout&gt;, fileio.c)
+void RescaleSelectedByRatio( FLOAT_T percent );
 void LoadScaleList( wControl_p list );
 void LoadGaugeList( wControl_p list, SCALEDESCINX_T scale);
 
