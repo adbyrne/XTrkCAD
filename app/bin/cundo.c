@@ -788,6 +788,11 @@ void UndoDeferFree( void * p )
 	if ( p == NULL ) {
 		return;
 	}
+	if ( undoHead < 0 ) {
+		// No step yet, so no step can refer to it
+		MyFree( p );
+		return;
+	}
 	us = &undoStack[undoHead];
 	DYNARR_APPEND( void*, us->deferFree_da, 10 );
 	DYNARR_LAST( void*, us->deferFree_da ) = p;

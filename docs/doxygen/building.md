@@ -535,7 +535,10 @@ bug:
   still holds, at most 10, and compares the layout with the file of that step; then it redoes them,
   comparing with the layout from before each Undo. Redo renumbers the tracks (`RenumberTracks()`),
   so layouts are written and compared with the live tracks numbered 1, 2, 3… in list order
-  (`TrackNumbersCompact()`). Level `full`.
+  (`TrackNumbersCompact()`). Level `full`, except `RegressionUndo.dmtotrim.xtr`, which is also
+  `regression-ci` so the sanitizer job runs it: Undo of Split Turnout gave the turnout back paths
+  that `SetPaths()` had freed (`compound.c`), and a normal build only failed now and then. Data an
+  Undo step may still restore goes to `UndoDeferFree()`, not `MyFree()`.
 - **Checkpoints (`RegressionCheckpoint.*`)** — `-Tcheckpoint:<layout>` checks the checkpoint, the
   only copy of unsaved work after a crash (`LayoutCheckpointTest()`, `fileio.c`). It's written once
   the Preferences' checkpoint interval of changes has been made and not before, matches the layout,
