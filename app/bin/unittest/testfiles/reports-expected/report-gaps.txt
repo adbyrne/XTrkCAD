@@ -1,0 +1,10 @@
+XTrackCAD Gaps Report
+XTrackCAD
+Demo
+
+
+Near-miss pairs: 0
+Isolated open endpoints: 10
+Turntable stalls excluded: 0
+
+No near-miss pairs found.

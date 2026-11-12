@@ -87,7 +87,7 @@ endforeach()
 # The paramcheck test cases (RegressionParamCheck.<case>, script
 # regress-paramcheck-<case>.xtr). Set once: the home dirs, the tests and the
 # INPUT ERROR pattern below all use it.
-set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify)
+set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports)
 foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
@@ -337,6 +337,20 @@ foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
         RUN_SERIAL TRUE
     )
 endforeach()
+# Every report saved to a file, checked against the expected text: the demos
+# only open and cancel them. A row the script selects has to exist.
+set_tests_properties(RegressionParamCheck.reports PROPERTIES
+    FIXTURES_SETUP regression_reports
+    FAIL_REGULAR_EXPRESSION "NOTICE ID: MSG_PLAYBACK_LISTENTRY")
+add_test(NAME RegressionParamCheck.reports_check
+    COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-reports-test.sh"
+        "${_xtrkcad_compare_dir}/reports-expected"
+        "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-reports/.${XTRKCAD_BIN}"
+)
+set_tests_properties(RegressionParamCheck.reports_check PROPERTIES
+    FIXTURES_REQUIRED regression_reports
+    LABELS "regression;regression-ci"
+)
 if(WIN32)
     set_tests_properties(RegressionParamCheck.wrong PROPERTIES WILL_FAIL TRUE)
 else()

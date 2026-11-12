@@ -1,0 +1,8 @@
+XTrackCAD Notes Report
+XTrackCAD
+Demo
+
+
+ROOT
+  ID 104: S1                                            layer 2
+      {"kind": "station", "id": "S1"}

@@ -1,0 +1,16 @@
+XTrackCAD Unconnected Endpoints Report
+XTrackCAD
+Demo
+
+
+ Track |   Lyr | Layer Name       |        X |        Y |   Angle | Note
+     1 |     1 | Main             |    4.373 |    9.000 | 270.000 | 
+     6 |     1 | Main             |   11.582 |    3.993 | 260.400 | 
+     9 |     1 | Main             |   77.127 |   12.848 |  90.000 | 
+    11 |     1 | Main             |    1.375 |   12.848 | 270.000 | 
+    12 |     1 | Main             |   82.377 |    9.098 |  90.000 | 
+    20 |     1 | Main             |   61.161 |   18.163 |  80.500 | 
+   100 |     2 | Second           |   70.000 |   21.000 | 270.000 | Isolated
+   100 |     2 | Second           |   80.000 |   21.000 |  90.000 | Isolated
+   102 |     2 | Second           |   55.000 |   22.000 | 270.000 | 
+   103 |     2 | Second           |   65.000 |   23.000 |  78.690 | 

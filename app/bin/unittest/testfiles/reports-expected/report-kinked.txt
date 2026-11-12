@@ -1,0 +1,7 @@
+XTrackCAD Kinked Joints Report
+XTrackCAD
+Demo
+
+
+ Trk A | Lyr A | Layer A Name   |  Trk B | Lyr B | Layer B Name   |   Angle
+   102 |     2 | Second         |    103 |     2 | Second         |  11.310

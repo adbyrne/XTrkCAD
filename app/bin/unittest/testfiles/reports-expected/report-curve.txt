@@ -1,0 +1,11 @@
+XTrackCAD Curve Stats Report
+XTrackCAD
+Demo
+
+
+Range     Count
+  < 12in        0
+  12-18in       0
+  18-24in       1
+  24-36in       1
+  > 36in        0
