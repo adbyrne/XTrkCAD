@@ -472,6 +472,10 @@ bug:
   list's order (`UndoRecordOrder()`, `cundo.c`), which Undo puts back and Redo reapplies; Undo
   takes a step's new tracks off the list's tail, and without the order the reordered list lost
   every track behind the first new one.
+  `blockends` loads a block of two connected straights and one on a Bezier. A block's ends aren't
+  in the file (`WriteBlock()`): `ResolveBlockTrack()` works them out once its tracks are read, as
+  its tracks' outer ends. The regression compare checks a block's ends against its tracks, in any
+  order (`CompareBlock()`, `Q_ENDPTS_FROM_TRACKS`), not against the expected block, which has none.
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button

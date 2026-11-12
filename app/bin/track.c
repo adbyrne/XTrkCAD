@@ -1361,14 +1361,18 @@ static wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
 	REGRESS_CHECK_INT( "Index", trk1, trk2, index )
 	REGRESS_CHECK_INT( "Layer", trk1, trk2, layer )
 	REGRESS_CHECK_INT( "Scale", trk1, trk2, scale )
-	REGRESS_CHECK_INT( "EndPtCnt", trk1, trk2, endCnt )
-	char * cq = cp-2;
-	for ( int inx=0; inx<GetTrkEndPtCnt( trk1 ); inx++ ) {
-		cp = cq;
-		sprintf( cp, "EP:%d - ", inx );
-		cp += strlen(cp);
-		if ( ! CompareEndPt( cp, trk1, trk2, inx ) ) {
-			return FALSE;
+	// A block's ends aren't in the file: they're worked out from its
+	// tracks, which its compare checks (CompareBlock())
+	if ( !QueryTrack( (track_p)trk1, Q_ENDPTS_FROM_TRACKS ) ) {
+		REGRESS_CHECK_INT( "EndPtCnt", trk1, trk2, endCnt )
+		char * cq = cp-2;
+		for ( int inx=0; inx<GetTrkEndPtCnt( trk1 ); inx++ ) {
+			cp = cq;
+			sprintf( cp, "EP:%d - ", inx );
+			cp += strlen(cp);
+			if ( ! CompareEndPt( cp, trk1, trk2, inx ) ) {
+				return FALSE;
+			}
 		}
 	}
 	if ( trackCmds( GetTrkType( trk1 ) )->compare == NULL ) {
