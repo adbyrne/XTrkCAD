@@ -421,8 +421,6 @@ static BOOL_T ReadBlock ( char * line )
 	char * cp = NULL;
 	blockData_p xx,xx1;
 	wIndex_t iTrack;
-	EPINX_T ep;
-	trkEndPt_p endPtP;
 	char *name, *script;
 
 	LOG( log_block, 1, ("*** ReadBlock: line is '%s'\n",line))
@@ -451,13 +449,10 @@ static BOOL_T ReadBlock ( char * line )
 			DYNARR_LAST( btrackinfo_t, blockTrk_da ).i = trkindex;
 		}
 	}
-	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
-	trk = NewTrack(index, T_BLOCK, TempEndPtsCount(),
+	// The file doesn't hold the block's ends: ResolveBlockTrack() works
+	// them out once its tracks are read
+	trk = NewTrack(index, T_BLOCK, 0,
 	               sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1);
-	for ( ep=0; ep<TempEndPtsCount(); ep++) {
-		endPtP = TempEndPt(ep);
-		SetTrkEndPoint( trk, ep, GetEndPtPos(endPtP), GetEndPtAngle(endPtP) );
-	}
 	xx = GetblockData( trk );
 	LOG( log_block, 1, ("*** ReadBlock(): trk = %p (%d), xx = %p\n",trk,
 	                    GetTrkIndex(trk),xx))
@@ -483,6 +478,57 @@ static BOOL_T ReadBlock ( char * line )
 	return TRUE;
 }
 
+/** One outer end of a block: where it is and which way it points. */
+typedef struct {
+	coOrd pos;
+	ANGLE_T angle;
+} blockEnd_t;
+
+static BOOL_T TrackInBlock (track_p trk, track_p blk);
+
+/**
+ * Work out the outer ends of block \a blk: the ends of its tracks that
+ * don't connect to another of its tracks. Two such ends at one place count
+ * once, as in blockCheckContiguousPath(). The block's tracks have to be
+ * resolved (ResolveBlockTrack()).
+ *
+ * \param blk IN the block
+ * \param ends OUT the outer ends (blockEnd_t)
+ */
+static void BlockOuterEnds( track_p blk, dynArr_t * ends )
+{
+	blockData_p xx = GetblockData( blk );
+	DYNARR_RESET( blockEnd_t, *ends );
+	for ( wIndex_t iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
+		track_p trk = tracklist(iTrack).t;
+		if ( trk == NULL ) {
+			continue;
+		}
+		for ( EPINX_T ep = 0; ep < GetTrkEndPtCnt( trk ); ep++ ) {
+			track_p trk1 = GetTrkEndTrk( trk, ep );
+			if ( trk1 != NULL && TrackInBlock( trk1, blk ) ) {
+				continue;
+			}
+			coOrd pos = GetTrkEndPos( trk, ep );
+			ANGLE_T angle = GetTrkEndAngle( trk, ep );
+			int inx;
+			for ( inx = 0; inx < ends->cnt; inx++ ) {
+				blockEnd_t * end = &DYNARR_N( blockEnd_t, *ends, inx );
+				if ( FindDistance( pos, end->pos ) < connectDistance
+				     && NormalizeAngle( angle - end->angle + connectAngle/2.0 )
+				     < connectAngle ) {
+					break;
+				}
+			}
+			if ( inx >= ends->cnt ) {
+				DYNARR_APPEND( blockEnd_t, *ends, 4 );
+				DYNARR_LAST( blockEnd_t, *ends ).pos = pos;
+				DYNARR_LAST( blockEnd_t, *ends ).angle = angle;
+			}
+		}
+	}
+}
+
 EXPORT void ResolveBlockTrack ( track_p trk )
 {
 	LOG( log_block, 1, ("*** ResolveBlockTrack(%p)\n",trk))
@@ -502,6 +548,69 @@ EXPORT void ResolveBlockTrack ( track_p trk )
 		LOG( log_block, 1, ("*** ResolveBlockTrack(): %d (%d): %p\n",iTrack,
 		                    tracklist(iTrack).i,t_trk))
 	}
+	// The block's ends are its tracks' outer ends, connected to nothing:
+	// like the ones BlockOk() makes (blockCheckContiguousPath())
+	static dynArr_t ends_da;
+	BlockOuterEnds( trk, &ends_da );
+	SetTrkEndPtCnt( trk, (EPINX_T)ends_da.cnt );
+	for ( EPINX_T ep = 0; ep < ends_da.cnt; ep++ ) {
+		blockEnd_t * end = &DYNARR_N( blockEnd_t, ends_da, ep );
+		SetTrkEndPoint( trk, ep, end->pos, end->angle );
+		SetEndPtTrack( GetTrkEndPt( trk, ep ), NULL );
+	}
+}
+
+/**
+ * Regression compare (CompareTrack()): name, script and tracks as expected,
+ * and the block's ends are its tracks' outer ends, in any order. Flip
+ * mirrors a block's ends without reordering them when a curve's ends swap,
+ * so the order isn't checked. \a trk1 is the layout's block, \a trk2 the
+ * expected one, whose ends aren't in the file.
+ */
+static wBool_t CompareBlock( track_cp trk1, track_cp trk2 )
+{
+	static dynArr_t ends_da;
+	blockData_p xx1 = GetblockData( (track_p)trk1 );
+	blockData_p xx2 = GetblockData( (track_p)trk2 );
+	char * cp = message + strlen( message );
+	REGRESS_CHECK_STR( "Name", xx1, xx2, name )
+	REGRESS_CHECK_STR( "Script", xx1, xx2, script )
+	REGRESS_CHECK_INT( "Tracks", xx1, xx2, numTracks )
+	for ( wIndex_t iTrack = 0; iTrack < xx1->numTracks; iTrack++ ) {
+		if ( (&(xx1->trackList))[iTrack].i != (&(xx2->trackList))[iTrack].i ) {
+			sprintf( cp, "Track %d: Actual T%d, Expected T%d\n", iTrack,
+			         (&(xx1->trackList))[iTrack].i, (&(xx2->trackList))[iTrack].i );
+			return FALSE;
+		}
+	}
+	BlockOuterEnds( (track_p)trk1, &ends_da );
+	if ( GetTrkEndPtCnt( trk1 ) != ends_da.cnt ) {
+		sprintf( cp, "EndPtCnt: Actual %d, its tracks' outer ends %d\n",
+		         GetTrkEndPtCnt( trk1 ), ends_da.cnt );
+		return FALSE;
+	}
+	for ( EPINX_T ep = 0; ep < GetTrkEndPtCnt( trk1 ); ep++ ) {
+		coOrd pos = GetTrkEndPos( trk1, ep );
+		ANGLE_T angle = GetTrkEndAngle( trk1, ep );
+		int inx;
+		for ( inx = 0; inx < ends_da.cnt; inx++ ) {
+			blockEnd_t * end = &DYNARR_N( blockEnd_t, ends_da, inx );
+			if ( IsPosClose( pos, end->pos ) && IsAngleClose( angle, end->angle ) ) {
+				break;
+			}
+		}
+		if ( inx >= ends_da.cnt ) {
+			sprintf( cp, "EP:%d - [%0.3f %0.3f] %0.3f isn't an outer end of its tracks\n",
+			         ep, pos.x, pos.y, angle );
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+static BOOL_T QueryBlock( track_p trk, int query )
+{
+	return query == Q_ENDPTS_FROM_TRACKS;
 }
 
 static void MoveBlock (track_p trk, coOrd orig ) {}
@@ -531,14 +640,19 @@ static trackCmd_t blockCmds = {
 	NULL, /* getLength */
 	NULL, /* getTrkParams */
 	NULL, /* moveEndPt */
-	NULL, /* query */
+	QueryBlock,
 	NULL, /* ungroup */
 	NULL, /* flip */
 	NULL, /* drawPositionIndicator */
 	NULL, /* advancePositionIndicator */
 	NULL, /* checkTraverse */
 	NULL, /* makeParallel */
-	NULL  /* drawDesc */
+	NULL, /* drawDesc */
+	NULL, /* rebuildSegs */
+	NULL, /* replayData */
+	NULL, /* storeData */
+	NULL, /* activate */
+	CompareBlock
 };
 
 
