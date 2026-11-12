@@ -7001,7 +7001,7 @@ msgid "Move Objects Above"
 msgstr "Objekte nach oben"
 
 #: ../bin/track.c:1512
-msgid "Mode Objects Below"
+msgid "Move Objects Below"
 msgstr "Objekte nach unten"
 
 #: ../bin/track.c:1810

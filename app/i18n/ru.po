@@ -7039,7 +7039,7 @@ msgid "Move Objects Above"
 msgstr ""
 
 #: ../bin/track.c:1512
-msgid "Mode Objects Below"
+msgid "Move Objects Below"
 msgstr ""
 
 #: ../bin/track.c:1810

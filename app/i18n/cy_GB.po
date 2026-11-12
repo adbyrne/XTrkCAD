@@ -6957,7 +6957,7 @@ msgid "Move Objects Above"
 msgstr "Symud gwrthrychau uwchben"
 
 #: ../bin/track.c:1512
-msgid "Mode Objects Below"
+msgid "Move Objects Below"
 msgstr "Symud gwrthrychau isod"
 
 #: ../bin/track.c:1810

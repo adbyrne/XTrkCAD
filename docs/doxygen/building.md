@@ -466,6 +466,12 @@ bug:
   filter (`reportsfilter`). `reports_check` (`tools/check-reports-test.sh`) compares each saved
   report with `testfiles/reports-expected/`, leaving out line 4, the date. If a report's output
   changes on purpose, copy the new file there with that line removed (`sed 4d`).
+  `movebelow` covers Move Objects Below and Above (`SelectBelow()`, `SelectAbove()`) with Undo
+  and Redo: a drawn track moved below the others, and an older track moved above a drawn one,
+  then Undo of both steps has to give back the layout as it was. These steps record the track
+  list's order (`UndoRecordOrder()`, `cundo.c`), which Undo puts back and Redo reapplies; Undo
+  takes a step's new tracks off the list's tail, and without the order the reordered list lost
+  every track behind the first new one.
 - **Messages under `-T`** — nobody can answer a notice in a test run, so with `-T` every
   notice goes to the log as `NOTICE: <text>` and `NOTICE ANSWER: <button>` instead of opening,
   and each status-bar error as `ERROR: <text>` (`wNoticeSetAnswer()`, `misc.c`). The first button
@@ -521,8 +527,7 @@ bug:
   still holds, at most 10, and compares the layout with the file of that step; then it redoes them,
   comparing with the layout from before each Undo. Redo renumbers the tracks (`RenumberTracks()`),
   so layouts are written and compared with the live tracks numbered 1, 2, 3… in list order
-  (`TrackNumbersCompact()`). Level `full`. `dmlines2.xtr` is left out until its bug is fixed: Move
-  Objects Below, then Undo, empties the layout.
+  (`TrackNumbersCompact()`). Level `full`.
 - **Checkpoints (`RegressionCheckpoint.*`)** — `-Tcheckpoint:<layout>` checks the checkpoint, the
   only copy of unsaved work after a crash (`LayoutCheckpointTest()`, `fileio.c`). It's written once
   the Preferences' checkpoint interval of changes has been made and not before, matches the layout,
