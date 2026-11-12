@@ -477,6 +477,7 @@ void wDrawArc(
 
 	// and finish the batch
 	bd->pathOpen = TRUE;
+	bd->fill = FALSE;
 	flush_path_if_open(bd, cairo);
 
 	if (cairo != cairoCtx) {
@@ -683,6 +684,10 @@ void wDrawFilledRectangle(
 		if (cairoCtx) {
 			flush_path_if_open(bd, cairoCtx);
 			cairo = cairoCtx;
+			/* The shared context still holds the last batched segment's
+			 * width and dash; use the legacy outline style (1 px, solid). */
+			cairo_set_line_width(cairo, 1);
+			setCairoDashStyle(cairo, wDrawLineSolid);
 		} else {
 			cairo = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid, color, opt);
 		}
@@ -765,17 +770,14 @@ void wDrawPolygon(
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, fill?0:dw,
 	                 fill?wDrawLineSolid:lt, color, opt);
 
+	/* Start point of the closed path: set at i == 0, used at i == cnt-1. */
+	GdkPoint save = { 0, 0 };
 	for(i = 0; i < cnt; ++i) {
 		int j = i-1;
 		int k = i+1;
 		if (j < 0) { j = cnt-1; }
 		if (k > cnt-1) { k = 0; }
 		GdkPoint mid0, mid1, mid3, mid4;
-		// save is static because of an apparent compiler bug on Linux
-		// This happens with RelWithDebInfo target
-		// If the first segment is a line then save should = points[0]
-		// However it becomes mid0 instead which causes the last corner to be misplaced.
-		static GdkPoint save;
 		double len0, len1;
 		double d0x = (points[i].x-points[j].x);
 		double d0y = (points[i].y-points[j].y);
@@ -1442,6 +1444,7 @@ void wDrawFinish(wControl_p drawArea)
 
 	drawControl->batchCount = 0;
 	drawControl->pathOpen = FALSE;
+	drawControl->fill = FALSE;
 
 	if ( iDrawLog >= 2 ) {
 		printf( "%ld: wDrawFinish, %u calls batched\n", lDrawCnt++, currCalls );
