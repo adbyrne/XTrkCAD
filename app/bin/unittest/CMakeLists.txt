@@ -355,6 +355,25 @@ target_link_libraries(reportstest PRIVATE dynstring cJSON CMocka::cmocka)
 
 add_test(ReportsTest reportstest)
 
+# The privacy filters of the problem report (problemrep.c, included by the
+# test): the user's name and home directory become placeholders, the rest of
+# each line stays.
+add_executable(problemreptest
+	problemreptest.c
+)
+
+target_include_directories(problemreptest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_SOURCE_DIR}/app/wlib/include
+    ${CMAKE_SOURCE_DIR}/app/dynstring
+    ${CMAKE_BINARY_DIR}
+)
+
+target_link_libraries(problemreptest PRIVATE dynstring CMocka::cmocka)
+
+add_test(ProblemrepTest problemreptest)
+
 # elevjoin.c -- pure endpoint elevation-mode merge logic extracted from
 # elev.c:SetTrkElevModes(). No dependency beyond libc and the ELEV_*
 # constants in track.h, so it links as the real source with no stubs.
@@ -446,6 +465,7 @@ set_target_properties(
 	carregistrytest
 	careditlogictest
 	reportstest
+	problemreptest
 	elevjointest
 	layergrouptest
 	notenamestest

@@ -164,7 +164,8 @@ ReplaceUserID(DynString* result, char* in, char* replace)
 
 	if (user) {
 		DynStringNCatCStr(result, user - in, in);
-		DynStringCatCStrs(result, replace, user + strlen(user), NULL);
+		// The rest after the name, not after the line
+		DynStringCatCStrs(result, replace, user + strlen(wGetUserID()), NULL);
 		rc = true;
 	}
 
@@ -325,104 +326,146 @@ FilterDirectoryName(DynString* result, char* dir, const char* search,
 }
 
 /**
- * Filter path information from a NOTE subcommand. In case the home directory
- * is referenced it is changed using a place holder.
- * In case a NOTE references a file (sub format 2) the home directory
- * changed using a place holder
+ * Find the first quoted field in a layout line at or after \a from. A
+ * doubled quote inside it is a quote (ConvertToEscapedText()).
  *
- * \param out	open file handle
- * \param work	subfunction of NOTE without the leading command
+ * \param from	where to start looking
+ * \param start	OUT the opening quote
+ * \param end	OUT just past the closing quote
+ * \return		false if there is none, or it isn't closed
  */
 
-static void
-FilterLayoutNote(FILE* out, char* work)
+static bool
+FindQuotedField(const char* from, const char** start, const char** end)
 {
-	DynString result;
-	bool isDocument = false;
-	const char* token;
-
-	DynStringMalloc(&result, FILENAME_MAX);
-
-	fprintf(out, "NOTE ");
-
-	for (int i = 0; i < 8; i++) {
-		token = strtok(NULL, " \t");
-		fprintf(out, "%s ", token);
+	const char* p = strchr(from, '"');
+	if (!p) {
+		return false;
 	}
-
-	if (token && !strcmp(token, "2")) {
-		isDocument = true;
+	*start = p;
+	for (p++; *p; p++) {
+		if (*p == '"') {
+			if (p[1] == '"') {
+				p++;
+				continue;
+			}
+			*end = p + 1;
+			return true;
+		}
 	}
-	// filename is next
-	token = strtok(NULL, " \t\"");
-
-	char * filename = ConvertFromEscapedText(token);
-
-	if (isDocument && FilterDirectoryName(&result, filename,
-	                                      wGetUserHomeDir(), "<<home>>")) {
-		MyFree(filename);
-		filename = ConvertToEscapedText(DynStringToCStr(&result));
-		fprintf(out, "\"%s\"", filename);
-	} else {
-		fprintf(out, "\"%s\"", token);
-	}
-
-	MyFree(filename);
-	filename = NULL;
-
-	token = strtok(NULL, "\n");
-	fprintf(out, "%s\n", token);
-
-	DynStringFree(&result);
+	return false;
 }
 
 /**
- * Filter path information from a SET subcommand. In case the home directory
- * is referenced it is changed using a place holder
- *
- * \param out	open file handle
- * \param work	subcommand of LAYERS without the leading command
+ * Write \a in to \a out with the path in its quoted field from \a start to
+ * \a end filtered: a path in the home directory starts with a place holder.
+ * A line whose path isn't there is written as it is.
  */
 
 static void
-FilterLayers(FILE *out, char* work)
+FilterQuotedPath(FILE* out, const char* in, const char* start,
+                 const char* end)
 {
 	DynString result;
+	size_t len = end - start - 2;
+	char* escaped = MyMalloc(len + 1);
+	char* path;
 
-	DynStringMalloc(&result, FILENAME_MAX );
-
-	char* token = strtok(NULL, " \t");
-	if (token ) {
-		if (!stricmp(token, "SET")) {
-			char* filename;
-			bool clean;
-
-			fprintf(out, "%s ", token);
-			token = strtok(NULL, " \t");
-			fprintf(out, "%s ",token);
-			token = strtok(NULL, "\"");
-			filename = ConvertFromEscapedText(token);
-
-			DYNARR_APPEND(char*, configFiles_da, 1);
-			configFile(configFiles_da.cnt - 1) = MyStrdup(filename);
-
-			clean = FilterDirectoryName(&result, filename, wGetUserHomeDir(),
-			                            "<<home>>");
-			if (clean) {
-				MyFree(filename);
-				filename = ConvertToEscapedText(DynStringToCStr(&result));
-				fprintf(out, "\"%s\"\n", filename);
-			} else {
-				fprintf(out, "\"%s\"\n", token);
-			}
-			MyFree(filename);
-
-		} else {
-			const char* remainder = token + strlen(token) + 1;
-			fprintf(out, "%s %s", token, remainder );
+	// The path without its quotes, and with a doubled quote as one
+	size_t j = 0;
+	for (size_t i = 0; i < len; i++) {
+		escaped[j++] = start[1 + i];
+		if (start[1 + i] == '"') {
+			i++;
 		}
 	}
+	escaped[j] = '\0';
+	path = ConvertFromEscapedText(escaped);
+
+	DynStringMalloc(&result, FILENAME_MAX);
+	if (FilterDirectoryName(&result, path, wGetUserHomeDir(), "<<home>>")) {
+		char* filtered = ConvertToEscapedText(DynStringToCStr(&result));
+		fprintf(out, "%.*s\"%s\"%s", (int)(start - in), in, filtered, end);
+		MyFree(filtered);
+	} else {
+		fputs(in, out);
+	}
 	DynStringFree(&result);
+	MyFree(path);
+	MyFree(escaped);
+}
+
+/**
+ * Filter path information from a NOTE line. Only a file note holds a path:
+ * NOTE <index> <layer> 0 0 <x> <y> 0 2 "<path>" "<title>". In case the path
+ * is in the home directory, it starts with a place holder. Every other NOTE
+ * line, such as the main note (NOTE MAIN ...) or a text note, is written as
+ * it is.
+ *
+ * \param out	open file handle
+ * \param in	the NOTE line
+ */
+
+static void
+FilterLayoutNote(FILE* out, const char* in)
+{
+	const char* start;
+	const char* end;
+	char* fields;
+	const char* op = NULL;
+	int count = 0;
+
+	if (!FindQuotedField(in, &start, &end)) {
+		fputs(in, out);
+		return;
+	}
+	// The words before the path: NOTE and eight fields, the last the type
+	fields = MyStrdup(in);
+	fields[start - in] = '\0';
+	for (char* token = strtok(fields, " \t"); token;
+	     token = strtok(NULL, " \t")) {
+		count++;
+		op = token;
+	}
+	if (count == 9 && strcmp(op, "2") == 0) {
+		FilterQuotedPath(out, in, start, end);
+	} else {
+		fputs(in, out);
+	}
+	MyFree(fields);
+}
+
+/**
+ * Filter path information from a LAYERS line. Only LAYERS SET <layer>
+ * "<file>" holds a path, the layer's settings file: it is remembered for the
+ * report, and in case it is in the home directory, it starts with a place
+ * holder. Every other LAYERS line is written as it is.
+ *
+ * \param out	open file handle
+ * \param in	the LAYERS line
+ */
+
+static void
+FilterLayers(FILE *out, const char* in)
+{
+	const char* start;
+	const char* end;
+	char set[4];
+
+	if (sscanf(in, "LAYERS %3s", set) != 1 || stricmp(set, "SET") != 0
+	    || !FindQuotedField(in, &start, &end)) {
+		fputs(in, out);
+		return;
+	}
+	char* file = MyMalloc(end - start - 1);
+	memcpy(file, start + 1, end - start - 2);
+	file[end - start - 2] = '\0';
+	char* filename = ConvertFromEscapedText(file);
+	DYNARR_APPEND(char*, configFiles_da, 1);
+	configFile(configFiles_da.cnt - 1) = filename;
+	MyFree(file);
+
+	FilterQuotedPath(out, in, start, end);
 }
 
 /**
@@ -437,29 +480,13 @@ FilterLayers(FILE *out, char* work)
 static bool
 FilterLayoutLine(FILE *out, const char* in)
 {
-	char* workCopy = MyStrdup(in);
-	char* token;
-
-	token = strtok(workCopy, " \t\n");
-	if (token) {
-		bool done = false;
-		if (!stricmp(token, "LAYERS")) {
-			// handle LAYERS
-			fprintf(out, "%s ", token);
-			FilterLayers(out, workCopy);
-			done = true;
-		}
-		if (!stricmp(token, "NOTE")) {
-			// handle NOTE document
-			FilterLayoutNote(out, workCopy);
-			done = true;
-		}
-		if (!done) {
-			fputs(in, out);
-		}
+	if (strnicmp(in, "LAYERS ", 7) == 0) {
+		FilterLayers(out, in);
+	} else if (strnicmp(in, "NOTE ", 5) == 0) {
+		FilterLayoutNote(out, in);
+	} else {
+		fputs(in, out);
 	}
-
-	MyFree(workCopy);
 	return(true);
 }
 
