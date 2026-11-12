@@ -308,6 +308,8 @@ up (Development Issues #67). Regression tests besides the demos:
   or cancelled save or Open must keep it.
 - `RegressionClipboard.*`: `-Tclipboard:<layout>` Copy/Paste, Cut with Undo/Redo, Clone of a whole
   layout; each Undo gives back the saved layout.
+- `RegressionBackground.objects`: `-Tbackground:<layout>` a background image saved into a
+  `.xtce` archive and loaded back from it.
 - `RegressionOps.*`: `-Tops:<layout>` Rotate, Flip, Rescale, Move of a whole layout, each and its
   reverse, with Undo/Redo.
 - `RegressionXti.*`: `-Txti:<layout>` File > Export to `.xti`, then Import into an empty layout, into

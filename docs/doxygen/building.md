@@ -571,6 +571,14 @@ bug:
   relative to the selection. Into the layout itself, the copies connect among themselves as the
   originals do and to none of them, and Undo gives back the saved layout. As a module, they go on
   one new layer, "Module - <file>", marked as a module. Same two layouts and labels as above.
+- **Background image in an archive (`RegressionBackground.objects`)** — `-Tbackground:<layout>`
+  loads the layout and takes an image as its background, as the Layout dialog does
+  (`LoadImageFile()`), saves a `.xtce`, clears the background and loads the archive again
+  (`LayoutBackgroundTest()`, `fileio.c`). The layout has to come back with a background named as
+  the image and holding the same bytes: the archive carries the image (`CopyDependency()`) and names
+  it in the manifest, but the layout file doesn't. The test writes the image itself, a 4 x 4 PNG in
+  its working directory, so no file it reads is named on the command line (CodeQL path-injection).
+  Level `ci`.
 - **Rotate, Flip, Rescale and Move (`RegressionOps.*`)** — `-Tops:<layout>` runs each operation on
   every object but the cars, then the one that undoes it: Rotate 90 and back, Flip twice, Rescale
   to 50 % and back, Move and back (`LayoutOpsTest()`, `fileio.c`). The operations are called as the

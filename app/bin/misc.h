@@ -279,6 +279,7 @@ int LayoutRoundTripTest(const char *pathName);
 int LayoutExportTest(const char *pathName);
 int LayoutCheckpointTest(const char *pathName);
 int LayoutClipboardTest(const char *pathName);
+int LayoutBackgroundTest(const char *target);
 int LayoutOpsTest(const char *pathName);
 BOOL_T RegressionSnapshotWrite(const char *path);
 int RegressionSnapshotCompare(const char *path);
