@@ -1226,6 +1226,12 @@ static BOOL_T GetBoundsDoIt( track_p trk, BOOL_T unused )
 {
 	coOrd hi, lo;
 
+	// A block or switch motor is in place of its tracks or turnout, and has no
+	// box of its own: a block's is never set, so it would stretch the bounds
+	// to (0,0), and Rescale and Rotate Align would turn about the wrong centre
+	if ( QueryTrack( trk, Q_HAS_NO_POSITION ) ) {
+		return TRUE;
+	}
 	GetBoundingBox( trk, &hi, &lo );
 	if ( getSelectedBoundsCount == 0 ) {
 		getSelectedBoundsLo = lo;
@@ -1251,6 +1257,7 @@ static BOOL_T GetBoundsDoIt( track_p trk, BOOL_T unused )
 EXPORT void GetSelectedBounds( coOrd * low, coOrd * high )
 {
 	getSelectedBoundsCount = 0;
+	getSelectedBoundsLo = getSelectedBoundsHi = zero;
 	DoSelectedTracks( GetBoundsDoIt );
 	*low = getSelectedBoundsLo;
 	*high = getSelectedBoundsHi;
@@ -2512,6 +2519,45 @@ static void QuickRotate( void* pangle )
 	UndoStart( _("Rotate Tracks"), "Rotate Tracks" );
 	MoveTracks( TRUE, FALSE, TRUE, zero, cmdMenuPos, (double)angle/1000, TRUE);
 	wDrawDelayUpdate( mainD.d, FALSE );
+}
+
+
+/*
+ * Move, Rotate and Flip of the selected objects, as the commands do them,
+ * without the mouse. Only the operations test uses them (-Tops:&lt;layout&gt;,
+ * fileio.c). Each is one Undo step.
+ */
+
+/** Move the selected objects by \a offset. */
+void SelectedTracksMove( coOrd offset )
+{
+	QuickMove( &offset );
+}
+
+/** Rotate the selected objects by \a angle degrees about \a orig. */
+void SelectedTracksRotate( coOrd orig, ANGLE_T angle )
+{
+	DYNARR_RESET(track_p,auto_select_da);
+	if ( SelectedTracksAreFrozen() ) {
+		return;
+	}
+	wDrawDelayUpdate( mainD.d, TRUE );
+	GetMovedTracks(FALSE);
+	UndoStart( _("Rotate Tracks"), "Rotate Tracks" );
+	MoveTracks( TRUE, FALSE, TRUE, zero, orig, angle, TRUE );
+	wDrawDelayUpdate( mainD.d, FALSE );
+}
+
+static void FlipTracks( coOrd orig, ANGLE_T angle );
+
+/** Mirror the selected objects in the line through \a orig at \a angle. */
+void SelectedTracksFlip( coOrd orig, ANGLE_T angle )
+{
+	if ( SelectedTracksAreFrozen() ) {
+		return;
+	}
+	UndoStart( _("Flip Tracks"), "flip" );
+	FlipTracks( orig, angle );
 }
 
 

@@ -2082,6 +2082,33 @@ static int UndoCheckCompare( const char * path )
 	return nDiff;
 }
 
+/**
+ * Write the layout as it is now to \a path, numbered as Redo would number
+ * it, for RegressionSnapshotCompare(). The operations test uses it too
+ * (-Tops:&lt;layout&gt;, fileio.c). It runs outside playback, so this sets the
+ * C locale layout files are written in (SetCLocale() nests).
+ */
+BOOL_T RegressionSnapshotWrite( const char * path )
+{
+	SetCLocale();
+	BOOL_T rc = UndoCheckWrite( path );
+	SetUserLocale();
+	return rc;
+}
+
+/**
+ * Number of objects that differ from the layout written to \a path by
+ * RegressionSnapshotWrite(), within the regression tolerances
+ * (IsPosClose() and the like).
+ */
+int RegressionSnapshotCompare( const char * path )
+{
+	SetCLocale();
+	int nDiff = UndoCheckCompare( path );
+	SetUserLocale();
+	return nDiff;
+}
+
 static void UndoCheckRun( const char * demo )
 {
 	int slots[UNDO_CHECK_SLOTS];
@@ -2150,6 +2177,9 @@ EXPORT int RegressionTestAll(const char *target)
 	}
 	if (target != NULL && strncmp(target, "clipboard:", 10) == 0) {
 		return LayoutClipboardTest(target + 10);
+	}
+	if (target != NULL && strncmp(target, "ops:", 4) == 0) {
+		return LayoutOpsTest(target + 4);
 	}
 	if (target != NULL && strncmp(target, "xti:", 4) == 0) {
 		return LayoutXtiTest(target + 4);

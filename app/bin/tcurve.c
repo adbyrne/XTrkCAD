@@ -28,6 +28,7 @@
 #include "layout.h"
 #include "form.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "common-ui.h"
 
 static TRKTYP_T T_CURVE = -1;
@@ -1593,7 +1594,12 @@ static void FlipCurve(
 {
 	struct extraDataCurve_t * xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	FlipPoint( &xx->pos, orig, angle );
+	// FlipTrack() has mirrored the ends and swaps them after this
+	// (Q_FLIP_ENDPTS). The box comes from the ends' angles, which before the
+	// swap describe the rest of the circle: work it out as they will be.
+	SwapEndPts( GetTrkEndPt( trk, 0 ), 0, 1 );
 	ComputeCurveBoundingBox( trk, xx );
+	SwapEndPts( GetTrkEndPt( trk, 0 ), 0, 1 );
 }
 
 

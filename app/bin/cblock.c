@@ -610,7 +610,7 @@ static wBool_t CompareBlock( track_cp trk1, track_cp trk2 )
 
 static BOOL_T QueryBlock( track_p trk, int query )
 {
-	return query == Q_ENDPTS_FROM_TRACKS;
+	return query == Q_ENDPTS_FROM_TRACKS || query == Q_HAS_NO_POSITION;
 }
 
 static void MoveBlock (track_p trk, coOrd orig ) {}

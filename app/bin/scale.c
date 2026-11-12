@@ -907,15 +907,16 @@ static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
 }
 
 
-static void RescaleDlgOk(
-        const void * unused )
+/**
+ * Rescale the selected objects as the Rescale dialog's settings say
+ * (rescaleMode, rescalePercent, rescaleNoChangeDim, the target scale).
+ */
+static void RescaleSelected( void )
 {
 	coOrd center, size;
 	DIST_T d;
 	FLOAT_T ratio = rescalePercent/100.0;
 	coOrd getboundsLo, getboundsHi;
-
-	rescaleMode = wNoteBookGetActivePage(rescalePLs[I_NOTEBOOK].control);
 
 	UndoStart( _("Rescale Tracks"), "Rescale" );
 	GetSelectedBounds( &getboundsLo, &getboundsHi );
@@ -973,7 +974,29 @@ static void RescaleDlgOk(
 		SetLayoutBackGroundSize(bgSize);
 	}
 	DoRedraw();
+}
+
+
+static void RescaleDlgOk(
+        const void * unused )
+{
+	rescaleMode = wNoteBookGetActivePage(rescalePLs[I_NOTEBOOK].control);
+	RescaleSelected();
 	wHide( rescalePG.win );
+}
+
+
+/**
+ * Rescale the selected objects by \a percent, keeping their scale and
+ * changing their dimensions, as the dialog's Ratio page does. Only the
+ * operations test uses it (-Tops:&lt;layout&gt;, fileio.c).
+ */
+void RescaleSelectedByRatio( FLOAT_T percent )
+{
+	rescaleMode = 1;
+	rescaleNoChangeDim = FALSE;
+	rescalePercent = percent;
+	RescaleSelected();
 }
 
 

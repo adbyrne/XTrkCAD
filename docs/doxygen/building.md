@@ -552,6 +552,17 @@ bug:
   relative to the selection. Into the layout itself, the copies connect among themselves as the
   originals do and to none of them, and Undo gives back the saved layout. As a module, they go on
   one new layer, "Module - <file>", marked as a module. Same two layouts and labels as above.
+- **Rotate, Flip, Rescale and Move (`RegressionOps.*`)** — `-Tops:<layout>` runs each operation on
+  every object but the cars, then the one that undoes it: Rotate 90 and back, Flip twice, Rescale
+  to 50 % and back, Move and back (`LayoutOpsTest()`, `fileio.c`). The operations are called as the
+  commands do them, without the mouse (`SelectedTracksRotate()`, `SelectedTracksFlip()`,
+  `SelectedTracksMove()` in `cselect.c`, `RescaleSelectedByRatio()` in `scale.c`). Each pair has to
+  give back the layout, compared within the regression tolerances (`RegressionSnapshotCompare()`,
+  `macro.c`), except Rescale: it turns about the centre of the selection's box, and a sensor's,
+  signal's or control's box doesn't scale. Rescale has to keep that centre to within 1. Undo of the
+  eight steps gives back each layout before them, Redo each one after. The test first makes the
+  room bigger and moves the layout 10 in from its edges, as Rescale pushes a layout that grows past
+  an edge back onto the room. Same two layouts and labels as above.
 - **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
   platforms. Both gate like the Linux jobs. macOS runners can be scarce, so a `regression-macos`
   job that never starts may need a rerun. Locally, pass

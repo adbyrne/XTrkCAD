@@ -39,6 +39,10 @@ extern long selectedTrackCount;
 void InvertTrackSelect( void * unused );
 void OrphanedTrackSelect( void * unused );
 void SetAllTrackSelect( BOOL_T );
+// For the operations test (-Tops:&lt;layout&gt;, fileio.c)
+void SelectedTracksMove( coOrd offset );
+void SelectedTracksRotate( coOrd orig, ANGLE_T angle );
+void SelectedTracksFlip( coOrd orig, ANGLE_T angle );
 void SetAllTrackSelectCB( void * context );
 void SelectTunnel( void * unused );
 void SelectBridge( void * unused );

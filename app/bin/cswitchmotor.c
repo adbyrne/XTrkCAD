@@ -508,6 +508,16 @@ static void RotateSwitchMotor (track_p trk, coOrd orig, ANGLE_T angle ) {}
 static void RescaleSwitchMotor (track_p trk, FLOAT_T ratio ) {}
 
 
+/*
+ * A switch motor is where its turnout is: its box is set from the turnout
+ * when it's read and doesn't follow it (MoveSwitchMotor() and the like are
+ * empty), so it doesn't count for a selection's bounds (GetSelectedBounds()).
+ */
+static BOOL_T QuerySwitchMotor( track_p trk, int query )
+{
+	return query == Q_HAS_NO_POSITION;
+}
+
 static trackCmd_t switchmotorCmds = {
 	"SWITCHMOTOR",
 	DrawSwitchMotor,
@@ -531,7 +541,7 @@ static trackCmd_t switchmotorCmds = {
 	NULL, /* getLength */
 	NULL, /* getTrkParams */
 	NULL, /* moveEndPt */
-	NULL, /* query */
+	QuerySwitchMotor,
 	NULL, /* ungroup */
 	NULL, /* flip */
 	NULL, /* drawPositionIndicator */
