@@ -822,10 +822,17 @@ EXPORT void SetEndPts( track_p trk, EPINX_T cnt )
 }
 
 
+/*
+ * The ends of an object answering Q_ENDPTS_FROM_TRACKS (a block) are its
+ * tracks' ends, worked out again when the operation ends
+ * (UpdateBlockEnds()): MoveTrack(), RotateTrack(), RescaleTrack() and
+ * FlipTrack() leave them alone.
+ */
 EXPORT void MoveTrack( track_p trk, coOrd orig )
 {
 	EPINX_T ep;
-	for (ep=0; ep<trk->endCnt; ep++) {
+	EPINX_T endCnt = QueryTrack( trk, Q_ENDPTS_FROM_TRACKS ) ? 0 : trk->endCnt;
+	for (ep=0; ep<endCnt; ep++) {
 		trkEndPt_p epp =  EndPtIndex( trk->endPt, ep );
 		coOrd pos = GetEndPtPos( epp );
 		pos.x += orig.x;
@@ -842,7 +849,8 @@ EXPORT void RotateTrack( track_p trk, coOrd orig, ANGLE_T angle )
 	if ( trackCmds( trk->type )->rotate == NULL ) {
 		return;
 	}
-	for (ep=0; ep<trk->endCnt; ep++) {
+	EPINX_T endCnt = QueryTrack( trk, Q_ENDPTS_FROM_TRACKS ) ? 0 : trk->endCnt;
+	for (ep=0; ep<endCnt; ep++) {
 		trkEndPt_p epp = EndPtIndex( trk->endPt, ep );
 		coOrd pos = GetEndPtPos( epp );
 		Rotate( &pos, orig, angle );
@@ -858,7 +866,8 @@ EXPORT void RescaleTrack( track_p trk, FLOAT_T ratio, coOrd shift )
 	if ( trackCmds( trk->type )->rescale == NULL ) {
 		return;
 	}
-	for (ep=0; ep<trk->endCnt; ep++) {
+	EPINX_T endCnt = QueryTrack( trk, Q_ENDPTS_FROM_TRACKS ) ? 0 : trk->endCnt;
+	for (ep=0; ep<endCnt; ep++) {
 		trkEndPt_p epp = EndPtIndex( trk->endPt, ep );
 		coOrd pos = GetEndPtPos( epp );
 		pos.x *= ratio;
@@ -887,8 +896,9 @@ EXPORT void FlipTrack(
         ANGLE_T angle )
 {
 	EPINX_T ep;
+	EPINX_T endCnt = QueryTrack( trk, Q_ENDPTS_FROM_TRACKS ) ? 0 : trk->endCnt;
 
-	for ( ep=0; ep<trk->endCnt; ep++ ) {
+	for ( ep=0; ep<endCnt; ep++ ) {
 		trkEndPt_p epp = EndPtIndex( trk->endPt, ep );
 		coOrd pos1 = GetEndPtPos( epp );
 		FlipPoint( &pos1, orig, angle );
