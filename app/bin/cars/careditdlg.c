@@ -396,7 +396,7 @@ static void CarDlgRedraw(
 	if ( carDlgDim.carLength <= 0 || carDlgDim.carWidth <= 0 ) {
 		return;
 	}
-	FreeFilledDraw( carDlgSegs_da.cnt, &carDlgSegs(0) );
+	FreeFilledDraw( carDlgSegs_da.cnt, (trkSeg_p)carDlgSegs_da.ptr );
 	if ( !CARDLG_AUTHORING_PROTO_OUTLINE ) {
 		if ( carDlgProtoInx < 0 ||
 		     (protoP = CarProtoLookup( carDlgProtoStr, FALSE, FALSE, 0.0, 0.0 )) == NULL ||

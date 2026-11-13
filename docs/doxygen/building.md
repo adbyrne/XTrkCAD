@@ -312,7 +312,8 @@ bug:
   ASan/UBSan, the program included, so the regression tests run under them too. If the compiler can't
   link them (GCC without libasan and libubsan), configure stops and says so. Run those with
   `ASAN_OPTIONS=detect_leaks=0`, as `regression-gtk3-sanitizers` does: GTK and GLib keep
-  allocations to the end of the program, so every test would report leaks. For the unit tests,
+  allocations to the end of the program, so every test would report leaks. Set
+  `UBSAN_OPTIONS=halt_on_error=1` as CI does, or UBSan only reports an error and the test passes. For the unit tests,
   leave leak detection on and leave out the GTK widget tests with `-LE gtk-display`, for the
   same reason. They still run elsewhere, e.g. under `c-tests-linux`'s `xvfb-run`. Tests labelled `gtk-display` create GTK widgets and
   need a display; give any new test that calls into GTK the same label

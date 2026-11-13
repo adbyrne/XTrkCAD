@@ -396,7 +396,9 @@ jobs:
           # the end of the program, about 1 MB in 26000 blocks per run, so
           # every test would fail. Overruns, use after free and UBSan stay on.
           ASAN_OPTIONS: "abort_on_error=1:detect_leaks=0"
-          UBSAN_OPTIONS: "abort_on_error=1:print_stacktrace=1"
+          # halt_on_error=1: UBSan reports and carries on by default, so
+          # abort_on_error alone never fired and its errors passed CI.
+          UBSAN_OPTIONS: "halt_on_error=1:abort_on_error=1:print_stacktrace=1"
         run: ctest --test-dir build -L regression-ci --output-on-failure -VV
 
   c-tests-valgrind:

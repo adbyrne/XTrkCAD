@@ -61,16 +61,16 @@ static void CsvFormatLong(FILE* f, long val, const char* sep);
 static void CsvFormatFloat(FILE* f, FLOAT_T val, int digits, const char* sep);
 static void CsvFormatString(FILE* f, char* str, int len, const char* sep);
 
-static void AddItem(void);
+static void AddItem(void * unused);
 static void SelectOrder(void *context);
 static void DeleteTag(void *context );
-static void LaunchItemEditor(void);
-static void DeleteOrShelveSelected(void);
+static void LaunchItemEditor(void * unused);
+static void DeleteOrShelveSelected(void * unused);
 static carItem_p FindCurrentItem(void);
 static void FindOnLayout(void *unused);
-static void ImportCsv(void);
-static void ExportCsv(void);
-static void SaveText(void);
+static void ImportCsv(void * unused);
+static void ExportCsv(void * unused);
+static void SaveText(void * unused);
 static void LoadSortedList(void);
 static void FormatDisplayItem(carItem_p item);
 
@@ -214,7 +214,7 @@ SelectOrder(void *context)
 }
 
 static void
-AddItem(void)
+AddItem(void * unused)
 {
 	if (carProto_da.cnt <= 0) {
 		NoticeMessage(MSG_NO_CARPROTO, _("Ok"), NULL);
@@ -256,7 +256,7 @@ AddItem(void)
 
 
 static void
-LaunchItemEditor(void)
+LaunchItemEditor(void * unused)
 {
 	carDlgUpdateItemPtr = FindCurrentItem();
 	if (carDlgUpdateItemPtr == NULL) {
@@ -267,7 +267,7 @@ LaunchItemEditor(void)
 
 
 static void
-DeleteOrShelveSelected(void)
+DeleteOrShelveSelected(void * unused)
 {
 	carItem_p item;
 	wIndex_t inx, cnt, selcnt;
@@ -429,8 +429,11 @@ static void LoadSortedList(void)
 {
 	wIndex_t selectedItem;
 
-	qsort(&carItemInfo(0), carItemInfo_da.cnt, sizeof carItemInfo(0),
-	      Cmp_carInvItem);
+	// An empty list has no array yet: nothing to sort
+	if (carItemInfo_da.cnt > 1) {
+		qsort(&carItemInfo(0), carItemInfo_da.cnt, sizeof carItemInfo(0),
+		      Cmp_carInvItem);
+	}
 	FormControlShow(&carInvPG, I_CI_LIST, FALSE);
 	wListClear(carInvPLs[I_CI_LIST].control);
 	for (int inx = 0; inx < carItemInfo_da.cnt; inx++) {
@@ -1386,7 +1389,7 @@ static int CarInvExportCsv(
 }
 
 static struct wFilSel_t* carInvExportCsv_fs;
-static void ExportCsv(void)
+static void ExportCsv(void * unused)
 {
 	if (carItemInfo_da.cnt <= 0) {
 		return;
@@ -1398,7 +1401,7 @@ static void ExportCsv(void)
 }
 
 static struct wFilSel_t* carInvSaveText_fs;
-static void SaveText(void)
+static void SaveText(void * unused)
 {
 	if (carInvSaveText_fs == NULL)
 		carInvSaveText_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("List Cars"),
@@ -1407,7 +1410,7 @@ static void SaveText(void)
 }
 
 static struct wFilSel_t* carInvImportCsv_fs;
-static void ImportCsv(void)
+static void ImportCsv(void * unused)
 {
 	if (carInvImportCsv_fs == NULL)
 		carInvImportCsv_fs = wFilSelCreate(mainW, FS_LOAD, 0, _("Import Cars"),

@@ -2878,6 +2878,13 @@ static void ParamCheck(char *line)
 	}
 }
 
+/*
+ * The bit of parameter \a inx in ParamIntRestore()'s change mask. A dialog can
+ * have more parameters than a long has bits (the Turnout Designer has over
+ * 64), and shifting that far is undefined: those share the last bit.
+ */
+#define PARAM_CHANGE_BIT( inx ) ( (inx) < 62 ? (1L << (inx)) : (1L << 62) )
+
 static long ParamIntRestore(paramGroup_cp pg, int class)
 {
 	long change = 0;
@@ -2903,7 +2910,7 @@ static long ParamIntRestore(paramGroup_cp pg, int class)
 				if (p->control) {
 					wEntrySetValue((wEntry_p)p->control, FormatLong(oldP->l));
 				}
-				change |= (1L << inx);
+				change |= PARAM_CHANGE_BIT(inx);
 			}
 			break;
 		case PD_RADIO:
@@ -2913,7 +2920,7 @@ static long ParamIntRestore(paramGroup_cp pg, int class)
 				if (p->control) {
 					wRadioSetValue((wChoice_p)p->control, oldP->l);
 				}
-				change |= (1L << inx);
+				change |= PARAM_CHANGE_BIT(inx);
 			}
 			break;
 		case PD_TOGGLE:
@@ -2923,7 +2930,7 @@ static long ParamIntRestore(paramGroup_cp pg, int class)
 				if (p->control) {
 					wToggleSetValue((wChoice_p)p->control, oldP->l);
 				}
-				change |= (1L << inx);
+				change |= PARAM_CHANGE_BIT(inx);
 			}
 			break;
 		case PD_LIST:
@@ -2935,7 +2942,7 @@ static long ParamIntRestore(paramGroup_cp pg, int class)
 				if (p->control) {
 					wListSetIndex((wList_p)p->control, (wIndex_t)oldP->l);
 				}
-				change |= (1L << inx);
+				change |= PARAM_CHANGE_BIT(inx);
 			}
 			break;
 		case PD_COLORLIST:
@@ -2945,7 +2952,7 @@ static long ParamIntRestore(paramGroup_cp pg, int class)
 				if (p->control)
 					wColorSelectButtonSetColor((wButton_p)p->control,
 					                           oldP->dc); /* COLORNOP */
-				change |= (1L << inx);
+				change |= PARAM_CHANGE_BIT(inx);
 			}
 			break;
 		case PD_FLOAT:
@@ -2968,7 +2975,7 @@ static long ParamIntRestore(paramGroup_cp pg, int class)
 					}
 					wEntrySetValue((wEntry_p)p->control, valS);
 				}
-				change |= (1L << inx);
+				change |= PARAM_CHANGE_BIT(inx);
 			}
 			break;
 		case PD_STRING:
@@ -2978,7 +2985,7 @@ static long ParamIntRestore(paramGroup_cp pg, int class)
 				if (p->control) {
 					wEntrySetValue((wEntry_p)p->control, (char *)p->valueP);
 				}
-				change |= (1L << inx);
+				change |= PARAM_CHANGE_BIT(inx);
 			}
 			break;
 		case PD_MESSAGE:
