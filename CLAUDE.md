@@ -342,8 +342,9 @@ ctest --test-dir build -R pathstest          # run a single test by name
 ctest --test-dir build --output-on-failure
 ```
 
-`common.h` includes `dynarray.h` from `app/bin/include/` — any new test target that pulls in
-`common.h` must add `${CMAKE_CURRENT_SOURCE_DIR}/../include` to its `target_include_directories`.
+A new unit test is one `xtrkcad_add_unit_test(<target> <test> [MATH] SOURCES … INCLUDES … LIBS …)` call in
+`app/bin/unittest/CMakeLists.txt` (executable, includes, CMocka, `add_test`, IDE folder);
+`${_xtrkcad_ut_includes}` is app/bin, its `include/` (which `common.h` needs for `dynarray.h`) and the wlib headers.
 
 ## Doxygen
 
