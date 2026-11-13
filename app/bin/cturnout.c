@@ -2710,12 +2710,15 @@ static void AddTurnout(void)
 					leftover(i).trk = NULL;
 				}
 			} else {
+				/* the trim may delete lt (a new track: freed at once) */
+				TRKINX_T ltIndex = GetTrkIndex(lt);
 				AuditTracks("addTurnout T%d[%d] before trimming L%d[%d]", GetTrkIndex(newTrk),
-				            i, GetTrkIndex(lt), le);
+				            i, ltIndex, le);
 				TrimTrack(lt, le, maxX, nearest_pos, nearest_angle, nearest_radius,
 				          nearest_center);
+				leftover(i).trk = NULL;
 				AuditTracks("addTurnout T%d[%d] after trimming L%d[%d]", GetTrkIndex(newTrk), i,
-				            GetTrkIndex(lt), le);
+				            ltIndex, le);
 
 			}
 		}

@@ -93,7 +93,7 @@ endforeach()
 # The paramcheck test cases (RegressionParamCheck.<case>, script
 # regress-paramcheck-<case>.xtr). Set once: the home dirs, the tests and the
 # INPUT ERROR pattern below all use it.
-set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends splitops trimmerge blockmove switchmotor)
+set(_xtrkcad_paramcheck_cases block wrong undo props longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends splitops trimmerge blockmove switchmotor easement)
 foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()

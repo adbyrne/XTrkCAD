@@ -1188,6 +1188,10 @@ static BOOL_T SplitJoint( track_p trk, coOrd pos, EPINX_T ep,
 	trk1 = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
 	xx1 = GET_EXTRA_DATA(trk1, T_EASEMENT, extraDataEase_t);
 	*xx1 = *xx;
+	/* the new piece shows its description only if the easement did */
+	if ( GetTrkBits( trk ) & TB_HIDEDESC ) {
+		SetTrkBits( trk1, TB_HIDEDESC );
+	}
 	SetTrkEndPoint( trk1, ep, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );
 	*leftover = trk1;
 	*ep0 = 1-ep;
@@ -1345,9 +1349,56 @@ static BOOL_T EnumerateJoint( track_p trk )
 	return FALSE;
 }
 
-static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T maxX, coOrd endpos,
+/**
+ * Trim an easement to dist from end ep: what AddTurnout() does with the part of
+ * a track left under and beyond a turnout. The easement is split dist along it
+ * from ep, and the piece from ep to there is deleted; the rest stays connected
+ * to the track beyond. If the turnout covers the whole easement, all of it is
+ * deleted.
+ *
+ * The covered piece is disconnected before it's deleted: DeleteTrack() of an
+ * easement calls UndoJoint() on its neighbours, which reshapes them as if the
+ * easement had never been there, pulling a curve back under the turnout or
+ * leaving a stray piece on top of the rest of the easement (dev ML #4676).
+ *
+ * \param trk the easement
+ * \param ep its end under the turnout
+ * \param dist how far to trim from ep
+ * \param endpos unused (TrimCornu() fits its end to these)
+ * \param angle unused
+ * \param radius unused
+ * \param center unused
+ *
+eturn TRUE
+ */
+static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos,
                          ANGLE_T angle, DIST_T radius, coOrd center )
 {
+	traverseTrack_t trvTrk;
+	DIST_T d = dist;
+	track_p rest = NULL;
+
+	if ( dist <= minLength ) {
+		return TRUE;
+	}
+	trvTrk.trk = trk;
+	trvTrk.length = -1;
+	trvTrk.dist = 0.0;
+	trvTrk.pos = GetTrkEndPos( trk, ep );
+	trvTrk.angle = NormalizeAngle( GetTrkEndAngle( trk, ep ) + 180.0 );
+	TraverseJointTrack( &trvTrk, &d );
+	if ( d <= 0.0 ) {
+		/* trk keeps the covered piece, rest the part beyond it */
+		SplitTrack( trk, trvTrk.pos, 1-ep, &rest, TRUE );
+	}
+	for ( EPINX_T ep1 = 0; ep1 < 2; ep1++ ) {
+		track_p trk1 = GetTrkEndTrk( trk, ep1 );
+		if ( trk1 ) {
+			DisconnectTracks( trk, ep1, trk1,
+			                  GetEndPtConnectedToMe( trk1, trk ) );
+		}
+	}
+	UndrawNewTrack( trk );
 	DeleteTrack( trk, FALSE );
 	return TRUE;
 }

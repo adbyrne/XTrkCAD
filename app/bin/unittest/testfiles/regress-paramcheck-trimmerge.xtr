@@ -7,7 +7,7 @@
 # them (MSG_JOIN_NOTBEZIERORCORNU), and with one it builds a Cornu instead
 # (CmdCornu()), so MergeBezier() and MergeCornu() aren't reached. Trim and
 # Split of an easement (TrimJoint(), SplitJoint()) need an easement longer
-# than a turnout: a test of its own.
+# than a turnout: regress-paramcheck-easement.xtr.
 # The turnout comes from the Turnout Designer, as no parameter file is loaded;
 # MOUSE 8200 is the space key, which ends a placement.
 VERSION 13 5.4.0
