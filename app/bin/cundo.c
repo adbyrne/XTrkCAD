@@ -1042,6 +1042,7 @@ void UndoEnd( void )
 		needAttachTrains = FALSE;
 	}
 	UpdateBlockEnds();
+	UpdateSwitchMotorBoxes();
 	UpdateAllElevations();
 }
 
@@ -1201,6 +1202,7 @@ void UndoUndo( void * unused )
 		needAttachTrains = FALSE;
 	}
 	UpdateBlockEnds();
+	UpdateSwitchMotorBoxes();
 	UpdateAllElevations();
 	if (!redrawAll) {
 		RedrawInStream( &undoStream, us->undoStart, us->undoEnd, TRUE );
@@ -1287,6 +1289,7 @@ void UndoRedo( void * unused )
 		needAttachTrains = FALSE;
 	}
 	UpdateBlockEnds();
+	UpdateSwitchMotorBoxes();
 	UpdateAllElevations();
 	if (!redrawAll) {
 		for (trk=us->newTrks; trk; trk=trk->next ) {

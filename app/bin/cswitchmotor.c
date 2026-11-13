@@ -146,10 +146,19 @@ static coOrd switchmotorPoly_Pix[] = {
 #define switchmotorPoly_CNT (COUNT(switchmotorPoly_Pix))
 #define switchmotorPoly_SF (3.0)
 
-static void ComputeSwitchMotorBoundingBox (track_p t)
+/**
+ * The box of switch motor \a t, worked out from its turnout as it is now: a
+ * switch motor stands for its turnout (Robert Heller, dev ML #4675).
+ *
+ * \return FALSE if the motor has no turnout
+ */
+static BOOL_T SwitchMotorBox (track_p t, coOrd * hiR, coOrd * loR)
 {
-	coOrd hi, lo, p;
+	coOrd hi = zero, lo = zero, p;
 	switchmotorData_p data_p = GetswitchmotorData(t);
+	if (data_p->turnout == NULL) {
+		return FALSE;
+	}
 	const struct extraDataCompound_t *xx = GET_EXTRA_DATA(data_p->turnout,
 	                                       T_TURNOUT,
 	                                       extraDataCompound_t);
@@ -181,7 +190,47 @@ static void ComputeSwitchMotorBoundingBox (track_p t)
 			if (p.y > hi.y) { hi.y = p.y; }
 		}
 	}
-	SetBoundingBox(t, hi, lo);
+	*hiR = hi;
+	*loR = lo;
+	return TRUE;
+}
+
+static void ComputeSwitchMotorBoundingBox (track_p t)
+{
+	coOrd hi, lo;
+	if (SwitchMotorBox(t, &hi, &lo)) {
+		SetBoundingBox(t, hi, lo);
+	}
+}
+
+/**
+ * Regression compare (CompareTrack()): name, scripts and turnout as expected,
+ * and the motor's box is the one its turnout gives now. \a trk1 is the
+ * layout's motor, \a trk2 the expected one, whose box isn't in the file.
+ */
+static wBool_t CompareSwitchMotor (track_cp trk1, track_cp trk2)
+{
+	switchmotorData_p xx1 = GetswitchmotorData((track_p)trk1);
+	switchmotorData_p xx2 = GetswitchmotorData((track_p)trk2);
+	char * cp = message + strlen(message);
+	coOrd hi, lo, hi1, lo1;
+	REGRESS_CHECK_STR( "Name", xx1, xx2, name )
+	REGRESS_CHECK_STR( "Normal", xx1, xx2, normal )
+	REGRESS_CHECK_STR( "Reverse", xx1, xx2, reverse )
+	REGRESS_CHECK_STR( "PointSense", xx1, xx2, pointsense )
+	REGRESS_CHECK_INT( "Turnout", xx1, xx2, turnindx )
+	if (!SwitchMotorBox((track_p)trk1, &hi, &lo)) {
+		sprintf(cp, "no turnout\n");
+		return FALSE;
+	}
+	GetBoundingBox((track_p)trk1, &hi1, &lo1);
+	if (!IsPosClose(hi, hi1) || !IsPosClose(lo, lo1)) {
+		sprintf(cp,
+		        "Box: Actual [%0.3f %0.3f]-[%0.3f %0.3f], its turnout's [%0.3f %0.3f]-[%0.3f %0.3f]\n",
+		        lo1.x, lo1.y, hi1.x, hi1.y, lo.x, lo.y, hi.x, hi.y);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 
@@ -503,6 +552,25 @@ EXPORT void ResolveSwitchmotorTurnout ( track_p trk )
 	                         xx->turnindx,t_trk))
 }
 
+/**
+ * Work out every switch motor's box again from its turnout. A switch motor
+ * isn't a thing of its own on the layout: it stands for its turnout (Robert
+ * Heller, dev ML #4675), so when the turnout moves the motor follows it. This
+ * runs when an Undo step ends and after Undo and Redo (cundo.c), next to
+ * UpdateBlockEnds().
+ */
+EXPORT void UpdateSwitchMotorBoxes( void )
+{
+	for (track_p trk = first_motor; trk;
+	     trk = GetswitchmotorData(trk)->next_motor) {
+		switchmotorData_p xx = GetswitchmotorData(trk);
+		if (!IsTrackDeleted(trk) && xx->turnout != NULL
+		    && !IsTrackDeleted(xx->turnout)) {
+			ComputeSwitchMotorBoundingBox(trk);
+		}
+	}
+}
+
 static void MoveSwitchMotor (track_p trk, coOrd orig ) {}
 static void RotateSwitchMotor (track_p trk, coOrd orig, ANGLE_T angle ) {}
 static void RescaleSwitchMotor (track_p trk, FLOAT_T ratio ) {}
@@ -548,7 +616,12 @@ static trackCmd_t switchmotorCmds = {
 	NULL, /* advancePositionIndicator */
 	NULL, /* checkTraverse */
 	NULL, /* makeParallel */
-	NULL  /* drawDesc */
+	NULL, /* drawDesc */
+	NULL, /* rebuildSegs */
+	NULL, /* replayData */
+	NULL, /* storeData */
+	NULL, /* activate */
+	CompareSwitchMotor
 };
 
 static track_p FindSwitchMotor (const track_p trk)

@@ -482,6 +482,11 @@ bug:
   from the Turnout Designer, as a test run loads no parameter file. Join can't merge a Bezier or a
   Cornu (it refuses them, or with a Cornu easement builds a Cornu), so `MergeBezier()` and
   `MergeCornu()` aren't reached.
+  `switchmotor` moves a turnout without its switch motor: the motor stands for its turnout (Robert
+  Heller, dev ML #4675), so its box has to follow, and Undo gives both back.
+  `UpdateSwitchMotorBoxes()` works every motor's box out again from its turnout where
+  `UpdateBlockEnds()` runs, and the compare checks a motor's box against its turnout's
+  (`CompareSwitchMotor()`).
   `blockends` loads a block of two connected straights and one on a Bezier. A block's ends aren't
   in the file (`WriteBlock()`): `ResolveBlockTrack()` works them out once its tracks are read, as
   its tracks' outer ends. The regression compare checks a block's ends against its tracks, in any
