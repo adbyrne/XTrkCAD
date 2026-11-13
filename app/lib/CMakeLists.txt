@@ -71,25 +71,26 @@ if(UNIX AND NOT APPLE)
 		RENAME "${XTRKCAD_BIN}.png"
 		)
 	if (XTRKCAD_BUILD_FLATPAK)
+		set(_flatpak_id "${XTRKCAD_FLATPAK_DOMAIN}.${XTRKCAD_BIN}")
 		install(FILES
 			xtrkcad.flatpak.desktop
-			DESTINATION "share/applications"
-			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.desktop
+			DESTINATION "${CMAKE_INSTALL_DATADIR}/applications"
+			RENAME ${_flatpak_id}.desktop
 			)
 		install(FILES
 			xtrkcad.xml
-			DESTINATION "share/mime/packages"
-			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.xml
+			DESTINATION "${CMAKE_INSTALL_DATADIR}/mime/packages"
+			RENAME ${_flatpak_id}.xml
 			)
 		install(FILES
 			xtrkcad.metainfo.xml
-			DESTINATION "share/metainfo"
-			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.metainfo.xml
+			DESTINATION "${CMAKE_INSTALL_DATADIR}/metainfo"
+			RENAME ${_flatpak_id}.metainfo.xml
 			)
 		install(FILES
 			xtrkcad_logo_128x128.svg
-			DESTINATION "share/icons/hicolor/scalable/apps"
-			RENAME io.sourceforge.xtrkcad_fork.${XTRKCAD_BIN}.svg
+			DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps"
+			RENAME ${_flatpak_id}.svg
 			)
 	else()
 		configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/${XTRKCAD_BIN}.desktop @ONLY)
@@ -107,21 +108,21 @@ if(UNIX AND NOT APPLE)
 		# build's binary, so several versions can be installed side by side.
 		install(FILES
 			${CMAKE_CURRENT_BINARY_DIR}/${XTRKCAD_BIN}.desktop
-			DESTINATION "share/applications"
+			DESTINATION "${CMAKE_INSTALL_DATADIR}/applications"
 			)
 		install(FILES
 			xtrkcad.xml
-			DESTINATION "share/mime/packages"
+			DESTINATION "${CMAKE_INSTALL_DATADIR}/mime/packages"
 			RENAME ${XTRKCAD_BIN}.xml
 			)
 		install(FILES
 			xtrkcad_logo_128x128.svg
-			DESTINATION "share/icons/hicolor/scalable/apps"
+			DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps"
 			RENAME ${XTRKCAD_BIN}.svg
 			)
 		install(FILES
 			xtrkcad.png
-			DESTINATION "share/icons/hicolor/64x64/apps"
+			DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/64x64/apps"
 			RENAME ${XTRKCAD_BIN}.png
 			)
 	endif()

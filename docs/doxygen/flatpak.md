@@ -106,6 +106,10 @@ cmake -DXTRKCAD_BUILD_FLATPAK=1 -G "Ninja" -B build
 
 and notice `hg diff app/lib/xtrkcad.*` shows the new versions and release date.
 
+The app id's domain is the CMake cache option `XTRKCAD_FLATPAK_DOMAIN` (default
+`io.sourceforge.xtrkcad_fork`, as on Flathub); a local build under another domain passes, for
+example, `-DXTRKCAD_FLATPAK_DOMAIN=org.xtrkcad`.
+
 \important Ensure version changes that are checked in do **NOT** include the hash. Periods separating the version numbers must be converted to underscores wherever the app id is used (**io.sourceforge.xtrkcad_fork.xtrkcad\***).
 
 If the only difference is the inclusion of the hash, then no need to edit, just revert:
