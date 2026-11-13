@@ -80,7 +80,8 @@ Using a new report-only report as the running example (substitute the interactiv
 7. **Add a unit test** for the new formatting function in `unittest/reportstest.c` (empty-list and
    single/few-row cases at minimum), or a new CMocka test binary if the report doesn't fit that
    file's existing dependency shape -- see `unittest/CMakeLists.txt`'s `reportstest` target for
-   how it links `reportsformat.c` directly rather than stubbing it.
+   how it links `reportsformat.c` directly rather than stubbing it. A new test binary is one
+   `xtrkcad_add_unit_test()` call there.
 8. **Add a `.xtr` demo fixture** under `app/lib/demos/` if the report needs one for manual/replay
    testing (e.g. a small synthetic layout that exercises an edge case like a zero-endpoint
    object) -- `dmreporttracklen.xtr`/`dmreportcurve.xtr`/`dmreportequip.xtr` are examples. Use the
