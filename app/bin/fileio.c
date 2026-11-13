@@ -93,6 +93,25 @@ EXPORT FILE * FOpenWriteRestricted( const char * path )
 }
 
 /**
+ * As FOpenWriteRestricted(), but for binary data: on Windows a file opened
+ * in text mode writes every 0x0A as 0x0D 0x0A.
+ *
+ * \param path IN the file
+ * \return the open file, or NULL
+ */
+EXPORT FILE * FOpenWriteRestrictedBinary( const char * path )
+{
+#ifdef WINDOWS
+	int fd = _open( path, _O_CREAT | _O_WRONLY | _O_TRUNC | _O_BINARY,
+	                _S_IREAD | _S_IWRITE );
+	return fd < 0 ? NULL : _fdopen( fd, "wb" );
+#else
+	int fd = open( path, O_CREAT | O_WRONLY | O_TRUNC, 0644 );
+	return fd < 0 ? NULL : fdopen( fd, "wb" );
+#endif
+}
+
+/**
  * Open a file for appending, creating it with the same explicit mode as
  * FOpenWriteRestricted(), instead of fopen()'s umask-only default.
  *
@@ -1928,7 +1947,8 @@ EXPORT int LayoutBackgroundTest( const char * pathName )
 	SafeCreateDir( dir );
 	MakeFullpath( &archive, dir, "background.xtce", NULL );
 	MakeFullpath( &image, dir, "background-test.png", NULL );
-	FILE * f = FOpenWriteRestricted( image );
+	// Binary: in text mode Windows writes the PNG's 0x0A bytes as 0x0D 0x0A
+	FILE * f = FOpenWriteRestrictedBinary( image );
 	if ( f == NULL
 	     || fwrite( backgroundTestPng, sizeof backgroundTestPng, 1, f ) != 1 ) {
 		lprintf( "  FAIL: background: can't write %s\n", image );
