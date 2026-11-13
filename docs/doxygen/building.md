@@ -483,6 +483,12 @@ bug:
   from the Turnout Designer, as a test run loads no parameter file. Join can't merge a Bezier or a
   Cornu (it refuses them, or with a Cornu easement builds a Cornu), so `MergeBezier()` and
   `MergeCornu()` aren't reached.
+  `easement` places a turnout on an easement three times: with its far end inside the easement,
+  on the straight and on the curve, each with Undo. `TrimJoint()` splits the leftover easement
+  where the turnout ends and deletes the covered piece, or all of it when the turnout covers it;
+  the rest stays connected to the curve. The piece is disconnected before `DeleteTrack()`, which
+  otherwise calls `UndoJoint()` on its neighbours and reshapes them as if the easement had never
+  been there (dev ML #4676-#4678).
   `switchmotor` moves a turnout without its switch motor: the motor stands for its turnout (Robert
   Heller, dev ML #4675), so its box has to follow, and Undo gives both back.
   `UpdateSwitchMotorBoxes()` works every motor's box out again from its turnout where
