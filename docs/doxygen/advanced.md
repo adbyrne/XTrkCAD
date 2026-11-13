@@ -295,7 +295,11 @@ section; nothing to add here beyond pointing at those.
 ## The warning-count ratchet
 
 `PlatformSettings.cmake` promotes specific warning categories to `-Werror=` once a phase has
-brought their count to zero for owned code, so a new PR can't silently reintroduce them:
+brought their count to zero for owned code, so a new PR can't silently reintroduce them. They are
+listed once, in `XTRKCAD_RATCHET_WARNINGS` (and `XTRKCAD_RATCHET_WARNINGS_GNU` for GCC-only ones);
+the GCC/Clang options for UNIX and MinGW come from `XTRKCAD_GNU_WARNING_OPTIONS`, and vendored
+targets such as wrapbox turn the same list back into warnings with
+`XTRKCAD_RATCHET_EXEMPT_OPTIONS`. To ratchet a new category, add it to the list:
 `sign-compare`, `type-limits`, `absolute-value`, `unused-but-set-parameter`, and
 `implicit-fallthrough` are gated on both GCC and Clang; `cast-function-type` stays GCC-only.
 That last exception is deliberate, not an oversight: Clang's equivalent
