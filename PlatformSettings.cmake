@@ -18,13 +18,71 @@ endif()
 # warning-count ratchet").
 set(XTRKCAD_POINTER_TYPES_FLAG -Werror=incompatible-pointer-types)
 
+# Ratchet: Phases 4-6 of the GTK3V2MAIN quality plan brought these
+# categories to zero for owned code. They are errors so a future PR can't
+# silently reintroduce them. The few remaining instances are all in vendored
+# third-party targets (wrapbox), which turn this same list back into
+# warnings with XTRKCAD_RATCHET_EXEMPT_OPTIONS.
+#
+# implicit-fallthrough was initially GCC-only (Phase 10) because Clang
+# doesn't recognize this codebase's comment-style fallthrough annotation.
+# Phase 12 (SF #663) fixed the ~73 genuine fallthrough sites and
+# standardized on __attribute__((fallthrough)) (recognized by both
+# compilers), so it ratchets on both now.
+set(XTRKCAD_RATCHET_WARNINGS
+	sign-compare
+	type-limits
+	absolute-value
+	unused-but-set-parameter
+	implicit-fallthrough
+)
+# cast-function-type stays GCC-only. Under Clang, this same flag name also
+# promotes a separate, stricter sub-check (-Wcast-function-type-strict) that
+# flags ~106 GTK/GLib generic-callback-cast idiom instances (GCallback,
+# GCompareFunc, G_DEFINE_TYPE-generated code) as well as vendored code --
+# verified directly (Clang 22, ccache disabled to rule out stale results)
+# that even the "plain" flag name pulls -strict in under Clang, so it can't
+# be ratcheted there without also flagging that permanently-accepted idiom.
+# Phase 12 (SF #662) fixed the ~13 genuine project-typedef cast mismatches
+# that WERE real bugs among the findings; the rest -- see SF #662 for the
+# full accounting -- are a permanent, un-ratcheted Clang-only false-positive
+# class, not tracked as debt.
+set(XTRKCAD_RATCHET_WARNINGS_GNU cast-function-type)
+
+list(TRANSFORM XTRKCAD_RATCHET_WARNINGS PREPEND -Werror=
+	OUTPUT_VARIABLE _xtrkcad_ratchet)
+list(TRANSFORM XTRKCAD_RATCHET_WARNINGS_GNU PREPEND -Werror=
+	OUTPUT_VARIABLE _xtrkcad_ratchet_gnu)
+# Vendored targets: the same categories, warnings again (all of them on
+# every compiler, as architecture-specific findings can surface on
+# platforms not tested here).
+list(TRANSFORM XTRKCAD_RATCHET_WARNINGS PREPEND -Wno-error=
+	OUTPUT_VARIABLE XTRKCAD_RATCHET_EXEMPT_OPTIONS)
+list(TRANSFORM XTRKCAD_RATCHET_WARNINGS_GNU PREPEND -Wno-error=
+	OUTPUT_VARIABLE _xtrkcad_exempt_gnu)
+list(APPEND XTRKCAD_RATCHET_EXEMPT_OPTIONS ${_xtrkcad_exempt_gnu})
+
+# Warning options for GCC and Clang (UNIX, and MinGW on Windows). -Wall is
+# added separately: always on UNIX, Debug only on MinGW.
+set(XTRKCAD_GNU_WARNING_OPTIONS
+	${XTRKCAD_POINTER_TYPES_FLAG}
+	# glib 2.0 deprecated GTypeDebugFlags and GTimeVal
+	-Wno-deprecated-declarations
+	# paramData_t/descData_t positional aggregate literals (dialog control
+	# tables throughout app/bin) deliberately set only their leading fields
+	# and rely on C's implicit zero-init for the rest -- a longstanding
+	# codebase idiom, not latent bugs. Suppress rather than force a large,
+	# regression-risk rewrite.
+	-Wno-missing-field-initializers
+	${_xtrkcad_ratchet}
+	"$<$<C_COMPILER_ID:GNU>:${_xtrkcad_ratchet_gnu}>"
+)
+
 if(UNIX)
     include(FindPkgConfig)
     SET (CMAKE_ENABLE_EXPORTS TRUE)
     set(XTRKCAD_USE_GTK_DEFAULT ON)
 	
-	add_compile_options(${XTRKCAD_POINTER_TYPES_FLAG})
-
     # Configure help display and i18n
     if(APPLE)
         set(CMAKE_MACOSX_RPATH 0)
@@ -42,46 +100,7 @@ if(UNIX)
         add_link_options("-pthread")
    endif()
 
-    add_compile_options("-Wall")
-    # glib 2.0 deprecated GTypeDebugFlags and GTimeVal, gtk2 has not been updated
-    add_compile_options("-Wno-deprecated-declarations")
-    # paramData_t/descData_t positional aggregate literals (dialog control tables
-    # throughout app/bin) deliberately set only their leading fields and rely on
-    # C's implicit zero-init for the rest -- a longstanding codebase idiom, not
-    # latent bugs. Suppress rather than force a large, regression-risk rewrite.
-    add_compile_options("-Wno-missing-field-initializers")
-    # Ratchet: Phases 4-6 of the GTK3V2MAIN quality plan brought these
-    # categories to zero for owned code. Promote to errors so a future PR
-    # can't silently reintroduce them. The few remaining instances are all
-    # in vendored third-party targets (halibut/xtrkcad-charset/wrapbox),
-    # which carry their own -Wno-error= overrides for exactly these.
-    add_compile_options(-Werror=sign-compare)
-    add_compile_options(-Werror=type-limits)
-    add_compile_options(-Werror=absolute-value)
-    add_compile_options(-Werror=unused-but-set-parameter)
-    # implicit-fallthrough was initially GCC-only (Phase 10) because Clang
-    # doesn't recognize this codebase's comment-style fallthrough annotation
-    # -- never audited by the original GCC-only verification. Phase 12
-    # (SF #663) fixed the ~73 genuine fallthrough sites and standardized on
-    # __attribute__((fallthrough)) (recognized by both compilers), so it
-    # ratchets universally now, no GNU-only guard needed.
-    add_compile_options(-Werror=implicit-fallthrough)
-    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        # cast-function-type stays GCC-only. Under Clang, this same flag
-        # name also promotes a separate, stricter sub-check
-        # (-Wcast-function-type-strict) that flags ~106 GTK/GLib generic-
-        # callback-cast idiom instances (GCallback, GCompareFunc,
-        # G_DEFINE_TYPE-generated code) as well as vendored code -- verified
-        # directly (Clang 22, ccache disabled to rule out stale results)
-        # that even the "plain" flag name pulls -strict in under Clang, so
-        # it can't be ratcheted there without also flagging that permanently-
-        # accepted idiom. Phase 12 (SF #662) fixed the ~13 genuine project-
-        # typedef cast mismatches that WERE real bugs among the findings;
-        # the rest -- see SF #662 for the full accounting -- are a
-        # permanent, un-ratcheted Clang-only false-positive class, not
-        # tracked as debt.
-        add_compile_options(-Werror=cast-function-type)
-    endif()
+    add_compile_options(-Wall ${XTRKCAD_GNU_WARNING_OPTIONS})
 endif()
 
 # Set Win64 flag when a 64 bit build is selected
@@ -126,32 +145,7 @@ if(WIN32)
 			"$<$<COMPILE_LANGUAGE:C>:/wd4828>"
 		)
 	else()
-		add_compile_options("$<$<CONFIG:DEBUG>:-Wall>")
-		# incompatible pointer types are an error, as on UNIX (see the top)
-		add_compile_options(${XTRKCAD_POINTER_TYPES_FLAG})
-		add_compile_options(-Wno-deprecated-declarations)
-		# paramData_t/descData_t positional aggregate literals (dialog control tables
-		# throughout app/bin) deliberately set only their leading fields and rely on
-		# C's implicit zero-init for the rest -- a longstanding codebase idiom, not
-		# latent bugs. Suppress rather than force a large, regression-risk rewrite.
-		add_compile_options(-Wno-missing-field-initializers)
-		# Ratchet: Phases 4-6 of the GTK3V2MAIN quality plan brought these
-		# categories to zero for owned code. Promote to errors so a future PR
-		# can't silently reintroduce them. The few remaining instances are all
-		# in vendored third-party targets (halibut/xtrkcad-charset/wrapbox),
-		# which carry their own -Wno-error= overrides for exactly these.
-		add_compile_options(-Werror=sign-compare)
-		add_compile_options(-Werror=type-limits)
-		add_compile_options(-Werror=absolute-value)
-		add_compile_options(-Werror=unused-but-set-parameter)
-		# See the matching UNIX-branch comment above (Phase 12, SF #662/#663):
-		# implicit-fallthrough ratchets universally now; cast-function-type
-		# stays GCC-only (Clang's -Wcast-function-type-strict sub-check is
-		# not separable from it, and permanently un-ratcheted -- see #662).
-		add_compile_options(-Werror=implicit-fallthrough)
-		if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-			add_compile_options(-Werror=cast-function-type)
-		endif()
+		add_compile_options("$<$<CONFIG:DEBUG>:-Wall>" ${XTRKCAD_GNU_WARNING_OPTIONS})
 	endif()
 
 	add_compile_definitions(
