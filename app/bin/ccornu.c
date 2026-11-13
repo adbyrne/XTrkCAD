@@ -817,12 +817,12 @@ void DrawTempCornu()
 
 	DrawCornuCurve(&Da.trk1Seg,
 	               &Da.ep1Segs[0],Da.ep1Segs_da_cnt,
-	               &DYNARR_N(trkSeg_t,Da.crvSegs_da,0),Da.crvSegs_da_cnt,
+	               (trkSeg_p)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,
 	               &Da.ep2Segs[0],Da.ep2Segs_da_cnt,
 	               &Da.trk2Seg,
 	               Da.extend[0]?&Da.extendSeg[0]:NULL,
 	               Da.extend[1]?&Da.extendSeg[1]:NULL,
-	               &DYNARR_N(trkSeg_t,Da.midSegs,0),Da.midSegs.cnt,
+	               (trkSeg_p)Da.midSegs.ptr,Da.midSegs.cnt,
 	               fabs(Da.minRadius)<(GetLayoutMinTrackRadius()-EPSILON)?exceptionColor:
 	               normalColor);
 
@@ -984,7 +984,7 @@ track_p CreateCornuFromPoints(coOrd pos[2],BOOL_T track_end[2])
 
 		if (!track_end[i] || (Da.radius[i]==-1.0)) {
 
-			angle[i] = GetAngleSegs(Da.crvSegs_da.cnt,&DYNARR_N(trkSeg_t,Da.crvSegs_da,0),
+			angle[i] = GetAngleSegs(Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,
 			                        &pos_temp[i],&inx,NULL,&back,&subinx,&neg);
 
 			trkSeg_p segPtr = &DYNARR_N(trkSeg_t, Da.crvSegs_da, inx);
@@ -1270,12 +1270,12 @@ EXPORT STATUS_T AdjustCornuCurve(
 				int closest = -1;
 				wIndex_t pIndex, nIndex;
 				temp_pos = Da.pos[0];
-				DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,&DYNARR_N(trkSeg_t,Da.crvSegs_da,0),
+				DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,
 				             &temp_pos,&pIndex);
 				if (Da.mid_points.cnt>0) {
 					for (int i=0; i<Da.mid_points.cnt; i++) {
 						temp_pos = DYNARR_N(coOrd,Da.mid_points,i);
-						DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,&DYNARR_N(trkSeg_t,Da.crvSegs_da,0),
+						DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,
 						             &temp_pos,&nIndex);
 						if (((pIndex<=index) && (nIndex>=index))) {
 							closest = i;
@@ -1284,7 +1284,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 						pIndex = nIndex;
 					}
 					temp_pos = Da.pos[1];
-					DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,&DYNARR_N(trkSeg_t,Da.crvSegs_da,0),
+					DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,
 					             &temp_pos,&nIndex);
 					if (index == nIndex) { closest = Da.mid_points.cnt; }
 					if (closest == -1) {
@@ -1667,7 +1667,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			if (Da.trk[i] || Da.ends[i]) { continue; }
 			coOrd p = Da.pos[i];
 			Da.angle[i] = NormalizeAngle((i?0:180)+GetAngleSegs( Da.crvSegs_da_cnt,
-			                             &DYNARR_N(trkSeg_t,Da.crvSegs_da,0), &p, NULL, NULL, NULL, NULL, NULL));
+			                             (trkSeg_p)Da.crvSegs_da.ptr, &p, NULL, NULL, NULL, NULL, NULL));
 			Da.radius[i] = 0.0;
 		}
 		Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
@@ -2754,9 +2754,9 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if ( Da.state != NONE ) {
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,
-			               &DYNARR_N(trkSeg_t,Da.crvSegs_da,0),Da.crvSegs_da_cnt, NULL,
+			               (trkSeg_p)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt, NULL,
 			               Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,
-			               &DYNARR_N(trkSeg_t,Da.midSegs,0),Da.midSegs.cnt,wDrawColorBlack);
+			               (trkSeg_p)Da.midSegs.ptr,Da.midSegs.cnt,wDrawColorBlack);
 		}
 		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
 		            0 );

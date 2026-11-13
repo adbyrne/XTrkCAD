@@ -742,6 +742,10 @@ EXPORT void FreeFilledDraw(
 {
 	trkSeg_p sp;
 
+	// An empty array may have no storage yet
+	if ( segs == NULL ) {
+		return;
+	}
 	for ( sp=segs; sp<&segs[segCnt]; sp++ ) {
 		switch (sp->type) {
 		case SEG_POLY:

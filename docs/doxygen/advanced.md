@@ -156,7 +156,9 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
 - **`regression-gtk3-sanitizers`** — the same `regression-ci` tests as `regression-gtk3`, with the
   program built with ASan/UBSan (`-DXTRKCAD_SANITIZE=ON`, as in `c-tests-sanitizers`). Leak
   detection is off (`detect_leaks=0`), since GTK and GLib keep allocations to the end of the
-  program. Closes the SF #682 gap: `c-tests-sanitizers` leaves out the regression tests
+  program. A UBSan error fails the test: `UBSAN_OPTIONS` sets `halt_on_error=1`, here and in
+  `c-tests-sanitizers`. Without it UBSan only reports and carries on, and until 2026-11 its errors
+  (32 at 10 places) passed CI. Closes the SF #682 gap: `c-tests-sanitizers` leaves out the regression tests
   (`-LE regression`) and `regression-gtk3` isn't instrumented, so the combination that found
   SF #675/#677–#680 had only happened when someone ran it locally — see the "Static tools and a
   live sanitizer run" bullet below. Until 2026-11 `XTRKCAD_SANITIZE` only instrumented the unit
