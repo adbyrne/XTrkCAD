@@ -1364,6 +1364,10 @@ static BOOL_T EnumerateJoint( track_p trk )
  * \param trk the easement
  * \param ep its end under the turnout
  * \param dist how far to trim from ep
+ * \param endpos unused (TrimCornu() fits its end to these)
+ * \param angle unused
+ * \param radius unused
+ * \param center unused
  *
 eturn TRUE
  */
