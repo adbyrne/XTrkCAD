@@ -172,8 +172,11 @@ endif()
 #set( CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" )
 
 
+# Standard install layout: share/, share/locale, ... (CMAKE_INSTALL_DATADIR
+# and friends).
+include(GNUInstallDirs)
 set(XTRKCAD_BIN_INSTALL_DIR "bin")
-set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")
+set(XTRKCAD_LOCALE_INSTALL_DIR "${CMAKE_INSTALL_LOCALEDIR}")
 
 # XTRKCAD_BIN is the single source of truth for this build's identity: the
 # installed binary name, package name, desktop file name, and (via the same
@@ -200,7 +203,13 @@ else()
 	set(XTRKCAD_BIN "xtrkcad${XTRKCAD_INSTALL_SUFFIX}")
 endif()
 
-set(XTRKCAD_SHARE_INSTALL_DIR "share/${XTRKCAD_BIN}")
+set(XTRKCAD_SHARE_INSTALL_DIR "${CMAKE_INSTALL_DATADIR}/${XTRKCAD_BIN}")
+
+# Flatpak application ID domain, as on Flathub (distribution/flatpak).
+# For a local build under another domain: -DXTRKCAD_FLATPAK_DOMAIN=org.xtrkcad
+set(XTRKCAD_FLATPAK_DOMAIN "io.sourceforge.xtrkcad_fork" CACHE STRING
+	"Flatpak application ID domain")
+mark_as_advanced(XTRKCAD_FLATPAK_DOMAIN)
 # XTRKCAD_PACKAGE doubles as the gettext domain name (app/i18n/CMakeLists.txt,
 # app/bin/i18n.c's bindtextdomain/textdomain calls) and therefore the
 # installed .mo filename under the *shared* system locale tree

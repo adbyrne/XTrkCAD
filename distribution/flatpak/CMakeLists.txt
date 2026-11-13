@@ -33,11 +33,8 @@ set(_XTRK_DESKTOP_SRC_FILE "desktop")
 set(_XTRK_META_SRC_FILE "metainfo.xml")
 set(_XTRK_MANIFEST_SRC_FILE "manifest.yaml")
 
-# flatpak domain build from flathub
-set(FLATPAK_DOMAIN "io.sourceforge.xtrkcad_fork")
-
-# flatpak domain local build
-#set(FLATPAK_DOMAIN "org.xtrkcad")
+# flatpak domain: XTRKCAD_FLATPAK_DOMAIN (top-level CMakeLists.txt)
+set(FLATPAK_DOMAIN "${XTRKCAD_FLATPAK_DOMAIN}")
 
 set(_XTRK_DESKTOP_FILE "xtrkcad.flatpak.desktop")
 set(_XTRK_META_FILE "xtrkcad.metainfo.xml")
