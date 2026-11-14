@@ -1351,10 +1351,12 @@ static BOOL_T EnumerateJoint( track_p trk )
 
 /**
  * Trim an easement to dist from end ep: what AddTurnout() does with the part of
- * a track left under and beyond a turnout. The easement is split dist along it
- * from ep, and the piece from ep to there is deleted; the rest stays connected
- * to the track beyond. If the turnout covers the whole easement, all of it is
- * deleted.
+ * a track left under and beyond a turnout, and RemoveTrack() with the track
+ * under a hand-laid turnout. The easement is split dist along it from ep, and
+ * the piece from ep to there is deleted. trk stays as the rest, connected to
+ * the track beyond, with its end ep where the trim ends, so a caller can
+ * connect to it. If the turnout covers the whole easement, all of it is
+ * deleted, trk too.
  *
  * The covered piece is disconnected before it's deleted: DeleteTrack() of an
  * easement calls UndoJoint() on its neighbours, which reshapes them as if the
@@ -1369,14 +1371,14 @@ static BOOL_T EnumerateJoint( track_p trk )
  * \param radius unused
  * \param center unused
  *
-eturn TRUE
+ * \return TRUE
  */
 static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos,
                          ANGLE_T angle, DIST_T radius, coOrd center )
 {
 	traverseTrack_t trvTrk;
 	DIST_T d = dist;
-	track_p rest = NULL;
+	track_p covered = trk;
 
 	if ( dist <= minLength ) {
 		return TRUE;
@@ -1388,18 +1390,25 @@ static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos,
 	trvTrk.angle = NormalizeAngle( GetTrkEndAngle( trk, ep ) + 180.0 );
 	TraverseJointTrack( &trvTrk, &d );
 	if ( d <= 0.0 ) {
-		/* trk keeps the covered piece, rest the part beyond it */
-		SplitTrack( trk, trvTrk.pos, 1-ep, &rest, TRUE );
-	}
-	for ( EPINX_T ep1 = 0; ep1 < 2; ep1++ ) {
-		track_p trk1 = GetTrkEndTrk( trk, ep1 );
-		if ( trk1 ) {
-			DisconnectTracks( trk, ep1, trk1,
-			                  GetEndPtConnectedToMe( trk1, trk ) );
+		/* the new piece is the covered one; trk keeps the part beyond,
+		 * with its end ep now where the trim ends, as TrimStraight()
+		 * leaves a straight: RemoveTrack()'s callers connect to it */
+		covered = NULL;
+		SplitTrack( trk, trvTrk.pos, ep, &covered, TRUE );
+		if ( covered == NULL ) {
+			/* the trim ends at trk's far end: it's all covered */
+			covered = trk;
 		}
 	}
-	UndrawNewTrack( trk );
-	DeleteTrack( trk, FALSE );
+	for ( EPINX_T ep1 = 0; ep1 < 2; ep1++ ) {
+		track_p trk1 = GetTrkEndTrk( covered, ep1 );
+		if ( trk1 ) {
+			DisconnectTracks( covered, ep1, trk1,
+			                  GetEndPtConnectedToMe( trk1, covered ) );
+		}
+	}
+	UndrawNewTrack( covered );
+	DeleteTrack( covered, FALSE );
 	return TRUE;
 }
 
