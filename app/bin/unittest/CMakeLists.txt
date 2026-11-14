@@ -9,27 +9,7 @@ set(_xtrkcad_ut_includes
     ${CMAKE_SOURCE_DIR}/app/wlib/include
 )
 
-# xtrkcad_add_unit_test(<target> <test> [MATH] [SOURCES <file>...]
-#                       [INCLUDES <dir>...] [LIBS <library>...])
-#
-# One unit test: the executable <target> from <target>.c and SOURCES, with
-# the INCLUDES directories, linked with LIBS and CMocka (and libm where there
-# is one, with MATH), the ctest test <test>, and the UnitTests folder. A test
-# that needs more (dependencies, link options, properties) adds them after
-# the call.
-function(xtrkcad_add_unit_test _target _test)
-    cmake_parse_arguments(PARSE_ARGV 2 _ut "MATH" "" "SOURCES;INCLUDES;LIBS")
-    add_executable(${_target} ${_target}.c ${_ut_SOURCES})
-    if(_ut_INCLUDES)
-        target_include_directories(${_target} PRIVATE ${_ut_INCLUDES})
-    endif()
-    target_link_libraries(${_target} PRIVATE ${_ut_LIBS} CMocka::cmocka)
-    if(_ut_MATH)
-        target_link_libraries(${_target} PRIVATE "$<${XTRKCAD_IF_UNIX}:m>")
-    endif()
-    add_test(${_test} ${_target})
-    set_target_properties(${_target} PROPERTIES FOLDER UnitTests)
-endfunction()
+# Each test is one xtrkcad_add_unit_test() call (CMake/XtrkcadUnitTest.cmake).
 
 # dxf formatting
 xtrkcad_add_unit_test(dxfformattest DXFOutputTest

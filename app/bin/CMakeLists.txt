@@ -318,6 +318,8 @@ target_include_directories(xtrkcad-lib
 )
 
 target_link_libraries(xtrkcad-lib
+    PUBLIC
+    xtrkcad-config
     PRIVATE
     cJSON
  dynstring

@@ -203,8 +203,14 @@ The build files follow a few rules, so a value is changed in one place:
   resolves it against the directory that defined the target, not the one that adds it. `if()`
   stays where a generator expression can't go: `find_package()`, `option()` defaults, `install()`
   rules, custom commands and anything that sets a variable.
-- **A unit test is one call:** `xtrkcad_add_unit_test()` in `app/bin/unittest/CMakeLists.txt`
-  (see \ref regression-tests "Regression tests" for the playback tests).
+- **A unit test is one call:** `xtrkcad_add_unit_test()` (`CMake/XtrkcadUnitTest.cmake`), in
+  `app/bin/unittest/`, `app/wlib/gtk3lib/unittests/` or `app/dynstring/unittest/`; `MAIN` names
+  the test's source when it isn't `<target>.c`, `FOLDER` its IDE folder (see
+  \ref regression-tests "Regression tests" for the playback tests).
+- **Nothing is set for a whole directory:** no `include_directories()` or `add_definitions()`.
+  The generated `xtrkcad-config.h` comes with the `xtrkcad-config` interface target, which
+  `xtrkcad-lib` and `xtrkcad-wlib` pass on; a target that includes it some other way, through
+  `version.h` or `i18n.h`, links it. Without it the build stops at the missing header.
 - **Libraries are imported targets** (`PkgConfig::GTK3`, `CMocka::cmocka`, `MiniXML::mxml`),
   not include directories and library variables.
 
