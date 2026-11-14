@@ -346,8 +346,9 @@ ctest --test-dir build -R pathstest          # run a single test by name
 ctest --test-dir build --output-on-failure
 ```
 
-A new unit test is one `xtrkcad_add_unit_test(<target> <test> [MATH] SOURCES … INCLUDES … LIBS …)` call in
-`app/bin/unittest/CMakeLists.txt` (executable, includes, CMocka, `add_test`, IDE folder);
+A new unit test is one `xtrkcad_add_unit_test(<target> <test> [MATH] [MAIN <file>] [FOLDER <f>] SOURCES … INCLUDES … LIBS …)`
+call (`CMake/XtrkcadUnitTest.cmake`; executable, includes, `xtrkcad-config`, CMocka, `add_test`, IDE folder), in
+`app/bin/unittest/CMakeLists.txt` or the wlib/dynstring `unittest(s)/` dirs;
 `${_xtrkcad_ut_includes}` is app/bin, its `include/` (which `common.h` needs for `dynarray.h`) and the wlib headers.
 
 ## Doxygen

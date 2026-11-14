@@ -1,103 +1,42 @@
-# build unit tests for the preferences
+# build unit tests for the GTK3 wlib (xtrkcad_add_unit_test(),
+# CMake/XtrkcadUnitTest.cmake)
 
-add_executable(preftest preftest.c)
-target_link_libraries(preftest 
-    PRIVATE
-	xtrkcad-wlib
-	CMocka::cmocka
-	PkgConfig::GTK3
-)
-target_include_directories(preftest
-	PRIVATE
-	"../../include"
-	"../../../bin"
-)
-add_test(PreferenceTest preftest)
-
-set_target_properties(
-	preftest
- 	PROPERTIES FOLDER UnitTestsWLib
+# the wlib headers and app/bin, for i18n.h
+set(_xtrkcad_wlib_ut_includes
+	"${CMAKE_CURRENT_SOURCE_DIR}/../../include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../../../bin"
 )
 
-# build unit tests for the MRU list
+# the preferences
+xtrkcad_add_unit_test(preftest PreferenceTest
+	FOLDER UnitTestsWLib
+	INCLUDES ${_xtrkcad_wlib_ut_includes}
+	LIBS xtrkcad-wlib PkgConfig::GTK3)
 
-add_executable(mrulisttest mrulisttest.c)
-target_link_libraries(mrulisttest
-    PRIVATE
-	xtrkcad-wlib
-	CMocka::cmocka
-	PkgConfig::GTK3
-)
-target_include_directories(mrulisttest
-	PRIVATE
-	"../../include"
-	"../../../bin"
-)
-add_test(MRUListTest mrulisttest)
+# the MRU list
+xtrkcad_add_unit_test(mrulisttest MRUListTest
+	FOLDER UnitTestsWLib
+	INCLUDES ${_xtrkcad_wlib_ut_includes}
+	LIBS xtrkcad-wlib PkgConfig::GTK3)
 
-set_target_properties(
-	mrulisttest
- 	PROPERTIES FOLDER UnitTestsWLib
-)
-
-# build unit tests for the file selector helpers
+# the file selector helpers
 # fileselector.c is included by the test, so xtrkcad-wlib is not linked
+xtrkcad_add_unit_test(fileselectortest FileSelectorTest
+	FOLDER UnitTestsWLib
+	INCLUDES ${_xtrkcad_wlib_ut_includes}
+	LIBS PkgConfig::GTK3)
 
-add_executable(fileselectortest fileselectortest.c)
-target_link_libraries(fileselectortest
-    PRIVATE
-	CMocka::cmocka
-	PkgConfig::GTK3
-)
-target_include_directories(fileselectortest
-	PRIVATE
-	"../../include"
-	"../../../bin"
-)
-add_test(FileSelectorTest fileselectortest)
-
-set_target_properties(
-	fileselectortest
- 	PROPERTIES FOLDER UnitTestsWLib
-)
-
-# build unit tests for the getopt() replacement used on Windows
+# the getopt() replacement used on Windows
 # win32/getopt.c is included by the test, so it runs on every platform
+xtrkcad_add_unit_test(getopttest GetoptTest
+	FOLDER UnitTestsWLib
+	INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
 
-add_executable(getopttest getopttest.c)
-target_link_libraries(getopttest
-    PRIVATE
-	CMocka::cmocka
-)
-target_include_directories(getopttest
-	PRIVATE
-	"../../include"
-)
-add_test(GetoptTest getopttest)
-
-set_target_properties(
-	getopttest
- 	PROPERTIES FOLDER UnitTestsWLib
-)
-
-# build unit tests for positioning in multiline text controls
-
-add_executable(textpositiontest textpositiontest.c)
-target_link_libraries(textpositiontest
-    PRIVATE
-	xtrkcad-wlib
-	CMocka::cmocka
-	PkgConfig::GTK3
-)
-if(UNIX)
-	target_link_libraries(textpositiontest PRIVATE m)
-endif()
-target_include_directories(textpositiontest
-	PRIVATE
-	"../../include"
-	"../../../bin"
-)
-add_test(TextPositionTest textpositiontest)
+# positioning in multiline text controls
+xtrkcad_add_unit_test(textpositiontest TextPositionTest MATH
+	FOLDER UnitTestsWLib
+	INCLUDES ${_xtrkcad_wlib_ut_includes}
+	LIBS xtrkcad-wlib PkgConfig::GTK3)
 
 # These tests create GTK widgets, so they need a display (CI runs them under
 # xvfb-run). Jobs without one, and the ASan/Valgrind jobs, where GTK's own
@@ -105,9 +44,4 @@ add_test(TextPositionTest textpositiontest)
 # new test here that calls into GTK.
 set_tests_properties(PreferenceTest MRUListTest TextPositionTest
 	PROPERTIES LABELS gtk-display
-)
-
-set_target_properties(
-	textpositiontest
- 	PROPERTIES FOLDER UnitTestsWLib
 )

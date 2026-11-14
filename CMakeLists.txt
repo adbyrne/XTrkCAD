@@ -45,6 +45,7 @@ find_package(CMocka)
 if(CMOCKA_FOUND)
     option(XTRKCAD_TESTING "Build unittests" ON)
 endif()
+include(XtrkcadUnitTest)
 
 # GUI demo-playback regression tests (RegressionTestAll(), the -T flag; see GTK3
 # issue #26). These drive a real GTK3 window, so they need an X display -- default
@@ -219,14 +220,13 @@ mark_as_advanced(XTRKCAD_FLATPAK_DOMAIN)
 # versions' translations don't overwrite each other in that shared directory.
 set(XTRKCAD_PACKAGE "${XTRKCAD_BIN}")
 
-# Enable use of a configuration file ...
-add_definitions(-DXTRKCAD_CMAKE_BUILD)
+# The generated configuration header, xtrkcad-config.h. Code that includes
+# it, directly or through version.h or i18n.h, links xtrkcad-config: it
+# carries the header's directory and, where gettext is used, libintl.h's.
+# xtrkcad-lib and xtrkcad-wlib pass it on to what links them.
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-config.h)
-
-# find the config.h include file
-include_directories(
- ${CMAKE_CURRENT_BINARY_DIR}
-)
+add_library(xtrkcad-config INTERFACE)
+target_include_directories(xtrkcad-config INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
 
 #
 # I18N related dependencies
@@ -242,7 +242,7 @@ if(XTRKCAD_USE_GETTEXT)
         find_path ( INTL_PATH libintl.h )
         if(INTL_PATH)
             message( STATUS "Use installed gettext module" )
-            include_directories(${INTL_PATH})
+            target_include_directories(xtrkcad-config INTERFACE ${INTL_PATH})
         endif()
     endif()
 endif()
