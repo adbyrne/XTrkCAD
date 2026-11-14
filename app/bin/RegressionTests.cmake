@@ -531,8 +531,12 @@ foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
         set(_xtrkcad_describe_labels "regression;regression-ci")
         set(_xtrkcad_describe_timeout 120)
     endif()
+    # Every text a dialog shows has to be UTF-8: an example layout with a
+    # Latin-1 title gave Pango one "Invalid UTF-8" warning per entry
+    # (Development Issues #83).
     set_tests_properties("RegressionDescribe.${_xtrkcad_example_id}" PROPERTIES
         FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        FAIL_REGULAR_EXPRESSION "Invalid UTF-8"
         LABELS "${_xtrkcad_describe_labels}"
         TIMEOUT ${_xtrkcad_describe_timeout}
         ENVIRONMENT "HOME=${_xtrkcad_describe_home}"

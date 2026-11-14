@@ -461,7 +461,9 @@ bug:
   `fileio.c`). No dialog may start an Undo step, and every object has to match what it was before,
   compared as the demo check compares them. Drawn objects are compared by position: Properties
   stores a drawn object's rotation in its points, which doesn't move it. Cars aren't compared, as
-  only a full save writes them. The five largest layouts take 20 s to 100 s each, so they're only
+  only a full save writes them. A Pango "Invalid UTF-8" warning fails the test: every text a
+  dialog shows has to be UTF-8, so an example layout has to be saved as UTF-8 too (Development
+  Issues #83). The five largest layouts take 20 s to 100 s each, so they're only
   labelled `regression`; the rest are `regression-ci`. `regression-windows` leaves them out: they
   take over ten times as long there, and what they check doesn't depend on the platform.
 - **Dialog values (`RegressionParamCheck.*`)** — a script line `PARAMCHECK <dialog> <field> <value>`
