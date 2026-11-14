@@ -708,11 +708,10 @@ static void test_known_bug_7e_bitmap_invalidation(void **state)
 	assert_true(rec.n_area + rec.n_all >= 1);
 }
 
-/* 1a: lines ignore the clip in batch mode */
-static void test_known_bug_1a_clip_ignored_in_batch(void **state)
+/* 1a (fixed): lines ignored the clip in batch mode */
+static void test_clip_applied_in_batch(void **state)
 {
 	CTX();
-	KNOWN_BUG("1a");
 	wDrawStart(c);
 	wDrawClip(c, 0, 0, 50, 50);
 	wDrawLine(c, 10, 10, 90, 10, 1, wDrawLineSolid, COL_BLACK, 0);
@@ -723,12 +722,11 @@ static void test_known_bug_1a_clip_ignored_in_batch(void **state)
 	assert_false(is_set(d->surface, 70, 89)); /* outside the clip */
 }
 
-/* 1b: the clip applied by a circle sticks to the shared batch context.
+/* 1b (fixed): the clip applied by a circle stuck to the shared batch context.
  * Line (60,60)-(90,60) -> device row 39, outside the old clip. */
-static void test_known_bug_1b_clip_leaks_in_batch(void **state)
+static void test_clip_clear_in_batch(void **state)
 {
 	CTX();
-	KNOWN_BUG("1b");
 	wDrawStart(c);
 	wDrawClip(c, 0, 0, 50, 50);
 	wDrawFilledCircle(c, 25, 25, 5, COL_RED, 0);
@@ -742,6 +740,63 @@ static void test_known_bug_1b_clip_leaks_in_batch(void **state)
 	 * outside the old clip, so it only shows if the clip was really cleared. */
 	assert_true(is_set(d->surface, 25, 74)); /* circle was drawn */
 	assert_true(is_set(d->surface, 75, 39)); /* line visible after ClipClear */
+}
+
+/* N1: a path built under one clip is drawn under that clip, even when the
+ * clip changes before the path is flushed. Lines A and B have the same
+ * attributes, so without a flush on the clip change they would share one
+ * path and both be stroked unclipped at wDrawFinish.
+ * Clip (0,0,50,50) = columns 0..49, rows 49..98.
+ * Line A: y = 10 -> row 89, columns 10..90, built under the clip.
+ * Line B: y = 60 -> row 39, columns 60..90, built after wDrawClipClear. */
+static void test_clip_change_flushes_open_path(void **state)
+{
+	CTX();
+	wDrawStart(c);
+	wDrawClip(c, 0, 0, 50, 50);
+	wDrawLine(c, 10, 10, 90, 10, 1, wDrawLineSolid, COL_BLACK, 0);
+	wDrawClipClear(c);
+	wDrawLine(c, 60, 60, 90, 60, 1, wDrawLineSolid, COL_BLACK, 0);
+	wDrawFinish(c);
+	assert_true(is_set(d->surface, 30, 89));  /* A inside the clip   */
+	assert_false(is_set(d->surface, 70, 89)); /* A outside the clip  */
+	assert_true(is_set(d->surface, 75, 39));  /* B drawn unclipped   */
+}
+
+/* N2: measuring text inside a batch must not end the open batch segment.
+ * Before the fix wDrawGetTextSize went through gtkDrawCreateCairoContext,
+ * which flushes the open path of the shared batch context.
+ * Lines A (y = 10 -> row 89) and B (y = 60 -> row 39) share one segment. */
+static void test_text_size_keeps_batch_open(void **state)
+{
+	CTX();
+	wDrawPix_t w, h, dsc, asc;
+
+	wDrawStart(c);
+	wDrawLine(c, 10, 10, 90, 10, 1, wDrawLineSolid, COL_BLACK, 0);
+	assert_true(d->pathOpen);
+	wDrawGetTextSize(&w, &h, &dsc, &asc, c, "Text", NULL, 10.0);
+	assert_true(d->pathOpen);                 /* segment still open */
+	wDrawLine(c, 10, 60, 90, 60, 1, wDrawLineSolid, COL_BLACK, 0);
+	wDrawFinish(c);
+	assert_true(is_set(d->surface, 50, 89));  /* line A */
+	assert_true(is_set(d->surface, 50, 39));  /* line B */
+}
+
+/* N3: the transparent rectangle draws on the batch context directly; it must
+ * still respect the clip.
+ * Clip (0,0,50,50) = columns 0..49, rows 49..98.
+ * Rectangle (30, 20, 40, 20): columns 30..69, rows 99-20-20 = 59 .. 78,
+ * so it crosses the right clip edge at column 49. */
+static void test_transparent_rect_clipped_in_batch(void **state)
+{
+	CTX();
+	wDrawStart(c);
+	wDrawClip(c, 0, 0, 50, 50);
+	wDrawFilledRectangle(c, 30, 20, 40, 20, COL_RED, wDrawOptTransparent);
+	wDrawFinish(c);
+	assert_true(is_set(d->surface, 40, 68));  /* inside the clip  */
+	assert_false(is_set(d->surface, 60, 68)); /* outside the clip */
 }
 
 /* 6: a white line is not widened in batch mode */
@@ -851,6 +906,11 @@ int main(int argc, char **argv)
 		cmocka_unit_test_setup_teardown(test_release_without_widget, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_arc_after_rect_batch, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_transparent_rect_batch_width, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_clip_applied_in_batch, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_clip_clear_in_batch, setup_widget, teardown),
+		cmocka_unit_test_setup_teardown(test_clip_change_flushes_open_path, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_text_size_keeps_batch_open, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_transparent_rect_clipped_in_batch, setup_nowidget, teardown),
 
 		/* keep last: under ASan this test aborts the whole process */
 		cmocka_unit_test_setup_teardown(test_polygon_zero_points, setup_nowidget, teardown),
@@ -858,8 +918,6 @@ int main(int argc, char **argv)
 		/* known bugs */
 
 		cmocka_unit_test_setup_teardown(test_known_bug_7e_bitmap_invalidation, setup_widget, teardown),
-		cmocka_unit_test_setup_teardown(test_known_bug_1a_clip_ignored_in_batch, setup_nowidget, teardown),
-		cmocka_unit_test_setup_teardown(test_known_bug_1b_clip_leaks_in_batch, setup_widget, teardown),
 		cmocka_unit_test_setup_teardown(test_known_bug_6_white_line_batch_vs_legacy, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_known_bug_N6_dirty_rect_stroke_width, setup_widget, teardown),
 

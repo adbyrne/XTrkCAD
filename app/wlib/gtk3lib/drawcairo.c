@@ -66,8 +66,11 @@ struct wDrawBitMap_t {
 static unsigned int currCalls;
 static cairo_t * cairoCtx;
 static cairo_matrix_t base_matrix;
+/** drawing area whose surface cairoCtx draws on (NULL outside a batch) */
+static struct draw *batchOwner;
 
 static void flush_path_if_open(struct draw *bd, cairo_t *cr);
+static void apply_clip(struct draw *bd, cairo_t *cr);
 static void setCairoDashStyle(cairo_t *cr, wDrawLineType_e lineType);
 static cairo_t* prepare_drawing(struct draw *bd, wDrawWidth width,
                                 wDrawLineType_e lineType,
@@ -183,10 +186,11 @@ static cairo_t *gtkDrawCreateCairoContext(struct draw *bd,
 	GdkRGBA gcolor = wlibGetColor(color, TRUE);
 	GtkDrawSetColor(cairo, color, &gcolor);
 
-	if (bd->clipregion) {
-		cairo_rectangle(cairo, bd->clipregion->x, bd->clipregion->y,
-		                bd->clipregion->w, bd->clipregion->h);
-		cairo_clip(cairo);
+	/* Only a one-shot context is clipped here. The batch context gets its
+	 * clip from wDrawStart/wDrawClip/wDrawClipClear; clipping it here
+	 * would stay on the shared context for the rest of the batch. */
+	if (cairo != cairoCtx) {
+		apply_clip(bd, cairo);
 	}
 
 
@@ -598,26 +602,22 @@ void wDrawGetTextSize(
 	*w = 0;
 	*h = 0;
 
-	/* draw text */
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid,
-	                 wDrawColorBlack, bd->bTempMode?wDrawOptTemp:0 );
-
-	cairo_save(cairo);
-	cairo_identity_matrix(cairo);
+	/* Measure on a context of its own: no flush of an open batch path and
+	 * no change to the batch context's state (N2). */
+	cairo_t *cairo = cairo_create(bd->bTempMode ? bd->temp_surface
+	                              : bd->surface);
 
 	wlibFontDestroyPangoLayout(
 	        wlibFontCreatePangoLayout(drawingArea->widget, cairo, fp, fs, s,
 	                                  &textWidth, &textHeight,
 	                                  &ascent, &descent, &baseline) );
 
-	cairo_restore(cairo);
+	cairo_destroy(cairo);
 
 	*w = textWidth;
 	*h = textHeight;
 	*a = ascent;
 	*d = descent;
-
-	gtkDrawDestroyCairoContext(cairo);
 }
 
 /*******************************************************************************
@@ -1201,9 +1201,41 @@ double wDrawGetMaxRadius( wControl_p drawingArea )
 }
 
 /**
- *	Define a clipping region. The passed coordinates are stored and will be applied
- * 	when the cairo context for this drawing area is created
+ * Replace the clip of a cairo context with the drawing area's clip region
+ * (or remove it when there is none). The region is in device pixels, so it
+ * is applied under the identity matrix; cairo keeps a clip fixed in device
+ * space when the transform changes later.
  *
+ * cairo_clip() also clears the current path: in batch mode the caller must
+ * flush the open path first.
+ *
+ * \param bd IN the drawing area
+ * \param cr IN the context to clip
+ */
+static void apply_clip(struct draw *bd, cairo_t *cr)
+{
+	cairo_matrix_t m;
+
+	cairo_reset_clip(cr);
+	if (!bd->clipregion) {
+		return;
+	}
+	cairo_get_matrix(cr, &m);
+	cairo_identity_matrix(cr);
+	cairo_rectangle(cr, bd->clipregion->x, bd->clipregion->y,
+	                bd->clipregion->w, bd->clipregion->h);
+	cairo_clip(cr);
+	cairo_set_matrix(cr, &m);
+}
+
+/**
+ * Define a clipping region. Outside a batch the region is applied to each
+ * one-shot cairo context. Inside a batch on this drawing area, the open path
+ * is drawn first (it was built under the old clip), then the new clip is set
+ * on the batch context.
+ *
+ * \param drawingArea IN the drawing area
+ * \param x, y, w, h IN the region in application coordinates
  */
 
 void wDrawClip(wControl_p drawingArea,
@@ -1224,19 +1256,30 @@ void wDrawClip(wControl_p drawingArea,
 	d->clipregion->x = INMAPX( d, x );
 	d->clipregion->y = INMAPY( d, y ) - d->clipregion->h;
 
+	if (cairoCtx && batchOwner == d) {
+		flush_path_if_open(d, cairoCtx);
+		apply_clip(d, cairoCtx);
+	}
 }
 
+/**
+ * Remove the clipping region. Inside a batch on this drawing area, the open
+ * path is drawn first, then the batch context is unclipped.
+ *
+ * \param drawingArea IN the drawing area
+ */
 void wDrawClipClear(wControl_p drawingArea)
 {
-	wWinPix_t totalW, totalH;
 	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
 
-	wDrawGetSize(drawingArea, &totalW, &totalH);
-	wDrawClip(drawingArea, 0, 0, totalW, totalH);
-
 	g_free(d->clipregion);
 	d->clipregion = NULL;
+
+	if (cairoCtx && batchOwner == d) {
+		flush_path_if_open(d, cairoCtx);
+		cairo_reset_clip(cairoCtx);
+	}
 }
 
 /*******************************************************************************
@@ -1424,6 +1467,11 @@ wDrawStart(wControl_p drawArea)
 	 * can restore it after operations that modify the transform. */
 	cairo_get_matrix(cairoCtx, &base_matrix);
 
+	/* A clip set before the batch applies to the whole batch; later
+	 * changes go through wDrawClip/wDrawClipClear. */
+	batchOwner = drawControl;
+	apply_clip(drawControl, cairoCtx);
+
 	currCalls = 0;
 
 	if ( iDrawLog >= 2 ) {
@@ -1441,6 +1489,7 @@ void wDrawFinish(wControl_p drawArea)
 		cairo_destroy(cairoCtx);
 		cairoCtx = NULL;
 	}
+	batchOwner = NULL;
 
 	drawControl->batchCount = 0;
 	drawControl->pathOpen = FALSE;
