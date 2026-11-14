@@ -24,8 +24,8 @@ function(xtrkcad_add_unit_test _target _test)
         target_include_directories(${_target} PRIVATE ${_ut_INCLUDES})
     endif()
     target_link_libraries(${_target} PRIVATE ${_ut_LIBS} CMocka::cmocka)
-    if(_ut_MATH AND UNIX)
-        target_link_libraries(${_target} PRIVATE m)
+    if(_ut_MATH)
+        target_link_libraries(${_target} PRIVATE "$<${XTRKCAD_IF_UNIX}:m>")
     endif()
     add_test(${_test} ${_target})
     set_target_properties(${_target} PROPERTIES FOLDER UnitTests)
@@ -86,15 +86,15 @@ add_dependencies(getargstest msgfiles)
 set_target_properties(getargstest PROPERTIES ENABLE_EXPORTS FALSE)
 target_compile_definitions(getargstest PRIVATE XTRKCAD_TESTBUILD_NO_WMAIN)
 target_compile_options(getargstest PRIVATE -ffunction-sections -fdata-sections)
-if(APPLE)
-	# Apple's ld64 doesn't understand GNU's --gc-sections syntax at all
-	# ("ld: unknown options: --gc-sections", confirmed on the macOS CI
-	# runner) -- -dead_strip is its equivalent flag for the same
-	# per-symbol dead-code elimination.
-	target_link_options(getargstest PRIVATE -Wl,-dead_strip)
-elseif(NOT WIN32)
-	target_link_options(getargstest PRIVATE -Wl,--gc-sections)
-endif()
+# Apple's ld64 doesn't understand GNU's --gc-sections syntax at all
+# ("ld: unknown options: --gc-sections", confirmed on the macOS CI runner)
+# -- -dead_strip is its equivalent flag for the same per-symbol dead-code
+# elimination.
+target_link_options(getargstest
+	PRIVATE
+	"$<${XTRKCAD_IF_MACOS}:-Wl,-dead_strip>"
+	"$<$<NOT:$<PLATFORM_ID:Windows,Darwin>>:-Wl,--gc-sections>"
+)
 
 # filelines.c is standalone like getargs.c above; the test links the real
 # Stripcr() and DynString, and stubs the rest.
@@ -189,10 +189,11 @@ xtrkcad_add_unit_test(problemreptest ProblemrepTest
     INCLUDES ${_xtrkcad_ut_includes} ${CMAKE_SOURCE_DIR}/app/dynstring
              ${CMAKE_BINARY_DIR}
     LIBS dynstring)
-if(WIN32)
-	# getline() for Windows, as the program gets it from wlib
-	target_sources(problemreptest PRIVATE ${CMAKE_SOURCE_DIR}/app/wlib/gtk3lib/win32/getline.c)
-endif()
+# getline() for Windows, as the program gets it from wlib
+target_sources(problemreptest
+	PRIVATE
+	"$<${XTRKCAD_IF_WINDOWS}:${CMAKE_SOURCE_DIR}/app/wlib/gtk3lib/win32/getline.c>"
+)
 
 # elevjoin.c -- pure endpoint elevation-mode merge logic extracted from
 # elev.c:SetTrkElevModes(). No dependency beyond libc and the ELEV_*

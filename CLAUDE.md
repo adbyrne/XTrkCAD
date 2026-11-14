@@ -267,6 +267,10 @@ cmake --install build-install && ~/.local/bin/xtrkcad -V
 The hash stays OFF here so each install overwrites the same `xtrkcad-5.4.0`; reconfigure every
 time (the `cmake -B` line) so the version hash is current.
 
+Changing the CMake files: set each value once, platform differences in a target as generator
+expressions (`XTRKCAD_IF_WINDOWS`/`_UNIX`/`_MACOS`/`_MSVC` from `PlatformSettings.cmake`), and
+compare `ninja -t commands` before and after (dev guide `building.md`, "Changing the CMake files").
+
 Useful CMake options:
 - `-DXTRKCAD_TESTING=ON` — build unit tests (auto-enabled when CMocka is found)
 - `-DXTRKCAD_USE_DOXYGEN=ON` — generate Doxygen internals docs
@@ -285,8 +289,8 @@ Useful CMake options:
 ## Tests
 
 Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and
-`app/dynstring/unittest/`. Hg `default` has 212 tests at the `full` level, 26 of them outside the
-`regression` label and 40 labelled `regression-critical` (r8030, `ctest -N`, with `poppler-utils`
+`app/dynstring/unittest/`. Hg `default` has 295 tests at the `full` level, 33 of them outside the
+`regression` label and 54 labelled `regression-critical` (PR #383, `ctest -N`, with `poppler-utils`
 installed; the 2 `RegressionExport.*` tests need it).
 Regression tests have levels (`-DXTRKCAD_REGRESSION_LEVEL=critical|ci|full`, `RegressionTests.cmake`):
 a local build defaults to `critical` (~4 min with the unit tests), CI to `full` (~23 min; run it in

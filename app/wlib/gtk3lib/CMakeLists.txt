@@ -64,24 +64,16 @@ target_sources(xtrkcad-wlib
     wpref.c
 )
 
-if(WIN32)
-    target_sources(xtrkcad-wlib
-        PRIVATE
-        win32/getline.c
-        win32/getopt.c
-        win32/sysinfo.c
-        win32/utf8conv.c
-        win32/w32paths.c
-    )
-endif()
-
-if(UNIX)
-    target_sources(xtrkcad-wlib
-        PRIVATE
-        unix/ixpaths.c
-        unix/sysinfo.c
-    )
-endif()
+target_sources(xtrkcad-wlib
+    PRIVATE
+    "$<${XTRKCAD_IF_WINDOWS}:${CMAKE_CURRENT_SOURCE_DIR}/win32/getline.c>"
+    "$<${XTRKCAD_IF_WINDOWS}:${CMAKE_CURRENT_SOURCE_DIR}/win32/getopt.c>"
+    "$<${XTRKCAD_IF_WINDOWS}:${CMAKE_CURRENT_SOURCE_DIR}/win32/sysinfo.c>"
+    "$<${XTRKCAD_IF_WINDOWS}:${CMAKE_CURRENT_SOURCE_DIR}/win32/utf8conv.c>"
+    "$<${XTRKCAD_IF_WINDOWS}:${CMAKE_CURRENT_SOURCE_DIR}/win32/w32paths.c>"
+    "$<${XTRKCAD_IF_UNIX}:${CMAKE_CURRENT_SOURCE_DIR}/unix/ixpaths.c>"
+    "$<${XTRKCAD_IF_UNIX}:${CMAKE_CURRENT_SOURCE_DIR}/unix/sysinfo.c>"
+)
 
 # help system is OS and build specific, add appropriate source files
 if(APPLE)
@@ -129,12 +121,10 @@ target_link_libraries(xtrkcad-wlib
 )
 
 # GTK's native Unix print (PkgConfig::GTK_UNIX_PRINT3 comes from the top level)
-if(UNIX)
-    target_link_libraries(xtrkcad-wlib
-        PRIVATE
-        PkgConfig::GTK_UNIX_PRINT3
-    )
-endif()
+target_link_libraries(xtrkcad-wlib
+    PRIVATE
+    "$<${XTRKCAD_IF_UNIX}:PkgConfig::GTK_UNIX_PRINT3>"
+)
 
 if(TARGET resource-target AND TARGET symbols-target)
     add_dependencies(xtrkcad-wlib resource-target symbols-target)
