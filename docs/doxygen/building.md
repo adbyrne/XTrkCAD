@@ -177,6 +177,49 @@ presets go in `CMakeUserPresets.json`, which git and Hg ignore. CI runs the `lin
 `macos-debug` and `windows-debug` workflows, the Linux one with CMake 4.0.7 (see
 \ref ci-tooling-overview "CI tooling overview").
 
+# Changing the CMake files {#cmake-conventions}
+
+The build files follow a few rules, so a value is changed in one place:
+
+- **Set a value once.** A list, flag set, path or name goes into one variable or included
+  `.cmake` file and is used from there. Examples: the warning lists in `PlatformSettings.cmake`
+  (see \ref advanced "Advanced Topics", "The warning-count ratchet"), `XTRKCAD_SANITIZE_FLAGS` in
+  the top-level `CMakeLists.txt`, the regression case lists in `app/bin/RegressionTests.cmake`.
+- **Install paths** come from `GNUInstallDirs` (`CMAKE_INSTALL_DATADIR`,
+  `CMAKE_INSTALL_LOCALEDIR`), and the `XTRKCAD_SHARE_INSTALL_DIR` and
+  `XTRKCAD_LOCALE_INSTALL_DIR` built on them, never a literal `share/...`.
+- **Platform and compiler differences in a target** (sources, libraries, compile or link
+  options, definitions) use generator expressions, not `if()` blocks. `PlatformSettings.cmake`
+  sets the conditions once: `XTRKCAD_IF_WINDOWS` (CMake's `WIN32`: MinGW and MSVC),
+  `XTRKCAD_IF_UNIX` (everything else, macOS too), `XTRKCAD_IF_MACOS` and `XTRKCAD_IF_MSVC`:
+
+  ```cmake
+  target_link_libraries(cnvdsgn PRIVATE "$<${XTRKCAD_IF_UNIX}:m>")
+  target_sources(xtrkcad-wlib PRIVATE
+      "$<${XTRKCAD_IF_WINDOWS}:${CMAKE_CURRENT_SOURCE_DIR}/win32/getline.c>")
+  ```
+
+  Give a source file in a generator expression its full path: CMake doesn't make it absolute, and
+  resolves it against the directory that defined the target, not the one that adds it. `if()`
+  stays where a generator expression can't go: `find_package()`, `option()` defaults, `install()`
+  rules, custom commands and anything that sets a variable.
+- **A unit test is one call:** `xtrkcad_add_unit_test()` in `app/bin/unittest/CMakeLists.txt`
+  (see \ref regression-tests "Regression tests" for the playback tests).
+- **Libraries are imported targets** (`PkgConfig::GTK3`, `CMocka::cmocka`, `MiniXML::mxml`),
+  not include directories and library variables.
+
+A change that should not change the build is checked by comparing every build command before and
+after, for GCC and Clang, Debug and Release:
+
+```sh
+ninja -C <build> -t commands | sort > before.txt    # on the old tree
+cmake -B <build> -S <source>                         # after the change
+ninja -C <build> -t commands | sort > after.txt
+cmp before.txt after.txt
+```
+
+CI covers Windows (MinGW and MSVC) and macOS.
+
 # Dev-build filename hash suffix
 
 Every untagged dev build's *compiled-in* version string (About dialog, `--version` CLI output)

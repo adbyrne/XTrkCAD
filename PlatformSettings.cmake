@@ -78,6 +78,14 @@ set(XTRKCAD_GNU_WARNING_OPTIONS
 	"$<$<C_COMPILER_ID:GNU>:${_xtrkcad_ratchet_gnu}>"
 )
 
+# Platform and compiler conditions for generator expressions, set once:
+# "$<${XTRKCAD_IF_WINDOWS}:file.c>". WINDOWS is CMake's WIN32 (MinGW and
+# MSVC), UNIX everything else (macOS too), MACOS is APPLE.
+set(XTRKCAD_IF_WINDOWS "$<PLATFORM_ID:Windows>")
+set(XTRKCAD_IF_UNIX "$<NOT:$<PLATFORM_ID:Windows>>")
+set(XTRKCAD_IF_MACOS "$<PLATFORM_ID:Darwin>")
+set(XTRKCAD_IF_MSVC "$<C_COMPILER_ID:MSVC>")
+
 if(UNIX)
     include(FindPkgConfig)
     SET (CMAKE_ENABLE_EXPORTS TRUE)
@@ -96,11 +104,7 @@ if(UNIX)
     else()
         set(XTRKCAD_USE_GETTEXT_DEFAULT ON)
         set(XTRKCAD_USE_BROWSER_DEFAULT ON)
-        add_compile_options("-pthread")
-        add_link_options("-pthread")
    endif()
-
-    add_compile_options(-Wall ${XTRKCAD_GNU_WARNING_OPTIONS})
 endif()
 
 # Set Win64 flag when a 64 bit build is selected
@@ -133,25 +137,30 @@ if(WIN32)
 		if(CMAKE_VERSION VERSION_LESS 3.21)
 			message(FATAL_ERROR "The MSVC build needs CMake 3.21 or newer")
 		endif()
-		add_compile_options("$<$<CONFIG:DEBUG>:/W3>")
-		# Sources are UTF-8; the compat header stands in for GCC attributes
-		# and POSIX names (C only: rc.exe doesn't know these switches).
-		# C4828 (not valid UTF-8) comes from Latin-1 characters in a comment
-		# of the vendored app/wlib/include/getline.h, which wlib.h includes
-		# everywhere.
-		add_compile_options(
-			"$<$<COMPILE_LANGUAGE:C>:/utf-8>"
-			"$<$<COMPILE_LANGUAGE:C>:/FI${CMAKE_SOURCE_DIR}/app/bin/include/win32/msvccompat.h>"
-			"$<$<COMPILE_LANGUAGE:C>:/wd4828>"
-		)
-	else()
-		add_compile_options("$<$<CONFIG:DEBUG>:-Wall>" ${XTRKCAD_GNU_WARNING_OPTIONS})
 	endif()
-
-	add_compile_definitions(
-		"$<$<CONFIG:DEBUG>:_DEBUG>"
-	)
-
-	add_compile_definitions(WINDOWS)
-	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif()
+
+# Compile and link options for every platform and compiler.
+set(_xtrkcad_gnu "$<NOT:${XTRKCAD_IF_MSVC}>")
+set(_xtrkcad_unix_not_macos "$<NOT:$<PLATFORM_ID:Windows,Darwin>>")
+set(_xtrkcad_msvc_c "$<AND:${XTRKCAD_IF_MSVC},$<COMPILE_LANGUAGE:C>>")
+add_compile_options(
+	"$<${_xtrkcad_unix_not_macos}:-pthread>"
+	# GCC and Clang: -Wall always on UNIX, Debug only on MinGW
+	"$<$<AND:${_xtrkcad_gnu},$<OR:${XTRKCAD_IF_UNIX},$<CONFIG:DEBUG>>>:-Wall>"
+	"$<${_xtrkcad_gnu}:${XTRKCAD_GNU_WARNING_OPTIONS}>"
+	"$<$<AND:${XTRKCAD_IF_MSVC},$<CONFIG:DEBUG>>:/W3>"
+	# MSVC: sources are UTF-8; the compat header stands in for GCC
+	# attributes and POSIX names (C only: rc.exe doesn't know these
+	# switches). C4828 (not valid UTF-8) comes from Latin-1 characters in a
+	# comment of the vendored app/wlib/include/getline.h, which wlib.h
+	# includes everywhere.
+	"$<${_xtrkcad_msvc_c}:/utf-8>"
+	"$<${_xtrkcad_msvc_c}:/FI${CMAKE_SOURCE_DIR}/app/bin/include/win32/msvccompat.h>"
+	"$<${_xtrkcad_msvc_c}:/wd4828>"
+)
+add_link_options("$<${_xtrkcad_unix_not_macos}:-pthread>")
+add_compile_definitions(
+	"$<$<AND:${XTRKCAD_IF_WINDOWS},$<CONFIG:DEBUG>>:_DEBUG>"
+	"$<${XTRKCAD_IF_WINDOWS}:WINDOWS;_CRT_SECURE_NO_WARNINGS>"
+)

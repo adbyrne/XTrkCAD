@@ -32,9 +32,7 @@ target_include_directories(cnvdsgn
     ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
-if(NOT WIN32)
-	target_link_libraries(cnvdsgn PRIVATE m)
-endif()
+target_link_libraries(cnvdsgn PRIVATE "$<${XTRKCAD_IF_UNIX}:m>")
 
 add_custom_target(lines
  DEPENDS cnvdsgn
@@ -293,16 +291,13 @@ add_subdirectory(appmainwindow)
 add_subdirectory(parts)
 
 # add UTF-8 conversion utilities on Windows
-
-if(WIN32)
-    target_sources(xtrkcad-lib
-        PRIVATE
-        utf8convert.c
-        winstubs.c
-        include/utf8convert.h
-        include/win32/dirent.h
-    )
-endif()
+target_sources(xtrkcad-lib
+    PRIVATE
+    "$<${XTRKCAD_IF_WINDOWS}:${CMAKE_CURRENT_SOURCE_DIR}/utf8convert.c>"
+    "$<${XTRKCAD_IF_WINDOWS}:${CMAKE_CURRENT_SOURCE_DIR}/winstubs.c>"
+    "$<${XTRKCAD_IF_WINDOWS}:${CMAKE_CURRENT_SOURCE_DIR}/include/utf8convert.h>"
+    "$<${XTRKCAD_IF_WINDOWS}:${CMAKE_CURRENT_SOURCE_DIR}/include/win32/dirent.h>"
+)
 
 # This ensures that messages.h has been generated before we build xtrkcad-lib
 add_dependencies(xtrkcad-lib
@@ -348,23 +343,10 @@ if(XTRKCAD_CREATE_SVG)
         svgformat.c
         svgoutput.c
     )
-
-    if(WIN32)
-        target_link_libraries(xtrkcad-lib
-            PRIVATE
-            MiniXML::mxml
-        )
-    endif()
-    if(UNIX)
-        if (APPLE OR NOT ${MINIXML_STATIC_LIBRARY})
-            target_link_libraries(xtrkcad-lib
-                PRIVATE
-                MiniXML::mxml
-            )
-        else()
-			target_link_libraries(${XTRKCAD_BIN} PRIVATE ${MINIXML_STATIC_LIBRARY} pthread)
-        endif()
-    endif()
+    target_link_libraries(xtrkcad-lib
+        PRIVATE
+        MiniXML::mxml
+    )
 endif()
 
 target_sources(${XTRKCAD_BIN}
@@ -393,18 +375,21 @@ target_link_libraries(${XTRKCAD_BIN}
 
 
 
-if(NOT WIN32)
-    target_link_libraries(${XTRKCAD_BIN}
-        PRIVATE
-        m
-    )
-else()
+target_link_libraries(${XTRKCAD_BIN}
+    PRIVATE
+    "$<${XTRKCAD_IF_UNIX}:m>"
+)
+# main() stays the entry point of the WIN32 executable (MinGW does this by
+# itself)
+target_link_options(${XTRKCAD_BIN}
+    PRIVATE
+    "$<${XTRKCAD_IF_MSVC}:/ENTRY:mainCRTStartup>"
+)
+
+if(WIN32)
     set(ENV{path} "${CMAKE_CURRENT_BINARY_DIR};$ENV{PATH}")
 
     if(MSVC)
-        # main() stays the entry point of the WIN32 executable (MinGW does
-        # this by itself)
-        target_link_options(${XTRKCAD_BIN} PRIVATE /ENTRY:mainCRTStartup)
         install(
             FILES $<TARGET_PDB_FILE:${XTRKCAD_BIN}>
             DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}

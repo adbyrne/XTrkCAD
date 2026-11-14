@@ -51,16 +51,6 @@ else ()
 			/opt/local/lib
 		DOC "The Mini XML library")
 	endif()
-	find_library( MINIXML_STATIC_LIBRARY
-		NAMES libmxml.a
-		PATHS
-		/usr/lib64
-		/usr/lib
-		/usr/local/lib64
-		/usr/local/lib
-		/sw/lib
-		/opt/local/lib
-		DOC "The Mini XML static library")
 endif (WIN32)
 
 include(FindPackageHandleStandardArgs)

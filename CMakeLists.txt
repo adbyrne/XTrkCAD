@@ -235,16 +235,10 @@ if(XTRKCAD_USE_GETTEXT)
     #
     # Find the GnuWin32 installation directory, the gettext include should be located in subdir include
     #
-    if(WIN32)
-        # find libintl.h and use it (MinGW, or gvsbuild's gettext for MSVC);
-        # the library itself comes with GLib's link flags in PkgConfig::GTK3
-        find_path ( INTL_PATH libintl.h )
-        if(INTL_PATH)
-            message( STATUS "Use installed gettext module" )
-            include_directories(${INTL_PATH})
-        endif()
-    endif()
-    if(APPLE)
+    if(WIN32 OR APPLE)
+        # find libintl.h and use it (MinGW, gvsbuild's gettext for MSVC, or
+        # Homebrew); on Windows the library itself comes with GLib's link
+        # flags in PkgConfig::GTK3
         find_path ( INTL_PATH libintl.h )
         if(INTL_PATH)
             message( STATUS "Use installed gettext module" )
