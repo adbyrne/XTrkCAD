@@ -213,8 +213,11 @@ jobs:
 
           # Apply file by file. Our process is git first, so an Hg change can
           # already be on main. A file that already matches Hg at TIP (or is
-          # absent from both) is skipped as already present. Only the others
-          # are patched, so a failed patch is a real conflict. Checking the
+          # absent from both), or whose Hg diff reverse-applies, is skipped as
+          # already present: the second test covers files with git-only hunks
+          # (sync exceptions such as careditdlg.c, #384), as in the start-node
+          # search above. Only the others are patched, so a failed patch is a
+          # real conflict. Checking the
           # content first matters: a hunk that only adds lines can apply a
           # second time to a file that already has them, a few lines further
           # on (2026-10-22: it duplicated a function in cselect.c).
@@ -231,7 +234,8 @@ jobs:
           if [ -s "$RUNNER_TEMP/upstream.diff" ]; then
             sed -n 's|^diff --git a/.* b/||p' "$RUNNER_TEMP/upstream.diff" | sort -u > "$RUNNER_TEMP/files.txt"
             while IFS= read -r f; do
-              if matches_tip "$f"; then
+              if matches_tip "$f" ||
+                git apply -R --check --include="$f" "$RUNNER_TEMP/upstream.diff" 2> /dev/null; then
                 echo "$f" >> "$RUNNER_TEMP/already.txt"
               elif ! git apply --index --include="$f" "$RUNNER_TEMP/upstream.diff" 2>> "$RUNNER_TEMP/apply.err"; then
                 echo "FAILED: $f" >> "$RUNNER_TEMP/apply.err"
