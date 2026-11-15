@@ -592,6 +592,12 @@ WlibBeginPageTransform(GtkPrintContext *context)
 	}
 	WlibGetPaperSize();
 
+	// The control has no widget, so wDrawGetSize() reports these. They are
+	// the printable area in the control's pixels; left at 0 the clipping in
+	// callers (e.g. DDrawFillCircle()) dropped every filled circle.
+	bd->width = (gint)ceil((paperWidth - lBorder - rBorder) * printDpi);
+	bd->height = (gint)ceil((paperHeight - tBorder - bBorder) * printDpi);
+
 	// in XTrackCAD 0,0 is top left, in cairo bottom left. This is corrected
 	// via the following transformations. The translate also makes sure the
 	// drawing is rendered within the paper margin. The shared basicdraw
