@@ -238,9 +238,9 @@ static void scene_basic(struct control *c)
 }
 
 /* Bug 6 scene. Both lines lie in device row 99 - 50 = 49.
- * Legacy: the white line is widened from 3 to 4 px ("remove ghosts"),
- * batch: it stays 3 px wide. The black line (5 px) is the same in both paths,
- * so the two results differ in the rows at the edge of the white line. */
+ * Both paths widen the white line from 3 to 4 px ("remove ghosts"); before
+ * the fix the batch kept it at 3 px, so the rows at the edge of the white
+ * line differed. The black line (5 px) is the same in both paths. */
 static void scene_white(struct control *c)
 {
 	wDrawLine(c, 10, 50, 90, 50, 5, wDrawLineSolid, COL_BLACK, 0);
@@ -694,13 +694,12 @@ static void test_polygon_zero_points(void **state)
  * Known-bug tests (red before the fix, only with DRAWCAIRO_KNOWN_BUGS=1)
  * =================================================================== */
 
-/* 7e: wDrawBitMap does not invalidate.
+/* 7e (fixed): wDrawBitMap did not invalidate.
  * A missing resource yields a 1x1 transparent bitmap. */
-static void test_known_bug_7e_bitmap_invalidation(void **state)
+static void test_bitmap_invalidation(void **state)
 {
 	CTX();
 	wDrawBitMap_p bm;
-	KNOWN_BUG("7e");
 	bm = wDrawBitMapCreate(c, 0, 0, "/xtrkcad-test/", "missing.png");
 	assert_non_null(bm); /* intentionally not freed: the type is private */
 	rec_reset();
@@ -799,27 +798,81 @@ static void test_transparent_rect_clipped_in_batch(void **state)
 	assert_false(is_set(d->surface, 60, 68)); /* outside the clip */
 }
 
-/* 6: a white line is not widened in batch mode */
-static void test_known_bug_6_white_line_batch_vs_legacy(void **state)
+/* N5 (fixed): the background is clipped to the room rectangle.
+ * Background: a 100 x 100 opaque red pixbuf, size 100 -> scale 1, it covers
+ * the whole canvas. Borders are 0 in the stubs.
+ * Room (20, 20, 30, 30) in application pixels -> columns 20..49,
+ * rows 99-20-30 = 49 .. 78. */
+static void test_background_clipped_to_room(void **state)
 {
 	CTX();
-	KNOWN_BUG("6");
+	GdkPixbuf *pb = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 100, 100);
+
+	gdk_pixbuf_fill(pb, 0xFF0000FF);
+	d->background = pb; /* released by teardown */
+	wDrawShowBackground(c, 0, 0, 100, 0.0, 0, 20, 20, 30, 30);
+	assert_true(is_set(d->surface, 35, 60));   /* inside the room      */
+	assert_false(is_set(d->surface, 80, 60));  /* right of the room    */
+	assert_false(is_set(d->surface, 35, 20));  /* above the room       */
+	assert_false(is_set(d->surface, 35, 90));  /* below the room       */
+}
+
+/* Bitmap export passes an empty room: no room clip, the whole canvas. */
+static void test_background_without_room(void **state)
+{
+	CTX();
+	GdkPixbuf *pb = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 100, 100);
+
+	gdk_pixbuf_fill(pb, 0xFF0000FF);
+	d->background = pb; /* released by teardown */
+	wDrawShowBackground(c, 0, 0, 100, 0.0, 0, 0, 0, 0, 0);
+	assert_true(is_set(d->surface, 35, 60));
+	assert_true(is_set(d->surface, 80, 10));
+}
+
+/* 6 (fixed): a white line was not widened in batch mode */
+static void test_white_line_batch_vs_legacy(void **state)
+{
+	CTX();
 	assert_batch_equals_legacy(c, scene_white);
 }
 
-/* N6: invalidation ignores the stroke width */
-static void test_known_bug_N6_dirty_rect_stroke_width(void **state)
+/* N6 (fixed): invalidation ignored the stroke width */
+static void test_dirty_rect_stroke_width(void **state)
 {
 	CTX();
 	unsigned char *before;
-	KNOWN_BUG("N6");
 	before = snapshot(d->surface, NULL);
 	rec_reset();
 	/* y = 50 -> device row 49, line centered at 49.5 with width 5: it covers
 	 * 47.0 .. 52.0 = rows 47..51. The legacy code invalidates only the row of
-	 * the line (height |dy| + 1 = 1 -> row 49), so rows 47, 48, 50, 51 are
+	 * the line (height |dy| + 1 = 1 -> row 49), so rows 47, 48, 50, 51 were
 	 * changed but not invalidated. */
 	wDrawLine(c, 10, 50, 90, 50, 5, wDrawLineSolid, COL_BLACK, 0);
+	assert_int_equal(uncovered_changes(before, d->surface), 0);
+	free(before);
+}
+
+/* N6 (fixed): the same for a wide arc and a wide stroked polygon.
+ * Arc: center (50,50) -> device (50,49), r = 20, width 5: the stroke reaches
+ * 2.5 px beyond the circle's bounding box.
+ * Triangle (20,20) (80,20) (50,80), width 5, stroked, closed. */
+static void test_dirty_rect_wide_arc_polygon(void **state)
+{
+	CTX();
+	unsigned char *before;
+	wDrawPix_t p[3][2] = { { 20, 20 }, { 80, 20 }, { 50, 80 } };
+
+	before = snapshot(d->surface, NULL);
+	rec_reset();
+	wDrawArc(c, 50, 50, 20, 0.0, 360.0, 0, 5, wDrawLineSolid, COL_BLACK, 0);
+	assert_int_equal(uncovered_changes(before, d->surface), 0);
+	free(before);
+
+	clear_surface(d->surface);
+	before = snapshot(d->surface, NULL);
+	rec_reset();
+	wDrawPolygon(c, p, NULL, 3, COL_BLACK, 5, wDrawLineSolid, 0, 0, 0);
 	assert_int_equal(uncovered_changes(before, d->surface), 0);
 	free(before);
 }
@@ -911,15 +964,18 @@ int main(int argc, char **argv)
 		cmocka_unit_test_setup_teardown(test_clip_change_flushes_open_path, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_text_size_keeps_batch_open, setup_nowidget, teardown),
 		cmocka_unit_test_setup_teardown(test_transparent_rect_clipped_in_batch, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_bitmap_invalidation, setup_widget, teardown),
+		cmocka_unit_test_setup_teardown(test_dirty_rect_stroke_width, setup_widget, teardown),
+		cmocka_unit_test_setup_teardown(test_dirty_rect_wide_arc_polygon, setup_widget, teardown),
+		cmocka_unit_test_setup_teardown(test_background_clipped_to_room, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_background_without_room, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_white_line_batch_vs_legacy, setup_nowidget, teardown),
 
 		/* keep last: under ASan this test aborts the whole process */
 		cmocka_unit_test_setup_teardown(test_polygon_zero_points, setup_nowidget, teardown),
 
 		/* known bugs */
 
-		cmocka_unit_test_setup_teardown(test_known_bug_7e_bitmap_invalidation, setup_widget, teardown),
-		cmocka_unit_test_setup_teardown(test_known_bug_6_white_line_batch_vs_legacy, setup_nowidget, teardown),
-		cmocka_unit_test_setup_teardown(test_known_bug_N6_dirty_rect_stroke_width, setup_widget, teardown),
 
 
 	};

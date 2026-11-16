@@ -86,6 +86,22 @@ static void finish_drawing(struct draw *bd, cairo_t *cr);
 #define INMAPX(D,X)	(X)
 #define INMAPY(D,Y)	(((D)->height-1) - (Y))
 
+/** arcs with a smaller radius (in pixels) are not drawn */
+#define MIN_ARC_RADIUS	(6.0/75.0)
+/** largest radius wDrawArc can draw, see wDrawGetMaxRadius */
+#define MAX_ARC_RADIUS	(32767.0)
+/** offset from a pixel's corner to its center: a 1 px line drawn there
+ *  covers exactly one pixel row/column */
+#define PIXEL_CENTER	(0.5)
+/** alpha of the fill of a transparent (wDrawOptTransparent) shape */
+#define TRANSPARENT_FILL_ALPHA	(0.3)
+/** extra margin of an invalidated area for antialiased edges, in pixels */
+#define AA_MARGIN	(1.0)
+/** extra margin of the invalidated area around rotated text, in pixels */
+#define TEXT_MARGIN	(2.0)
+/** degrees to radians */
+#define DEG2RAD(A)	((A) * (M_PI / 180.0))
+
 /*******************************************************************************
  *
  * Basic Drawing Functions
@@ -321,7 +337,12 @@ prepare_drawing(struct draw *bd, wDrawWidth width, wDrawLineType_e lineType,
 	if (!bd->pathOpen) {
 		GdkRGBA gcolor;
 		GtkDrawSetColor(cairoCtx, color, &gcolor);
-		cairo_set_line_width(cairoCtx, width ? abs(width) : 1);
+		double lw = width ? abs(width) : 1;
+		if (color == wDrawColorWhite) {
+			/* Remove ghosts, as gtkDrawCreateCairoContext does */
+			lw += 1;
+		}
+		cairo_set_line_width(cairoCtx, lw);
 		setCairoDashStyle(cairoCtx, lineType);
 		bd->activeColor = color;
 		bd->activeWidth = width;
@@ -363,6 +384,45 @@ void wDrawDelayUpdate(
 }
 
 
+/**
+ * How far a stroke reaches beyond its geometric path, in pixels: half the
+ * line width (as gtkDrawCreateCairoContext/prepare_drawing set it, white
+ * lines one pixel wider) plus AA_MARGIN for antialiasing.
+ *
+ * \param width IN line width as passed to the wDraw* call
+ * \param color IN line color
+ * \return the padding to add around the path's bounding box
+ */
+static double stroke_pad(wDrawWidth width, wDrawColor color)
+{
+	double lw = width ? abs(width) : 1;
+	if (color == wDrawColorWhite) {
+		lw += 1;
+	}
+	return lw / 2.0 + AA_MARGIN;
+}
+
+/**
+ * Invalidate the device-pixel box (x0,y0)-(x1,y1), grown by `pad` on every
+ * side and widened to whole pixels.
+ *
+ * \param drawingArea IN the drawing area (must have a widget)
+ * \param x0, y0, x1, y1 IN two opposite corners, in any order
+ * \param pad IN extra margin in pixels
+ */
+static void invalidate_box(wControl_p drawingArea,
+                           double x0, double y0, double x1, double y1,
+                           double pad)
+{
+	int left   = (int)floor(MIN(x0, x1) - pad);
+	int top    = (int)floor(MIN(y0, y1) - pad);
+	int right  = (int)ceil(MAX(x0, x1) + pad);
+	int bottom = (int)ceil(MAX(y0, y1) + pad);
+
+	gtk_widget_queue_draw_area(drawingArea->widget, left, top,
+	                           right - left + 1, bottom - top + 1);
+}
+
 void wDrawLine(
         wControl_p drawingArea,
         wDrawPix_t x0, wDrawPix_t y0,
@@ -390,8 +450,8 @@ void wDrawLine(
 
 	cairo_t* cr = prepare_drawing(bd, width, lineType, color, opts, FALSE);
 
-	cairo_move_to(cr, x0 + 0.5, y0 + 0.5);
-	cairo_line_to(cr, x1 + 0.5, y1 + 0.5);
+	cairo_move_to(cr, x0 + PIXEL_CENTER, y0 + PIXEL_CENTER);
+	cairo_line_to(cr, x1 + PIXEL_CENTER, y1 + PIXEL_CENTER);
 
 	if (cr != cairoCtx) {
 		cairo_stroke(cr);
@@ -403,9 +463,10 @@ void wDrawLine(
 			/* Legacy mode: stroke happened in finish_drawing, just
 			 * invalidate the region. In batch mode the
 			 * queue_draw_area is deferred to wDrawFinish. */
-			gtk_widget_queue_draw_area(drawingArea->widget,
-			                           x0>x1?x1:x0, y0>y1?y1:y0,
-			                           fabs(x1-x0)+1, fabs(y1-y0)+1);
+			invalidate_box(drawingArea,
+			               x0 + PIXEL_CENTER, y0 + PIXEL_CENTER,
+			               x1 + PIXEL_CENTER, y1 + PIXEL_CENTER,
+			               stroke_pad(width, color));
 		}
 	}
 
@@ -438,7 +499,6 @@ void wDrawArc(
         wDrawColor color,
         wDrawOpts opts )
 {
-	int x, y, w, h;
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 
 	g_assert(drawingArea->type == B_DRAW);
@@ -449,11 +509,7 @@ void wDrawArc(
 		return;
 	}
 
-	if (r < 6.0/75.0) { return; }
-	x = INMAPX(bd,x0-r);
-	y = INMAPY(bd,y0+r);
-	w = 2*r;
-	h = 2*r;
+	if (r < MIN_ARC_RADIUS) { return; }
 
 	// the batch handling looks different here, but it works like that
 	// the arc is not a part of a batch
@@ -477,7 +533,7 @@ void wDrawArc(
 
 	// draw the curve itself
 	cairo_arc_negative(cairo, INMAPX(bd, x0), INMAPY(bd, y0), r,
-	                   (angle0 - 90 + angle1) * (M_PI / 180.0), (angle0 - 90) * (M_PI / 180.0));
+	                   DEG2RAD(angle0 - 90 + angle1), DEG2RAD(angle0 - 90));
 
 	// and finish the batch
 	bd->pathOpen = TRUE;
@@ -490,7 +546,13 @@ void wDrawArc(
 
 	if (drawingArea->widget && !bd->delayUpdate) {
 		if(!cairoCtx) {
-			gtk_widget_queue_draw_area(drawingArea->widget,x,y,w,h);
+			/* the whole circle, or the center mark if that reaches
+			 * further, plus the stroke */
+			double reach = drawCenter ? MAX(r, CENTERMARK_LENGTH / 2.0) : r;
+			double cx = INMAPX(bd, x0);
+			double cy = INMAPY(bd, y0);
+			invalidate_box(drawingArea, cx - reach, cy - reach,
+			               cx + reach, cy + reach, stroke_pad(width, color));
 		}
 	}
 }
@@ -512,13 +574,12 @@ void wDrawString(
         wDrawOpts opts )
 {
 	PangoLayout *layout;
-	GdkRectangle update_rect;
 	wDrawPix_t w;
 	wDrawPix_t h;
 	wDrawPix_t ascent;
 	wDrawPix_t descent;
 	wDrawPix_t baseline;
-	double angle = -M_PI * a / 180.0;
+	double angle = -DEG2RAD(a);
 
 	struct draw* bd = CONTROL_GET_ATTRIBUTES_PTR(drawingArea, draw);
 	g_assert(drawingArea->type == B_DRAW);
@@ -565,18 +626,29 @@ void wDrawString(
 
 	if (bd->delayUpdate || drawingArea->widget == NULL) { return; }
 
-	/* recalculate the area to be updated
-	 * for simplicity sake I added plain text height ascent and descent,
-	 * mathematically correct would be to use the trigonometrical functions as well
-	 */
-	update_rect.x      = (gint) x - 2;
-	update_rect.y      = (gint) y - (gint) (baseline + descent) - 2;
-	update_rect.width  = (gint) (fabs(w * cos( angle )) + fabs(h * sin(angle)))+2;
-	update_rect.height = (gint) (fabs(h * sin( angle )) + fabs(w * cos(angle)))+2;
+	/* The layout covers (0, -baseline) .. (w, h - baseline) in text
+	 * coordinates, rotated by `angle` around (x, y). Invalidate the bounding
+	 * box of its four rotated corners, plus TEXT_MARGIN. */
+	{
+		double c = cos(angle);
+		double sn = sin(angle);
+		double cornerX[2] = { 0.0, w };
+		double cornerY[2] = { -baseline, h - baseline };
+		double minX = 0, maxX = 0, minY = 0, maxY = 0;
+		int i, j;
 
-	if (drawingArea->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(drawingArea->widget, update_rect.x, update_rect.y,
-		                           update_rect.width, update_rect.height);
+		for (i = 0; i < 2; i++) {
+			for (j = 0; j < 2; j++) {
+				double px = x + cornerX[i] * c - cornerY[j] * sn;
+				double py = y + cornerX[i] * sn + cornerY[j] * c;
+				if ((i == 0 && j == 0) || px < minX) { minX = px; }
+				if ((i == 0 && j == 0) || px > maxX) { maxX = px; }
+				if ((i == 0 && j == 0) || py < minY) { minY = py; }
+				if ((i == 0 && j == 0) || py > maxY) { maxY = py; }
+			}
+		}
+		invalidate_box(drawingArea, minX, minY, maxX, maxY,
+		               TEXT_MARGIN);
 	}
 
 }
@@ -644,9 +716,11 @@ static void wlibDrawFilled(
 		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
 		if ( iDrawLog >= 1 ) {
 			printf( "wlibDrawFilled( %0.3f %0.3f %0.3f %0.3f )\n",
-			        gcolor.red, gcolor.green, gcolor.blue, 0.3);
+			        gcolor.red, gcolor.green, gcolor.blue,
+			        TRANSPARENT_FILL_ALPHA);
 		}
-		cairo_set_source_rgba(cairo, gcolor.red, gcolor.green, gcolor.blue, 0.3);
+		cairo_set_source_rgba(cairo, gcolor.red, gcolor.green,
+		                      gcolor.blue, TRANSPARENT_FILL_ALPHA);
 	}
 	cairo_fill(cairo);
 	cairo_set_operator(cairo, saved_op);
@@ -755,16 +829,9 @@ void wDrawPolygon(
 		}
 		maxCnt = cnt;
 	}
-	wDrawPix_t min_x,max_x,min_y,max_y;
-	min_x = max_x = INMAPX(bd,p[0][0]);
-	min_y = max_y = INMAPY(bd,p[0][1]);
 	for (i=0; i<cnt; i++) {
 		points[i].x = INMAPX(bd,p[i][0]);
 		points[i].y = INMAPY(bd,p[i][1]);
-		if (points[i].x < min_x) { min_x = points[i].x; }
-		if (points[i].x > max_x) { max_x = points[i].x; }
-		if (points[i].y > max_y) { max_y = points[i].y; }
-		if (points[i].y < min_y) { min_y = points[i].y; }
 	}
 
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, fill?0:dw,
@@ -842,6 +909,14 @@ void wDrawPolygon(
 			cairo_line_to(cairo, save.x, save.y);
 		}
 	}
+	/* What the stroke covers, including line width and mitre joins (a
+	 * filled polygon has width 1 here, which also covers its transparent
+	 * outline). Taken before the path is consumed. */
+	double ex0, ey0, ex1, ey1;
+	cairo_stroke_extents(cairo, &ex0, &ey0, &ex1, &ey1);
+	cairo_user_to_device(cairo, &ex0, &ey0);
+	cairo_user_to_device(cairo, &ex1, &ey1);
+
 	if (fill && !open) {
 		wlibDrawFilled( cairo, color, opt );
 	} else {
@@ -849,9 +924,7 @@ void wDrawPolygon(
 	}
 	gtkDrawDestroyCairoContext(cairo);
 	if (drawingArea->widget && !bd->delayUpdate) {
-		gtk_widget_queue_draw_area(GTK_WIDGET(drawingArea->widget),min_x,min_y,
-		                           max_x-min_x+1,
-		                           max_y-min_y+1);  //Ensure positive width
+		invalidate_box(drawingArea, ex0, ey0, ex1, ey1, AA_MARGIN);
 	}
 
 }
@@ -1056,6 +1129,12 @@ void wDrawBitMap(
 
 	gtkDrawDestroyCairoContext(cr);
 
+	/* In batch mode wDrawFinish invalidates the whole widget. */
+	if (drawingArea->widget && !bd->delayUpdate && !cairoCtx) {
+		gtk_widget_queue_draw_area(drawingArea->widget, (gint)floor(x),
+		                           (gint)floor(y), bm->w + 1, bm->h + 1);
+	}
+
 	if ( iDrawLog >= 1 ) {
 		printf( "%ld: wDrawBitMap( %d+%d ) %0.1f+%0.1f ) \n", lDrawCnt++, bm->x, bm->y,
 		        x, y ) ;
@@ -1197,7 +1276,8 @@ double wDrawGetDPI(
 
 double wDrawGetMaxRadius( wControl_p drawingArea )
 {
-	return(32767.0);
+	(void)drawingArea;
+	return(MAX_ARC_RADIUS);
 }
 
 /**
@@ -1377,18 +1457,21 @@ void wDrawShowBackground( wControl_p drawingArea, wWinPix_t pos_x,
 		                drawControl->height - bb);
 		cairo_clip(cairo);
 
-		// 2. Set the clipping area to the "White Room"
-		// We switch to identity matrix because room_x/y/w/h are screen pixels
-		cairo_matrix_t current_matrix;
-		cairo_get_matrix(cairo, &current_matrix); // Save current zoom matrix
+		// 2. Narrow the clip to the "White Room". The room comes in
+		// application pixels like wDrawClip (y measured from the bottom);
+		// a width or height <= 0 means "no room clip" (bitmap export).
+		// One rectangle per cairo_clip: two rectangles in one path would
+		// clip to their union.
+		if (clip_w > 0 && clip_h > 0) {
+			cairo_matrix_t current_matrix;
+			cairo_get_matrix(cairo, &current_matrix); // Save current zoom matrix
 
-		cairo_identity_matrix(cairo);
-		cairo_rectangle(cairo, clip_x, clip_y, clip_w, clip_h);
-		cairo_rectangle(cairo, lb, 0,
-		                drawControl->width - lb,
-		                drawControl->height - bb);
-		cairo_clip(cairo);
-		cairo_set_matrix(cairo, &current_matrix);
+			cairo_identity_matrix(cairo);
+			cairo_rectangle(cairo, INMAPX(drawControl, clip_x),
+			                INMAPY(drawControl, clip_y) - clip_h, clip_w, clip_h);
+			cairo_clip(cairo);
+			cairo_set_matrix(cairo, &current_matrix);
+		}
 
 		/* -------------------------- */
 		int pixels_width = gdk_pixbuf_get_width(drawControl->background);
@@ -1406,7 +1489,7 @@ void wDrawShowBackground( wControl_p drawingArea, wWinPix_t pos_x,
 			scale = sized/width;
 		}
 		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
-		double rad = M_PI*(angle/180);
+		double rad = DEG2RAD(angle);
 		posy = (double)drawControl->height-((pixels_height*fabs(cos(
 		                rad))+pixels_width*fabs(sin(
 		                                rad)))*scale)-posy;
@@ -1415,7 +1498,7 @@ void wDrawShowBackground( wControl_p drawingArea, wWinPix_t pos_x,
 		cairo_translate(cairo, fabs(pixels_width/2.0*cos(rad))+fabs(
 		                        pixels_height/2.0*sin(rad)),
 		                fabs(pixels_width/2.0*sin(rad))+fabs(pixels_height/2.0*cos(rad)));
-		cairo_rotate(cairo, M_PI*(angle/180.0));
+		cairo_rotate(cairo, rad);
 		// We need to clip around the image, or cairo will paint garbage attributes
 		cairo_rectangle(cairo, -pixels_width/2.0, -pixels_height/2.0, pixels_width,
 		                pixels_height);

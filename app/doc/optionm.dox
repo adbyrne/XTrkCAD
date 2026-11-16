@@ -348,7 +348,7 @@ This dialog controls some parameters which likely will not be changed frequently
 
 - <b>Angles</b> - controls the angle system. <b>Polar</b>: 0° is up and angles are measured clockwise, or <b>Cartesian</b>: 0° is to the right and angles are measured counter-clockwise.
 
-- <b>AutoSave</b> <i>AutoSave</i> \anchor idx_AutoSave_243  - specifies the number of Check Points taken before an AutoSave. The same number of checkpoints are retained in a circular archive set in the (\ref workDir) named for the layout file.  Setting this value to 0 disables AutoSave.
+- <b>AutoSave</b> <i>AutoSave</i> \anchor idx_AutoSave_243  - specifies the number of Check Points taken before an AutoSave. The same number of checkpoints are retained in a circular archive set in the (\ref workDir) named for the layout file.  Setting this value to 0 disables AutoSave. The field is greyed out while Check Point is 0.
 
 - <b>Balloon Help</b> - disables the display of <b>Balloon Help</b> (\ref windowTerms) which usually is shown when the cursor is placed over a control.
 
@@ -356,7 +356,7 @@ This dialog controls some parameters which likely will not be changed frequently
 
 - <b>Show Flex-track</b> - disables the display or <b>Flex-track</b> (\ref generalTerms) which is shown on the left of the Toolbar.
 
-- <b>Check Point</b> <i>AutoSave</i> \anchor idx_AutoSave_244  - specifies the Check Point frequency; the number of modifications made to the layout since the last save. The layout is automatically saved to the Check Point file (\ref workDir) when the Check Point frequency is reached. Setting this value to 0 disables use of the Checkpoint file <i>and AutoSave</i>. Upon restart, if the program was not saved normally, the user will be prompted to see if they want to resume at the last checkpoint.
+- <b>Check Point</b> <i>AutoSave</i> \anchor idx_AutoSave_244  - specifies the number of modifications made to the layout between Check Points. The layout is automatically saved to the Check Point file (\ref workDir) when that number is reached. Setting this value to 0 disables use of the Checkpoint file <i>and AutoSave</i>. Upon restart, if the program was not saved normally, the user will be prompted to see if they want to resume at the last checkpoint.
 
 - <b>Connection Angle</b> - as below for Connection Distance for the angle between endpoints.
 

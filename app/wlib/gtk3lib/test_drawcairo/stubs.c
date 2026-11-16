@@ -112,3 +112,37 @@ void wlibFontDestroyPangoLayout(PangoLayout *layout)
 
 int GetLBorder(void) { return 0; }
 int GetBBorder(void) { return 0; }
+
+/* ------------------------------------------------------------------ GDK */
+
+/* The real function needs an open display (it creates a surface similar to
+ * the default screen's). The tests run without one, so this copies the
+ * pixbuf into a plain ARGB32 image surface (premultiplied alpha). */
+cairo_surface_t *gdk_cairo_surface_create_from_pixbuf(const GdkPixbuf *pixbuf,
+                int scale, GdkWindow *for_window)
+{
+	int w = gdk_pixbuf_get_width(pixbuf);
+	int h = gdk_pixbuf_get_height(pixbuf);
+	int n = gdk_pixbuf_get_n_channels(pixbuf);
+	int sstride = gdk_pixbuf_get_rowstride(pixbuf);
+	const guchar *src = gdk_pixbuf_read_pixels(pixbuf);
+	cairo_surface_t *s = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
+	unsigned char *dst;
+	int dstride, x, y;
+
+	(void)scale; (void)for_window;
+	cairo_surface_flush(s);
+	dst = cairo_image_surface_get_data(s);
+	dstride = cairo_image_surface_get_stride(s);
+	for (y = 0; y < h; y++) {
+		for (x = 0; x < w; x++) {
+			const guchar *p = src + y * sstride + x * n;
+			guint32 a = (n == 4) ? p[3] : 255;
+			guint32 v = (a << 24) | ((p[0] * a / 255) << 16) |
+			            ((p[1] * a / 255) << 8) | (p[2] * a / 255);
+			memcpy(dst + y * dstride + x * 4, &v, 4);
+		}
+	}
+	cairo_surface_mark_dirty(s);
+	return s;
+}

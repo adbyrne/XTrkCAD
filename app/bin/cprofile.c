@@ -196,6 +196,91 @@ DestroyCopyOfProfileElements()
  * \param  printVert print vertical.
  */
 
+/**
+ * Hatch the area below the profile line with 45 degree lines instead of
+ * filling it, so a printout doesn't waste ink or toner.
+ *
+ * The work is done in page units (u to the right, v up from prof.minE),
+ * so the hatch is 45 degrees on paper whatever the X and Y scales are.
+ * A hatch line is v = u - c; it lies inside the area where
+ * g(u) = F(u) - (u - c) >= 0 with F the profile height, for u >= c.
+ *
+ * \param D IN the print draw context
+ * \param pts IN profile points, ascending in x
+ * \param cnt IN number of profile points
+ */
+static void HatchProfile(drawCmd_p D, coOrd * pts, int cnt)
+{
+	double sx = prof.scaleX / D->scale;
+	double sy = prof.scaleY / D->scale;
+	double step = 0.1;		/* hatch spacing on paper, inch */
+	double uMax, vMax = 0.0;
+	double c;
+	int inx;
+
+	if (cnt < 2 || sx <= 0.0 || sy <= 0.0) {
+		return;
+	}
+	uMax = pts[cnt-1].x * sx;
+	for (inx = 0; inx < cnt; inx++) {
+		vMax = max(vMax, (pts[inx].y - prof.minE) * sy);
+	}
+
+	for (c = -vMax + step / 2.0; c < uMax; c += step) {
+		BOOL_T inside = FALSE;
+		double uStart = 0.0;
+
+		for (inx = 0; inx < cnt - 1; inx++) {
+			double u0 = pts[inx].x * sx;
+			double u1 = pts[inx+1].x * sx;
+			double g0 = (pts[inx].y - prof.minE) * sy - (u0 - c);
+			double g1 = (pts[inx+1].y - prof.minE) * sy - (u1 - c);
+			double lo = max(u0, c);
+			double gl, uz;
+			coOrd p0, p1;
+
+			if (u1 <= u0 || u1 <= lo) {
+				continue;
+			}
+			/* g is linear on [u0,u1]; evaluate it at lo */
+			gl = g0 + (g1 - g0) * (lo - u0) / (u1 - u0);
+			if (!inside && gl >= 0.0) {
+				inside = TRUE;
+				uStart = lo;
+			}
+			if (inside && g1 >= 0.0) {
+				continue;	/* still inside at the segment end */
+			}
+			if (!inside) {
+				if (g1 <= 0.0) {
+					continue;
+				}
+				/* enters the area inside this segment */
+				uStart = lo + (u1 - lo) * (-gl) / (g1 - gl);
+				inside = TRUE;
+				continue;
+			}
+			/* leaves the area inside this segment */
+			uz = lo + (u1 - lo) * gl / (gl - g1);
+			p0.x = uStart / sx;
+			p0.y = (uStart - c) / sy + prof.minE;
+			p1.x = uz / sx;
+			p1.y = (uz - c) / sy + prof.minE;
+			DrawLine(D, p0, p1, 0, profileColorFill);
+			inside = FALSE;
+		}
+		if (inside) {
+			coOrd p0, p1;
+
+			p0.x = uStart / sx;
+			p0.y = (uStart - c) / sy + prof.minE;
+			p1.x = uMax / sx;
+			p1.y = (uMax - c) / sy + prof.minE;
+			DrawLine(D, p0, p1, 0, profileColorFill);
+		}
+	}
+}
+
 static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 {
 	coOrd pl, pt, pb;
@@ -265,7 +350,12 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 		DYNARR_APPEND(pts_t, points_da, 10);
 		pb.x = 0;
 		points(points_da.cnt-1) = pb;
-		DrawPoly(D, points_da.cnt, &points(0), NULL, profileColorFill, 1, DRAW_FILL);
+		if (D->options & DC_PRINT) {
+			HatchProfile(D, &points(0), profElem_da.cnt);
+		} else {
+			DrawPoly(D, points_da.cnt, &points(0), NULL, profileColorFill, 1,
+			         DRAW_FILL);
+		}
 	}
 
 	pt.y = prof.minE-(2*LABELH+3.0/mainD.dpi)/prof.scaleY*D->scale;
@@ -593,7 +683,6 @@ static drawCmd_t printProfileD = {
  * orientation is based in on the orientation of the display windows.
  * Eg. is the windows is wider than high, the printout will be in
  * landscape.
- * \todo Rework the layout of the printout
  *
  * \param pageNr IN
  * \param data IN
