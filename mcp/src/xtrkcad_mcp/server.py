@@ -9,6 +9,7 @@ from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
 from xtrkcad_mcp.config import load_config
+from xtrkcad_mcp.conventions import CONVENTIONS_VERSION, check_conventions as _check_conventions
 from xtrkcad_mcp.models import (
     SCALE_RATIOS,
     Layout,
@@ -3050,6 +3051,38 @@ def list_labeled_segments(
         }
         for s in segments
     ]
+
+
+@mcp.tool()
+def check_conventions(path: str) -> dict:
+    """Check a layout against the Operating Data Conventions (v1).
+
+    The conventions record the railroad as built, as JSON Notes with a
+    "kind" (station, industry, yard_track, reference, ...) placed on the
+    layout, and Layer Groups. This reports every rule the layout breaks,
+    errors first. Rule ids are stable; messages may change.
+
+    The whole layout is always checked: notes refer to each other across
+    layers, so a layer subset would report false unknown references.
+
+    Args:
+        path: Path to a .xtc or .xtce file.
+
+    Returns:
+        {"conventions_version", "layout", "counts": {"error", "warning",
+        "info"}, "issues": [{"severity", "rule", "message", "hint",
+        "note_id", "layer", "group", "track_id", "x", "y"}]}
+    """
+    p = _resolve_plan(path)
+    issues = _check_conventions(parse_file(p))
+    counts = {sev: sum(1 for i in issues if i.severity == sev)
+              for sev in ("error", "warning", "info")}
+    return {
+        "conventions_version": CONVENTIONS_VERSION,
+        "layout": str(p),
+        "counts": counts,
+        "issues": [i.as_dict() for i in issues],
+    }
 
 
 @mcp.tool()

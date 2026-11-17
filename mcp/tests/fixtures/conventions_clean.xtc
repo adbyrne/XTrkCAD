@@ -1,0 +1,60 @@
+VERSION 13 5.4.0
+TITLE1 Conventions clean fixture
+TITLE2 every note kind, valid (spec v1)
+SCALE HO
+ROOMSIZE 260 x 80
+
+LAYERS 0 1 0 0 0 0 0 0 0 "L1-Main"
+LAYERS 1 1 0 0 0 0 0 0 0 "L1-Passing"
+LAYERS 2 1 0 0 0 0 0 0 0 "L1-Service"
+LAYERS 3 1 0 0 0 0 0 0 0 "L1-Staging"
+LAYERS CURRENT 0
+LAYERGROUP DEFINE 0 "Mainline"
+LAYERGROUP MEMBERS 0 "1"
+LAYERGROUP DEFINE 1 "Passing"
+LAYERGROUP MEMBERS 1 "2"
+LAYERGROUP DEFINE 2 "Service"
+LAYERGROUP MEMBERS 2 "3"
+LAYERGROUP DEFINE 3 "Staging"
+LAYERGROUP MEMBERS 3 "4"
+LAYERGROUP DEFINE 4 "NYE"
+LAYERGROUP MEMBERS 4 "1;2;3;4"
+
+NOTE 100 0 0 0 0.000000 0.000000 0 3 "{""kind"": ""railroad"", ""id"": ""NYE"", ""name"": ""New York & Eastern"", ""reporting_marks"": ""NYE"", ""group"": ""NYE""}"
+NOTE 101 0 0 0 0.000000 0.000000 0 3 "{""kind"": ""subdivision"", ""id"": ""NLS"", ""name"": ""Northern Lights Subdivision"", ""railroad"": ""NYE""}"
+NOTE 102 0 0 0 0.000000 0.000000 0 3 "{""kind"": ""reference"", ""id"": ""MP_ZERO"", ""mp"": 0, ""mp_scale"": 12, ""mp_unit"": ""in""}"
+NOTE 103 0 0 0 200.000000 0.000000 0 3 "{""kind"": ""reference"", ""id"": ""BB_EXIT""}"
+NOTE 104 0 0 0 10.000000 0.000000 0 3 "{""kind"": ""station"", ""id"": ""WP"", ""name"": ""Williamsport"", ""terminus"": true, ""ref_tag"": ""MP_ZERO""}"
+NOTE 105 0 0 0 150.000000 0.000000 0 3 "{""kind"": ""station"", ""id"": ""XP"", ""name"": ""Xina Pass""}"
+NOTE 106 0 0 0 5.000000 0.000000 0 3 "{""kind"": ""yard_limit"", ""id"": ""WP""}"
+NOTE 107 0 0 0 40.000000 0.000000 0 3 "{""kind"": ""yard_limit"", ""id"": ""WP""}"
+NOTE 108 2 0 0 160.000000 30.000000 0 3 "{""kind"": ""industry"", ""id"": ""QM1"", ""name"": ""Quilly Mine #1"", ""station"": ""XP"", ""car_spots"": 2, ""car_types"": [""HM""], ""loads_in"": [""empties""], ""loads_out"": [""coal""]}"
+NOTE 109 3 0 0 20.000000 50.000000 0 3 "{""kind"": ""staging"", ""id"": ""EAST"", ""name"": ""East Staging""}"
+NOTE 110 3 0 0 60.000000 50.000000 0 3 "{""kind"": ""yard_track"", ""id"": ""EAST"", ""label"": ""S1"", ""function"": ""staging""}"
+NOTE 111 2 0 0 20.000000 30.000000 0 3 "{""kind"": ""yard_track"", ""id"": ""WP"", ""label"": ""Track 2"", ""function"": ""classification""}"
+NOTE 112 2 0 0 170.000000 30.000000 0 3 "{""kind"": ""yard_track"", ""id"": ""QM1"", ""label"": ""Loading 1"", ""function"": ""loading""}"
+NOTE 113 2 0 0 140.000000 30.000000 0 3 "{""kind"": ""house_track"", ""id"": ""XP""}"
+NOTE 114 2 0 0 100.000000 30.000000 0 3 "{""kind"": ""storage"", ""id"": ""CAR_BARN"", ""name"": ""Car barn""}"
+NOTE 115 2 0 0 30.000000 30.000000 0 3 "{""kind"": ""facility"", ""id"": ""WP_COAL"", ""name"": ""Coal trestle"", ""type"": ""coal"", ""location"": ""WP""}"
+NOTE 116 2 0 0 200.000000 30.000000 0 3 "{""kind"": ""switchback"", ""id"": ""XP_SWB"", ""serves"": ""XP""}"
+NOTE 117 1 0 0 150.000000 10.000000 0 3 "{""todo"": ""not a convention note: no kind""}"
+
+STRAIGHT 1 0 0 0 0 HO 0
+	E 0.000000 0.000000 270.000000
+	E 240.000000 0.000000 90.000000
+	END$SEGS
+
+STRAIGHT 2 1 0 0 0 HO 0
+	E 0.000000 10.000000 270.000000
+	E 240.000000 10.000000 90.000000
+	END$SEGS
+
+STRAIGHT 3 2 0 0 0 HO 0
+	E 0.000000 30.000000 270.000000
+	E 240.000000 30.000000 90.000000
+	END$SEGS
+
+STRAIGHT 4 3 0 0 0 HO 0
+	E 0.000000 50.000000 270.000000
+	E 240.000000 50.000000 90.000000
+	END$SEGS
