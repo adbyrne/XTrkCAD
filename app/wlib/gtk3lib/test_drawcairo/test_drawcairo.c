@@ -698,10 +698,13 @@ static void test_polygon_zero_points(void **state)
  * A missing resource yields a 1x1 transparent bitmap. */
 static void test_bitmap_invalidation(void **state)
 {
+	/* static: there is no wDrawBitMapDestroy() and the type is private, so
+	 * the bitmap can't be freed; keeping it reachable stops valgrind's
+	 * leak check (c-tests-valgrind) from reporting it as lost. */
+	static wDrawBitMap_p bm;
 	CTX();
-	wDrawBitMap_p bm;
 	bm = wDrawBitMapCreate(c, 0, 0, "/xtrkcad-test/", "missing.png");
-	assert_non_null(bm); /* intentionally not freed: the type is private */
+	assert_non_null(bm);
 	rec_reset();
 	wDrawBitMap(c, bm, 50, 50, COL_BLACK, 0);
 	assert_true(rec.n_area + rec.n_all >= 1);

@@ -189,14 +189,6 @@ DestroyCopyOfProfileElements()
 
 
 /**
- * Draw profile
- *
- * \param  D		 The drawCmd_p to use.
- * \param  fontSize  Size of the font.
- * \param  printVert print vertical.
- */
-
-/**
  * Hatch the area below the profile line with 45 degree lines instead of
  * filling it, so a printout doesn't waste ink or toner.
  *
@@ -281,6 +273,13 @@ static void HatchProfile(drawCmd_p D, coOrd * pts, int cnt)
 	}
 }
 
+/**
+ * Draw profile
+ *
+ * \param  D		 The drawCmd_p to use.
+ * \param  fontSize  Size of the font.
+ * \param  printVert print vertical.
+ */
 static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 {
 	coOrd pl, pt, pb;
