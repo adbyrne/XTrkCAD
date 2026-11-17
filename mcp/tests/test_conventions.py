@@ -1233,3 +1233,33 @@ def test_unreachable_hint_names_the_tracks_breaking_the_main(tmp_path):
                                  tracks=broken) if i.rule == "MP_UNREACHABLE"]
     assert len(issues) == 1
     assert "L1-Passing" in issues[0].hint
+
+
+# -- yard limits: defaults from station limits (user 2026-11-17) -------------
+# A station's yard limits default to its entry and exit switches; a physical
+# board with the station's id moves the zone's end out to the board.
+
+def _zones(model):
+    return {z.id: (round(z.mp_start, 3), round(z.mp_end, 3), z.source)
+            for z in model.yard_limits}
+
+
+def test_yard_limit_defaults_to_station_limits(tmp_path):
+    m = _model(tmp_path, [ZERO, _st("XP", 100), _st("SK", 228)])
+    assert _zones(m) == {"XP": (5.0, 15.0, "station"), "SK": (19.0, 19.0, "station")}
+
+
+def test_board_extends_station_yard_limit(tmp_path):
+    m = _model(tmp_path, [ZERO, _st("XP", 100), _board("XP", 228)])
+    assert _zones(m)["XP"] == (5.0, 19.0, "board")
+
+
+def test_terminus_board_sets_the_far_end(tmp_path):
+    # Like NYE's WP: terminus at MP 0, a board at MP 3.
+    m = _model(tmp_path, [ZERO, _st("WP", 1, terminus=True), _board("WP", 36)])
+    assert _zones(m)["WP"] == (pytest.approx(1 / 12, abs=1e-3), 3.0, "board")
+
+
+def test_boards_without_a_station(tmp_path):
+    m = _model(tmp_path, [ZERO, _board("Z", 24), _board("Z", 36)])
+    assert _zones(m)["Z"] == (2.0, 3.0, "board")

@@ -81,12 +81,27 @@ class StationMP:
 
 
 @dataclass
+class YardLimitZone:
+    """A yard-limit zone on one MP line. By default a station's zone is its
+    own limits (entry to exit switch); boards (yard_limit notes) with the
+    station's id move the zone's ends out to them. Boards whose id is no
+    station make a zone of their own."""
+    id: str
+    railroad: str | None
+    subdivision: str | None
+    mp_start: float
+    mp_end: float
+    source: str                          # "station" | "board"
+
+
+@dataclass
 class MilepostModel:
     lines: list[Line]
     stations: list[StationMP]
     branch_mp: dict[str, float | None]   # industry / team track id -> MP of its switch
     boards: dict[tuple, list[float]]     # (railroad, subdivision, yard limit id) -> board MPs
     issues: list[Issue]
+    yard_limits: list[YardLimitZone] = field(default_factory=list)
 
 
 # -- the main-track graph ----------------------------------------------------
@@ -514,6 +529,7 @@ def milepost_model(layout: Layout, notes: list[ConventionNote] | None = None,
     refs = {n.id: (snapped[n.note_id], n.x, n.y) for n in notes
             if n.kind == "reference" and n.note_id in snapped}
     stations: list[StationMP] = []
+    station_notes: list[ConventionNote] = []
     sidings_by_line: dict = {}
     for note in notes:
         if note.kind != "station":
@@ -539,6 +555,7 @@ def milepost_model(layout: Layout, notes: list[ConventionNote] | None = None,
                 f"{line.origin.note.id}", note,
                 hint=_route_hint(layout, line, line.origin.track, track)))
         stations.append(st)
+        station_notes.append(note)
 
     branch_mp: dict[str, float | None] = {}
     for note in notes:
@@ -572,7 +589,23 @@ def milepost_model(layout: Layout, notes: list[ConventionNote] | None = None,
         if mp is not None:
             boards.setdefault(line.key() + (note.id,), []).append(mp)
 
-    return MilepostModel(lines, stations, branch_mp, boards, issues)
+    zones: list[YardLimitZone] = []
+    station_keys = set()
+    for st, note in zip(stations, station_notes):
+        if st.mp is None:
+            continue
+        line = _line_of(note, lines)
+        key = line.key() + (st.id,)
+        station_keys.add(key)
+        at = boards.get(key, [])
+        zones.append(YardLimitZone(st.id, line.railroad, line.subdivision,
+                                   min([st.mp_entry] + at), max([st.mp_exit] + at),
+                                   "board" if at else "station"))
+    for key, at in boards.items():
+        if key not in station_keys:
+            zones.append(YardLimitZone(key[2], key[0], key[1], min(at), max(at), "board"))
+
+    return MilepostModel(lines, stations, branch_mp, boards, issues, zones)
 
 
 def check_mileposts(layout: Layout, notes: list[ConventionNote],
