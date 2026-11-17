@@ -374,6 +374,8 @@ def test_yard_track_no_function_is_info(tmp_path):
     ({"kind": "station", "id": "L"}, "loading", False),
     ({"kind": "industry", "id": "L"}, "loading", True),
     ({"kind": "industry", "id": "L"}, "classification", False),
+    ({"kind": "industry", "id": "L"}, "lead", True),        # where the switcher works its tracks
+    ({"kind": "team_track", "id": "L"}, "lead", True),
     ({"kind": "staging", "id": "L"}, "staging", True),
     ({"kind": "staging", "id": "L"}, "caboose", True),   # staging takes yard functions
     ({"kind": "staging", "id": "L"}, "loading", False),
@@ -1263,3 +1265,11 @@ def test_terminus_board_sets_the_far_end(tmp_path):
 def test_boards_without_a_station(tmp_path):
     m = _model(tmp_path, [ZERO, _board("Z", 24), _board("Z", 36)])
     assert _zones(m)["Z"] == (2.0, 3.0, "board")
+
+
+def test_station_off_main_with_ref_tag_is_fine(tmp_path):
+    # Spec 4.3: ref_tag is for a station note on a track that isn't main
+    # (NYE's WP sits on its station track in the yard, MP from MP_ZERO).
+    notes = [(0, {"kind": "reference", "id": "SW"}, None, 20, 0.5),
+             (2, {"kind": "station", "id": "WP", "ref_tag": "SW"}, None, 80, 12.86)]
+    assert "STATION_NOT_ON_MAIN" not in _rules(_placed(tmp_path, notes))

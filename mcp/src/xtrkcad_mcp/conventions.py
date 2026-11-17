@@ -51,7 +51,7 @@ YARD_FUNCTIONS = (
     "runaround", "lead", "interchange", "caboose", "rip", "storage",
     "engine",
 )
-INDUSTRY_FUNCTIONS = ("loading", "empties", "loads", "service")
+INDUSTRY_FUNCTIONS = ("loading", "empties", "loads", "service", "lead")
 STAGING_FUNCTIONS = ("staging",) + YARD_FUNCTIONS
 _FUNCTIONS_BY_YARD_KIND = {
     "station": YARD_FUNCTIONS,
@@ -807,7 +807,8 @@ def _check_placement(layout: Layout, notes: list[ConventionNote],
             issues.append(_placed_issue(
                 "error", "ANCHOR_NOT_ON_MAIN",
                 f"MP anchor {note.id} is not on main track", note, track))
-        elif note.kind == "station" and not on_main:
+        elif note.kind == "station" and not on_main and note.str_field("ref_tag") is None:
+            # with ref_tag the note may sit off the main (spec 4.3)
             issues.append(_placed_issue(
                 "warning", "STATION_NOT_ON_MAIN",
                 f"Station {note.id} is not on main track", note, track,
