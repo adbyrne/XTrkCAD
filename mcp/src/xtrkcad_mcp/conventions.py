@@ -6,8 +6,8 @@ stable). A fact tied to a place on the layout is a JSON Note there, with a
 ``kind`` and an ``id``; check_conventions() reports every rule the layout
 breaks as an Issue with a stable rule id.
 
-This module covers the note and id rules (phase 1). Layer Group, placement
-and milepost rules follow in later phases.
+This module covers the note and id rules (phase 1) and the Layer Group rules
+(phase 2). Placement and milepost rules follow in later phases.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass, field
 
-from .models import Layout, NoteObject
+from .models import Layout, NoteObject, category_from_layer_name
 
 CONVENTIONS_VERSION = 1
 
@@ -72,6 +72,16 @@ AAR_CAR_TYPES = frozenset({
     # caboose, maintenance of way, passenger
     "NE", "MW", "PA", "PB", "PO", "PS", "PD", "BH",
 })
+
+# Reserved Layer Group names that give their layers a category (spec 3.1),
+# matched case-insensitively. Values are the category keys the reports use.
+CATEGORY_GROUPS = {
+    "mainline": "mainline", "passing": "passing", "staging": "staging",
+    "storage": "storage", "service": "service", "connecting": "connecting",
+    "scenery": "scenery", "ignore": "ignore",
+}
+# Categories whose layers belong to no railroad.
+_UNOWNED_CATEGORIES = ("scenery", "ignore")
 
 _SEVERITY_ORDER = ("error", "warning", "info")
 
@@ -240,7 +250,41 @@ def read_convention_notes(layout: Layout) -> tuple[list[ConventionNote], list[Is
 
 
 def _group_layers(layout: Layout) -> dict[str, set[int]]:
-    return {g.name: set(g.layers) for g in layout.layer_groups}
+    """Layer Group name (lower case) -> its layers. Names match like the
+    layers/groups filter on the report tools: case-insensitively."""
+    groups: dict[str, set[int]] = {}
+    for g in layout.layer_groups:
+        groups.setdefault(g.name.lower(), set()).update(g.layers)
+    return groups
+
+
+def track_layers(layout: Layout) -> set[int]:
+    """Layers holding at least one track object."""
+    return {t.layer for t in layout.tracks}
+
+
+def layer_categories(layout: Layout) -> dict[int, tuple[str, str]]:
+    """Each layer's category and where it came from (spec 3.1).
+
+    Returns layer index -> (category, source); source is "group" (the first
+    category Layer Group holding the layer), "name" (the L<n>-Suffix layer
+    name) or "default" (mainline).
+    """
+    by_group: dict[int, str] = {}
+    for g in layout.layer_groups:
+        cat = CATEGORY_GROUPS.get(g.name.lower())
+        if cat is None:
+            continue
+        for idx in g.layers:
+            by_group.setdefault(idx, cat)
+    result: dict[int, tuple[str, str]] = {}
+    for idx, info in layout.layers.items():
+        if idx in by_group:
+            result[idx] = (by_group[idx], "group")
+            continue
+        inferred = category_from_layer_name(info.name)
+        result[idx] = (inferred, "name") if inferred else ("mainline", "default")
+    return result
 
 
 def resolve_ownership(layout: Layout, notes: list[ConventionNote]) -> None:
@@ -252,7 +296,7 @@ def resolve_ownership(layout: Layout, notes: list[ConventionNote]) -> None:
 
     def _owner_by_group(owners: list[ConventionNote], layer: int) -> str | None:
         hits = {o.id for o in owners
-                if layer in groups.get(o.str_field("group") or "", set())}
+                if layer in groups.get((o.str_field("group") or "").lower(), set())}
         return hits.pop() if len(hits) == 1 else None
 
     for sub in subdivisions:
@@ -475,10 +519,89 @@ def _check_kind_fields(notes: list[ConventionNote], issues: list[Issue]) -> None
                     f"{', '.join(MP_UNITS)}", note))
 
 
+def _layer_name(layout: Layout, layer: int) -> str:
+    return layout.layers[layer].name if layer in layout.layers else f"Layer {layer}"
+
+
+def _layer_issue(severity: str, rule: str, message: str, layer: int,
+                 hint: str = "", group: str | None = None) -> Issue:
+    return Issue(severity, rule, message, hint=hint, layer=layer, group=group)
+
+
+def _check_groups(layout: Layout, notes: list[ConventionNote], issues: list[Issue]) -> None:
+    """Category, railroad and subdivision Layer Group rules (spec 3.1, 3.2)."""
+    with_track = track_layers(layout)
+
+    category_groups: dict[int, list[str]] = {}
+    for g in layout.layer_groups:
+        if g.name.lower() in CATEGORY_GROUPS:
+            for idx in g.layers:
+                category_groups.setdefault(idx, []).append(g.name)
+    for idx, names in sorted(category_groups.items()):
+        if len(names) > 1:
+            issues.append(_layer_issue(
+                "error", "CATEGORY_LAYER_IN_TWO",
+                f"Layer {_layer_name(layout, idx)} is in category groups "
+                + " and ".join(names), idx, group=names[1],
+                hint="A layer has one category; take it out of all but one group."))
+
+    categories = layer_categories(layout)
+    for idx in sorted(with_track):
+        if idx in category_groups:
+            continue
+        cat, source = categories.get(idx, ("mainline", "default"))
+        how = "from its name" if source == "name" else "by default"
+        issues.append(_layer_issue(
+            "warning", "CATEGORY_LAYER_NONE",
+            f"Track layer {_layer_name(layout, idx)} is in no category group; {cat} {how}",
+            idx,
+            hint="Add it to one of: " + ", ".join(n.capitalize() for n in CATEGORY_GROUPS)))
+
+    groups = _group_layers(layout)
+    for kind, rule in (("railroad", "RAILROAD_LAYER_IN_TWO"),
+                       ("subdivision", "SUBDIVISION_LAYER_IN_TWO")):
+        owners: dict[int, list[str]] = {}
+        seen_groups: set[str] = set()
+        for note in notes:
+            if note.kind != kind:
+                continue
+            gname = note.str_field("group")
+            if gname is None:
+                continue
+            if gname.lower() not in groups:
+                issues.append(Issue(
+                    "error", "GROUP_UNKNOWN",
+                    f"{kind} {note.id}: Layer Group {gname!r} doesn't exist",
+                    hint="Groups: " + (", ".join(g.name for g in layout.layer_groups) or "none"),
+                    note_id=note.note_id, layer=note.layer, x=note.x, y=note.y,
+                    group=gname))
+                continue
+            if kind == "subdivision" and gname.lower() in seen_groups:
+                continue        # subdivisions may share one group (spec 4.1)
+            seen_groups.add(gname.lower())
+            for idx in groups[gname.lower()]:
+                owners.setdefault(idx, []).append(note.id)
+        for idx, ids in sorted(owners.items()):
+            if len(ids) > 1:
+                issues.append(_layer_issue(
+                    "error", rule,
+                    f"Layer {_layer_name(layout, idx)} is in the groups of "
+                    f"{kind}s {' and '.join(ids)}", idx))
+        if kind == "railroad" and sum(1 for n in notes if n.kind == "railroad") > 1:
+            for idx in sorted(with_track):
+                if idx in owners or categories.get(idx, ("",))[0] in _UNOWNED_CATEGORIES:
+                    continue
+                issues.append(_layer_issue(
+                    "warning", "RAILROAD_LAYER_NONE",
+                    f"Track layer {_layer_name(layout, idx)} belongs to no railroad", idx,
+                    hint="Add it to a railroad's Layer Group (the railroad note's \"group\")."))
+
+
 def sort_issues(issues: list[Issue]) -> list[Issue]:
     return sorted(issues, key=lambda i: (
         _SEVERITY_ORDER.index(i.severity), i.rule,
-        i.note_id if i.note_id is not None else -1))
+        i.note_id if i.note_id is not None else -1,
+        i.layer if i.layer is not None else -1))
 
 
 def check_conventions(layout: Layout) -> list[Issue]:
@@ -488,4 +611,5 @@ def check_conventions(layout: Layout) -> list[Issue]:
     _check_references(notes, location_kind, issues)
     _check_yard_tracks(notes, location_kind, issues)
     _check_kind_fields(notes, issues)
+    _check_groups(layout, notes, issues)
     return sort_issues(issues)

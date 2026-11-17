@@ -14,6 +14,7 @@ from xtrkcad_mcp import server
 from xtrkcad_mcp.conventions import (
     CONVENTIONS_VERSION,
     check_conventions,
+    layer_categories,
     read_convention_notes,
 )
 from xtrkcad_mcp.parser import parse_file
@@ -22,23 +23,29 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures"
 CLEAN_FIXTURE = FIXTURES_DIR / "conventions_clean.xtc"
 
 _DEFAULT_LAYERS = ["L1-Main", "L1-Passing", "L1-Service"]
+_DEFAULT_GROUPS = [("Mainline", [0]), ("Passing", [1]), ("Service", [2])]
 
 
 def _xtc_quote(text: str) -> str:
     return '"' + text.replace('"', '""') + '"'
 
 
-def _layout(tmp_path, notes, layers=None, groups=None, name="t.xtc"):
+def _layout(tmp_path, notes, layers=None, groups=None, name="t.xtc",
+            trackless=()):
     """Write and parse a layout.
 
     notes: list of (layer, note) where note is a dict (written as a JSON
     Note) or a str (raw JSON Note body, e.g. invalid JSON). A tuple
     (layer, str, "text") writes a plain text note instead.
     layers: layer names, index = position.
-    groups: list of (name, [layer indexes]).
-    Each layer gets one straight track so it is a track layer.
+    groups: list of (name, [layer indexes]); with the default layers and no
+    groups given, each default layer is in its category group.
+    Each layer gets one straight track, except those in trackless.
     """
-    layers = layers if layers is not None else _DEFAULT_LAYERS
+    if layers is None:
+        layers = _DEFAULT_LAYERS
+        if groups is None:
+            groups = _DEFAULT_GROUPS
     lines = ["VERSION 13 5.4.0", "TITLE1 conventions test", "SCALE HO",
              "ROOMSIZE 200 x 100", ""]
     for idx, lname in enumerate(layers):
@@ -58,6 +65,8 @@ def _layout(tmp_path, notes, layers=None, groups=None, name="t.xtc"):
                      f"{layer * 20}.000000 0 {op} {_xtc_quote(body)}")
     lines.append("")
     for tid, _ in enumerate(layers):
+        if tid in trackless:
+            continue
         y = tid * 20
         lines += [f"STRAIGHT {tid + 1} {tid} 0 0 0 HO 0",
                   f"\tE 0.000000 {y}.000000 270.000000",
@@ -464,3 +473,145 @@ def test_tool_shape(tmp_path):
 def test_tool_clean_fixture():
     result = server.check_conventions(str(CLEAN_FIXTURE))
     assert result["counts"]["error"] == 0 and result["counts"]["warning"] == 0
+
+
+# -- phase 2: Layer Groups ---------------------------------------------------
+
+def test_layer_categories_sources(tmp_path):
+    layout = _layout(tmp_path, [], layers=["L1-Main", "L1-CO-Staging", "Helix"],
+                     groups=[("Mainline", [0])])
+    cats = layer_categories(layout)
+    assert cats[0] == ("mainline", "group")
+    assert cats[1] == ("staging", "name")
+    assert cats[2] == ("mainline", "default")
+
+
+def test_category_group_name_is_case_insensitive(tmp_path):
+    layout = _layout(tmp_path, [], layers=["Helix"], groups=[("staging", [0])])
+    assert layer_categories(layout)[0] == ("staging", "group")
+
+
+def test_non_category_group_does_not_categorize(tmp_path):
+    # "Main" is not a reserved name; the layer name decides.
+    layout = _layout(tmp_path, [], layers=["L1-Passing"], groups=[("Main", [0])])
+    assert layer_categories(layout)[0] == ("passing", "name")
+
+
+def test_layer_in_two_category_groups(tmp_path):
+    issues = _check(tmp_path, [], groups=_DEFAULT_GROUPS + [("Staging", [0])])
+    assert _rules(issues) == ["CATEGORY_LAYER_IN_TWO"]
+    assert issues[0].layer == 0
+
+
+def test_track_layer_in_no_category_group(tmp_path):
+    issues = _check(tmp_path, [], groups=[("Mainline", [0]), ("Passing", [1])])
+    assert _rules(issues) == ["CATEGORY_LAYER_NONE"]
+    assert issues[0].severity == "warning" and issues[0].layer == 2
+
+
+def test_layer_without_track_needs_no_category(tmp_path):
+    issues = _check(tmp_path, [], layers=["L1-Main", "Floor"],
+                    groups=[("Mainline", [0])], trackless=(1,))
+    assert issues == []
+
+
+def test_railroad_group_unknown(tmp_path):
+    issues = _check(tmp_path, [(0, {"kind": "railroad", "id": "NYE", "group": "NYEE"})])
+    assert _rules(issues) == ["GROUP_UNKNOWN"]
+    assert issues[0].group == "NYEE"
+
+
+def test_subdivision_group_unknown(tmp_path):
+    issues = _check(tmp_path, [(0, {"kind": "railroad", "id": "NYE"}),
+                               (0, {"kind": "subdivision", "id": "NLS", "group": "X"})])
+    assert _rules(issues) == ["GROUP_UNKNOWN"]
+
+
+def test_group_name_match_is_case_insensitive(tmp_path):
+    issues = _check(tmp_path, [(0, {"kind": "railroad", "id": "NYE", "group": "nye"})],
+                    groups=_DEFAULT_GROUPS + [("NYE", [0, 1, 2])])
+    assert issues == []
+
+
+_RR2 = [(0, {"kind": "railroad", "id": "NYE", "group": "NYE"}),
+        (0, {"kind": "railroad", "id": "CO", "group": "C&O"})]
+
+
+def test_two_railroads_cover_all_layers(tmp_path):
+    issues = _check(tmp_path, _RR2,
+                    groups=_DEFAULT_GROUPS + [("NYE", [0, 2]), ("C&O", [1])])
+    assert issues == []
+
+
+def test_layer_in_two_railroad_groups(tmp_path):
+    issues = _check(tmp_path, _RR2,
+                    groups=_DEFAULT_GROUPS + [("NYE", [0, 1, 2]), ("C&O", [1])])
+    assert _rules(issues) == ["RAILROAD_LAYER_IN_TWO"]
+    assert issues[0].layer == 1
+
+
+def test_layer_in_no_railroad_group(tmp_path):
+    issues = _check(tmp_path, _RR2,
+                    groups=_DEFAULT_GROUPS + [("NYE", [0]), ("C&O", [1])])
+    assert _rules(issues) == ["RAILROAD_LAYER_NONE"]
+    assert issues[0].severity == "warning" and issues[0].layer == 2
+
+
+def test_one_railroad_needs_no_railroad_group(tmp_path):
+    assert _check(tmp_path, [(0, {"kind": "railroad", "id": "NYE"})]) == []
+
+
+def test_ignore_layer_needs_no_railroad(tmp_path):
+    issues = _check(tmp_path, _RR2, layers=["L1-Main", "L2-Main", "Benchwork"],
+                    groups=[("Mainline", [0, 1]), ("Ignore", [2]),
+                            ("NYE", [0]), ("C&O", [1])])
+    assert issues == []
+
+
+def test_layer_in_two_subdivision_groups(tmp_path):
+    issues = _check(tmp_path, [
+        (0, {"kind": "railroad", "id": "NYE"}),
+        (0, {"kind": "subdivision", "id": "A", "group": "SA"}),
+        (0, {"kind": "subdivision", "id": "B", "group": "SB"}),
+    ], groups=_DEFAULT_GROUPS + [("SA", [0, 1]), ("SB", [1, 2])])
+    assert _rules(issues) == ["SUBDIVISION_LAYER_IN_TWO"]
+    assert issues[0].layer == 1
+
+
+def test_subdivisions_may_share_a_group(tmp_path):
+    # Spec 4.1: one railroad's subdivisions may share layers.
+    issues = _check(tmp_path, [
+        (0, {"kind": "railroad", "id": "NYE"}),
+        (0, {"kind": "subdivision", "id": "A", "group": "S"}),
+        (0, {"kind": "subdivision", "id": "B", "group": "S"}),
+    ], groups=_DEFAULT_GROUPS + [("S", [0, 1, 2])])
+    assert issues == []
+
+
+def test_layer_groups_fixture_with_railroads(tmp_path):
+    text = (FIXTURES_DIR / "layer_groups.xtc").read_text().replace(
+        'NOTE 50 ',
+        'NOTE 60 0 0 0 0.000000 2.000000 0 3 '
+        '"{""kind"": ""railroad"", ""id"": ""NYE"", ""group"": ""NYE""}"\n'
+        'NOTE 61 3 0 0 0.000000 52.000000 0 3 '
+        '"{""kind"": ""railroad"", ""id"": ""CO"", ""group"": ""C&O""}"\n'
+        'NOTE 50 ', 1)
+    path = tmp_path / "lg.xtc"
+    path.write_text(text)
+    issues = check_conventions(parse_file(path))
+    assert _rules(issues, "error") == [] and _rules(issues, "warning") == []
+
+
+def test_two_railroads_sharing_one_group(tmp_path):
+    issues = _check(tmp_path, [(0, {"kind": "railroad", "id": "NYE", "group": "Both"}),
+                               (0, {"kind": "railroad", "id": "CO", "group": "Both"})],
+                    groups=_DEFAULT_GROUPS + [("Both", [0, 1, 2])])
+    assert _rules(issues) == ["RAILROAD_LAYER_IN_TWO"] * 3
+
+
+def test_braces_in_names_are_safe(tmp_path):
+    issues = _check(tmp_path, [(0, {"kind": "railroad", "id": "A{x}", "group": "G{0}"}),
+                               (0, {"kind": "railroad", "id": "B", "group": "G{0}"})],
+                    layers=["L1-Main{1}"], groups=[("Mainline", [0]), ("G{0}", [0])])
+    assert _rules(issues) == ["RAILROAD_LAYER_IN_TWO"]
+    assert "L1-Main{1}" in issues[0].message
