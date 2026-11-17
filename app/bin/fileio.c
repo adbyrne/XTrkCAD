@@ -550,6 +550,8 @@ int LoadTracks(
 	bReadOnly = bExample;
 	paramVersion = -1;
 	wSetCursor( mainD.d, wCursorWait );
+	// Cancel the active command while its tracks still exist
+	Reset();
 	ClearTracks();
 	ResetLayers();
 	NoteNameResetAll();
@@ -692,6 +694,7 @@ int LoadTracks(
 
 	UndoResume();
 	Reset();
+	FormReloadLayoutDialogs();
 	wSetCursor( mainD.d, defaultCursor );
 	if (!loaded) {
 		InfoMessage( _("The layout file could not be loaded") );

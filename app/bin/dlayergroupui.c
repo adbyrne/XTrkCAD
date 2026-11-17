@@ -99,7 +99,7 @@ static int layerGroupNameTarget = -1;
 static paramData_t layerGroupNamePLs[] = {
 	{ PD_STRING, layerGroupNameBuf, "name", PDO_NOTBLANK, I2VP(30), N_("Group Name"), 0, 0, sizeof( layerGroupNameBuf ) }
 };
-static paramGroup_t layerGroupNamePG = { "layergroupname", 0, layerGroupNamePLs, COUNT( layerGroupNamePLs ) };
+static paramGroup_t layerGroupNamePG = { "layergroupname", PGO_LAYOUT_CLOSE, layerGroupNamePLs, COUNT( layerGroupNamePLs ) };
 
 /**
  * Ok callback for the "enter a group name" dialog (layerGroupNamePG),
@@ -533,6 +533,7 @@ static void DoLayerGroups(void *unused)
 EXPORT addButtonCallBack_t InitLayerGroupsDialog(void)
 {
 	FormRegister(&layerGroupPG);
+	layerGroupPG.reloadProc = DoLayerGroups;
 	FormRegister(&layerGroupNamePG);
 	return &DoLayerGroups;
 }

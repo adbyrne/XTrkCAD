@@ -54,6 +54,7 @@ void ClearCars( void );
 void CarDlgAddProto( void );
 void CarDlgAddDesc( void );
 void AttachTrains( void );
+void TrainModeExit( void );
 
 BOOL_T StoreCarItem (carItem_p item, void **data,long *len);
 BOOL_T ReplayCarItem(carItem_p item, void *data,long len);

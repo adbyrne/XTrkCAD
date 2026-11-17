@@ -2675,6 +2675,23 @@ static void CarDlgCancel( paramGroup_cp pg )
 	wHide( carDlgPG.win );
 }
 
+/**
+ * Close the dialog without asking, dropping whatever it holds. Called by
+ * ClearCars() before a new layout replaces the current one: the car being
+ * edited is about to be freed, so there is nothing to keep and asking
+ * whether to discard the changes would offer a choice that doesn't exist.
+ */
+void CarDlgDiscard( void )
+{
+	if ( carDlgPG.win == NULL || !wWinIsVisible( carDlgPG.win ) ) {
+		return;
+	}
+	carDlgStkPtr = 0;
+	carDlgUpdateItemPtr = NULL;
+	wTextClear( (wText_p)carDlgPLs[I_CD_NOTES].control );
+	wHide( carDlgPG.win );
+}
+
 /* Rewrites the whole custom param file from the current live registries
  * (same mechanism as the "Manage Custom" dialog's Done button,
  * dcustmgm.c:CustomDone), instead of appending just the one changed

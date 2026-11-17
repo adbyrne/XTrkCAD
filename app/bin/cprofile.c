@@ -818,7 +818,7 @@ static paramData_t profilePLs[] = {
 #define I_PRINTBUTTON 5
 	{	PD_BUTTON, DoProfilePrint, "print", 0, NULL}
 };
-static paramGroup_t profilePG = { "profile", PGO_FULLDIALOGFROMBUILDER, profilePLs, COUNT( profilePLs ) };
+static paramGroup_t profilePG = { "profile", PGO_FULLDIALOGFROMBUILDER|PGO_LAYOUT_CLOSE, profilePLs, COUNT( profilePLs ) };
 
 static void SelProfileW(
         wIndex_t action,

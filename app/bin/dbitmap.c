@@ -293,7 +293,7 @@ static paramData_t outputBitMapPLs[] = {
 	{ PD_MESSAGE, N_( "99999 by 99999 pixels" ), "pixelsize", PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT, I2VP( 180 )},
 };
 
-static paramGroup_t outputBitMapPG = { "outputbitmap", PGO_FULLDIALOGFROMBUILDER, outputBitMapPLs, COUNT( outputBitMapPLs ) };
+static paramGroup_t outputBitMapPG = { "outputbitmap", PGO_FULLDIALOGFROMBUILDER|PGO_LAYOUT_CLOSE, outputBitMapPLs, COUNT( outputBitMapPLs ) };
 
 /**
  * The upper limit for the dpi setting is calculated. The limit is set

@@ -484,6 +484,7 @@ static void ReportsShowDialog(reportsDialog_t *rd, const char *title)
 {
 	if (rd->window == NULL) {
 		FormRegister( rd->pg );
+		rd->pg->reloadProc = rd->refreshProc;
 		rd->window = FormCreateDialog( rd->pg, MakeWindowTitle(title),
 		                               NULL, NULL,
 		                               NULL, rd->cancelProc ? rd->cancelProc : FormCancel_Current,

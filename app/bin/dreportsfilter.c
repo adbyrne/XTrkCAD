@@ -86,7 +86,7 @@ static paramData_t reportsFilterPLs[] = {
 #define I_CLEAR	(6)
 	{	PD_BUTTON, FilterClear, "clear", 0, NULL, NULL },
 };
-static paramGroup_t reportsFilterPG = { "reportsfilter", PGO_FULLDIALOGFROMBUILDER, reportsFilterPLs, COUNT( reportsFilterPLs ) };
+static paramGroup_t reportsFilterPG = { "reportsfilter", PGO_FULLDIALOGFROMBUILDER|PGO_LAYOUT_CLOSE, reportsFilterPLs, COUNT( reportsFilterPLs ) };
 
 /**
  * Rebuild the Available/Included lists from scratch against

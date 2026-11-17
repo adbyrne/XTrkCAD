@@ -65,6 +65,63 @@ EXPORT paramGroup_cp * DialogGroupIter( paramGroup_cp * ppg )
 }
 
 
+/** dialogs FormCloseLayoutDialogs() found open, to be reopened by
+ * FormReloadLayoutDialogs() */
+static dynArr_t reloadGroups_da;
+
+/**
+ * Prepare the open dialogs for a new layout replacing the current one.
+ * A dialog marked PGO_LAYOUT_CLOSE is closed the way its Cancel button
+ * would close it; one without a Cancel button gets the same notification
+ * as closing its window, without the window's ConfirmReset(). A dialog
+ * with a reloadProc stays open and is remembered for
+ * FormReloadLayoutDialogs(). Any other dialog is left alone.
+ */
+void FormCloseLayoutDialogs(void)
+{
+	DYNARR_RESET(paramGroup_cp, reloadGroups_da);
+
+	for (paramGroup_cp * ppg = DialogGroupIter(NULL); ppg;
+	     ppg = DialogGroupIter(ppg)) {
+		paramGroup_cp pg = *ppg;
+
+		if (pg->win == NULL || !wWinIsVisible(pg->win)) {
+			continue;
+		}
+		if (pg->options & PGO_LAYOUT_CLOSE) {
+			LOG(log_form, 1, ("FormCloseLayoutDialogs: close %s\n",
+			                  pg->nameStr ? pg->nameStr : "?"));
+			if (pg->cancelProc) {
+				pg->cancelProc(pg);
+			} else if (pg->changeProc) {
+				pg->changeProc(pg, -1, NULL);
+			}
+			if (wWinIsVisible(pg->win)) {
+				wHide(pg->win);
+			}
+		} else if (pg->reloadProc) {
+			DYNARR_APPEND(paramGroup_cp, reloadGroups_da, 10);
+			DYNARR_LAST(paramGroup_cp, reloadGroups_da) = pg;
+		}
+	}
+}
+
+/**
+ * Reopen the dialogs FormCloseLayoutDialogs() found open, now with the
+ * data of the new layout. Call it once the new layout is complete.
+ */
+void FormReloadLayoutDialogs(void)
+{
+	for (int i = 0; i < reloadGroups_da.cnt; i++) {
+		paramGroup_cp pg = DYNARR_N(paramGroup_cp, reloadGroups_da, i);
+
+		LOG(log_form, 1, ("FormReloadLayoutDialogs: reload %s\n",
+		                  pg->nameStr ? pg->nameStr : "?"));
+		pg->reloadProc(NULL);
+	}
+	DYNARR_RESET(paramGroup_cp, reloadGroups_da);
+}
+
 static void AddGroupPtrToItem(paramGroup_p pg)
 {
 	for (int i = 0; i < (pg->paramCnt); i++) {

@@ -140,6 +140,10 @@ See the \subpage creating-a-report "Creating a New Report" page for how to add a
 the `Reports` menu (SF #217) -- the shared viewer, the two report shapes, and a step-by-step
 recipe with references into the current `reports.c`/`reports.h` source.
 
+See the \subpage dialogs-and-layout-loading "Dialogs and Layout Loading" page for what happens
+to open dialogs when a new layout is loaded, and what a new dialog has to declare (reload,
+close, or neither) so it never writes stale data into the new layout.
+
 See the \subpage building "Building and Testing" page for local build steps per platform,
 the CMake presets, CI details, tool-version pins, and advanced checks (sanitizers, valgrind, the regression
 demo-playback suite, debug logging).

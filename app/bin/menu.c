@@ -149,7 +149,7 @@ static paramData_t addElevPLs[] = { {
 		PDO_NOPREF|PDO_DIM, &rn1000_1000, N_("Raise/lower by:"),
 	}
 };
-static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, COUNT( addElevPLs ) };
+static paramGroup_t addElevPG = { "addElev", PGO_LAYOUT_CLOSE, addElevPLs, COUNT( addElevPLs ) };
 
 static void DoAddElev(const void * unused)
 {
