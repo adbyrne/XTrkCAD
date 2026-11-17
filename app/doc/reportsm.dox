@@ -282,10 +282,8 @@ window.
 \page cmdReportsgaps Gaps Report
 
 The <b>Gaps Report</b> command lists pairs of open (unconnected) track
-endpoints, on two different tracks, that lie within the layout's
-Connection Distance preference (Options > \ref cmdPref) of each other --
-the same distance the editor itself uses to decide whether two endpoints
-are close enough to connect. Each row gives <b>Track A</b> and <b>Track
+endpoints, on two different tracks, that lie within the <b>Maximum gap</b>
+of each other. Each row gives <b>Track A</b> and <b>Track
 B</b> with each one's own layer (<b>Layer #</b>/<b>Layer Name</b>), and
 the <b>Gap</b> between them in inches. A pair like this usually means a
 missed connection rather than two deliberate dead ends -- but check both
@@ -294,6 +292,17 @@ the same X/Y position in the shared 2D drawing while actually being on
 two different physical levels, in which case the "gap" isn't a real one.
 
 ![](reportgaps.png)
+
+The <b>Maximum gap</b> drop-down sets how far apart two open endpoints may
+be and still be listed as a pair. <b>Connection distance</b> (the default)
+is the Connection Distance preference (Options > \ref cmdPref): the
+distance the editor itself uses to decide whether two endpoints are close
+enough to connect. The wider choices (0.25, 0.5 and 1.0 in) find missed
+joins a little wider than that, which are common in real layouts, without
+changing how the editor connects track; a choice smaller than the
+Connection Distance preference uses the preference. Changing the choice
+updates the report at once, and it is remembered for next time. The
+saved or printed report states the maximum gap used.
 
 A summary line above the list gives the number of near-miss pairs found,
 how many open endpoints have no nearby partner (<b>isolated</b>), and how
