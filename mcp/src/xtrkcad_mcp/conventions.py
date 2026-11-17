@@ -36,10 +36,11 @@ KINDS = (
 LOCATION_KINDS = ("station", "industry", "staging")
 
 # Kinds whose ids are unique within the kind. Location kinds share one
-# namespace (checked separately); yard_limit and yard_track group notes by id.
+# namespace (checked separately); yard_limit, yard_track and house_track
+# group notes by id (a location may have several house tracks).
 _UNIQUE_ID_KINDS = (
-    "railroad", "subdivision", "reference", "house_track", "storage",
-    "facility", "switchback",
+    "railroad", "subdivision", "reference", "storage", "facility",
+    "switchback",
 )
 
 YARD_FUNCTIONS = (
@@ -507,6 +508,29 @@ def _check_yard_tracks(notes: list[ConventionNote], location_kind: dict[str, str
                     hint='Add "railroads": ["A", "B"] naming railroad notes.'))
 
 
+def _check_house_tracks(notes: list[ConventionNote], issues: list[Issue]) -> None:
+    """A location may have several house tracks; then each needs its own label."""
+    by_location: dict[str, list[ConventionNote]] = {}
+    for note in notes:
+        if note.kind == "house_track":
+            by_location.setdefault(note.id, []).append(note)
+    for loc_id, group in by_location.items():
+        if len(group) < 2:
+            continue
+        seen: set[str] = set()
+        for note in group:
+            label = note.str_field("label")
+            if label is None or label in seen:
+                issues.append(_note_issue(
+                    "error", "HOUSE_TRACK_LABEL",
+                    f"{len(group)} house tracks at {loc_id!r}: "
+                    + ("this one has no label" if label is None
+                       else f"label {label!r} is used twice"),
+                    note, hint="With several house tracks, give each its own \"label\"."))
+            else:
+                seen.add(label)
+
+
 def _check_kind_fields(notes: list[ConventionNote], issues: list[Issue]) -> None:
     for note in notes:
         if note.kind == "industry":
@@ -843,6 +867,7 @@ def check_conventions(layout: Layout) -> list[Issue]:
     _check_references(notes, location_kind, issues)
     _check_yard_tracks(notes, location_kind, issues)
     _check_kind_fields(notes, issues)
+    _check_house_tracks(notes, issues)
     _check_groups(layout, notes, issues)
     _check_placement(layout, notes, issues)
     return sort_issues(issues)

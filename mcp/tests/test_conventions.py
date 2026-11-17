@@ -822,3 +822,31 @@ def test_hint_names_the_layer_the_note_belongs_on(tmp_path):
     issues = _placed(tmp_path, [(0, {"kind": "reference", "id": "X"}, None, 80, 12.86)])
     assert _rules(issues) == ["NOTE_FAR_FROM_TRACK"]
     assert "L1-Service" in issues[0].hint and "4" in issues[0].hint
+
+
+# -- house tracks: several per location (user 2026-11-17) --------------------
+
+def _ht(ident="WP", **fields):
+    return (2, {"kind": "house_track", "id": ident, **fields})
+
+
+def test_one_house_track_needs_no_label(tmp_path):
+    assert _check(tmp_path, [ST_WP, _ht()]) == []
+
+
+def test_several_house_tracks_with_labels(tmp_path):
+    assert _check(tmp_path, [ST_WP, _ht(label="Freight house"), _ht(label="Team")]) == []
+
+
+def test_house_track_at_industry(tmp_path):
+    issues = _check(tmp_path, [(2, {"kind": "industry", "id": "QM1", "car_spots": 2}),
+                               _ht("QM1", label="A"), _ht("QM1", label="B")])
+    assert issues == []
+
+
+@pytest.mark.parametrize("a, b", [({}, {}), ({"label": "T"}, {"label": "T"}),
+                                  ({}, {"label": "T"})])
+def test_house_tracks_not_told_apart(tmp_path, a, b):
+    # Several house tracks at one location: each needs its own label.
+    issues = _check(tmp_path, [ST_WP, _ht(**a), _ht(**b)])
+    assert set(_rules(issues)) == {"HOUSE_TRACK_LABEL"}
