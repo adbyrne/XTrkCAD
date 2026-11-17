@@ -32,7 +32,7 @@ CONVENTIONS_VERSION = 1
 KINDS = (
     "railroad", "subdivision", "reference", "station", "yard_limit",
     "industry", "team_track", "staging", "yard_track", "house_track",
-    "storage", "facility", "switchback",
+    "storage", "facility", "switchback", "terminus",
 )
 LOCATION_KINDS = ("station", "industry", "team_track", "staging")
 # Car destinations: kinds with station, car_spots, car_types, loads_*.
@@ -467,6 +467,18 @@ def _check_references(notes: list[ConventionNote], location_kind: dict[str, str]
             loc = note.str_field("location")
             if loc is not None and loc not in location_kind:
                 unknown_location(note, "location", loc, "location")
+        elif note.kind == "terminus":
+            if location_kind.get(note.id) != "station":
+                issues.append(_note_issue(
+                    "error", "TERMINUS_UNKNOWN_STATION",
+                    f"Terminus note {note.id!r} names no station", note,
+                    hint="Its id is the terminus station's id."))
+            elif not any(n.kind == "station" and n.id == note.id
+                         and n.fields.get("terminus") is True for n in notes):
+                issues.append(_note_issue(
+                    "warning", "TERMINUS_STATION_NOT_TERMINUS",
+                    f"Terminus note for {note.id!r}, but the station isn't marked terminus",
+                    note, hint='Add "terminus": true to the station note.'))
         elif note.kind == "switchback":
             serves = note.str_field("serves")
             if serves is not None and serves not in location_kind:
@@ -822,6 +834,12 @@ def _check_placement(layout: Layout, notes: list[ConventionNote],
                 boards.setdefault(note.id, []).append(note)
         elif note.kind == "switchback":
             _check_switchback(layout, note, track, main, by_id, issues)
+        elif note.kind == "terminus" and (track.kind != "TURNOUT" or not on_main):
+            issues.append(_placed_issue(
+                "error", "TERMINUS_NOT_AT_SWITCH",
+                f"Terminus {note.id}: not on a main-track switch", note, track,
+                hint="Place it on the switch where the terminus starts; the track beyond "
+                     "the switch's legs is the terminus."))
 
     for yl_id, group in boards.items():
         if len(group) > 2:

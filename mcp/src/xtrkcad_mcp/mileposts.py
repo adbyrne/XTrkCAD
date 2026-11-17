@@ -11,6 +11,10 @@ the MP of the last anchor passed plus the main-track distance since it,
 divided by the MP scale; an anchor met on the way resets the count.
 Distances follow main track only (the line's Mainline layers). A switch is
 measured at its points.
+
+A terminus starts at a main-track switch (a ``terminus`` note, or by default
+the MP zero anchor of a terminus station whose ref_tag names it): the track
+beyond the switch's legs is the station's own, and has the switch's MP.
 """
 
 from __future__ import annotations
@@ -215,6 +219,8 @@ class _Measurer:
         self.dists = {id(a): _dijkstra(self.adj, {(a.track.id, i): d for i, d in
                                                   self.points[id(a)].along.items()})
                       for a in line.anchors}
+        # Terminal track (beyond a terminus switch's legs): track id -> its MP.
+        self.terminal: dict[int, float] = {}
 
     def _dist(self, anchor: Anchor, p: _Point) -> float:
         return _distance(self.dists[id(anchor)], self.points[id(anchor)], p)
@@ -237,6 +243,8 @@ class _Measurer:
         return best
 
     def mp(self, p: _Point) -> float | None:
+        if p.track.id in self.terminal:
+            return self.terminal[p.track.id]
         if self.line.origin is None or self.line.scale_in is None:
             return None
         a = self.previous_anchor(p)
@@ -407,10 +415,34 @@ def _passing_sidings(layout: Layout, line: Line) -> list[list[TrackObject]]:
     return sidings
 
 
+def _terminal_tracks(layout: Layout, turnout: TrackObject, layers: set[int]) -> set[int]:
+    """The tracks on the given layers beyond a turnout's legs (reached from
+    endpoints 1.. without passing the turnout itself)."""
+    by_id = {t.id: t for t in layout.tracks}
+    seen: set[int] = set()
+    stack = [by_id[e.connected_to] for e in turnout.endpoints[1:]
+             if e.connected_to in by_id and by_id[e.connected_to].layer in layers]
+    while stack:
+        t = stack.pop()
+        if t.id in seen or t.id == turnout.id:
+            continue
+        seen.add(t.id)
+        for e in t.endpoints:
+            nxt = by_id.get(e.connected_to) if e.connected_to is not None else None
+            if nxt is not None and nxt.layer in layers and nxt.id not in seen:
+                stack.append(nxt)
+    return seen
+
+
 def _station_mp(m: _Measurer, layout: Layout, note: ConventionNote, track: TrackObject,
                 sidings: list[tuple[float, float, list[int]]],
                 tail_switches: list[TrackObject] | None,
-                refs: dict[str, tuple[TrackObject, float, float]]) -> StationMP:
+                refs: dict[str, tuple[TrackObject, float, float]],
+                terminus: tuple[float, list[int]] | None = None) -> StationMP:
+    if terminus is not None:
+        mp, ids = terminus
+        return StationMP(note.id, note.note_id, note.railroad, note.subdivision, mp, mp, mp,
+                         "terminus", list(ids), terminus=True)
     at_note = m.mp_at(track, note.x, note.y)
     tag = note.str_field("ref_tag")
     if at_note is None and tag in refs:
@@ -528,6 +560,40 @@ def milepost_model(layout: Layout, notes: list[ConventionNote] | None = None,
 
     refs = {n.id: (snapped[n.note_id], n.x, n.y) for n in notes
             if n.kind == "reference" and n.note_id in snapped}
+
+    # Termini first: their terminal track gets the switch's MP before anything
+    # on it is measured.
+    termini: dict[tuple, tuple[float, list[int]]] = {}
+    for note in notes:
+        if note.kind != "station" or note.fields.get("terminus") is not True:
+            continue
+        line = _line_of(note, lines)
+        m = measurers.get(line.key()) if line is not None else None
+        if m is None or line.scale_in is None:
+            continue
+        marks = [n for n in notes if n.kind == "terminus" and n.id == note.id
+                 and _line_of(n, lines) is line and n.note_id in snapped
+                 and snapped[n.note_id].kind == "TURNOUT"
+                 and snapped[n.note_id].layer in line.layers]
+        if marks:
+            turnout = snapped[marks[0].note_id]
+            mp = m.mp_of_switch(turnout)
+        elif note.str_field("ref_tag") == line.origin.note.id:
+            turnout = line.origin.track if line.origin.track.kind == "TURNOUT" else None
+            mp = line.origin.mp
+        else:
+            issues.append(_note_issue(
+                "warning", "TERMINUS_NO_START",
+                f"Terminus station {note.id}: where does the terminus start?", note,
+                hint="Add a terminus note on the main-track switch where it starts "
+                     "(or ref_tag the MP zero anchor, if the terminus starts there)."))
+            continue
+        if mp is None:
+            continue
+        if turnout is not None:
+            for tid in _terminal_tracks(layout, turnout, line.layers):
+                m.terminal[tid] = mp
+        termini[line.key() + (note.id,)] = (mp, [turnout.id] if turnout is not None else [])
     stations: list[StationMP] = []
     station_notes: list[ConventionNote] = []
     sidings_by_line: dict = {}
@@ -547,7 +613,7 @@ def milepost_model(layout: Layout, notes: list[ConventionNote] | None = None,
                     (a, ia), (b, ib) = sorted(mps)
                     sidings_by_line[line.key()].append((a, b, [ia, ib]))
         st = _station_mp(m, layout, note, track, sidings_by_line[line.key()],
-                         tails.get(note.id), refs)
+                         tails.get(note.id), refs, termini.get(line.key() + (note.id,)))
         if st.mp is None:
             issues.append(_note_issue(
                 "warning", "MP_UNREACHABLE",

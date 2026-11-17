@@ -88,7 +88,7 @@ def _rules(issues, severity=None):
 
 # Phase 4 rules: most test layouts have main track and no MP anchor, so the
 # tests of the other rules leave these out (phase=4 keeps them).
-_PHASE4_RULES = ("MP_", "SWITCHBACK_SWITCH_AMBIGUOUS")
+_PHASE4_RULES = ("MP_", "SWITCHBACK_SWITCH_AMBIGUOUS", "TERMINUS_NO_START")
 
 
 def _check(tmp_path, notes, phase4=False, **kw):
@@ -1034,7 +1034,7 @@ def _station(model, ident, subdivision=None):
 def _p4(issues):
     """Phase 4 rules only (MP_*, SWITCHBACK_SWITCH_AMBIGUOUS)."""
     return [r for r in _rules(issues)
-            if r.startswith("MP_") or r == "SWITCHBACK_SWITCH_AMBIGUOUS"]
+            if r.startswith("MP_") or r in ("SWITCHBACK_SWITCH_AMBIGUOUS", "TERMINUS_NO_START")]
 
 
 def test_station_without_siding_mp_at_note(tmp_path):
@@ -1273,3 +1273,59 @@ def test_station_off_main_with_ref_tag_is_fine(tmp_path):
     notes = [(0, {"kind": "reference", "id": "SW"}, None, 20, 0.5),
              (2, {"kind": "station", "id": "WP", "ref_tag": "SW"}, None, 80, 12.86)]
     assert "STATION_NOT_ON_MAIN" not in _rules(_placed(tmp_path, notes))
+
+
+# -- terminus (user 2026-11-17) ------------------------------------------------
+# A terminus starts at a main-track switch; the track beyond its legs is the
+# station's own (still main for op density). MPs stop at the switch.
+# On LINE, turnout 7's points are at x=200 (MP 16.667) and its legs face east:
+# main track 8 (208-240) is beyond them. Turnout 5's points are at x=180
+# (facing east), its legs face west (x <= 172).
+
+def _term(ident, x, y=0.0, layer=0):
+    return (layer, {"kind": "terminus", "id": ident}, None, x, y)
+
+
+def test_terminus_station_mp_is_its_switch(tmp_path):
+    notes = [ZERO, _st("HC", 228, terminus=True), _term("HC", 200.5)]
+    s = _station(_model(tmp_path, notes), "HC")
+    assert s.limits == "terminus" and s.switch_ids == [7]
+    assert (s.mp_entry, s.mp, s.mp_exit) == pytest.approx((200 / 12,) * 3)
+
+
+def test_mps_stop_at_the_terminus_switch(tmp_path):
+    notes = [ZERO, _st("HC", 228, terminus=True), _term("HC", 200.5), _board("HC", 236)]
+    m = _model(tmp_path, notes)
+    assert {z.id: (round(z.mp_start, 3), round(z.mp_end, 3)) for z in m.yard_limits}["HC"] \
+        == (round(200 / 12, 3),) * 2
+
+
+def test_terminus_defaults_to_the_zero_anchor_via_ref_tag(tmp_path):
+    # Like NYE's WP: MP_ZERO at a switch whose legs face the terminus.
+    # The anchor is on turnout 5 (x 172-180), 4 in from its points.
+    zero = (0, {"kind": "reference", "id": "MP_ZERO", "mp": 0, "mp_scale": 12}, None, 176, 0)
+    notes = [zero, _st("WP", 100, terminus=True, ref_tag="MP_ZERO"), _st("SK", 228)]
+    m = _model(tmp_path, notes)
+    wp, sk = _station(m, "WP"), _station(m, "SK")
+    assert wp.limits == "terminus" and wp.mp == pytest.approx(0.0) and wp.switch_ids == [5]
+    assert sk.mp == pytest.approx((228 - 176) / 12)
+
+
+def test_terminus_station_without_start(tmp_path):
+    issues = _placed(tmp_path, phase4=True, notes=[ZERO, _st("HC", 228, terminus=True)],
+                     tracks=LINE)
+    assert "TERMINUS_NO_START" in _p4(issues)
+
+
+def test_terminus_note_names_no_station(tmp_path):
+    assert "TERMINUS_UNKNOWN_STATION" in _rules(_check(tmp_path, [_term("ZZ", 20)]))
+
+
+def test_terminus_note_for_station_not_marked_terminus(tmp_path):
+    issues = _check(tmp_path, [_st("HC", 30), _term("HC", 20)])
+    assert "TERMINUS_STATION_NOT_TERMINUS" in _rules(issues)
+
+
+def test_terminus_note_not_at_a_switch(tmp_path):
+    issues = _placed(tmp_path, [_st("HC", 228, terminus=True), _term("HC", 120)], tracks=LINE)
+    assert "TERMINUS_NOT_AT_SWITCH" in _rules(issues)
