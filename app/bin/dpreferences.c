@@ -53,8 +53,6 @@ static paramFloatRange_t r0_180 = { 0.0, 180.0 };
 static paramFloatRange_t r1_10 = { 1.0, 10.0 };
 
 static void UpdatePrefD(void);
-static void UpdateChkPtInterval(long);
-static void UpdateAutoSaveInterval(long);
 
 static char* iconSizeLabels[] = { N_("16 px"), N_("24 px"), N_("32 px"), NULL };
 static char* unitsLabels[] = { N_("English"), N_("Metric"), NULL };
@@ -63,29 +61,109 @@ static char* enableFlexTrackLabels[] = { N_("Show FlexTrack in HotBar"), NULL };
 static char* enableAudioLabels[] = { N_("Enable audio signals"), NULL };
 static char* startOptions[] = { N_("Load Last Layout"), N_("Start New Layout"), NULL };
 
+enum {
+	I_ICONSIZE,
+	I_ANGLESYSTEM,
+	I_UNITS,
+	I_DISTANCEFORMAT,
+	I_MINLENGTH,
+	I_CONNECTDISTANCE,
+	I_CONNECTANGLE,
+	I_TURNTABLEANGLE,
+	I_COUPLINGSPEED,
+	I_AUDIO,
+	I_SHOWFLEXTRACK,
+	I_DRAGPIXELS,
+	I_DRAGTIMEOUT,
+	I_MINGRIDSPACING,
+	I_CHECKPOINT,
+	I_CHECKPOINTUNIT,
+	I_AUTOSAVE,
+	I_AUTOSAVEUNIT,
+	I_ONSTARTUP,
+};
+
 static paramData_t prefPLs[] = {
-	{ PD_RADIO, &iconSize, "iconsize", PDO_NOPSHUPD, iconSizeLabels, N_("Icon Size"), BC_HORIZONTAL, I2VP(CHANGE_ICONSIZE) },
-	{ PD_RADIO, &angleSystem, "anglesystem", PDO_NOPSHUPD, angleSystemLabels, N_("Angles"), BC_HORIZONTAL },
-#define I_UNITS	(2)
-	{ PD_RADIO, &units, "units", PDO_NOPSHUPD | PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORIZONTAL, I2VP(CHANGE_MAIN | CHANGE_UNITS) },
-#define I_DISTANCEFORMAT (3)
-	{ PD_COMBOLIST, &distanceFormatInx, "dstfmt", PDO_DIM | PDO_NOPSHUPD | PDO_LISTINDEX, I2VP(15), N_("Length Format"), 0, I2VP(CHANGE_MAIN | CHANGE_UNITS) },
-	{ PD_FLOAT, &minLength, "minlength", PDO_DIM | PDO_SMALLDIM | PDO_NOPSHUPD, &r0o1_1, N_("Min Track Length") },
-	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM | PDO_SMALLDIM | PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance") },
-	{ PD_FLOAT, &connectAngle, "connectangle", PDO_NOPSHUPD, &r1_10, N_("Connection Angle") },
-	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
-	{ PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD, &i10_100, N_("Max Coupling Speed"), 0 },
-	{ PD_TOGGLE, &enableAudio, "setaudio", PDO_NOPSHUPD, enableAudioLabels, "", BC_HORIZONTAL },
-#define I_SHOWFLEXTRACK (10)
-	{ PD_TOGGLE, &showFlexTrack, "showflextrack", PDO_NOPSHUPD, enableFlexTrackLabels, "", BC_HORIZONTAL, I2VP(CHANGE_PARAMS | CHANGE_TOOLBAR) },
-	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD | PDO_DRAW, &i1_1000, N_("Drag Distance") },
-	{ PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD | PDO_DRAW, &i1_1000, N_("Drag Timeout") },
-	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD | PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
-#define I_CHECKPOINTFREQUENCY (14)
-	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD | PDO_FILE, &i0_10000, N_("Check Point Frequency") },
-#define I_AUTOSAVE		(15)
-	{ PD_LONG, &autosaveChkPoints, "autosave", PDO_NOPSHUPD | PDO_FILE, &i0_99, N_("Autosave Checkpoint Frequency") },
-	{ PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD, startOptions, N_("On Program Startup"), 0, NULL }
+	[I_ICONSIZE] = {
+		PD_RADIO, &iconSize, "iconsize", PDO_NOPSHUPD, iconSizeLabels,
+		N_("Icon Size"), BC_HORIZONTAL, I2VP(CHANGE_ICONSIZE)
+	},
+	[I_ANGLESYSTEM] = {
+		PD_RADIO, &angleSystem, "anglesystem", PDO_NOPSHUPD,
+		angleSystemLabels, N_("Angles"), BC_HORIZONTAL
+	},
+	[I_UNITS] = {
+		PD_RADIO, &units, "units", PDO_NOPSHUPD | PDO_NOUPDACT, unitsLabels,
+		N_("Units"), BC_HORIZONTAL, I2VP(CHANGE_MAIN | CHANGE_UNITS)
+	},
+	[I_DISTANCEFORMAT] = {
+		PD_COMBOLIST, &distanceFormatInx, "dstfmt",
+		PDO_DIM | PDO_NOPSHUPD | PDO_LISTINDEX, I2VP(15),
+		N_("Length Format"), 0, I2VP(CHANGE_MAIN | CHANGE_UNITS)
+	},
+	[I_MINLENGTH] = {
+		PD_FLOAT, &minLength, "minlength",
+		PDO_DIM | PDO_SMALLDIM | PDO_NOPSHUPD, &r0o1_1,
+		N_("Min Track Length")
+	},
+	[I_CONNECTDISTANCE] = {
+		PD_FLOAT, &connectDistance, "connectdistance",
+		PDO_DIM | PDO_SMALLDIM | PDO_NOPSHUPD, &r0o1_1,
+		N_("Connection Distance")
+	},
+	[I_CONNECTANGLE] = {
+		PD_FLOAT, &connectAngle, "connectangle", PDO_NOPSHUPD, &r1_10,
+		N_("Connection Angle")
+	},
+	[I_TURNTABLEANGLE] = {
+		PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180,
+		N_("Turntable Angle")
+	},
+	[I_COUPLINGSPEED] = {
+		PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD,
+		&i10_100, N_("Max Coupling Speed"), 0
+	},
+	[I_AUDIO] = {
+		PD_TOGGLE, &enableAudio, "setaudio", PDO_NOPSHUPD, enableAudioLabels,
+		"", BC_HORIZONTAL
+	},
+	[I_SHOWFLEXTRACK] = {
+		PD_TOGGLE, &showFlexTrack, "showflextrack", PDO_NOPSHUPD,
+		enableFlexTrackLabels, "", BC_HORIZONTAL,
+		I2VP(CHANGE_PARAMS | CHANGE_TOOLBAR)
+	},
+	[I_DRAGPIXELS] = {
+		PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD | PDO_DRAW, &i1_1000,
+		N_("Drag Distance")
+	},
+	[I_DRAGTIMEOUT] = {
+		PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD | PDO_DRAW,
+		&i1_1000, N_("Drag Timeout")
+	},
+	[I_MINGRIDSPACING] = {
+		PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD | PDO_DRAW,
+		&i1_100, N_("Min Grid Spacing"), 0, 0
+	},
+	[I_CHECKPOINT] = {
+		PD_LONG, &checkPtInterval, "checkpoint",
+		PDO_NOPSHUPD | PDO_FILE | PDO_SAMEROW, &i0_10000,
+		N_("Check Point Every")
+	},
+	[I_CHECKPOINTUNIT] = {
+		PD_MESSAGE, N_("changes"), "checkpointunit", PDO_SAMEROW
+	},
+	[I_AUTOSAVE] = {
+		PD_LONG, &autosaveChkPoints, "autosave",
+		PDO_NOPSHUPD | PDO_FILE | PDO_SAMEROW | PDO_NEWSAMEROW, &i0_99,
+		N_("AutoSave Every")
+	},
+	[I_AUTOSAVEUNIT] = {
+		PD_MESSAGE, N_("check points"), "autosaveunit", PDO_SAMEROW
+	},
+	[I_ONSTARTUP] = {
+		PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD, startOptions,
+		N_("On Program Startup"), 0, NULL
+	}
 };
 static paramGroup_t prefPG = { "pref", PGO_RECORD | PGO_PREFMISC, prefPLs, COUNT(prefPLs) };
 
@@ -138,18 +216,19 @@ static dstFmts_t metricDstFmts[] = {
 };
 static dstFmts_t* dstFmts[] = { englishDstFmts, metricDstFmts };
 
-void UpdateAutoSaveInterval(long value)
+/**
+ * AutoSave only runs from a check point, so its field is only available
+ * while check points are on. Its value is kept while it is unavailable.
+ */
+static void UpdateAutoSaveActive(void)
 {
-	autosaveChkPoints = value;
-	FormLoadSingleControl(&prefPG, I_AUTOSAVE);
-	FormLoadSingleControl(&prefPG, I_CHECKPOINTFREQUENCY);
-}
+	wBool_t active = checkPtInterval > 0;
 
-void UpdateChkPtInterval(long value)
-{
-	checkPtInterval = value;
-	FormLoadSingleControl(&prefPG, I_AUTOSAVE);
-	FormLoadSingleControl(&prefPG, I_CHECKPOINTFREQUENCY);
+	if (prefPLs[I_AUTOSAVE].control == NULL) {
+		return;
+	}
+	wControlActive(prefPLs[I_AUTOSAVE].control, active);
+	wControlActive(prefPLs[I_AUTOSAVEUNIT].control, active);
 }
 
 /**
@@ -217,7 +296,7 @@ static void UpdateMeasureFmt()
 /**
  * Settings the dialog writes while it is open, so that its own fields can
  * follow (units and length format reformat the dimension fields, the
- * checkpoint and autosave fields depend on each other). Saved when the
+ * check point field enables the autosave field). Saved when the
  * dialog opens and put back by Cancel, so that nothing changes before Ok.
  */
 static struct {
@@ -264,24 +343,12 @@ static wBool_t OptionDlgUpdate(
 	case I_SHOWFLEXTRACK:
 		// applied by PrefOk, through the field's change mask
 		break;
-	case I_CHECKPOINTFREQUENCY:
+	case I_CHECKPOINT:
 		checkPtInterval = *(long*)valueP;
-		if (checkPtInterval == 0) {
-			/** \todo show status message to user */
-			//wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
-			//wControlSetBalloon(pg->paramPtr[inx].control, 0, h * 3 / 4,
-			//	_("Turning off AutoSave"));
-			UpdateAutoSaveInterval(0);
-		}
+		UpdateAutoSaveActive();
 		break;
 	case I_AUTOSAVE:
 		autosaveChkPoints = *(long*)valueP;
-		if (checkPtInterval == 0 && autosaveChkPoints > 0) {
-			//wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
-			//wControlSetBalloon(pg->paramPtr[inx].control, 0, -h * 3 / 4,
-			//	_("Turning on CheckPointing"));
-			UpdateChkPtInterval(10);
-		}
 		break;
 	default:
 		if ( log_dpreferences < 0 ) { log_dpreferences = LogFindIndex( "dpreferences" ); }
@@ -354,6 +421,7 @@ static void DoPref(void* junk)
 	}
 	PrefSave();
 	FormLoadControls(&prefPG);
+	UpdateAutoSaveActive();
 	displayUnits = units;
 	wShow(prefW);
 }

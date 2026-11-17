@@ -399,8 +399,10 @@ EXPORT void MainRedraw(void)
 		                    &bitmapWidth);
 
 		wDrawPix_t rx, ry, rw, rh;
+		/* room in application pixels, margins included, like the
+		 * coordinates of every other wDraw* call on mainD */
 		rx = lborder + (0.0 - mainD.orig.x) * mainD.dpi / mainD.scale;
-		ry = (0.0 - mainD.orig.y) * mainD.dpi / mainD.scale;
+		ry = bborder + (0.0 - mainD.orig.y) * mainD.dpi / mainD.scale;
 		rw = mapD.size.x * mainD.dpi / mainD.scale;
 		rh = mapD.size.y * mainD.dpi / mainD.scale;
 
