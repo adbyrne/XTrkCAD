@@ -30,10 +30,12 @@ CONVENTIONS_VERSION = 1
 
 KINDS = (
     "railroad", "subdivision", "reference", "station", "yard_limit",
-    "industry", "staging", "yard_track", "house_track", "storage",
-    "facility", "switchback",
+    "industry", "team_track", "staging", "yard_track", "house_track",
+    "storage", "facility", "switchback",
 )
-LOCATION_KINDS = ("station", "industry", "staging")
+LOCATION_KINDS = ("station", "industry", "team_track", "staging")
+# Car destinations: kinds with station, car_spots, car_types, loads_*.
+_DESTINATION_KINDS = ("industry", "team_track")
 
 # Kinds whose ids are unique within the kind. Location kinds share one
 # namespace (checked separately); yard_limit, yard_track and house_track
@@ -46,13 +48,14 @@ _UNIQUE_ID_KINDS = (
 YARD_FUNCTIONS = (
     "arrival", "departure", "arrival_departure", "classification",
     "runaround", "lead", "interchange", "caboose", "rip", "storage",
-    "engine", "team",
+    "engine",
 )
 INDUSTRY_FUNCTIONS = ("loading", "empties", "loads", "service")
 STAGING_FUNCTIONS = ("staging",) + YARD_FUNCTIONS
 _FUNCTIONS_BY_YARD_KIND = {
     "station": YARD_FUNCTIONS,
     "industry": INDUSTRY_FUNCTIONS,
+    "team_track": INDUSTRY_FUNCTIONS,
     "staging": STAGING_FUNCTIONS,
 }
 
@@ -357,7 +360,7 @@ def _check_ids(notes: list[ConventionNote], issues: list[Issue]) -> dict[str, st
                 f"Location id {loc_id!r} is used by a {first.kind} and a {extra.kind}"
                 if extra.kind != first.kind else
                 f"Two {extra.kind} notes with id {loc_id!r}",
-                extra, hint="Stations, industries and staging yards share one id namespace."))
+                extra, hint="Stations, industries, team tracks and staging yards share one id namespace."))
 
     for kind in _UNIQUE_ID_KINDS:
         seen: dict[str, ConventionNote] = {}
@@ -436,19 +439,26 @@ def _check_references(notes: list[ConventionNote], location_kind: dict[str, str]
                 issues.append(_note_issue(
                     "error", "REF_UNKNOWN_REFERENCE",
                     f"Station {note.id}: ref_tag {tag!r} names no reference note", note))
-        elif note.kind == "industry":
+        elif note.kind in _DESTINATION_KINDS:
             station = note.str_field("station")
             if station is not None:
                 if station not in location_kind:
                     unknown_location(note, "station", station, "location")
                 elif location_kind[station] != "station":
                     issues.append(_note_issue(
-                        "error", "INDUSTRY_STATION_NOT_STATION",
-                        f"Industry {note.id}: {station!r} is a "
+                        "error", "STATION_REF_NOT_STATION",
+                        f"{note.kind} {note.id}: {station!r} is a "
                         f"{location_kind[station]}, not a station", note))
+            elif note.kind == "team_track":
+                issues.append(_note_issue(
+                    "info", "TEAM_TRACK_TIMETABLE_STATION",
+                    f"Team track {note.id} names no station: it is a timetable "
+                    f"station itself", note,
+                    hint='Give "station" if it is switched from a nearby station.'))
         elif note.kind == "yard_track":
             if note.id not in location_kind:
-                unknown_location(note, "id", note.id, "station, industry or staging yard")
+                unknown_location(note, "id", note.id,
+                                 "station, industry, team track or staging yard")
         elif note.kind == "house_track":
             if location_kind.get(note.id) not in ("station", "industry"):
                 unknown_location(note, "id", note.id, "station or industry")
@@ -533,16 +543,16 @@ def _check_house_tracks(notes: list[ConventionNote], issues: list[Issue]) -> Non
 
 def _check_kind_fields(notes: list[ConventionNote], issues: list[Issue]) -> None:
     for note in notes:
-        if note.kind == "industry":
+        if note.kind in _DESTINATION_KINDS:
             if "car_spots" not in note.fields:
                 issues.append(_note_issue(
-                    "info", "INDUSTRY_CAR_SPOTS_DEFAULT",
-                    f"Industry {note.id}: car_spots not given, 2 used", note))
+                    "info", "CAR_SPOTS_DEFAULT",
+                    f"{note.kind} {note.id}: car_spots not given, 2 used", note))
             unknown = [c for c in note.str_list_field("car_types") if c not in AAR_CAR_TYPES]
             if unknown:
                 issues.append(_note_issue(
-                    "warning", "INDUSTRY_UNKNOWN_CAR_TYPE",
-                    f"Industry {note.id}: unknown car type(s) {', '.join(unknown)}", note,
+                    "warning", "UNKNOWN_CAR_TYPE",
+                    f"{note.kind} {note.id}: unknown car type(s) {', '.join(unknown)}", note,
                     hint="Use AAR mechanical designations (XM, HM, TM, ...)."))
         elif note.kind == "facility":
             ftype = note.fields.get("type")

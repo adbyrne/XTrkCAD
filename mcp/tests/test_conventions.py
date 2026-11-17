@@ -320,7 +320,7 @@ def test_house_track_at_staging_is_unknown_location(tmp_path):
 def test_industry_station_must_be_station(tmp_path):
     issues = _check(tmp_path, [(2, {"kind": "staging", "id": "E"}),
                                (2, {"kind": "industry", "id": "QM1", "station": "E"})])
-    assert "INDUSTRY_STATION_NOT_STATION" in _rules(issues)
+    assert "STATION_REF_NOT_STATION" in _rules(issues)
 
 
 def test_station_ref_tag_unknown(tmp_path):
@@ -413,14 +413,14 @@ def test_staging_interchange_track_is_fine(tmp_path):
 
 def test_industry_car_spots_default_is_info(tmp_path):
     issues = _check(tmp_path, [(2, {"kind": "industry", "id": "QM1"})])
-    assert _rules(issues) == ["INDUSTRY_CAR_SPOTS_DEFAULT"]
+    assert _rules(issues) == ["CAR_SPOTS_DEFAULT"]
     assert issues[0].severity == "info"
 
 
 def test_industry_unknown_car_type(tmp_path):
     issues = _check(tmp_path, [(2, {"kind": "industry", "id": "QM1", "car_spots": 2,
                                     "car_types": ["HM", "ZZ"]})])
-    assert _rules(issues) == ["INDUSTRY_UNKNOWN_CAR_TYPE"]
+    assert _rules(issues) == ["UNKNOWN_CAR_TYPE"]
     assert issues[0].severity == "warning"
 
 
@@ -472,7 +472,7 @@ def test_tool_shape(tmp_path):
     assert result["conventions_version"] == CONVENTIONS_VERSION == 1
     assert result["counts"] == {"error": 1, "warning": 0, "info": 1}
     assert [i["rule"] for i in result["issues"]] == [
-        "NOTE_UNKNOWN_KIND", "INDUSTRY_CAR_SPOTS_DEFAULT"]
+        "NOTE_UNKNOWN_KIND", "CAR_SPOTS_DEFAULT"]
 
 
 def test_tool_clean_fixture():
@@ -850,3 +850,78 @@ def test_house_tracks_not_told_apart(tmp_path, a, b):
     # Several house tracks at one location: each needs its own label.
     issues = _check(tmp_path, [ST_WP, _ht(**a), _ht(**b)])
     assert set(_rules(issues)) == {"HOUSE_TRACK_LABEL"}
+
+
+# -- team tracks (user 2026-11-17) -------------------------------------------
+# A public delivery track: shaped like an industry, a location of its own.
+# Without "station" it is a timetable station itself.
+
+def _tt(ident="XP_TEAM", **fields):
+    return (2, {"kind": "team_track", "id": ident, "car_spots": 3, **fields})
+
+
+def test_team_track_at_station(tmp_path):
+    assert _check(tmp_path, [ST_XP, _tt(station="XP")]) == []
+
+
+def test_standalone_team_track_is_timetable_station(tmp_path):
+    issues = _check(tmp_path, [_tt("MILLER_TEAM")])
+    assert _rules(issues) == ["TEAM_TRACK_TIMETABLE_STATION"]
+    assert issues[0].severity == "info"
+
+
+def test_team_track_shares_location_namespace(tmp_path):
+    assert "ID_DUPLICATE_LOCATION" in _rules(_check(tmp_path, [ST_XP, _tt("XP", station="XP")]))
+
+
+def test_team_track_unknown_station(tmp_path):
+    assert "REF_UNKNOWN_LOCATION" in _rules(_check(tmp_path, [_tt(station="NOPE")]))
+
+
+def test_team_track_station_must_be_station(tmp_path):
+    issues = _check(tmp_path, [(2, {"kind": "staging", "id": "E"}), _tt(station="E")])
+    assert "STATION_REF_NOT_STATION" in _rules(issues)
+
+
+def test_team_track_car_spots_default(tmp_path):
+    issues = _check(tmp_path, [ST_XP, (2, {"kind": "team_track", "id": "T", "station": "XP"})])
+    assert _rules(issues) == ["CAR_SPOTS_DEFAULT"]
+
+
+def test_team_track_car_types_optional_and_checked(tmp_path):
+    assert _check(tmp_path, [ST_XP, _tt(station="XP", car_types=["XM", "FM"])]) == []
+    issues = _check(tmp_path, [ST_XP, _tt(station="XP", car_types=["QQ"])])
+    assert _rules(issues) == ["UNKNOWN_CAR_TYPE"]
+
+
+def test_team_track_field_types(tmp_path):
+    assert "NOTE_FIELD_TYPE" in _rules(_check(tmp_path, [_tt(car_spots=0)]))
+
+
+def test_team_track_yard_takes_industry_functions(tmp_path):
+    ok = _check(tmp_path, [ST_XP, _tt(station="XP"),
+                           (2, {"kind": "yard_track", "id": "XP_TEAM", "label": "1",
+                                "function": "loads"})])
+    assert ok == []
+    bad = _check(tmp_path, [ST_XP, _tt(station="XP"),
+                            (2, {"kind": "yard_track", "id": "XP_TEAM", "label": "1",
+                                 "function": "classification"})])
+    assert _rules(bad) == ["YARD_TRACK_BAD_FUNCTION"]
+
+
+def test_team_is_no_longer_a_yard_function(tmp_path):
+    issues = _check(tmp_path, [ST_WP, (2, {"kind": "yard_track", "id": "WP", "label": "T",
+                                           "function": "team"})])
+    assert _rules(issues) == ["YARD_TRACK_BAD_FUNCTION"]
+
+
+def test_house_and_team_track_on_one_track(tmp_path):
+    # One track serving both: two notes on it.
+    issues = _check(tmp_path, [ST_XP, _ht("XP"), _tt(station="XP")])
+    assert issues == []
+
+
+def test_team_track_is_placed_off_main(tmp_path):
+    issues = _placed(tmp_path, [(2, {"kind": "team_track", "id": "T", "car_spots": 2},
+                                 None, 80, 12.86)])
+    assert _rules(issues) == ["TEAM_TRACK_TIMETABLE_STATION"]

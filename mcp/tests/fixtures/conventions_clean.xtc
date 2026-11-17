@@ -37,6 +37,8 @@ NOTE 113 2 0 0 140.000000 30.000000 0 3 "{""kind"": ""house_track"", ""id"": ""X
 NOTE 114 2 0 0 100.000000 30.000000 0 3 "{""kind"": ""storage"", ""id"": ""CAR_BARN"", ""name"": ""Car barn""}"
 NOTE 115 2 0 0 30.000000 30.000000 0 3 "{""kind"": ""facility"", ""id"": ""WP_COAL"", ""name"": ""Coal trestle"", ""type"": ""coal"", ""location"": ""WP""}"
 NOTE 116 2 0 0 214.000000 10.000000 0 3 "{""kind"": ""switchback"", ""id"": ""XP_SWB"", ""serves"": ""XP""}"
+NOTE 118 2 0 0 120.000000 30.000000 0 3 "{""kind"": ""team_track"", ""id"": ""XP_TEAM"", ""name"": ""Xina Pass team track"", ""station"": ""XP"", ""car_spots"": 3}"
+NOTE 119 2 0 0 60.000000 30.000000 0 3 "{""kind"": ""team_track"", ""id"": ""MILLER_TEAM"", ""name"": ""Miller team track"", ""car_spots"": 2}"
 NOTE 117 1 0 0 150.000000 10.000000 0 3 "{""todo"": ""not a convention note: no kind""}"
 
 STRAIGHT 1 0 0 0 0 HO 0
