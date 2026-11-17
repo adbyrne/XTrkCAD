@@ -7,7 +7,8 @@ stable). A fact tied to a place on the layout is a JSON Note there, with a
 breaks as an Issue with a stable rule id.
 
 This module covers the note and id rules (phase 1), the Layer Group rules
-(phase 2) and note placement (phase 3). Milepost rules follow in phase 4.
+(phase 2) and note placement (phase 3); mileposts.py computes MPs and station
+limits and reports their rules (phase 4).
 """
 
 from __future__ import annotations
@@ -745,13 +746,14 @@ def _main_component_has_end(layout: Layout, start: TrackObject, main: set[int]) 
     return False
 
 
-def _switchback_switch(layout: Layout, tail: TrackObject, main: set[int]) -> TrackObject | None:
-    """The main-track turnout the switchback's tail track leaves: the first
-    turnout on a main layer reached from the tail without crossing other
-    main track."""
+def main_turnouts_from(layout: Layout, start: TrackObject, main: set[int]) -> list[TrackObject]:
+    """The main-layer turnouts reached from a track off the main without
+    crossing main track, nearest first: where a spur, a switchback's tail
+    or a team track's track leaves the main."""
     by_id = {t.id: t for t in layout.tracks}
-    seen = {tail.id}
-    queue = deque([tail])
+    seen = {start.id}
+    queue = deque([start])
+    found = []
     while queue:
         track = queue.popleft()
         for ep in track.endpoints:
@@ -761,14 +763,16 @@ def _switchback_switch(layout: Layout, tail: TrackObject, main: set[int]) -> Tra
             seen.add(nxt.id)
             if nxt.layer in main:
                 if nxt.kind == "TURNOUT":
-                    return nxt
+                    found.append(nxt)
                 continue
             queue.append(nxt)
-    return None
+    return found
 
 
-def _check_placement(layout: Layout, notes: list[ConventionNote], issues: list[Issue]) -> None:
-    """Spec 4.0 positions, 4.2 anchors, 4.3 stations, 4.4 YL boards, 4.9."""
+def _check_placement(layout: Layout, notes: list[ConventionNote],
+                     issues: list[Issue]) -> dict[int, TrackObject]:
+    """Spec 4.0 positions, 4.2 anchors, 4.3 stations, 4.4 YL boards, 4.9.
+    Returns note id -> the track it snapped to."""
     main = _main_layers(layout)
     snapped: dict[int, TrackObject] = {}
     for note in notes:
@@ -835,6 +839,7 @@ def _check_placement(layout: Layout, notes: list[ConventionNote], issues: list[I
                 f"Yard limit {yl_id} has one board and its main has no end",
                 note, snapped[note.note_id],
                 hint="Add the second board, at the other end of the zone."))
+    return snapped
 
 
 def _check_switchback(layout: Layout, note: ConventionNote, tail: TrackObject,
@@ -856,11 +861,18 @@ def _check_switchback(layout: Layout, note: ConventionNote, tail: TrackObject,
                     f"Switchback {note.id}: switch {sw!r} is not a turnout on main track",
                     note, tail))
         return
-    if _switchback_switch(layout, tail, main) is None:
+    found = main_turnouts_from(layout, tail, main)
+    if not found:
         issues.append(_placed_issue(
             "error", "SWITCHBACK_NO_SWITCH",
             f"Switchback {note.id}: no main-track turnout where its tail track leaves",
             note, tail, hint='Give the switch(es) as "switches": [track ids].'))
+    elif len(found) > 1:
+        issues.append(_placed_issue(
+            "warning", "SWITCHBACK_SWITCH_AMBIGUOUS",
+            f"Switchback {note.id}: its tail track reaches main turnouts "
+            + ", ".join(str(t.id) for t in found), note, tail,
+            hint='Say which act as the switchback switch: "switches": [track ids].'))
 
 
 def sort_issues(issues: list[Issue]) -> list[Issue]:
@@ -879,5 +891,7 @@ def check_conventions(layout: Layout) -> list[Issue]:
     _check_kind_fields(notes, issues)
     _check_house_tracks(notes, issues)
     _check_groups(layout, notes, issues)
-    _check_placement(layout, notes, issues)
+    snapped = _check_placement(layout, notes, issues)
+    from .mileposts import check_mileposts   # mileposts imports this module
+    issues += check_mileposts(layout, notes, snapped)
     return sort_issues(issues)

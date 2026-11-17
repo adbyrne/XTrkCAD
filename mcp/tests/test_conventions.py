@@ -86,8 +86,16 @@ def _rules(issues, severity=None):
     return [i.rule for i in issues if severity is None or i.severity == severity]
 
 
-def _check(tmp_path, notes, **kw):
-    return check_conventions(_layout(tmp_path, notes, **kw))
+# Phase 4 rules: most test layouts have main track and no MP anchor, so the
+# tests of the other rules leave these out (phase=4 keeps them).
+_PHASE4_RULES = ("MP_", "STATION_NO_YARD_LIMIT", "SWITCHBACK_SWITCH_AMBIGUOUS")
+
+
+def _check(tmp_path, notes, phase4=False, **kw):
+    issues = check_conventions(_layout(tmp_path, notes, **kw))
+    if phase4:
+        return issues
+    return [i for i in issues if not i.rule.startswith(_PHASE4_RULES)]
 
 
 ST_WP = (0, {"kind": "station", "id": "WP"})
@@ -467,7 +475,9 @@ def test_issue_carries_note_position(tmp_path):
 
 def test_tool_shape(tmp_path):
     _layout(tmp_path, [(0, {"kind": "bogus", "id": "B"}),
-                       (2, {"kind": "industry", "id": "QM1"})])
+                       (2, {"kind": "industry", "id": "QM1"}),
+                       (0, {"kind": "reference", "id": "MP_ZERO", "mp": 0, "mp_scale": 12},
+                        None, 0, 0)])
     result = server.check_conventions(str(tmp_path / "t.xtc"))
     assert result["conventions_version"] == CONVENTIONS_VERSION == 1
     assert result["counts"] == {"error": 1, "warning": 0, "info": 1}
@@ -603,7 +613,8 @@ def test_layer_groups_fixture_with_railroads(tmp_path):
         'NOTE 50 ', 1)
     path = tmp_path / "lg.xtc"
     path.write_text(text)
-    issues = check_conventions(parse_file(path))
+    issues = [i for i in check_conventions(parse_file(path))
+              if not i.rule.startswith(_PHASE4_RULES)]    # no MP anchors in it
     assert _rules(issues, "error") == [] and _rules(issues, "warning") == []
 
 
@@ -925,3 +936,305 @@ def test_team_track_is_placed_off_main(tmp_path):
     issues = _placed(tmp_path, [(2, {"kind": "team_track", "id": "T", "car_spots": 2},
                                  None, 80, 12.86)])
     assert _rules(issues) == ["TEAM_TRACK_TIMETABLE_STATION"]
+
+
+# -- phase 4: mileposts and station limits -----------------------------------
+# LINE: main along y=0 from x=0 to x=240 (layer 0), MP = x / 12 from a zero
+# anchor at x=0 with mp_scale 12.
+#   straight 1 0-60, turnout 2 points at 60 (legs to 68,0 and 68,4),
+#   straight 3 68-172, turnout 5 points at 180 facing east (legs to 172,0
+#   and 172,4), straight 6 180-200, turnout 7 points at 200 (legs to 208,0
+#   and 208,4), straight 8 208-240.
+#   Passing siding: straight 4 (layer 1) 68,4-172,4 between turnouts 2 and 5.
+#   Spur: straight 9 (layer 2) 208,4-230,12 off turnout 7.
+# Switch MPs (at the points): turnout 2 = 5, turnout 5 = 15, turnout 7 = 16.667.
+LINE = """
+STRAIGHT 1 0 0 0 0 HO 0
+\tE 0.000000 0.000000 270.000000
+\tT 2 60.000000 0.000000 90.000000
+\tEND$SEGS
+
+TURNOUT 2 0 0 0 0 HO 2 60.000000 0.000000 0 0.000000 "A\t#6 Left\t"
+\tT 1 60.000000 0.000000 270.000000
+\tT 3 68.000000 0.000000 90.000000
+\tT 4 68.000000 4.000000 80.000000
+\tEND$SEGS
+
+STRAIGHT 3 0 0 0 0 HO 0
+\tT 2 68.000000 0.000000 270.000000
+\tT 5 172.000000 0.000000 90.000000
+\tEND$SEGS
+
+STRAIGHT 4 1 0 0 0 HO 0
+\tT 2 68.000000 4.000000 260.000000
+\tT 5 172.000000 4.000000 100.000000
+\tEND$SEGS
+
+TURNOUT 5 0 0 0 0 HO 2 180.000000 0.000000 0 0.000000 "B\t#6 Right\t"
+\tT 6 180.000000 0.000000 90.000000
+\tT 3 172.000000 0.000000 270.000000
+\tT 4 172.000000 4.000000 280.000000
+\tEND$SEGS
+
+STRAIGHT 6 0 0 0 0 HO 0
+\tT 5 180.000000 0.000000 270.000000
+\tT 7 200.000000 0.000000 90.000000
+\tEND$SEGS
+
+TURNOUT 7 0 0 0 0 HO 2 200.000000 0.000000 0 0.000000 "C\t#6 Left\t"
+\tT 6 200.000000 0.000000 270.000000
+\tT 8 208.000000 0.000000 90.000000
+\tT 9 208.000000 4.000000 70.000000
+\tEND$SEGS
+
+STRAIGHT 8 0 0 0 0 HO 0
+\tT 7 208.000000 0.000000 270.000000
+\tE 240.000000 0.000000 90.000000
+\tEND$SEGS
+
+STRAIGHT 9 2 0 0 0 HO 0
+\tT 7 208.000000 4.000000 250.000000
+\tE 230.000000 12.000000 70.000000
+\tEND$SEGS
+"""
+
+# An isolated piece of main track (layer 0), connected to nothing.
+ISOLATED_MAIN = """
+STRAIGHT 20 0 0 0 0 HO 0
+\tE 0.000000 60.000000 270.000000
+\tE 50.000000 60.000000 90.000000
+\tEND$SEGS
+"""
+
+ZERO = (0, {"kind": "reference", "id": "MP_ZERO", "mp": 0, "mp_scale": 12}, None, 0, 0)
+
+
+def _st(ident, x, layer=0, y=0.0, **fields):
+    return (layer, {"kind": "station", "id": ident, **fields}, None, x, y)
+
+
+def _board(ident, x):
+    return (0, {"kind": "yard_limit", "id": ident}, None, x, 0)
+
+
+def _model(tmp_path, notes, tracks=LINE, **kw):
+    from xtrkcad_mcp.mileposts import milepost_model
+    return milepost_model(_layout(tmp_path, notes, tracks=tracks, **kw))
+
+
+def _station(model, ident, subdivision=None):
+    hits = [s for s in model.stations if s.id == ident
+            and (subdivision is None or s.subdivision == subdivision)]
+    assert len(hits) == 1, hits
+    return hits[0]
+
+
+def _p4(issues):
+    """Phase 4 rules only (MP_*, STATION_NO_YARD_LIMIT, SWITCHBACK_SWITCH_AMBIGUOUS)."""
+    return [r for r in _rules(issues)
+            if r.startswith("MP_") or r in ("STATION_NO_YARD_LIMIT",
+                                            "SWITCHBACK_SWITCH_AMBIGUOUS")]
+
+
+def test_station_without_siding_mp_at_note(tmp_path):
+    m = _model(tmp_path, [ZERO, _st("SK", 228)])
+    s = _station(m, "SK")
+    assert s.mp == pytest.approx(19.0) and s.limits == "note"
+    assert s.mp_entry == s.mp_exit == pytest.approx(19.0)
+
+
+def test_pass_through_station_mp_is_siding_midpoint(tmp_path):
+    m = _model(tmp_path, [ZERO, _st("XP", 100)])
+    s = _station(m, "XP")
+    assert s.limits == "siding"
+    assert (s.mp_entry, s.mp, s.mp_exit) == pytest.approx((5.0, 10.0, 15.0))
+    assert sorted(s.switch_ids) == [2, 5]
+
+
+def test_mp_at_note_overrides_midpoint(tmp_path):
+    s = _station(_model(tmp_path, [ZERO, _st("XP", 120, mp_at_note=True)]), "XP")
+    assert s.mp == pytest.approx(10.0) and s.mp_entry == pytest.approx(5.0)
+    s = _station(_model(tmp_path, [ZERO, _st("XP", 150, mp_at_note=True)]), "XP")
+    assert s.mp == pytest.approx(12.5)
+
+
+def test_mp_unit_ft(tmp_path):
+    zero_ft = (0, {"kind": "reference", "id": "MP_ZERO", "mp": 0, "mp_scale": 1,
+                   "mp_unit": "ft"}, None, 0, 0)
+    assert _station(_model(tmp_path, [zero_ft, _st("SK", 228)]), "SK").mp == pytest.approx(19.0)
+
+
+def test_anchor_resets_the_count(tmp_path):
+    reset = (0, {"kind": "reference", "id": "R", "mp": 40}, None, 204, 0)
+    m = _model(tmp_path, [ZERO, reset, _st("SK", 228)])
+    assert _station(m, "SK").mp == pytest.approx(42.0)
+    # before the reset anchor the zero still counts
+    m = _model(tmp_path, [ZERO, reset, _st("XP", 100)])
+    assert _station(m, "XP").mp == pytest.approx(10.0)
+
+
+def test_anchor_reset_is_info(tmp_path):
+    reset = (0, {"kind": "reference", "id": "R", "mp": 40}, None, 204, 0)
+    issues = _placed(tmp_path, phase4=True, notes=[ZERO, reset, _st("SK", 228)], tracks=LINE)
+    assert "MP_ANCHOR_RESET" in _p4(issues)
+    assert [i.severity for i in issues if i.rule == "MP_ANCHOR_RESET"] == ["info"]
+
+
+def test_anchor_at_calculated_value_is_no_reset(tmp_path):
+    same = (0, {"kind": "reference", "id": "R", "mp": 17}, None, 204, 0)
+    assert "MP_ANCHOR_RESET" not in _p4(_placed(tmp_path, phase4=True, notes=[ZERO, same], tracks=LINE))
+
+
+def test_anchor_lower_than_before_decreases(tmp_path):
+    low = (0, {"kind": "reference", "id": "R", "mp": 2}, None, 204, 0)
+    assert "MP_DECREASES" in _p4(_placed(tmp_path, phase4=True, notes=[ZERO, low], tracks=LINE))
+
+
+def test_mps_increase_away_from_zero_in_both_directions(tmp_path):
+    zero_mid = (0, {"kind": "reference", "id": "MP_ZERO", "mp": 0, "mp_scale": 12},
+                None, 120, 0)
+    m = _model(tmp_path, [zero_mid, _st("A", 24), _st("B", 228)])
+    assert _station(m, "A").mp == pytest.approx(8.0)
+    assert _station(m, "B").mp == pytest.approx(9.0)
+
+
+def test_subdivision_without_zero_counts_from_its_lowest_anchor(tmp_path):
+    start = (0, {"kind": "reference", "id": "CO_START", "mp": 412, "mp_scale": 12},
+             None, 0, 0)
+    assert _station(_model(tmp_path, [start, _st("SK", 228)]), "SK").mp == pytest.approx(431.0)
+
+
+def test_no_anchor(tmp_path):
+    issues = _placed(tmp_path, phase4=True, notes=[_st("SK", 228)], tracks=LINE)
+    assert "MP_NO_ANCHOR" in _p4(issues)
+
+
+def test_no_anchor_hint_for_mp_zero_without_mp(tmp_path):
+    # NYE's old MP_ZERO: mp_scale but no "mp", so not an anchor.
+    old = (0, {"kind": "reference", "id": "MP_ZERO", "mp_scale": 12}, None, 0, 0)
+    issues = [i for i in _placed(tmp_path, phase4=True, notes=[old], tracks=LINE) if i.rule == "MP_NO_ANCHOR"]
+    assert len(issues) == 1 and "MP_ZERO" in issues[0].hint
+
+
+def test_no_scale(tmp_path):
+    zero = (0, {"kind": "reference", "id": "MP_ZERO", "mp": 0}, None, 0, 0)
+    assert "MP_NO_SCALE" in _p4(_placed(tmp_path, phase4=True, notes=[zero], tracks=LINE))
+
+
+def test_two_scales(tmp_path):
+    other = (0, {"kind": "reference", "id": "R", "mp": 17, "mp_scale": 10}, None, 204, 0)
+    assert "MP_TWO_SCALES" in _p4(_placed(tmp_path, phase4=True, notes=[ZERO, other], tracks=LINE))
+
+
+def test_same_scale_in_other_units_is_one_scale(tmp_path):
+    other = (0, {"kind": "reference", "id": "R", "mp": 17, "mp_scale": 1, "mp_unit": "ft"},
+             None, 204, 0)
+    assert "MP_TWO_SCALES" not in _p4(_placed(tmp_path, phase4=True, notes=[ZERO, other], tracks=LINE))
+
+
+def test_unreachable_station(tmp_path):
+    issues = _placed(tmp_path, phase4=True, notes=[ZERO, _st("ISO", 25, y=60)], tracks=LINE + ISOLATED_MAIN)
+    assert "MP_UNREACHABLE" in _p4(issues)
+
+
+def test_station_no_yard_limit(tmp_path):
+    issues = _placed(tmp_path, phase4=True, notes=[ZERO, _st("XP", 100)], tracks=LINE)
+    assert "STATION_NO_YARD_LIMIT" in _p4(issues)
+
+
+@pytest.mark.parametrize("boards", [[100], [50, 190], [150, 230]])
+def test_station_with_yard_limit(tmp_path, boards):
+    notes = [ZERO, _st("XP", 100)] + [_board("XP", x) for x in boards]
+    assert "STATION_NO_YARD_LIMIT" not in _p4(_placed(tmp_path, phase4=True, notes=notes, tracks=LINE))
+
+
+def test_switchback_station(tmp_path):
+    notes = [ZERO, _st("SK", 228),
+             (2, {"kind": "switchback", "id": "SK_SWB", "serves": "SK"}, None, 219, 8)]
+    s = _station(_model(tmp_path, notes), "SK")
+    assert s.limits == "switchback"
+    assert s.mp == pytest.approx(200 / 12) and s.switch_ids == [7]
+
+
+def test_switchback_station_with_siding(tmp_path):
+    # Entry = the siding's lower switch (MP 5), tail switch 7 (MP 16.667).
+    notes = [ZERO, _st("XP", 100),
+             (2, {"kind": "switchback", "id": "XP_SWB", "serves": "XP"}, None, 219, 8)]
+    s = _station(_model(tmp_path, notes), "XP")
+    assert s.limits == "switchback"
+    assert (s.mp_entry, s.mp_exit) == pytest.approx((5.0, 200 / 12))
+    assert s.mp == pytest.approx((5.0 + 200 / 12) / 2)
+
+
+def test_switchback_tail_reaching_two_switches(tmp_path):
+    # A tail on the passing track reaches turnouts 2 and 5.
+    notes = [ZERO, (1, {"kind": "switchback", "id": "S"}, None, 120, 4)]
+    assert "SWITCHBACK_SWITCH_AMBIGUOUS" in _p4(_placed(tmp_path, phase4=True, notes=notes, tracks=LINE))
+    notes[1][1]["switches"] = [2, 5]
+    assert "SWITCHBACK_SWITCH_AMBIGUOUS" not in _p4(_placed(tmp_path, phase4=True, notes=notes, tracks=LINE))
+
+
+def test_standalone_team_track_branch_mp(tmp_path):
+    notes = [ZERO, (2, {"kind": "team_track", "id": "MILLER", "car_spots": 2}, None, 219, 8)]
+    m = _model(tmp_path, notes)
+    assert m.branch_mp["MILLER"] == pytest.approx(200 / 12)
+
+
+def test_industry_branch_mp(tmp_path):
+    notes = [ZERO, _st("SK", 228),
+             (2, {"kind": "industry", "id": "QM1", "station": "SK", "car_spots": 2},
+              None, 219, 8)]
+    assert _model(tmp_path, notes).branch_mp["QM1"] == pytest.approx(200 / 12)
+
+
+def test_joint_station_one_mp_per_subdivision(tmp_path):
+    # Two railroads on parallel mains: NYE on layer 0 (y=0), CO on layer 1 (y=20).
+    two_mains = """
+STRAIGHT 1 0 0 0 0 HO 0
+\tE 0.000000 0.000000 270.000000
+\tE 240.000000 0.000000 90.000000
+\tEND$SEGS
+
+STRAIGHT 2 1 0 0 0 HO 0
+\tE 0.000000 20.000000 270.000000
+\tE 240.000000 20.000000 90.000000
+\tEND$SEGS
+"""
+    notes = [
+        (0, {"kind": "railroad", "id": "NYE", "group": "NYE"}),
+        (0, {"kind": "railroad", "id": "CO", "group": "C&O"}),
+        (0, {"kind": "reference", "id": "NYE_ZERO", "mp": 0, "mp_scale": 12}, None, 0, 0),
+        (1, {"kind": "reference", "id": "CO_START", "mp": 100, "mp_scale": 12}, None, 240, 20),
+        _st("WP", 60), _st("WP", 120, layer=1, y=20),
+    ]
+    m = _model(tmp_path, notes, tracks=two_mains, layers=["L1-NYE-Main", "L2-CO-Main"],
+               groups=[("Mainline", [0, 1]), ("NYE", [0]), ("C&O", [1])])
+    by_rr = {s.railroad: s.mp for s in m.stations if s.id == "WP"}
+    assert by_rr == pytest.approx({"NYE": 5.0, "CO": 110.0})
+
+
+def test_clean_fixture_has_mileposts():
+    from xtrkcad_mcp.mileposts import milepost_model
+    m = milepost_model(parse_file(CLEAN_FIXTURE))
+    assert {s.id for s in m.stations} == {"WP", "XP"}
+    assert all(s.mp is not None for s in m.stations)
+
+
+def test_station_on_isolated_track_uses_ref_tag(tmp_path):
+    # Spec 4.3: ref_tag routes from a named point when the note sits on an
+    # isolated track; the station's MP is that point's.
+    ref = (0, {"kind": "reference", "id": "HERE"}, None, 120, 0)
+    notes = [ZERO, ref, _st("ISO", 25, y=60, ref_tag="HERE")]
+    s = _station(_model(tmp_path, notes, tracks=LINE + ISOLATED_MAIN), "ISO")
+    assert s.mp == pytest.approx(10.0)
+    issues = _placed(tmp_path, phase4=True, notes=notes, tracks=LINE + ISOLATED_MAIN)
+    assert "MP_UNREACHABLE" not in _p4(issues)
+
+
+def test_unreachable_hint_names_the_tracks_breaking_the_main(tmp_path):
+    # Straight 3 (the main between turnouts 2 and 5) drawn on the Passing layer.
+    broken = LINE.replace("STRAIGHT 3 0 0", "STRAIGHT 3 1 0")
+    issues = [i for i in _placed(tmp_path, phase4=True, notes=[ZERO, _st("SK", 228)],
+                                 tracks=broken) if i.rule == "MP_UNREACHABLE"]
+    assert len(issues) == 1
+    assert "L1-Passing" in issues[0].hint

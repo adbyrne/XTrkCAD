@@ -1,6 +1,6 @@
 VERSION 13 5.4.0
 TITLE1 Conventions clean fixture
-TITLE2 every note kind, valid (spec v1); main turnout 5 with the switchback tail (7) on L1-Service
+TITLE2 every note kind, valid (spec v1); main turnouts 8 (team-track spur 9) and 5 (switchback tail 7, on L1-Service)
 SCALE HO
 ROOMSIZE 260 x 80
 
@@ -38,16 +38,39 @@ NOTE 114 2 0 0 100.000000 30.000000 0 3 "{""kind"": ""storage"", ""id"": ""CAR_B
 NOTE 115 2 0 0 30.000000 30.000000 0 3 "{""kind"": ""facility"", ""id"": ""WP_COAL"", ""name"": ""Coal trestle"", ""type"": ""coal"", ""location"": ""WP""}"
 NOTE 116 2 0 0 214.000000 10.000000 0 3 "{""kind"": ""switchback"", ""id"": ""XP_SWB"", ""serves"": ""XP""}"
 NOTE 118 2 0 0 120.000000 30.000000 0 3 "{""kind"": ""team_track"", ""id"": ""XP_TEAM"", ""name"": ""Xina Pass team track"", ""station"": ""XP"", ""car_spots"": 3}"
-NOTE 119 2 0 0 60.000000 30.000000 0 3 "{""kind"": ""team_track"", ""id"": ""MILLER_TEAM"", ""name"": ""Miller team track"", ""car_spots"": 2}"
+NOTE 119 2 0 0 124.000000 -10.000000 0 3 "{""kind"": ""team_track"", ""id"": ""MILLER_TEAM"", ""name"": ""Miller team track"", ""car_spots"": 2}"
+NOTE 120 0 0 0 145.000000 0.000000 0 3 "{""kind"": ""yard_limit"", ""id"": ""XP""}"
+NOTE 121 0 0 0 195.000000 0.000000 0 3 "{""kind"": ""yard_limit"", ""id"": ""XP""}"
 NOTE 117 1 0 0 150.000000 10.000000 0 3 "{""todo"": ""not a convention note: no kind""}"
 
 STRAIGHT 1 0 0 0 0 HO 0
 	E 0.000000 0.000000 270.000000
+	T 8 100.000000 0.000000 90.000000
+	END$SEGS
+
+TURNOUT 8 0 0 0 0 HO 2 100.000000 0.000000 0 0.000000 "Test	#6 Left	"
+	T 1 100.000000 0.000000 270.000000
+	T 10 108.000000 0.000000 90.000000
+	T 9 108.000000 -5.000000 110.000000
+	D 0.000000 0.000000
+	P "Normal" 0
+	P "Reverse" 1
+	S 0 0 0.000000 0.000000 8.000000 0.000000
+	S 0 0 0.000000 0.000000 8.000000 -5.000000
+	END$SEGS
+
+STRAIGHT 10 0 0 0 0 HO 0
+	T 8 108.000000 0.000000 270.000000
 	T 5 190.000000 0.000000 90.000000
 	END$SEGS
 
+STRAIGHT 9 2 0 0 0 HO 0
+	T 8 108.000000 -5.000000 290.000000
+	E 140.000000 -15.000000 110.000000
+	END$SEGS
+
 TURNOUT 5 0 0 0 0 HO 2 190.000000 0.000000 0 0.000000 "Test	#6 Right	"
-	T 1 190.000000 0.000000 270.000000
+	T 10 190.000000 0.000000 270.000000
 	T 6 198.000000 0.000000 90.000000
 	T 7 198.000000 5.000000 70.000000
 	D 0.000000 0.000000
