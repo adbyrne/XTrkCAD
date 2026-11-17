@@ -87,7 +87,7 @@ void FormGroupRecord(
 			             *(wIndex_t*)p->valueP, message);
 			break;
 		case PD_COLORLIST:
-			rgb = wDrawGetRGB(*(wDrawColor*)p->valueP);
+			rgb = *(wDrawColor*)p->valueP;
 			RecordPrintf("PARAMETER %s %s %ld\n",
 			             pg->nameStr, p->nameStr, rgb);
 			break;

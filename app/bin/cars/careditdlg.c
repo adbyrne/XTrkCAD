@@ -3386,7 +3386,7 @@ static void CarDlgChange( long changes )
 void
 InitCarEditDlg()
 {
-	carDlgBodyColor = wDrawFindColor( wRGB(255,128,0) );
+	carDlgBodyColor = wRGB(255,128,0);
 	FormRegister( &carDlgPG );
 
 	RegisterChangeNotification( CarDlgChange );

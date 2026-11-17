@@ -3395,7 +3395,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	}
 	rgb = 0;
 	if ( cp && GetArgs( cp, "ffl", &newTurnRoadbedWidth, &lineWidth, &rgb ) ) {
-		newTurnRoadbedColor = wDrawFindColor(rgb);
+		newTurnRoadbedColor = rgb;
 		newTurnRoadbedLineWidth = lineWidth;
 	} else {
 		newTurnRoadbedWidth = 0;

@@ -1346,8 +1346,8 @@ wBool_t IsWidthClose( DIST_T dist1, DIST_T dist2 )
 
 wBool_t IsColorClose( wDrawColor color1, wDrawColor color2 )
 {
-	long rgb1 = wDrawGetRGB( color1 );
-	long rgb2 = wDrawGetRGB( color2 );
+	long rgb1 = color1;
+	long rgb2 = color2;
 	int r1 = (rgb1 >> 16) & 0xff;
 	int g1 = (rgb1 >> 8) & 0xff;
 	int b1 = rgb1 & 0xff;

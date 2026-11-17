@@ -839,7 +839,7 @@ static void SpeedRedraw(
 
 	y = (xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
 	     +SLIDER_THICKNESS/2.0);
-	drawColor  = wDrawFindColor(wRGB(160, 160, 160));
+	drawColor  = wRGB(160, 160, 160);
 	coOrd pos0, pos1, siz;
 	y /= speedD.dpi;
 	siz.x = SLIDER_WIDTH/speedD.dpi;

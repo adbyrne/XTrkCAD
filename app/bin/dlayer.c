@@ -1440,7 +1440,7 @@ static void LayerPrefSave(void)
 			sprintf(buffer, LAYERPREF_NAME ".%0u", inx);
 			wPrefSetString(LAYERPREF_SECTION, buffer, layers[inx].name);
 
-			layerSetInteger(inx, LAYERPREF_COLOR, wDrawGetRGB(layers[inx].color));
+			layerSetInteger(inx, LAYERPREF_COLOR, layers[inx].color);
 
 			flags = 0;
 			if (layers[inx].frozen) {
@@ -1576,7 +1576,7 @@ static void LayerPrefLoad(void)
 			 * not available from prefs */
 			layerGetInteger(inx, LAYERPREF_COLOR, &rgb,
 			                layerColorTab[inx % COUNT(layerColorTab)]);
-			color = wDrawFindColor(rgb);
+			color = rgb;
 			SetLayerColor(inx, color);
 			/* get and set the flags */
 			layerGetInteger(inx, LAYERPREF_FLAGS, &flags,
@@ -2269,7 +2269,7 @@ void ReadLayers(char *line)
 	if (!td.valid) {
 		td = GetScaleTieData(sclInx);
 	}
-	color = wDrawFindColor(rgb);
+	color = rgb;
 	SetLayerColor(inx, color);
 	strncpy(layers[inx].name, name, sizeof layers[inx].name);
 	layers[inx].name[sizeof(layers[inx].name) - 1] = '\0';

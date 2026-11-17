@@ -645,7 +645,7 @@ static BOOL_T WriteBezier( track_p t, FILE * f )
 	rc &= fprintf(f,
 	              "%s %d %u %ld %lu %0.6f %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %d %0.6f %0.6f \n",
 	              track?"BEZIER":"BZRLIN",GetTrkIndex(t), GetTrkLayer(t), (long)options,
-	              wDrawGetRGB(xx->segsColor), xx->segsLineWidth,
+	              xx->segsColor, xx->segsLineWidth,
 	              GetTrkScaleName(t), bits,
 	              xx->pos[0].x, xx->pos[0].y,
 	              xx->pos[1].x, xx->pos[1].y,
@@ -702,7 +702,7 @@ static BOOL_T ReadBezier( char * line )
 	xx->lineType = lt;
 	xx->descriptionOff = dp;
 	xx->segsLineWidth = lineWidth;
-	xx->segsColor = wDrawFindColor( rgb );
+	xx->segsColor = rgb;
 	FixUpBezier(xx->pos,xx,GetTrkType(t) == T_BEZIER);
 	ComputeBezierBoundingBox(t,xx);
 	if (GetTrkType(t) == T_BEZIER) {

@@ -883,8 +883,6 @@ ColorButtonTest(void* unused)
 
 	wDialogButtonsConfigure(dialog, "OK", "Cancel", "Help");
 
-	printf("%x\n",wDrawFindColor(0x00ff00));
-	printf("%d\n",wDrawGetRGB(1000));
 	wColorSelectButtonCreate(dialog, 1, 0, "snapgrid", "Snap Grid", 0, 10,
 	                         &snapColor, NULL, NULL);
 	wColorSelectButtonCreate(dialog, 1, 1, "marker", "Marker", 0, 10, &markerColor,

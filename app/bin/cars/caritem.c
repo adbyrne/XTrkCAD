@@ -246,7 +246,7 @@ EXPORT BOOL_T CarItemRead(
 	}
 	item = CarItemNew(NULL, curParamFileIndex, itemIndex, LookupScale(scale),
 	                  title,
-	                  options & (CAR_DESC_BITS | CAR_ITEM_BITS), type, &dim, wDrawFindColor(rgb),
+	                  options & (CAR_DESC_BITS | CAR_ITEM_BITS), type, &dim, rgb,
 	                  purchPrice, currPrice, condition, purchDate, serviceDate);
 	if ((options & CAR_ITEM_HASNOTES)) {
 		item->data.notes = sNote;
@@ -293,7 +293,7 @@ static BOOL_T CarItemWrite(
 	              item->index, GetScaleName(item->scaleInx), PutTitle(item->title),
 	              options, item->type,
 	              item->dim.carLength, item->dim.carWidth, longCenterOffset,
-	              item->dim.truckCenter, item->dim.coupledLength, wDrawGetRGB(item->color),
+	              item->dim.truckCenter, item->dim.coupledLength, item->color,
 	              item->data.purchPrice, item->data.currPrice, item->data.condition,
 	              item->data.purchDate, item->data.serviceDate) > 0;
 	if ((options & CAR_ITEM_HASNOTES)) {

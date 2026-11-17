@@ -251,13 +251,6 @@ void wColorSelectButtonSetColor(wControl_p bb, wDrawColor color);
 wDrawColor wColorSelectButtonGetColor(wControl_p bb);
 wDrawColor wDrawColorGray(int percent);
 
-// the following are placeholders for functions that are no longer needed
-// after color palettes were removed.
-
-#define wDrawFindColor(rgb) (rgb)
-
-#define wDrawGetRGB(color) (color)
-
 /*------------------------------------------------------------------------------
  *
  * Dialog Windows

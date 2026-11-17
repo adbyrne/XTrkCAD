@@ -27,6 +27,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include <math.h>
 
 #include "gtkint.h"
 
@@ -34,58 +35,30 @@ wDrawColor wDrawColorWhite = 0xFFFFFF;
 wDrawColor wDrawColorBlack = 0x000000;
 
 #define RGB(R,G,B) ( ((long)((R)&0xFF)<<16) | ((long)((G)&0xFF)<<8) | ((long)((B)&0xFF)) )
-#define RGBA(RGB,A) ( ((long)((RGB)&0xFFFFFF)) | ((long)((A)&0xFF)<<24) )
 
 /**
  * Get a gray color
  *
- * \param percent IN gray value required
+ * \param percent IN brightness, 0 = black, 100 = white
  * \return definition for gray color
  */
 
 wDrawColor wDrawColorGray(
         int percent)
 {
+	int level;
+
 	if (percent <= 0) {
 		return wDrawColorBlack;
-	} else if (percent > 100) {
+	} else if (percent >= 100) {
 		return wDrawColorWhite;
 	}
 
-	return RGB((percent*256/100), percent*256/100, percent*256/100);
+	level = (percent * 255 + 50) / 100;
+	return RGB(level, level, level);
 }
 
 
-/**
- * Get the color definition from the "index"
- *
- * \param color IN index into palette
- * \param normal IN normal or inverted color
- * \return  the selected color definition
- */
-
-GdkRGBA wlibGetColor(
-        wDrawColor color,
-        wBool_t normal)
-{
-	GdkRGBA out;
-	out.red = ((color&0x00FF0000)>>16)/256.0;
-	out.green = ((color&0x0000FF00)>>8)/256.0;
-	out.blue = ((color&0x000000FF))/256.0;
-	if ((color&0xFF000000) == 0) { out.alpha = 1.0; }
-	else { out.alpha = ((color&0xFF000000)>>24)/256.0; }
-
-	if (normal) {
-		return out;
-	} else {
-		out.red = 1.0-out.red;
-		out.green = 1.0-out.green;
-		out.blue = 1.0-out.blue;
-		return out;
-	}
-}
-
-
 /*
  *****************************************************************************
  *
@@ -108,9 +81,9 @@ wlibColorButtonGetColor(GtkColorButton* widget)
 
 	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(widget), &rgba);
 
-	rgb = ((long)(rgba. red * 255.0) << 16) +
-	      ((long)(rgba.green * 255.0) << 8) +
-	      ((long)(rgba.blue * 255.0));
+	rgb = wRGB(lround(rgba.red * 255.0),
+	           lround(rgba.green * 255.0),
+	           lround(rgba.blue * 255.0));
 
 	return(rgb);
 }
@@ -141,19 +114,14 @@ colorChange(GtkColorButton *widget, wControl_p user_data)
  * Set the color for a color button
  *
  * \param bb IN button
- * \param color IN palette index for color to use
+ * \param color IN color to use
  */
 
 void wColorSelectButtonSetColor(
         wControl_p bb,
         wDrawColor color)
 {
-	GdkRGBA rgba;
-
-	rgba.red = ((color&0x00FF0000)>>16)/256.0;
-	rgba.green = ((color&0x0000FF00)>>8)/256.0;
-	rgba.blue = (color&0x000000FF)/256.0;
-	rgba.alpha = 1.0;
+	GdkRGBA rgba = wlibGetColor(color);
 
 	gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(bb->widget),
 	                           &rgba);
@@ -165,7 +133,7 @@ void wColorSelectButtonSetColor(
  * Get the current color
  *
  * \param bb IN color button handle
- * \return  color in RGBA format
+ * \return  color as 0xRRGGBB
  */
 
 wDrawColor wColorSelectButtonGetColor(

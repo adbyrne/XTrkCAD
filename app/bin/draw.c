@@ -1745,35 +1745,34 @@ static void MainLayoutCB(wDraw_p bd, void *pContex, wWinPix_t px,
 
 EXPORT void InitColor(void)
 {
-	drawColorBlack = wDrawFindColor(wRGB(0, 0, 0));
-	drawColorWhite = wDrawFindColor(wRGB(255, 255, 255));
-	drawColorRed = wDrawFindColor(wRGB(255, 0, 0));
-	drawColorBlue = wDrawFindColor(wRGB(0, 0, 255));
-	drawColorGreen = wDrawFindColor(wRGB(0, 255, 0));
-	drawColorAqua = wDrawFindColor(wRGB(0, 255, 255));
-	drawColorDkRed = wDrawFindColor(wRGB(128, 0, 0));
-	drawColorDkBlue = wDrawFindColor(wRGB(0, 0, 128));
-	drawColorDkGreen = wDrawFindColor(wRGB(0, 128, 0));
-	drawColorDkAqua = wDrawFindColor(wRGB(0, 128, 128));
+	drawColorBlack = wRGB(0, 0, 0);
+	drawColorWhite = wRGB(255, 255, 255);
+	drawColorRed = wRGB(255, 0, 0);
+	drawColorBlue = wRGB(0, 0, 255);
+	drawColorGreen = wRGB(0, 255, 0);
+	drawColorAqua = wRGB(0, 255, 255);
+	drawColorDkRed = wRGB(128, 0, 0);
+	drawColorDkBlue = wRGB(0, 0, 128);
+	drawColorDkGreen = wRGB(0, 128, 0);
+	drawColorDkAqua = wRGB(0, 128, 128);
 
 	/* Last component of special color must be > 3 */
-	drawColorPreviewSelected = wDrawFindColor(wRGB(6, 6, 255)); /* Special Blue */
-	drawColorPreviewUnselected = wDrawFindColor(wRGB(255, 215,
-	                             6)); /* Special Yellow */
+	drawColorPreviewSelected = wRGB(6, 6, 255); /* Special Blue */
+	drawColorPreviewUnselected = wRGB(255, 215, 6); /* Special Yellow */
 
-	drawColorPowderedBlue = wDrawFindColor(wRGB(129, 212, 250));
-	drawColorPurple = wDrawFindColor(wRGB(128, 0, 128));
-	drawColorMagenta = wDrawFindColor(wRGB(255, 0, 255));
-	drawColorGold = wDrawFindColor(wRGB(255, 215, 0));
-	drawColorGrey10 = wDrawFindColor(wRGB(26, 26, 26));
-	drawColorGrey20 = wDrawFindColor(wRGB(51, 51, 51));
-	drawColorGrey30 = wDrawFindColor(wRGB(72, 72, 72));
-	drawColorGrey40 = wDrawFindColor(wRGB(102, 102, 102));
-	drawColorGrey50 = wDrawFindColor(wRGB(128, 128, 128));
-	drawColorGrey60 = wDrawFindColor(wRGB(153, 153, 153));
-	drawColorGrey70 = wDrawFindColor(wRGB(179, 179, 179));
-	drawColorGrey80 = wDrawFindColor(wRGB(204, 204, 204));
-	drawColorGrey90 = wDrawFindColor(wRGB(230, 230, 230));
+	drawColorPowderedBlue = wRGB(129, 212, 250);
+	drawColorPurple = wRGB(128, 0, 128);
+	drawColorMagenta = wRGB(255, 0, 255);
+	drawColorGold = wRGB(255, 215, 0);
+	drawColorGrey10 = wRGB(26, 26, 26);
+	drawColorGrey20 = wRGB(51, 51, 51);
+	drawColorGrey30 = wRGB(72, 72, 72);
+	drawColorGrey40 = wRGB(102, 102, 102);
+	drawColorGrey50 = wRGB(128, 128, 128);
+	drawColorGrey60 = wRGB(153, 153, 153);
+	drawColorGrey70 = wRGB(179, 179, 179);
+	drawColorGrey80 = wRGB(204, 204, 204);
+	drawColorGrey90 = wRGB(230, 230, 230);
 }
 
 EXPORT void DrawInit(int initialZoom)

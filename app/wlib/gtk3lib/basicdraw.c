@@ -33,8 +33,8 @@
 #include "gtkint.h"
 
 /**
- * Set the drawing color. The color table entry is fetched and converted
- * to RGBA format, where alpha is considered to be maximum, no transparency
+ * Set the drawing color. The color is converted to RGBA format, where alpha
+ * is considered to be maximum, no transparency
  *
  * \param cr
  * \param color
@@ -43,10 +43,10 @@
 static void
 BasicDrawSetColor (cairo_t *cr, wDrawColor color)
 {
-	GdkRGBA gcolor;
+	GdkRGBA gcolor = wlibGetColor(color);
 
-	gcolor = wlibGetColor (color, TRUE);
-	cairo_set_source_rgba (cr, gcolor.red, gcolor.green, gcolor.blue, 1.0);
+	cairo_set_source_rgba (cr, gcolor.red, gcolor.green, gcolor.blue,
+	                       gcolor.alpha);
 }
 
 /**
