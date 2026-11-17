@@ -3,6 +3,7 @@ XTrackCAD
 Demo
 
 
+Maximum gap: 0.1000 in (Connection distance)
 Near-miss pairs: 0
 Isolated open endpoints: 10
 Turntable stalls excluded: 0
