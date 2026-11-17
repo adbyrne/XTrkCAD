@@ -31,7 +31,7 @@ def _xtc_quote(text: str) -> str:
 
 
 def _layout(tmp_path, notes, layers=None, groups=None, name="t.xtc",
-            trackless=()):
+            trackless=(), tracks=None):
     """Write and parse a layout.
 
     notes: list of (layer, note) where note is a dict (written as a JSON
@@ -40,7 +40,9 @@ def _layout(tmp_path, notes, layers=None, groups=None, name="t.xtc",
     layers: layer names, index = position.
     groups: list of (name, [layer indexes]); with the default layers and no
     groups given, each default layer is in its category group.
-    Each layer gets one straight track, except those in trackless.
+    Each layer gets one straight track from (0, 20*layer) to
+    (100, 20*layer), except those in trackless; tracks (a string of .xtc
+    track records) replaces them all.
     """
     if layers is None:
         layers = _DEFAULT_LAYERS
@@ -61,9 +63,12 @@ def _layout(tmp_path, notes, layers=None, groups=None, name="t.xtc",
         op = 0 if len(item) > 2 and item[2] == "text" else 3
         if isinstance(body, dict):
             body = json.dumps(body)
-        lines.append(f"NOTE {nid} {layer} 0 0 {nid - 100}.000000 "
-                     f"{layer * 20}.000000 0 {op} {_xtc_quote(body)}")
+        x, y = (item[3], item[4]) if len(item) > 4 else (nid - 100, layer * 20)
+        lines.append(f"NOTE {nid} {layer} 0 0 {x:.6f} {y:.6f} 0 {op} {_xtc_quote(body)}")
     lines.append("")
+    if tracks is not None:
+        lines.append(tracks)
+        trackless = range(len(layers))
     for tid, _ in enumerate(layers):
         if tid in trackless:
             continue
@@ -615,3 +620,205 @@ def test_braces_in_names_are_safe(tmp_path):
                     layers=["L1-Main{1}"], groups=[("Mainline", [0]), ("G{0}", [0])])
     assert _rules(issues) == ["RAILROAD_LAYER_IN_TWO"]
     assert "L1-Main{1}" in issues[0].message
+
+
+# -- phase 3: placement ------------------------------------------------------
+
+# Main (layer 0): straight 1 (0,0)-(50,0), turnout 2 at (50,0) with its
+# straight leg to (58,0) and diverging leg to (58,5), straight 3 (58,0)-(120,0).
+# Spur (layer 2, Service): straight 4 (58,5)-(100,20) off the turnout.
+# Isolated spur (layer 2): straight 5 (0,40)-(40,40), connected to nothing.
+MAIN_AND_SPUR = """
+STRAIGHT 1 0 0 0 0 HO 0
+\tE 0.000000 0.000000 270.000000
+\tT 2 50.000000 0.000000 90.000000
+\tEND$SEGS
+
+TURNOUT 2 0 0 0 0 HO 2 50.000000 0.000000 0 0.000000 "Test\t#6 Right\t"
+\tT 1 50.000000 0.000000 270.000000
+\tT 3 58.000000 0.000000 90.000000
+\tT 4 58.000000 5.000000 70.000000
+\tD 0.000000 0.000000
+\tP "Normal" 0
+\tP "Reverse" 1
+\tS 0 0 0.000000 0.000000 8.000000 0.000000
+\tS 0 0 0.000000 0.000000 8.000000 5.000000
+\tEND$SEGS
+
+STRAIGHT 3 0 0 0 0 HO 0
+\tT 2 58.000000 0.000000 270.000000
+\tE 120.000000 0.000000 90.000000
+\tEND$SEGS
+
+STRAIGHT 4 2 0 0 0 HO 0
+\tT 2 58.000000 5.000000 250.000000
+\tE 100.000000 20.000000 70.000000
+\tEND$SEGS
+
+STRAIGHT 5 2 0 0 0 HO 0
+\tE 0.000000 40.000000 270.000000
+\tE 40.000000 40.000000 90.000000
+\tEND$SEGS
+"""
+
+# A closed loop of main track: a 100 x 100 square, no open end.
+MAIN_LOOP = """
+STRAIGHT 1 0 0 0 0 HO 0
+\tT 4 0.000000 0.000000 180.000000
+\tT 2 100.000000 0.000000 90.000000
+\tEND$SEGS
+
+STRAIGHT 2 0 0 0 0 HO 0
+\tT 1 100.000000 0.000000 270.000000
+\tT 3 100.000000 100.000000 0.000000
+\tEND$SEGS
+
+STRAIGHT 3 0 0 0 0 HO 0
+\tT 2 100.000000 100.000000 180.000000
+\tT 4 0.000000 100.000000 270.000000
+\tEND$SEGS
+
+STRAIGHT 4 0 0 0 0 HO 0
+\tT 3 0.000000 100.000000 90.000000
+\tT 1 0.000000 0.000000 0.000000
+\tEND$SEGS
+"""
+
+# A quarter circle of main track: centre (0,0), radius 100, from (100,0)
+# to (0,100). Its chord passes 29 in inside the arc's midpoint.
+MAIN_CURVE = """
+CURVE 1 0 0 0 0 HO 0 0.000000 0.000000 0 100.000000
+\tE 100.000000 0.000000 0.000000
+\tE 0.000000 100.000000 270.000000
+\tEND$SEGS
+"""
+
+
+def _placed(tmp_path, notes, tracks=MAIN_AND_SPUR, **kw):
+    return _check(tmp_path, notes, tracks=tracks, **kw)
+
+
+def _station_at(x, y, layer=0, **fields):
+    return (layer, {"kind": "station", "id": "WP", **fields}, None, x, y)
+
+
+def test_note_on_its_track(tmp_path):
+    assert _placed(tmp_path, [_station_at(20, 0.5)]) == []
+
+
+def test_note_far_from_track(tmp_path):
+    issues = _placed(tmp_path, [_station_at(20, 5)])
+    assert _rules(issues) == ["NOTE_FAR_FROM_TRACK"]
+    assert issues[0].severity == "warning" and issues[0].track_id == 1
+
+
+def test_note_no_track_nearby(tmp_path):
+    issues = _placed(tmp_path, [_station_at(20, 30)])
+    assert _rules(issues) == ["NOTE_NO_TRACK"]
+
+
+def test_note_only_snaps_to_its_own_layer(tmp_path):
+    # On top of main track, but the note is on the Passing layer, which has none.
+    issues = _placed(tmp_path, [(1, {"kind": "reference", "id": "X"}, None, 20, 0)])
+    assert _rules(issues) == ["NOTE_NO_TRACK"]
+
+
+def test_railroad_and_subdivision_have_no_position(tmp_path):
+    issues = _placed(tmp_path, [(0, {"kind": "railroad", "id": "NYE"}, None, 500, 500),
+                                (0, {"kind": "subdivision", "id": "S"}, None, 500, 500)])
+    assert issues == []
+
+
+def test_note_on_curve_measured_to_the_arc(tmp_path):
+    issues = _placed(tmp_path, [_station_at(70.71, 70.71)], tracks=MAIN_CURVE)
+    assert issues == []
+
+
+def test_note_off_curve(tmp_path):
+    issues = _placed(tmp_path, [_station_at(80, 80)], tracks=MAIN_CURVE)
+    assert _rules(issues) == ["NOTE_FAR_FROM_TRACK"]
+
+
+def test_note_on_turnout_diverging_leg(tmp_path):
+    assert _placed(tmp_path, [_station_at(54, 2.5)]) == []
+
+
+@pytest.mark.parametrize("note, rule", [
+    ((2, {"kind": "reference", "id": "A", "mp": 0, "mp_scale": 12}, None, 80, 12.86),
+     "ANCHOR_NOT_ON_MAIN"),
+    ((2, {"kind": "yard_limit", "id": "WP"}, None, 80, 12.86), "YARD_LIMIT_NOT_ON_MAIN"),
+    ((2, {"kind": "station", "id": "WP"}, None, 80, 12.86), "STATION_NOT_ON_MAIN"),
+])
+def test_not_on_main(tmp_path, note, rule):
+    assert rule in _rules(_placed(tmp_path, [note]))
+
+
+def test_station_not_on_main_is_warning(tmp_path):
+    issues = _placed(tmp_path, [(2, {"kind": "station", "id": "WP"}, None, 80, 12.86)])
+    assert [i.severity for i in issues] == ["warning"]
+
+
+def test_reference_without_mp_may_be_off_main(tmp_path):
+    assert _placed(tmp_path, [(2, {"kind": "reference", "id": "MC_EXIT"}, None, 80, 12.86)]) == []
+
+
+def _yl(x, y=0.0, ident="WP"):
+    return (0, {"kind": "yard_limit", "id": ident}, None, x, y)
+
+
+def test_two_yard_limit_boards(tmp_path):
+    assert _placed(tmp_path, [_yl(10), _yl(100)]) == []
+
+
+def test_three_yard_limit_boards(tmp_path):
+    assert "YARD_LIMIT_TOO_MANY" in _rules(_placed(tmp_path, [_yl(10), _yl(30), _yl(100)]))
+
+
+def test_one_board_on_main_with_an_end(tmp_path):
+    assert _placed(tmp_path, [_yl(100)]) == []
+
+
+def test_one_board_on_a_loop(tmp_path):
+    issues = _placed(tmp_path, [_yl(50)], tracks=MAIN_LOOP)
+    assert _rules(issues) == ["YARD_LIMIT_ONE_BOARD"]
+    assert issues[0].severity == "warning"
+
+
+def test_one_board_at_terminus_on_a_loop(tmp_path):
+    issues = _placed(tmp_path, [_yl(50), (0, {"kind": "station", "id": "WP", "terminus": True},
+                                          None, 20, 0)], tracks=MAIN_LOOP)
+    assert issues == []
+
+
+def _swb(x, y, layer=2, **fields):
+    return (layer, {"kind": "switchback", "id": "SWB", **fields}, None, x, y)
+
+
+def test_switchback_default_switch_found(tmp_path):
+    assert _placed(tmp_path, [_swb(80, 12.86)]) == []
+
+
+def test_switchback_tail_on_main(tmp_path):
+    assert "SWITCHBACK_TAIL_ON_MAIN" in _rules(_placed(tmp_path, [_swb(100, 0, layer=0)]))
+
+
+def test_switchback_isolated_tail_has_no_switch(tmp_path):
+    assert _rules(_placed(tmp_path, [_swb(20, 40)])) == ["SWITCHBACK_NO_SWITCH"]
+
+
+def test_switchback_isolated_tail_with_switches_given(tmp_path):
+    assert _placed(tmp_path, [_swb(20, 40, switches=[2])]) == []
+
+
+@pytest.mark.parametrize("switches", [[1], [99], [2, 4]])
+def test_switchback_bad_switch(tmp_path, switches):
+    # 1 is a straight, 99 doesn't exist, 4 is the (non-main) spur.
+    issues = _placed(tmp_path, [_swb(80, 12.86, switches=switches)])
+    assert _rules(issues) == ["SWITCHBACK_BAD_SWITCH"]
+
+
+def test_hint_names_the_layer_the_note_belongs_on(tmp_path):
+    # On the spur (Service layer) but the note is on the Main layer.
+    issues = _placed(tmp_path, [(0, {"kind": "reference", "id": "X"}, None, 80, 12.86)])
+    assert _rules(issues) == ["NOTE_FAR_FROM_TRACK"]
+    assert "L1-Service" in issues[0].hint and "4" in issues[0].hint

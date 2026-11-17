@@ -6,16 +6,25 @@ stable). A fact tied to a place on the layout is a JSON Note there, with a
 ``kind`` and an ``id``; check_conventions() reports every rule the layout
 breaks as an Issue with a stable rule id.
 
-This module covers the note and id rules (phase 1) and the Layer Group rules
-(phase 2). Placement and milepost rules follow in later phases.
+This module covers the note and id rules (phase 1), the Layer Group rules
+(phase 2) and note placement (phase 3). Milepost rules follow in phase 4.
 """
 
 from __future__ import annotations
 
 import json
+import math
+from collections import deque
 from dataclasses import asdict, dataclass, field
 
-from .models import Layout, NoteObject, category_from_layer_name
+from .models import (
+    Layout,
+    NoteObject,
+    TrackObject,
+    _normalize_angle,
+    arc_polyline,
+    category_from_layer_name,
+)
 
 CONVENTIONS_VERSION = 1
 
@@ -84,6 +93,14 @@ CATEGORY_GROUPS = {
 _UNOWNED_CATEGORIES = ("scenery", "ignore")
 
 _SEVERITY_ORDER = ("error", "warning", "info")
+
+# A note's position is data: it snaps to the nearest track on its own layer
+# (spec 4.0). Layout inches.
+SNAP_WARN = 3.0      # farther than a note normally sits from its track
+SNAP_ERROR = 24.0    # nothing this close on the layer: the note is misplaced
+
+# Kinds whose notes have no position (spec 4.1).
+_UNPOSITIONED_KINDS = ("railroad", "subdivision")
 
 # v0 text-prefix notes (spec 9, compatibility).
 _TEXT_PREFIXES = (
@@ -597,6 +614,221 @@ def _check_groups(layout: Layout, notes: list[ConventionNote], issues: list[Issu
                     hint="Add it to a railroad's Layer Group (the railroad note's \"group\")."))
 
 
+# -- phase 3: placement ------------------------------------------------------
+
+def _point_segment_distance(px: float, py: float, x0: float, y0: float,
+                            x1: float, y1: float) -> float:
+    dx, dy = x1 - x0, y1 - y0
+    seg_sq = dx * dx + dy * dy
+    if seg_sq < 1e-12:
+        return math.hypot(px - x0, py - y0)
+    t = max(0.0, min(1.0, ((px - x0) * dx + (py - y0) * dy) / seg_sq))
+    return math.hypot(px - (x0 + t * dx), py - (y0 + t * dy))
+
+
+def _track_polylines(track: TrackObject) -> list[list[tuple[float, float]]]:
+    """The track's shape as polylines: the arc for a curve, the chord from
+    the points to each other end for a turnout, else the end-to-end chord
+    (Cornu and Bezier tracks are approximated by it)."""
+    eps = track.endpoints
+    if len(eps) < 2:
+        return []
+    if track.kind == "CURVE" and track.extra.get("radius", 0.0) > 0.0:
+        arc_deg = _normalize_angle(eps[1].angle - eps[0].angle + 180.0)
+        return [arc_polyline(track.extra["cx"], track.extra["cy"], track.extra["radius"],
+                             eps[0].x, eps[0].y, eps[1].x, eps[1].y, arc_deg, n=64)]
+    if track.kind == "TURNOUT":
+        return [[(eps[0].x, eps[0].y), (ep.x, ep.y)] for ep in eps[1:]]
+    return [[(eps[0].x, eps[0].y), (eps[1].x, eps[1].y)]]
+
+
+def track_distance(track: TrackObject, x: float, y: float) -> float:
+    """Distance from (x, y) to the track (see _track_polylines)."""
+    best = math.inf
+    for line in _track_polylines(track):
+        for (x0, y0), (x1, y1) in zip(line, line[1:]):
+            best = min(best, _point_segment_distance(x, y, x0, y0, x1, y1))
+    return best
+
+
+def snap_note(layout: Layout, note: ConventionNote) -> tuple[TrackObject | None, float]:
+    """The nearest track on the note's own layer, and its distance."""
+    best, best_d = None, math.inf
+    for track in layout.tracks:
+        if track.layer != note.layer:
+            continue
+        d = track_distance(track, note.x, note.y)
+        if d < best_d:
+            best, best_d = track, d
+    return best, best_d
+
+
+def _other_layer_hint(layout: Layout, note: ConventionNote) -> str:
+    """When the note sits on a track of another layer, say so: the usual
+    cause is a note saved on the wrong layer."""
+    best, best_d = None, SNAP_WARN
+    for track in layout.tracks:
+        if track.layer == note.layer:
+            continue
+        d = track_distance(track, note.x, note.y)
+        if d <= best_d:
+            best, best_d = track, d
+    if best is None:
+        return ""
+    return (f"It is on track {best.id} of layer {_layer_name(layout, best.layer)}: "
+            f"move the note to that layer.")
+
+
+def _main_layers(layout: Layout) -> set[int]:
+    return {idx for idx, (cat, _) in layer_categories(layout).items() if cat == "mainline"}
+
+
+def _placed_issue(severity: str, rule: str, message: str, note: ConventionNote,
+                  track: TrackObject | None, hint: str = "") -> Issue:
+    issue = _note_issue(severity, rule, message, note, hint=hint)
+    issue.track_id = track.id if track is not None else None
+    return issue
+
+
+def _main_component_has_end(layout: Layout, start: TrackObject, main: set[int]) -> bool:
+    """Whether the main track connected to start has an open end.
+
+    Connections are followed only between main-layer tracks; an endpoint
+    joined to a track on another layer is not an end of the main.
+    """
+    by_id = {t.id: t for t in layout.tracks}
+    seen = {start.id}
+    queue = deque([start])
+    while queue:
+        track = queue.popleft()
+        for ep in track.endpoints:
+            if ep.connected_to is None:
+                return True
+            nxt = by_id.get(ep.connected_to)
+            if nxt is not None and nxt.layer in main and nxt.id not in seen:
+                seen.add(nxt.id)
+                queue.append(nxt)
+    return False
+
+
+def _switchback_switch(layout: Layout, tail: TrackObject, main: set[int]) -> TrackObject | None:
+    """The main-track turnout the switchback's tail track leaves: the first
+    turnout on a main layer reached from the tail without crossing other
+    main track."""
+    by_id = {t.id: t for t in layout.tracks}
+    seen = {tail.id}
+    queue = deque([tail])
+    while queue:
+        track = queue.popleft()
+        for ep in track.endpoints:
+            nxt = by_id.get(ep.connected_to) if ep.connected_to is not None else None
+            if nxt is None or nxt.id in seen:
+                continue
+            seen.add(nxt.id)
+            if nxt.layer in main:
+                if nxt.kind == "TURNOUT":
+                    return nxt
+                continue
+            queue.append(nxt)
+    return None
+
+
+def _check_placement(layout: Layout, notes: list[ConventionNote], issues: list[Issue]) -> None:
+    """Spec 4.0 positions, 4.2 anchors, 4.3 stations, 4.4 YL boards, 4.9."""
+    main = _main_layers(layout)
+    snapped: dict[int, TrackObject] = {}
+    for note in notes:
+        if note.kind in _UNPOSITIONED_KINDS:
+            continue
+        track, dist = snap_note(layout, note)
+        if track is None or dist > SNAP_ERROR:
+            issues.append(_placed_issue(
+                "error", "NOTE_NO_TRACK",
+                f"{note.kind} {note.id}: no track on its layer within {SNAP_ERROR:g} in",
+                note, None, hint=_other_layer_hint(layout, note)
+                or "Move the note onto its track, or onto the track's layer."))
+            continue
+        snapped[note.note_id] = track
+        if dist > SNAP_WARN:
+            issues.append(_placed_issue(
+                "warning", "NOTE_FAR_FROM_TRACK",
+                f"{note.kind} {note.id}: {dist:.1f} in from the nearest track ({track.id})",
+                note, track, hint=_other_layer_hint(layout, note)
+                or "A note's position is data; place it on its track."))
+
+    by_id = {t.id: t for t in layout.tracks}
+    stations_terminus = {n.id for n in notes
+                         if n.kind == "station" and n.fields.get("terminus") is True}
+    boards: dict[str, list[ConventionNote]] = {}
+    for note in notes:
+        track = snapped.get(note.note_id)
+        if track is None:
+            continue
+        on_main = track.layer in main
+        if note.kind == "reference" and _is_number(note.fields.get("mp")) and not on_main:
+            issues.append(_placed_issue(
+                "error", "ANCHOR_NOT_ON_MAIN",
+                f"MP anchor {note.id} is not on main track", note, track))
+        elif note.kind == "station" and not on_main:
+            issues.append(_placed_issue(
+                "warning", "STATION_NOT_ON_MAIN",
+                f"Station {note.id} is not on main track", note, track,
+                hint="Place a station note on the main at the station."))
+        elif note.kind == "yard_limit":
+            if not on_main:
+                issues.append(_placed_issue(
+                    "error", "YARD_LIMIT_NOT_ON_MAIN",
+                    f"Yard-limit board {note.id} is not on main track", note, track))
+            else:
+                boards.setdefault(note.id, []).append(note)
+        elif note.kind == "switchback":
+            _check_switchback(layout, note, track, main, by_id, issues)
+
+    for yl_id, group in boards.items():
+        if len(group) > 2:
+            for extra in group[2:]:
+                issues.append(_placed_issue(
+                    "error", "YARD_LIMIT_TOO_MANY",
+                    f"Yard limit {yl_id} has {len(group)} boards (2 at most)",
+                    extra, snapped[extra.note_id]))
+        elif len(group) == 1:
+            note = group[0]
+            if yl_id in stations_terminus or _main_component_has_end(
+                    layout, snapped[note.note_id], main):
+                continue
+            issues.append(_placed_issue(
+                "warning", "YARD_LIMIT_ONE_BOARD",
+                f"Yard limit {yl_id} has one board and its main has no end",
+                note, snapped[note.note_id],
+                hint="Add the second board, at the other end of the zone."))
+
+
+def _check_switchback(layout: Layout, note: ConventionNote, tail: TrackObject,
+                      main: set[int], by_id: dict[int, TrackObject],
+                      issues: list[Issue]) -> None:
+    if tail.layer in main:
+        issues.append(_placed_issue(
+            "error", "SWITCHBACK_TAIL_ON_MAIN",
+            f"Switchback {note.id}: its tail track ({tail.id}) is on a Mainline layer",
+            note, tail, hint="The tail track is never main track; put it on its own layer."))
+        return
+    switches = note.fields.get("switches")
+    if isinstance(switches, list) and switches:
+        for sw in switches:
+            track = by_id.get(sw) if isinstance(sw, int) else None
+            if track is None or track.kind != "TURNOUT" or track.layer not in main:
+                issues.append(_placed_issue(
+                    "error", "SWITCHBACK_BAD_SWITCH",
+                    f"Switchback {note.id}: switch {sw!r} is not a turnout on main track",
+                    note, tail))
+        return
+    if _switchback_switch(layout, tail, main) is None:
+        issues.append(_placed_issue(
+            "error", "SWITCHBACK_NO_SWITCH",
+            f"Switchback {note.id}: no main-track turnout where its tail track leaves",
+            note, tail, hint='Give the switch(es) as "switches": [track ids].'))
+
+
 def sort_issues(issues: list[Issue]) -> list[Issue]:
     return sorted(issues, key=lambda i: (
         _SEVERITY_ORDER.index(i.severity), i.rule,
@@ -612,4 +844,5 @@ def check_conventions(layout: Layout) -> list[Issue]:
     _check_yard_tracks(notes, location_kind, issues)
     _check_kind_fields(notes, issues)
     _check_groups(layout, notes, issues)
+    _check_placement(layout, notes, issues)
     return sort_issues(issues)

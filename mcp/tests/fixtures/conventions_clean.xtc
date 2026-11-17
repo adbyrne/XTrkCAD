@@ -1,6 +1,6 @@
 VERSION 13 5.4.0
 TITLE1 Conventions clean fixture
-TITLE2 every note kind, valid (spec v1)
+TITLE2 every note kind, valid (spec v1); main turnout 5 with the switchback tail (7) on L1-Service
 SCALE HO
 ROOMSIZE 260 x 80
 
@@ -36,12 +36,33 @@ NOTE 112 2 0 0 170.000000 30.000000 0 3 "{""kind"": ""yard_track"", ""id"": ""QM
 NOTE 113 2 0 0 140.000000 30.000000 0 3 "{""kind"": ""house_track"", ""id"": ""XP""}"
 NOTE 114 2 0 0 100.000000 30.000000 0 3 "{""kind"": ""storage"", ""id"": ""CAR_BARN"", ""name"": ""Car barn""}"
 NOTE 115 2 0 0 30.000000 30.000000 0 3 "{""kind"": ""facility"", ""id"": ""WP_COAL"", ""name"": ""Coal trestle"", ""type"": ""coal"", ""location"": ""WP""}"
-NOTE 116 2 0 0 200.000000 30.000000 0 3 "{""kind"": ""switchback"", ""id"": ""XP_SWB"", ""serves"": ""XP""}"
+NOTE 116 2 0 0 214.000000 10.000000 0 3 "{""kind"": ""switchback"", ""id"": ""XP_SWB"", ""serves"": ""XP""}"
 NOTE 117 1 0 0 150.000000 10.000000 0 3 "{""todo"": ""not a convention note: no kind""}"
 
 STRAIGHT 1 0 0 0 0 HO 0
 	E 0.000000 0.000000 270.000000
+	T 5 190.000000 0.000000 90.000000
+	END$SEGS
+
+TURNOUT 5 0 0 0 0 HO 2 190.000000 0.000000 0 0.000000 "Test	#6 Right	"
+	T 1 190.000000 0.000000 270.000000
+	T 6 198.000000 0.000000 90.000000
+	T 7 198.000000 5.000000 70.000000
+	D 0.000000 0.000000
+	P "Normal" 0
+	P "Reverse" 1
+	S 0 0 0.000000 0.000000 8.000000 0.000000
+	S 0 0 0.000000 0.000000 8.000000 5.000000
+	END$SEGS
+
+STRAIGHT 6 0 0 0 0 HO 0
+	T 5 198.000000 0.000000 270.000000
 	E 240.000000 0.000000 90.000000
+	END$SEGS
+
+STRAIGHT 7 2 0 0 0 HO 0
+	T 5 198.000000 5.000000 250.000000
+	E 230.000000 15.000000 70.000000
 	END$SEGS
 
 STRAIGHT 2 1 0 0 0 HO 0
