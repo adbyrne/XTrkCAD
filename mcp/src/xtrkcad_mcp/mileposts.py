@@ -577,20 +577,7 @@ def milepost_model(layout: Layout, notes: list[ConventionNote] | None = None,
 
 def check_mileposts(layout: Layout, notes: list[ConventionNote],
                     snapped: dict[int, TrackObject]) -> list[Issue]:
-    """The milepost and station-limit rules (spec 4.2, 4.3, 5)."""
-    model = milepost_model(layout, notes, snapped)
-    issues = list(model.issues)
-    for st in model.stations:
-        if st.mp is None:
-            continue
-        note = next(n for n in notes if n.note_id == st.note_id)
-        line = _line_of(note, model.lines)
-        zones = [(min(v), max(v)) for k, v in model.boards.items() if k[:2] == line.key()]
-        tol = SNAP_WARN / line.scale_in
-        if not any(lo - tol <= st.mp_exit and st.mp_entry <= hi + tol for lo, hi in zones):
-            issues.append(_note_issue(
-                "warning", "STATION_NO_YARD_LIMIT",
-                f"Station {st.id} (MP {st.mp:.2f}) has no yard-limit board within its "
-                f"limits", note, hint="Usual, not required: YL boards at the station's "
-                                      "switches let local moves work."))
-    return issues
+    """The milepost and station-limit rules (spec 4.2, 5)."""
+    # Yard limits are timetable and rules data (user 2026-11-17), so no
+    # station is expected to have yard-limit boards on the layout.
+    return list(milepost_model(layout, notes, snapped).issues)

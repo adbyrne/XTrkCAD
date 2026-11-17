@@ -88,7 +88,7 @@ def _rules(issues, severity=None):
 
 # Phase 4 rules: most test layouts have main track and no MP anchor, so the
 # tests of the other rules leave these out (phase=4 keeps them).
-_PHASE4_RULES = ("MP_", "STATION_NO_YARD_LIMIT", "SWITCHBACK_SWITCH_AMBIGUOUS")
+_PHASE4_RULES = ("MP_", "SWITCHBACK_SWITCH_AMBIGUOUS")
 
 
 def _check(tmp_path, notes, phase4=False, **kw):
@@ -1030,10 +1030,9 @@ def _station(model, ident, subdivision=None):
 
 
 def _p4(issues):
-    """Phase 4 rules only (MP_*, STATION_NO_YARD_LIMIT, SWITCHBACK_SWITCH_AMBIGUOUS)."""
+    """Phase 4 rules only (MP_*, SWITCHBACK_SWITCH_AMBIGUOUS)."""
     return [r for r in _rules(issues)
-            if r.startswith("MP_") or r in ("STATION_NO_YARD_LIMIT",
-                                            "SWITCHBACK_SWITCH_AMBIGUOUS")]
+            if r.startswith("MP_") or r == "SWITCHBACK_SWITCH_AMBIGUOUS"]
 
 
 def test_station_without_siding_mp_at_note(tmp_path):
@@ -1137,15 +1136,11 @@ def test_unreachable_station(tmp_path):
     assert "MP_UNREACHABLE" in _p4(issues)
 
 
-def test_station_no_yard_limit(tmp_path):
+def test_station_without_yard_limit_is_fine(tmp_path):
+    # Yard limits are timetable/rules data (user 2026-11-17), not layout
+    # data: a station without YL boards gives no issue.
     issues = _placed(tmp_path, phase4=True, notes=[ZERO, _st("XP", 100)], tracks=LINE)
-    assert "STATION_NO_YARD_LIMIT" in _p4(issues)
-
-
-@pytest.mark.parametrize("boards", [[100], [50, 190], [150, 230]])
-def test_station_with_yard_limit(tmp_path, boards):
-    notes = [ZERO, _st("XP", 100)] + [_board("XP", x) for x in boards]
-    assert "STATION_NO_YARD_LIMIT" not in _p4(_placed(tmp_path, phase4=True, notes=notes, tracks=LINE))
+    assert _p4(issues) == []
 
 
 def test_switchback_station(tmp_path):
