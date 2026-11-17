@@ -243,6 +243,7 @@ void CarInvListAdd(carItem_p item);
 void CarInvListUpdate(carItem_p item);
 
 void InitCarInvDlg(void);
+void CarInvDlgClearList(void);
 
 //careditlogic
 typedef enum {
@@ -402,6 +403,7 @@ void CarProtoDelete( carProto_p protoP );  /* here for CommitStaged rollback */
 
 
 void CarDlgAddItem(void);
+void CarDlgDiscard(void);
 void CarDlgUpdItem(void);
 extern long carDlgItemIndex;
 extern int log_carDlgDims;

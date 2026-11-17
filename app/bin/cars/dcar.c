@@ -417,6 +417,8 @@ EXPORT void CarItemUpdate(
 EXPORT void ClearCars( void )
 {
 	int inx;
+	CarDlgDiscard();
+	CarInvDlgClearList();
 	for ( inx=0; inx<carItemInfo_da.cnt; inx++ ) {
 		carItem_p item = carItemInfo(inx);
 		if (item->title) { MyFree(item->title); }

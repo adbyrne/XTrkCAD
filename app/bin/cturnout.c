@@ -98,7 +98,7 @@ static paramData_t turnoutPLs[] = {
 #define turnoutHideT    (turnoutPLs[I_HIDE].control)
 	{   PD_TOGGLE, &hideTurnoutWindow, "hide", PDO_DLGCMDBUTTON, NULL, NULL, BC_NOBORDER }
 };
-static paramGroup_t turnoutPG = { "turnout", PGO_FULLDIALOGFROMBUILDER, turnoutPLs, COUNT( turnoutPLs ) };
+static paramGroup_t turnoutPG = { "turnout", PGO_FULLDIALOGFROMBUILDER|PGO_LAYOUT_CLOSE, turnoutPLs, COUNT( turnoutPLs ) };
 #endif
 
 

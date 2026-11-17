@@ -1149,6 +1149,11 @@ EXPORT void FreeTrack( track_p trk )
 EXPORT void ClearTracks( void )
 {
 	track_p curr, next;
+	/* Before anything is freed: train mode and some dialogs hold tracks,
+	 * and the other dialogs that show layout data must not write it into
+	 * the next layout. */
+	TrainModeExit();
+	FormCloseLayoutDialogs();
 	UndoClear();
 	ClearNote();
 	ClearDescribe();

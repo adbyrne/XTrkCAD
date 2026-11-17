@@ -897,6 +897,7 @@ static void PlaybackQuit(void)
 	DoSetScale(oldScaleName);
 	inPlaybackQuit = FALSE;
 	DoChangeNotification(CHANGE_ALL);
+	FormReloadLayoutDialogs();
 	CloseDemoWindows();
 	curDemo = -1;
 	wPrefSetInteger("misc", "playbackspeed", playbackSpeed);

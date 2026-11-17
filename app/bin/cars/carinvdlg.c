@@ -1534,6 +1534,19 @@ static void CarInvDlgChange(long changes)
 	}
 }
 
+/**
+ * Empty the inventory list before ClearCars() frees the car items it
+ * points to. Clearing the list later, from LoadSortedList(), makes GTK
+ * report the selection change, and CarInvDlgUpdate() would then read the
+ * freed items. The list is filled again when the dialog is reloaded.
+ */
+void CarInvDlgClearList(void)
+{
+	if (carInvPG.win != NULL) {
+		wListClear(carInvPLs[I_CI_LIST].control);
+	}
+}
+
 EXPORT void DoCarDlg(void* unused)
 {
 	if (carInvPG.win == NULL) {
@@ -1552,6 +1565,7 @@ EXPORT void DoCarDlg(void* unused)
 void InitCarInvDlg(void)
 {
 	FormRegister( &carInvPG );
+	carInvPG.reloadProc = DoCarDlg;
 	log_carInvDlg = LogFindIndex("carInvDlg");
 	RegisterChangeNotification( CarInvDlgChange );
 }

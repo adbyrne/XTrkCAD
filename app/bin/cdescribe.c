@@ -518,6 +518,7 @@ void DoDescribe(char * title, track_p track, descData_p data,
 		                  F_RECALLPOS|PD_F_ALT_CANCELLABEL,
 		                  DescribeUpdate);
 
+		pg->options |= PGO_LAYOUT_CLOSE;
 		FormRegister(pg);
 	}
 

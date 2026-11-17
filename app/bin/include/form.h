@@ -163,6 +163,9 @@ typedef struct {
 #define PGO_PREFMISCGROUP		(1<<8)
 #define PGO_PREFMISC			(1<<10)
 #define PGO_FULLDIALOGFROMBUILDER (1L<<13)	/**< complete dialog is defined in XML file*/
+/** close the dialog before a new layout replaces the current one; for
+ * dialogs that depend on a selection, a track or the active command */
+#define PGO_LAYOUT_CLOSE		(1L<<14)
 
 typedef void (*paramActionOkProc)( void const * );
 typedef void (*paramActionCancelProc)( paramGroup_cp group );
@@ -196,6 +199,9 @@ typedef struct paramGroup_t {
 	wWinPix_t origH;
 	wBox_p * boxs;
 	wBool_t keepOpen;	/**< set by FormDialogKeepOpen(), see there */
+	/** reopens the dialog with the data of a newly loaded layout, see
+	 * FormReloadLayoutDialogs(); NULL if the dialog holds no layout data */
+	void (*reloadProc)(void *);
 } paramGroup_t;
 
 #define PD_F_ALT_CANCELLABEL	(1L<<30)		/**<use Close or Cancel for the discard button */
@@ -238,6 +244,8 @@ void FormUpdatePrefs(void);
 
 paramGroup_cp DialogGroupFind( const char * sName );
 paramGroup_cp * DialogGroupIter( paramGroup_cp * );
+void FormCloseLayoutDialogs(void);
+void FormReloadLayoutDialogs(void);
 
 wControl_p FormCreateDialog(
         paramGroup_p group,

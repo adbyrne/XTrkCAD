@@ -70,6 +70,38 @@ void LayerGroupResetAll(void)
 	groupCap = 0;
 }
 
+static layerGroupEntry_t *savedGroups = NULL;
+static int savedCount = 0;
+static int savedCap = 0;
+static int groupsSaved = 0;
+
+void LayerGroupSaveAll(void)
+{
+	LayerGroupResetAll();	/* drop a set that was saved but not restored */
+	savedGroups = groups;
+	savedCount = groupCount;
+	savedCap = groupCap;
+	groupsSaved = 1;
+	groups = NULL;
+	groupCount = 0;
+	groupCap = 0;
+}
+
+void LayerGroupRestoreAll(void)
+{
+	if (!groupsSaved) {
+		return;
+	}
+	LayerGroupResetAll();
+	groups = savedGroups;
+	groupCount = savedCount;
+	groupCap = savedCap;
+	savedGroups = NULL;
+	savedCount = 0;
+	savedCap = 0;
+	groupsSaved = 0;
+}
+
 int LayerGroupCount(void)
 {
 	return groupCount;

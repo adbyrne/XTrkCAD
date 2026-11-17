@@ -1914,6 +1914,9 @@ void ResetLayers(void)
 	/* SF #802: a fresh file load must never carry over a previous file's
 	 * Show Only/Hide Only session-only filter state. */
 	LayerGroupVisibilityOverrideReset();
+	/* The groups belong to the file too; the new file's LAYERGROUP lines
+	 * (or MigrateLayerLinksToGroups()) fill the registry again. */
+	LayerGroupResetAll();
 
 	/* Move these out of the loop */
 	SCALEINX_T scaleInx;
@@ -2015,6 +2018,7 @@ void SaveLayers(void)
 	}
 
 	memcpy(layers_save, layers, NUM_LAYERS * sizeof layers[0]);
+	LayerGroupSaveAll();
 	ResetLayers();
 }
 
@@ -2026,6 +2030,7 @@ void RestoreLayers(void)
 	memcpy(layers, layers_save, NUM_LAYERS * sizeof layers[0]);
 	free(layers_save);
 	layers_save = NULL;
+	LayerGroupRestoreAll();
 
 	for (inx = 0; inx < NUM_BUTTONS; inx++) {
 		wDrawColor color = layers[inx].color;
@@ -2690,6 +2695,7 @@ void InitLayers(int cmdGroup)
 addButtonCallBack_t InitLayersDialog(void)
 {
 	FormRegister(&layerPG);
+	layerPG.reloadProc = DoLayer;
 	RegisterChangeNotification(LayerChange);
 	return &DoLayer;
 }

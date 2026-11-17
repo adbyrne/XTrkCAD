@@ -135,6 +135,7 @@ void EditCopy(void *unused) { (void)unused; }
 void EditCut(void *unused) { (void)unused; }
 void EditPaste(void *unused) { (void)unused; }
 void EnableCommands(void) { }
+void FormReloadLayoutDialogs(void) { }
 void FormResetInvalid(wControl_p win) { (void)win; }
 void InfoDefaultControls(void) { }
 void LayoutBackGroundInit(BOOL_T clear) { (void)clear; }
