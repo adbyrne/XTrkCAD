@@ -31,6 +31,9 @@ the Parts List (\ref cmdEnum) window.
 - \subpage cmdReportskinked -- already-connected track joints whose
   alignment has drifted out of tolerance.
 
+- \subpage cmdReportsshort -- short track pieces, such as the ones joining
+  two tracks can insert, and any that are on an unexpected layer.
+
 - \subpage cmdReportsfilter
 
 */
@@ -395,6 +398,68 @@ is included by default. A kinked joint only appears when both of its two
 tracks' layers are included.
 
 The <b>Done</b> button closes the <b>Kinked Joints Report</b> window.
+
+*/
+
+/**
+\page cmdReportsshort Short Tracks Report
+
+The <b>Short Tracks Report</b> command lists every track shorter than the
+<b>Maximum length</b>: straights, curves, easements, Cornu and Bezier
+tracks, and two-ended sectional pieces. Turnouts, turntables and cars are
+not listed. Each row gives the <b>Track</b> id, its <b>Type</b> and
+<b>Length</b> in inches, its layer (<b>Layer #</b>/<b>Layer Name</b>), the
+<b>Connected Layers</b> of the tracks at its two ends ("-" when both ends
+are open), and, for a flagged track, its <b>Expected Layer</b>.
+
+When two tracks are joined, a short piece can be inserted between them.
+It goes on the current layer, not on the layer of the tracks it joins,
+and it is often too small to see without hiding layers. A track on none
+of its connected tracks' layers is flagged: its <b>Expected Layer</b>
+column names the layer(s) of the tracks it is connected to, and flagged
+tracks are listed first. Move a flagged track to one of those layers with
+<b>Move To Current Layer</b> (\ref editM) or its Properties.
+
+Every short track is listed, flagged or not, so one on an unlikely but
+still connected layer is seen too. A short piece you want to keep can
+simply stay in the list. If you don't sort your track into layers by type,
+the flag means little; a short piece can instead be reworked into a longer
+one, for example by joining its neighbouring tracks again or by extending
+it, so that it no longer appears in the list.
+
+The <b>Maximum length</b> drop-down (0.5, 1.0, 2.0 or 4.0 in; 1.0 in by
+default) sets how short a track must be to be listed. Changing the choice
+updates the report at once, and it is remembered for next time. The saved
+or printed report states the maximum length used.
+
+A summary line above the list gives the number of short tracks found and
+how many of them are on an unexpected layer, updated whenever the report
+is generated or refreshed.
+
+The report is interactive, the same way the Gaps Report (\ref
+cmdReportsgaps) is: selecting a row pans the <b>Main Canvas</b> (\ref
+mainW) to the track's midpoint and draws a temporary open-circle indicator
+there. The indicator is purely visual -- it's never saved with the layout
+and disappears as soon as the report window closes. Its color can be
+changed on the <b>Colors</b> (\ref cmdRgbcolor) dialog, under <b>Report
+Indicator</b>.
+
+The <b>Refresh</b> button recomputes the report in place -- useful after
+moving or reworking a listed track, without closing and reopening the
+report window.
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
+used to name and save the report to a text file.
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to
+print the report.
+
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default. A track appears when its own layer is included;
+its connected tracks' layers are shown whatever the filter.
+
+The <b>Done</b> button closes the <b>Short Tracks Report</b> window.
 
 */
 

@@ -334,6 +334,11 @@ FILESELECT report-kinked.txt
 PARAMETER reportskinked save
 PARAMETER reportskinked list 0
 PARAMETER reportskinked cancel
+PARAMETER misc cmdReportsShort
+PARAMETER reportsshort refresh
+FILESELECT report-short.txt
+PARAMETER reportsshort save
+PARAMETER reportsshort cancel
 PARAMETER misc cmdReportsNotes
 PARAMETER reportsnotes refresh
 FILESELECT report-notes.txt

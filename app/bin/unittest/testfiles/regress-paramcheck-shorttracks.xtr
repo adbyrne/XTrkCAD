@@ -1,0 +1,71 @@
+# Short Tracks report (Development Issues #86). Four short straights:
+# - 2 (0.3 in, Passing) joins track 1 (Main) to track 3 (Passing): on a
+#   connected track's layer, listed but not flagged;
+# - 5 (0.7 in, Storage) joins two Main tracks: on neither one's layer, so
+#   flagged, expected 1 Main (the only row the saved report flags);
+# - 7 (1.5 in) and 8 (3.0 in), both ends open: listed, not flagged.
+# Maximum length 0.5 in lists 1, 1 in (the default) 2, 2 in 3, 4 in all 4.
+# The choice is remembered: reopening the report keeps it. Selecting the
+# first row (the flagged track 5 comes first) pans to it. The report saved at
+# 1 in is compared with shorttracks-expected/. REDRAW resolves the tracks'
+# connections (macro.c), which the report reads.
+VERSION 13 5.4.0
+DEMOINIT
+ROOMSIZE 48.000000 x 30.000000
+SCALE HO
+LAYERS 0 1 0 1 255 0 0 0 0 "Main" 1 7 18.000000 0.000000 1.131804 0.183697 0.367394
+LAYERS 1 1 0 1 16711680 0 0 0 0 "Passing" 1 7 18.000000 0.000000 1.131804 0.183697 0.367394
+LAYERS 2 1 0 1 65280 0 0 0 0 "Storage" 1 7 18.000000 0.000000 1.131804 0.183697 0.367394
+LAYERS CURRENT 0
+STRAIGHT 1 0 0 0 0 HO 2 0.000000 0.000000
+	E4 2.000000 6.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	T4 2 20.000000 6.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+STRAIGHT 2 1 0 0 0 HO 2 0.000000 0.000000
+	T4 1 20.000000 6.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	T4 3 20.300000 6.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+STRAIGHT 3 1 0 0 0 HO 2 0.000000 0.000000
+	T4 2 20.300000 6.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	E4 40.000000 6.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+STRAIGHT 4 0 0 0 0 HO 2 0.000000 0.000000
+	E4 2.000000 16.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	T4 5 20.000000 16.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+STRAIGHT 5 2 0 0 0 HO 2 0.000000 0.000000
+	T4 4 20.000000 16.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	T4 6 20.700000 16.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+STRAIGHT 6 0 0 0 0 HO 2 0.000000 0.000000
+	T4 5 20.700000 16.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	E4 40.000000 16.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+STRAIGHT 7 0 0 0 0 HO 2 0.000000 0.000000
+	E4 5.000000 24.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	E4 6.500000 24.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+STRAIGHT 8 0 0 0 0 HO 2 0.000000 0.000000
+	E4 10.000000 24.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	E4 13.000000 24.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000
+	END$SEGS
+REDRAW
+PARAMETER misc cmdReportsShort
+PARAMCHECK reportsshort maxlen 1
+PARAMCHECK reportsshort list count 2
+FILESELECT report-short.txt
+PARAMETER reportsshort save
+PARAMETER reportsshort list 0
+PARAMETER reportsshort maxlen 0
+PARAMCHECK reportsshort list count 1
+PARAMETER reportsshort maxlen 2
+PARAMCHECK reportsshort list count 3
+PARAMETER reportsshort maxlen 3
+PARAMCHECK reportsshort list count 4
+PARAMETER reportsshort cancel
+PARAMETER misc cmdReportsShort
+PARAMCHECK reportsshort maxlen 3
+PARAMCHECK reportsshort list count 4
+PARAMETER reportsshort maxlen 1
+PARAMCHECK reportsshort list count 2
+PARAMETER reportsshort cancel

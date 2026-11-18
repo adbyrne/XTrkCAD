@@ -546,6 +546,12 @@ bug:
   facing open ends, 0.2 in and 0.6 in apart, give 0, 1 and 2 near-miss rows at Connection
   distance, 0.25 in and 1.0 in (`PARAMCHECK reportsgaps list count`), and reopening the report
   keeps the choice.
+  `shorttracks` covers the Short Tracks report (Development Issues #86): four short straights give
+  1, 2, 3 and 4 rows at a Maximum length of 0.5, 1, 2 and 4 in, reopening the report keeps the
+  choice, and the report saved at 1 in, with one track flagged as on neither connected track's
+  layer, is compared with `testfiles/shorttracks-expected/` (`RegressionParamCheck.shorttracks_check`,
+  the same `tools/check-reports-test.sh` as the reports test). The script needs a `REDRAW` after
+  the tracks: it resolves their connections, which the report reads.
   `switchmotor` moves a turnout without its switch motor: the motor stands for its turnout (Robert
   Heller, dev ML #4675), so its box has to follow, and Undo gives both back.
   `UpdateSwitchMotorBoxes()` works every motor's box out again from its turnout where

@@ -287,6 +287,48 @@ void ReportsFormatGapList(DynString *out, const reportsGapPair_t *list,
 	}
 }
 
+/* Append "<layer> <name>" for each of cnt layers, joined by sep. */
+static void ReportsCatLayers(DynString *out, int cnt,
+                             const unsigned int *layers,
+                             const char * const *names, const char *sep)
+{
+	char item[96];
+	int i;
+
+	for (i = 0; i < cnt; i++) {
+		snprintf(item, sizeof item, "%s%u %s", i > 0 ? sep : "", layers[i],
+		         names[i] ? names[i] : "");
+		DynStringCatCStr(out, item);
+	}
+}
+
+void ReportsFormatShortList(DynString *out, const reportsShortTrack_t *list,
+                            int count)
+{
+	char line[128];
+	int i;
+
+	for (i = 0; i < count; i++) {
+		const reportsShortTrack_t *row = &list[i];
+
+		snprintf(line, sizeof line, "%6d | %-9s | %8.3f | %5u | %-14s | ",
+		         row->track, row->typeName ? row->typeName : "",
+		         row->lengthIn, row->layer, row->layerName ? row->layerName : "");
+		DynStringCatCStr(out, line);
+		if (row->nbrCnt > 0) {
+			ReportsCatLayers(out, row->nbrCnt, row->nbrLayer, row->nbrLayerName, ", ");
+		} else {
+			DynStringCatCStr(out, "-");
+		}
+		if (row->flagged) {
+			DynStringCatCStr(out, " | ");
+			ReportsCatLayers(out, row->expectedCnt, row->expectedLayer,
+			                 row->expectedLayerName, " / ");
+		}
+		DynStringCatCStr(out, "\n");
+	}
+}
+
 void ReportsFormatKinkedList(DynString *out, const reportsKinkedJoint_t *list,
                              int count)
 {

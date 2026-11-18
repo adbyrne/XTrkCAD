@@ -93,7 +93,7 @@ endforeach()
 # The paramcheck test cases (RegressionParamCheck.<case>, script
 # regress-paramcheck-<case>.xtr). Set once: the home dirs, the tests and the
 # INPUT ERROR pattern below all use it.
-set(_xtrkcad_paramcheck_cases block wrong undo props gapsmax longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends splitops trimmerge blockmove switchmotor easement)
+set(_xtrkcad_paramcheck_cases block wrong undo props gapsmax longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends splitops trimmerge blockmove switchmotor easement shorttracks)
 foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
@@ -384,6 +384,20 @@ add_test(NAME RegressionParamCheck.reports_check
 )
 set_tests_properties(RegressionParamCheck.reports_check PROPERTIES
     FIXTURES_REQUIRED regression_reports
+    LABELS "regression;regression-ci"
+)
+# The Short Tracks report saved by its own test (Development Issues #86), on a
+# fixture with a flagged row, against shorttracks-expected/.
+set_tests_properties(RegressionParamCheck.shorttracks PROPERTIES
+    FIXTURES_SETUP regression_shorttracks
+    FAIL_REGULAR_EXPRESSION "NOTICE ID: MSG_PLAYBACK_LISTENTRY")
+add_test(NAME RegressionParamCheck.shorttracks_check
+    COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-reports-test.sh"
+        "${_xtrkcad_compare_dir}/shorttracks-expected"
+        "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-shorttracks/.${XTRKCAD_BIN}"
+)
+set_tests_properties(RegressionParamCheck.shorttracks_check PROPERTIES
+    FIXTURES_REQUIRED regression_shorttracks
     LABELS "regression;regression-ci"
 )
 if(WIN32)

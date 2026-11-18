@@ -1862,6 +1862,9 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsKinked",
 	                   _("_Kinked Joints ..."), ACCL_REPORTSKINKED,
 	                   ReportsKinkedJoints, 0, NULL);
+	MiscMenuItemCreate(reportsM, NULL, "cmdReportsShort",
+	                   _("_Short Tracks ..."), ACCL_REPORTSSHORT,
+	                   ReportsShortTracks, 0, NULL);
 	MiscMenuItemCreate(reportsM, NULL, "cmdReportsNotes",
 	                   _("_Notes ..."), ACCL_REPORTSNOTES,
 	                   ReportsNotes, 0, NULL);

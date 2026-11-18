@@ -2305,6 +2305,367 @@ void ReportsKinkedJoints( void * unused )
 }
 
 /* ---------------------------------------------------------------------
+ * Short Tracks Report (Development Issues #86). Interactive, the same
+ * shape as Gaps: a Maximum length choice (saved as a preference,
+ * reportsshort.maxlen), the shared layer/group filter, and rows that pan
+ * to the track. Joining two tracks can insert a short piece, and it goes
+ * on the current layer rather than on the layer of the tracks it joins;
+ * such a piece is often too small to see without hiding layers. Every
+ * short track is listed; one on none of its connected tracks' layers is
+ * flagged and listed first (see reportsShortTrack_t).
+ * ------------------------------------------------------------------- */
+
+/** Tentative declaration -- same reason as reportsPG above. */
+static paramGroup_t reportsShortPG;
+static void ReportsBuildShortText(DynString *out);
+static wBool_t ReportsDlgUpdateShort(paramGroup_cp pg, int inx, void *valueP);
+static void ReportsCancelShort(paramGroup_cp pg);
+
+static reportsDialog_t reportsShortDlg = {
+	&reportsShortPG, NULL, NULL, NULL,
+	ReportsBuildShortText, ReportsShortTracks,
+	ReportsDlgUpdateShort, ReportsCancelShort
+};
+static reportsOpCtx_t reportsShortRefreshOp = { &reportsShortDlg, REPORTSOP_REFRESH };
+static reportsOpCtx_t reportsShortSaveOp    = { &reportsShortDlg, REPORTSOP_SAVE };
+static reportsOpCtx_t reportsShortPrintOp   = { &reportsShortDlg, REPORTSOP_PRINT };
+
+static wWinPix_t reportsShortListWidths[] = { 60, 80, 80, 60, 100, 200, 160 };
+static const char * reportsShortListTitles[] = {
+	N_("Track"), N_("Type"), N_("Length (in)"), N_("Layer #"), N_("Layer Name"),
+	N_("Connected Layers"), N_("Expected Layer")
+};
+static paramListData_t reportsShortListData = { 8, 400, 7, reportsShortListWidths,
+                                                reportsShortListTitles
+                                              };
+
+/** This report's layer/group scope -- see dreportsfilter.h. */
+static reportsFilter_t reportsShortFilter;
+
+/** "Filter..." button -- see DoReportsFilter() above for the shared shape.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsShortFilter(void *unused)
+{
+	ShowReportsFilterDialog(&reportsShortFilter);
+}
+
+/** The Maximum length choice, in layout inches. 1 in (index 1) by default:
+ * the filler pieces found on a real layout were 0.2 to 0.7 in long. */
+static wIndex_t reportsShortMaxLenInx = 1;
+static const DIST_T reportsShortMaxLenValues[] = { 0.5, 1.0, 2.0, 4.0 };
+#define REPORTS_SHORT_MAXLEN_COUNT \
+	((wIndex_t)(sizeof reportsShortMaxLenValues / sizeof reportsShortMaxLenValues[0]))
+
+static paramData_t reportsShortPLs[] = {
+#define I_REPORTSSHORTSUMMARY (0)
+#define reportsShortSummary (reportsShortPLs[I_REPORTSSHORTSUMMARY].control)
+	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
+#define I_REPORTSSHORTMAXLEN (1)
+#define reportsShortMaxLen (reportsShortPLs[I_REPORTSSHORTMAXLEN].control)
+	{ PD_DROPLIST, &reportsShortMaxLenInx, "maxlen", PDO_LISTINDEX, I2VP(120), NULL, 0 },
+#define I_REPORTSSHORTLIST (2)
+#define reportsShortList (reportsShortPLs[I_REPORTSSHORTLIST].control)
+	{ PD_LIST, NULL, "list", 0, &reportsShortListData, NULL, 0 },
+	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsShortRefreshOp },
+	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsShortSaveOp },
+	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsShortPrintOp },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
+	{ PD_BUTTON, DoReportsShortFilter, "filter", 0, NULL, NULL, 0, NULL },
+};
+static paramGroup_t reportsShortPG = { "reportsshort", PGO_FULLDIALOGFROMBUILDER,
+                                       reportsShortPLs, COUNT( reportsShortPLs )
+                                     };
+
+/** The current report's short tracks -- each row's list context points
+ * into it, so it outlives the compute pass (same rule as
+ * reportsGapsList_da). Replaced, old rows freed first, on each run. */
+static dynArr_t reportsShortList_da;
+
+/** How many rows are flagged (on none of their connected tracks' layers). */
+static int reportsShortFlaggedCnt = 0;
+
+/** TRUE while the list or the Maximum length dropdown is being rebuilt --
+ * same re-entrancy guard as reportsGapsPopulating. */
+static BOOL_T reportsShortPopulating = FALSE;
+
+/** The Maximum length choice in inches; a stale or edited preference
+ * falls back to the default. */
+static DIST_T ReportsShortMaxLenValue(void)
+{
+	if ( reportsShortMaxLenInx < 0 ||
+	     reportsShortMaxLenInx >= REPORTS_SHORT_MAXLEN_COUNT ) {
+		reportsShortMaxLenInx = 1;
+	}
+	return reportsShortMaxLenValues[reportsShortMaxLenInx];
+}
+
+/** Fill the Maximum length dropdown and select the current choice. */
+static void ReportsPopulateMaxLenList(void)
+{
+	char label[32];
+	wIndex_t i;
+
+	(void) ReportsShortMaxLenValue();       // clamps the index
+	reportsShortPopulating = TRUE;
+	wListClear( reportsShortMaxLen );
+	for ( i = 0; i < REPORTS_SHORT_MAXLEN_COUNT; i++ ) {
+		snprintf( label, sizeof label, _("%.1f in"), reportsShortMaxLenValues[i] );
+		wComboBoxAddValue( reportsShortMaxLen, label, I2VP((int)i) );
+	}
+	wListSetIndex( reportsShortMaxLen, reportsShortMaxLenInx );
+	reportsShortPopulating = FALSE;
+}
+
+/** "<layer> <name>" for each of cnt layers, joined by sep, into buf. */
+static void ReportsShortLayersText(char *buf, size_t size, int cnt,
+                                   const unsigned int *layers,
+                                   const char * const *names, const char *sep)
+{
+	int i;
+	size_t len = 0;
+
+	buf[0] = '\0';
+	for ( i = 0; i < cnt && len < size; i++ ) {
+		int n = snprintf( buf + len, size - len, "%s%u %s", i > 0 ? sep : "",
+		                  layers[i], names[i] ? names[i] : "" );
+		if ( n < 0 ) {
+			break;
+		}
+		len += (size_t)n;
+	}
+}
+
+/** Populate the interactive list from reportsShortList_da, each row's
+ * context set to its entry so ReportsDlgUpdateShort() can recover it. */
+static void ReportsPopulateShortList(void)
+{
+	int i;
+	char row[400];
+	char connected[160];
+	char expected[160];
+
+	reportsShortPopulating = TRUE;
+	wListClear( reportsShortList );
+	for ( i = 0; i < reportsShortList_da.cnt; i++ ) {
+		reportsShortTrack_t *entry =
+		        &DYNARR_N(reportsShortTrack_t, reportsShortList_da, i);
+
+		if ( entry->nbrCnt > 0 ) {
+			ReportsShortLayersText( connected, sizeof connected, entry->nbrCnt,
+			                        entry->nbrLayer, entry->nbrLayerName, ", " );
+		} else {
+			snprintf( connected, sizeof connected, "-" );
+		}
+		expected[0] = '\0';
+		if ( entry->flagged ) {
+			ReportsShortLayersText( expected, sizeof expected, entry->expectedCnt,
+			                        entry->expectedLayer, entry->expectedLayerName, " / " );
+		}
+		snprintf( row, sizeof row, "%d\t%s\t%.3f\t%u\t%s\t%s\t%s",
+		          entry->track, entry->typeName, entry->lengthIn,
+		          entry->layer, entry->layerName ? entry->layerName : "",
+		          connected, expected );
+		wListAddValue( reportsShortList, row, NULL, entry );
+	}
+	reportsShortPopulating = FALSE;
+}
+
+/** paramGroup_t changeProc: a new Maximum length takes effect at once (as
+ * in Gaps); selecting a row pans/indicates at the track's midpoint. */
+static wBool_t ReportsDlgUpdateShort(paramGroup_cp pg, int inx, void *valueP)
+{
+	wIndex_t sel;
+	reportsShortTrack_t *entry;
+
+	if (reportsShortPopulating) {
+		return TRUE;
+	}
+	if (inx == I_REPORTSSHORTMAXLEN) {
+		ReportsShortTracks(NULL);
+		return TRUE;
+	}
+	if (inx != I_REPORTSSHORTLIST) {
+		return TRUE;
+	}
+	sel = wListGetIndex(reportsShortList);
+	if (sel < 0) {
+		return TRUE;
+	}
+	entry = (reportsShortTrack_t *)wListGetItemContext(reportsShortList, sel);
+	if (!entry) {
+		return TRUE;
+	}
+	if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+	LOG( log_reports, 1,
+	     ( "reports: short track row %d selected -> track %d, length=%.4f\n",
+	       sel, entry->track, entry->lengthIn ) )
+	ReportsSetIndicator(entry->pos, entry->scale);
+	return TRUE;
+}
+
+/** paramActionCancelProc -- same shape as ReportsCancelGaps(). */
+static void ReportsCancelShort(paramGroup_cp pg)
+{
+	ReportsClearIndicator();
+	FormCancel_Current(pg);
+}
+
+/** Build the formatted report text for Save/Print. */
+static void ReportsBuildShortText(DynString *out)
+{
+	char summaryLine[200];
+
+	DynStringMalloc( out, 256 );
+	ReportsAddHeader( out, _("Short Tracks Report") );
+
+	snprintf( summaryLine, sizeof summaryLine, "\n%s: %.2f in\n%s: %d\n%s: %d\n",
+	          _("Maximum length"), ReportsShortMaxLenValue(),
+	          _("Short tracks"), reportsShortList_da.cnt,
+	          _("On an unexpected layer"), reportsShortFlaggedCnt );
+	DynStringCatCStr( out, summaryLine );
+
+	if ( reportsShortList_da.cnt == 0 ) {
+		DynStringCatCStrs( out, "\n", _("No short tracks found."), "\n", NULL );
+	} else {
+		char headerLine[160];
+		snprintf( headerLine, sizeof headerLine,
+		          "\n%6s | %-9s | %8s | %5s | %-14s | %s | %s\n",
+		          _("Track"), _("Type"), _("Length"), _("Layer"), _("Layer Name"),
+		          _("Connected Layers"), _("Expected Layer") );
+		DynStringCatCStr( out, headerLine );
+		ReportsFormatShortList( out,
+		                        &DYNARR_N(reportsShortTrack_t, reportsShortList_da, 0),
+		                        reportsShortList_da.cnt );
+	}
+}
+
+/** Flagged rows first, then by track index. */
+static int ReportsShortCompare(const void *a, const void *b)
+{
+	const reportsShortTrack_t *ra = a;
+	const reportsShortTrack_t *rb = b;
+
+	if ( ra->flagged != rb->flagged ) {
+		return ra->flagged ? -1 : 1;
+	}
+	return (ra->track > rb->track) - (ra->track < rb->track);
+}
+
+void ReportsShortTracks( void * unused )
+{
+	track_p trk;
+	DIST_T maxLen = ReportsShortMaxLenValue();
+
+	ReportsClearIndicator();
+
+	/* Clear the visible list before freeing the array its rows' contexts
+	 * point into -- see ReportsUnconnectedEndpoints(). */
+	if ( reportsShortDlg.window != NULL ) {
+		reportsShortPopulating = TRUE;
+		wListClear( reportsShortList );
+		reportsShortPopulating = FALSE;
+	}
+	DYNARR_FREE( reportsShortTrack_t, reportsShortList_da );
+	DYNARR_INIT( reportsShortTrack_t, reportsShortList_da );
+	reportsShortFlaggedCnt = 0;
+
+	TRK_ITERATE( trk ) {
+		reportsShortTrack_t *entry;
+		DIST_T len;
+		coOrd p0, p1;
+		EPINX_T ep;
+		int i;
+
+		if ( QueryTrack( trk, Q_ISTRAIN ) ) {
+			continue;       // a car is on the track, not track
+		}
+		/* Two endpoints only: turnouts are what fillers join, and a
+		 * turntable's stalls are open by design. Benchwork, notes and
+		 * other objects without endpoints never get here. */
+		if ( GetTrkEndPtCnt(trk) != 2 || QueryTrack( trk, Q_CAN_ADD_ENDPOINTS ) ) {
+			continue;
+		}
+		if ( !ReportsFilterLayerIncluded( &reportsShortFilter, GetTrkLayer(trk) ) ) {
+			continue;
+		}
+		len = GetTrkLength( trk, 0, 1 );
+		if ( len >= maxLen ) {
+			continue;
+		}
+
+		DYNARR_APPEND( reportsShortTrack_t, reportsShortList_da, 10 );
+		entry = &DYNARR_LAST( reportsShortTrack_t, reportsShortList_da );
+		memset( entry, 0, sizeof *entry );
+		entry->track = GetTrkIndex(trk);
+		entry->typeName = GetTrkTypeName(trk);
+		entry->lengthIn = len;
+		p0 = GetTrkEndPos(trk, 0);
+		p1 = GetTrkEndPos(trk, 1);
+		entry->pos.x = (p0.x + p1.x) / 2.0;
+		entry->pos.y = (p0.y + p1.y) / 2.0;
+		entry->scale = GetTrkScale(trk);
+		entry->layer = GetTrkLayer(trk) + 1;
+		entry->layerName = GetLayerName(GetTrkLayer(trk));
+
+		for ( ep = 0; ep < 2; ep++ ) {
+			track_p other = GetTrkEndTrk(trk, ep);
+			if ( other == NULL ) {
+				continue;
+			}
+			entry->nbrLayer[entry->nbrCnt] = GetTrkLayer(other) + 1;
+			entry->nbrLayerName[entry->nbrCnt] = GetLayerName(GetTrkLayer(other));
+			entry->nbrCnt++;
+		}
+
+		/* A short piece belongs on the layer of a track it is connected
+		 * to, any of them (user 2026-11-18); flagged otherwise. */
+		entry->flagged = entry->nbrCnt > 0;
+		for ( i = 0; i < entry->nbrCnt; i++ ) {
+			if ( entry->nbrLayer[i] == entry->layer ) {
+				entry->flagged = FALSE;
+			}
+		}
+		if ( entry->flagged ) {
+			for ( i = 0; i < entry->nbrCnt; i++ ) {
+				if ( entry->expectedCnt == 1 &&
+				     entry->expectedLayer[0] == entry->nbrLayer[i] ) {
+					continue;       // both ends on the same layer
+				}
+				entry->expectedLayer[entry->expectedCnt] = entry->nbrLayer[i];
+				entry->expectedLayerName[entry->expectedCnt] = entry->nbrLayerName[i];
+				entry->expectedCnt++;
+			}
+			reportsShortFlaggedCnt++;
+		}
+	}
+
+	if ( reportsShortList_da.cnt > 1 ) {
+		qsort( reportsShortList_da.ptr, (size_t)reportsShortList_da.cnt,
+		       sizeof(reportsShortTrack_t), ReportsShortCompare );
+	}
+
+	{
+		char summary[200];
+
+		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
+		LOG( log_reports, 1,
+		     ( "reports: Short Tracks computed -- %d under %.2f in, %d flagged\n",
+		       reportsShortList_da.cnt, maxLen, reportsShortFlaggedCnt ) )
+
+		ReportsShowDialog( &reportsShortDlg, _("Short Tracks Report") );
+		ReportsPopulateMaxLenList();
+		snprintf( summary, sizeof summary,
+		          _("%d short track(s) under %.1f in, %d on an unexpected layer"),
+		          reportsShortList_da.cnt, maxLen, reportsShortFlaggedCnt );
+		wMessageSetValue( reportsShortSummary, summary );
+	}
+
+	ReportsPopulateShortList();
+}
+
+/* ---------------------------------------------------------------------
  * Notes Report (SF #799, part of the JSON Note umbrella SF #795).
  * Interactive (click-to-navigate) as of #799's own follow-up, same
  * grouped-by-category Save/Print text (ReportsFormatNoteList()) shape as
