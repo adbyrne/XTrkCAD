@@ -1024,6 +1024,6 @@ def test_export_layout_data_output_path_is_second_argument(tmp_path):
     """The layout-config guide calls export_layout_data(path, output_path)."""
     from xtrkcad_mcp.server import export_layout_data
     out = tmp_path / "layout_data.json"
-    result = export_layout_data(str(HILLSIDE_TRACK), str(out))
+    result = export_layout_data(str(HILLSIDE_TRACK), str(out), format="v1")
     assert out.exists()
     assert result["stations"] == 2
