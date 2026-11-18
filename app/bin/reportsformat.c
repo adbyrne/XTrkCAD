@@ -288,7 +288,8 @@ void ReportsFormatGapList(DynString *out, const reportsGapPair_t *list,
 }
 
 /* Append "<layer> <name>" for each of cnt layers, joined by sep. */
-static void ReportsCatLayers(DynString *out, int cnt, const unsigned int *layers,
+static void ReportsCatLayers(DynString *out, int cnt,
+                             const unsigned int *layers,
                              const char * const *names, const char *sep)
 {
 	char item[96];
