@@ -160,7 +160,7 @@ passing track itself.  `docs/layout-config-guide.md` section 6 describes every f
 | `get_station_distances` | Milepost and inter-station distances |
 | `list_labeled_segments` | Audit all annotated tracks before running validate/export |
 | `validate_layout` | Check the annotations for completeness |
-| `export_layout_data` | Write `layout_data.json` (mileposts, sidings, house tracks, industries) |
+| `export_layout_data` | Write `layout_data.json` v2 (schema: [docs/layout_data_v2.md](docs/layout_data_v2.md)); refuses while `check_conventions` finds errors unless `force=True`; `format="v1"` writes the previous format |
 
 ### Edit
 
@@ -261,6 +261,7 @@ src/xtrkcad_mcp/
   templates/     — 12 stub .xtc files + index.yaml catalog
   stations.py    — note annotations (JSON and text), station routing, capacities, export
   conventions.py — check_conventions: Operating Data Conventions rules
+  export_v2.py   — export_layout_data v2 (layout_data.json schema 2)
   mileposts.py   — milepost anchors, calculated mileposts, station and yard limits
   svg_views.py   — plan and elevation SVG views
   cli.py         — xtrkcad-report command-line entry point

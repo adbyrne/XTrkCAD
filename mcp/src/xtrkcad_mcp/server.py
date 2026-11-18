@@ -10,6 +10,7 @@ from mcp.server.fastmcp import FastMCP
 
 from xtrkcad_mcp.config import load_config
 from xtrkcad_mcp.conventions import CONVENTIONS_VERSION, check_conventions as _check_conventions
+from xtrkcad_mcp.export_v2 import build_export_v2
 from xtrkcad_mcp.models import (
     SCALE_RATIOS,
     Layout,
@@ -3102,52 +3103,72 @@ def export_layout_data(
     path: str,
     output_path: str = "",
     stations_yaml: str = "",
+    format: str = "v2",
+    force: bool = False,
 ) -> dict:
-    """Export layout measurement data to layout_data.json for RR_server.
+    """Export the layout's operating data to layout_data.json.
 
-    Produces a JSON file with station mileposts, passing track lengths,
-    freight-house track lengths (house_track_ft), industry spur data, and
-    inter-station segment lengths.  Fields that cannot be computed (missing
-    annotations, unreachable track) are null; reasons are in warnings[].
+    format="v2" (default) writes the general, versioned export of the
+    Operating Data Conventions (spec v1, section 8): railroads, subdivisions
+    and MP anchors, stations, yard limits, industries, yards, switchbacks,
+    facilities and segments, plus the convention check's issues. It is built
+    from the layout's JSON Notes and Layer Groups only. While the check finds
+    errors nothing is written and the errors are returned, unless force=True.
+    Schema: mcp/docs/layout_data_v2.md.
 
-    Station metadata (terminus, switchback) is read from !TERM/!SWB flags in
-    STATION: notes; mp_scale from 'REFERENCE: MP_ZERO mp_scale=N'.  When
-    stations_yaml is provided it overrides note-derived values (legacy path).
-
-    Milepost convention:
-      Distances are measured from the REFERENCE: MP_ZERO note along the track
-      graph.  mp_scale (layout inches per MP unit) defaults to 12.0 when not
-      specified in the REFERENCE: MP_ZERO note and no stations_yaml is given.
+    format="v1" writes the previous format, unchanged, for IOTtrains until it
+    imports v2: station mileposts from STATION:/REFERENCE: notes (or
+    stations_yaml, the legacy path), siding and house-track lengths,
+    industries, segments and yard tracks.
 
     Args:
         path: Path to the .xtc layout file.
         output_path: Where to write layout_data.json.  Defaults to
                      layout_data.json alongside the .xtc file.
-        stations_yaml: Optional path to stations.yaml.  When omitted, all
-                       station metadata is derived from the .xtc notes.
+        stations_yaml: v1 only: optional stations.yaml overriding note
+                       values.  v2 ignores it (stations.yaml is retired).
+        format: "v2" (default) or "v1".
+        force: v2 only: write the file even when the check finds errors.
     """
     import json
 
+    if format not in ("v1", "v2"):
+        raise ValueError(f"format must be 'v1' or 'v2', not {format!r}")
     p = _resolve_plan(path)
     layout = parse_file(p)
-    config = load_stations_config(stations_yaml) if stations_yaml else None
-    data = build_layout_export(layout, config)
+    out = Path(output_path) if output_path else p.with_name("layout_data.json")
 
-    if output_path:
-        out = Path(output_path)
-    else:
-        out = p.with_name("layout_data.json")
+    if format == "v1":
+        config = load_stations_config(stations_yaml) if stations_yaml else None
+        data = build_layout_export(layout, config)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        return {
+            "output": str(out),
+            "stations": len(data["stations"]),
+            "industries": len(data["industries"]),
+            "segments": len(data["segments"]),
+            "warnings": data["warnings"],
+        }
 
+    notices = []
+    if stations_yaml:
+        notices.append("stations_yaml is ignored by the v2 export (stations.yaml is "
+                       "retired); the values come from the layout's notes.")
+    issues = _check_conventions(layout)
+    counts = {sev: sum(1 for i in issues if i.severity == sev)
+              for sev in ("error", "warning", "info")}
+    errors = [i.as_dict() for i in issues if i.severity == "error"]
+    if errors and not force:
+        return {"written": False, "output": str(out), "counts": counts,
+                "errors": errors, "notices": notices + [
+                    "Not written: fix the errors (check_conventions lists them all), "
+                    "or pass force=True."]}
+    data = build_export_v2(layout, issues)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(data, indent=2), encoding="utf-8")
-
-    return {
-        "output": str(out),
-        "stations": len(data["stations"]),
-        "industries": len(data["industries"]),
-        "segments": len(data["segments"]),
-        "warnings": data["warnings"],
-    }
+    return {"written": True, "output": str(out), "counts": counts,
+            "errors": errors, "notices": notices}
 
 
 # ---------------------------------------------------------------------------
