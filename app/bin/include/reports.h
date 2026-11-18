@@ -559,6 +559,66 @@ void ReportsFormatKinkedList(DynString *out, const reportsKinkedJoint_t *list,
  */
 void ReportsKinkedJoints(void *unused);
 
+/** Most tracks a short track can be connected to: one per endpoint. */
+#define REPORTS_SHORT_MAX_NBR (2)
+
+/** One short track in the Short Tracks report (Development Issues #86): a
+ * track with exactly two endpoints (a straight, curve, easement, Cornu or
+ * Bezier, or a two-ended sectional piece) shorter than the report's
+ * Maximum length. Joining two tracks can insert a short piece like this,
+ * and it goes on the current layer rather than on the layer of the tracks
+ * it joins; it is often too small to see.
+ *
+ * `nbr*` are the layers of the tracks connected at its two ends (fewer
+ * at an open end). A short piece belongs on the layer of a track it is
+ * connected to, any of them: `flagged` is set when its own layer is none of
+ * those, and `expected*` then lists them. Every short piece is listed,
+ * flagged or not, so one on an unlikely but still connected layer is seen
+ * too. Layers are 1-based, as shown in the Layers dialog. `pos` (the piece's midpoint) and `scale` place the
+ * indicator when a row is selected. */
+typedef struct {
+	TRKINX_T track;
+	const char *typeName;
+	DIST_T   lengthIn;
+	coOrd    pos;
+	SCALEINX_T scale;
+	unsigned int layer;
+	const char *layerName;
+	int      nbrCnt;
+	unsigned int nbrLayer[REPORTS_SHORT_MAX_NBR];
+	const char *nbrLayerName[REPORTS_SHORT_MAX_NBR];
+	BOOL_T   flagged;
+	int      expectedCnt;
+	unsigned int expectedLayer[REPORTS_SHORT_MAX_NBR];
+	const char *expectedLayerName[REPORTS_SHORT_MAX_NBR];
+} reportsShortTrack_t;
+
+/**
+ * Format the Short Tracks report's table body, one row per short track, in
+ * the order given: track, type, length, layer, the layers of the tracks
+ * it is connected to ("-" when both ends are open), and, for a flagged row,
+ * the expected layer(s), separated by " / ". Numbers and layer names only:
+ * the column titles come from the caller, translated. Pure function, unit
+ * tested directly.
+ *
+ * \param[in,out] out appended to, not cleared first
+ * \param[in] list array of short tracks
+ * \param[in] count number of entries in list
+ */
+void ReportsFormatShortList(DynString *out, const reportsShortTrack_t *list,
+                            int count);
+
+/**
+ * Menu callback (Development Issues #86): compute and show/refresh the
+ * Short Tracks report -- every track with two endpoints shorter than the
+ * Maximum length choice, flagged when it is on an unexpected layer (see
+ * reportsShortTrack_t). Interactive: selecting a row pans/indicates at the
+ * track's midpoint.
+ *
+ * \param[in] unused menu-callback signature, unused
+ */
+void ReportsShortTracks(void *unused);
+
 /* ---------------------------------------------------------------------
  * Notes Report (SF #799, part of the JSON Note umbrella SF #795): every
  * note on the layout, grouped first by Type (Text/Weblink/Document/JSON,

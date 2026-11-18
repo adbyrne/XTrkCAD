@@ -696,6 +696,79 @@ static void test_gap_multiple_rows(void **state)
 	DynStringFree(&out);
 }
 
+/* Short Tracks -- Development Issues #86. */
+
+static void test_short_empty_list(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 16);
+
+	ReportsFormatShortList(&out, NULL, 0);
+
+	assert_string_equal(DynStringToCStr(&out), "");
+	DynStringFree(&out);
+}
+
+/* A filler on the branch's layer, as a join should leave it: not flagged,
+ * no expected layer shown. */
+static void test_short_row_not_flagged(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 64);
+	reportsShortTrack_t list[1] = {
+		{ 139, "STRAIGHT", 0.2, { 0.0, 0.0 }, 0, 9, "L2-Passing",
+		  2, { 8, 9 }, { "L2-Main", "L2-Passing" }, 0, 1, { 9, 0 }, { "L2-Passing", NULL } }
+	};
+
+	ReportsFormatShortList(&out, list, 1);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "   139 | STRAIGHT  |    0.200 |     9 | L2-Passing     | 8 L2-Main, 9 L2-Passing\n");
+	DynStringFree(&out);
+}
+
+/* A filler on neither connected track's layer, like NYE's track 56. */
+static void test_short_row_flagged(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 64);
+	reportsShortTrack_t list[1] = {
+		{ 512, "CURVE", 0.25, { 0.0, 0.0 }, 0, 4, "L1-Storage",
+		  2, { 2, 3 }, { "L1-Main", "L1-Passing" }, 1, 2, { 2, 3 }, { "L1-Main", "L1-Passing" } }
+	};
+
+	ReportsFormatShortList(&out, list, 1);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "   512 | CURVE     |    0.250 |     4 | L1-Storage     | 2 L1-Main, 3 L1-Passing | 2 L1-Main / 3 L1-Passing\n");
+	DynStringFree(&out);
+}
+
+/* Two expected layers (connected to tracks on two other layers), and a
+ * piece with both ends open ("-"). */
+static void test_short_rows_two_expected_and_open(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 128);
+	reportsShortTrack_t list[2] = {
+		{ 56, "STRAIGHT", 0.4, { 0.0, 0.0 }, 0, 11, "L2-Staging",
+		  2, { 10, 12 }, { "L2-Storage", "L2-Connecting" }, 1, 2, { 10, 12 }, { "L2-Storage", "L2-Connecting" } },
+		{ 7, "STRAIGHT", 1.5, { 0.0, 0.0 }, 0, 1, "Main",
+		  0, { 0, 0 }, { NULL, NULL }, 0, 0, { 0, 0 }, { NULL, NULL } }
+	};
+
+	ReportsFormatShortList(&out, list, 2);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "    56 | STRAIGHT  |    0.400 |    11 | L2-Staging     | 10 L2-Storage, 12 L2-Connecting | 10 L2-Storage / 12 L2-Connecting\n"
+	                    "     7 | STRAIGHT  |    1.500 |     1 | Main           | -\n");
+	DynStringFree(&out);
+}
+
 static void test_kinked_empty_list(void **state)
 {
 	(void) state;
@@ -962,6 +1035,10 @@ int main(void)
 		cmocka_unit_test(test_gap_empty_list),
 		cmocka_unit_test(test_gap_single_row),
 		cmocka_unit_test(test_gap_multiple_rows),
+		cmocka_unit_test(test_short_empty_list),
+		cmocka_unit_test(test_short_row_not_flagged),
+		cmocka_unit_test(test_short_row_flagged),
+		cmocka_unit_test(test_short_rows_two_expected_and_open),
 		cmocka_unit_test(test_kinked_empty_list),
 		cmocka_unit_test(test_kinked_single_row),
 		cmocka_unit_test(test_kinked_multiple_rows),
