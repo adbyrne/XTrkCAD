@@ -15,13 +15,16 @@ from __future__ import annotations
 
 import datetime
 
-from .conventions import (CONVENTIONS_VERSION, ConventionNote, Issue,
-                          check_conventions, read_convention_notes,
-                          resolve_ownership, snap_note)
-from .mileposts import Line, MilepostModel, _lines, _setup_line
-from .models import Layout, TrackObject
+from .conventions import (CONVENTIONS_VERSION, LOCATION_KINDS, ConventionNote,
+                          Issue, check_conventions, layer_categories,
+                          read_convention_notes, resolve_ownership, snap_note)
+from .mileposts import Line, MilepostModel, _lines, _Measurer, _setup_line
+from .models import Layout, TrackObject, cars_per_real_ft
+from .stations import _bfs_usable_length, _snap_to_segment, model_in_to_proto_ft
 
 SCHEMA_VERSION = 2
+CAR_SPOTS_DEFAULT = 2            # spec 4.5
+_MP_TOLERANCE = 1e-6
 
 
 class _Context:
@@ -44,6 +47,32 @@ class _Context:
         for line in self.lines:
             _setup_line(layout, line, self.notes, self.snapped, [])
         self.model: MilepostModel = milepost_model(layout, self.notes, self.snapped)
+        self.measurers = {ln.key(): _Measurer(layout, ln) for ln in self.lines if ln.anchors}
+        self.by_id = {t.id: t for t in layout.tracks}
+        self.categories = layer_categories(layout)
+        self.scale = layout.scale or "HO"
+        self.location_kind = {n.id: n.kind for n in self.notes if n.kind in LOCATION_KINDS}
+
+    def feet(self, inches: float) -> float:
+        return round(model_in_to_proto_ft(inches, self.scale), 3)
+
+    def cars(self, inches: float) -> int:
+        """Fugate: whole cars per model foot, as the capacity reports count."""
+        return int(inches / 12.0 * cars_per_real_ft(self.scale))
+
+    def usable_in(self, note: ConventionNote) -> tuple[int | None, float | None]:
+        """The track a note marks and its usable length: the connected
+        non-turnout tracks, switch throats excluded."""
+        track = self.snapped.get(note.note_id)
+        if track is None:
+            return None, None
+        if track.kind == "TURNOUT":
+            tid, _t, _d = _snap_to_segment(self.layout, note.x, note.y, note.layer,
+                                           exclude_turnouts=True)
+            if tid < 0:
+                return track.id, None
+            track = self.by_id[tid]
+        return track.id, _bfs_usable_length(self.layout, track.id)
 
     def of_kind(self, kind: str) -> list[ConventionNote]:
         return [n for n in self.notes if n.kind == kind]
@@ -84,29 +113,110 @@ def _mp_key(value: float | None) -> float:
     return value if value is not None else float("inf")
 
 
+def _siding(ctx: _Context, switch_ids: list[int]) -> tuple[float, list[int]] | None:
+    """The passing track joining two of a station's switches: its usable
+    length and the two switches. None when the station has no siding."""
+    switches = set(switch_ids)
+    passing = {t.id for t in ctx.layout.tracks
+               if t.kind != "TURNOUT"
+               and ctx.categories.get(t.layer, ("",))[0] == "passing"}
+    seen: set[int] = set()
+    for start in sorted(passing):
+        if start in seen:
+            continue
+        stack, comp, ends = [start], [], set()
+        seen.add(start)
+        while stack:
+            track = ctx.by_id[stack.pop()]
+            comp.append(track)
+            for ep in track.endpoints:
+                nxt = ctx.by_id.get(ep.connected_to) if ep.connected_to is not None else None
+                if nxt is None:
+                    continue
+                if nxt.id in passing and nxt.id not in seen:
+                    seen.add(nxt.id)
+                    stack.append(nxt.id)
+                elif nxt.kind == "TURNOUT" and nxt.id in switches:
+                    ends.add(nxt.id)
+        if len(ends) == 2:
+            return sum(t.length_model_inches() for t in comp), sorted(ends)
+    return None
+
+
+def _main_between(ctx: _Context, m: _Measurer, lo: float, hi: float) -> float:
+    """Usable main track between two MPs: the main line's non-turnout tracks
+    whose both ends lie in [lo, hi]."""
+    total = 0.0
+    for t in ctx.layout.tracks:
+        if t.kind == "TURNOUT" or t.layer not in m.line.layers:
+            continue
+        mps = [m.mp_at(t, ep.x, ep.y) for ep in t.endpoints]
+        if mps and all(v is not None and lo - _MP_TOLERANCE <= v <= hi + _MP_TOLERANCE
+                       for v in mps):
+            total += t.length_model_inches()
+    return total
+
+
+def _house_tracks(ctx: _Context, station_id: str, railroad: str | None,
+                  joint: bool) -> list[dict]:
+    out = []
+    for n in ctx.of_kind("house_track"):
+        if n.id != station_id or (joint and n.railroad != railroad):
+            continue
+        track_id, length = ctx.usable_in(n)
+        out.append({
+            "label": n.str_field("label"), "track_id": track_id,
+            "length_ft": ctx.feet(length) if length is not None else None,
+            "capacity_cars": ctx.cars(length) if length is not None else None,
+        })
+    return sorted(out, key=lambda h: (h["label"] or "", h["track_id"] or -1))
+
+
+def _station_entry(ctx: _Context, kind: str, ident: str, name: str | None,
+                   railroad: str | None, subdivision: str | None,
+                   mp: float | None, mp_entry: float | None, mp_exit: float | None,
+                   terminus: bool, switchback: bool) -> dict:
+    return {
+        "id": ident, "kind": kind, "name": name,
+        "railroad": railroad, "subdivision": subdivision,
+        "mp": _round(mp), "mp_entry": _round(mp_entry), "mp_exit": _round(mp_exit),
+        "terminus": terminus, "switchback": switchback,
+        "siding_ft": None, "siding_cars": None, "main_ft": None, "main_cars": None,
+        "house_tracks": [],
+    }
+
+
 def _stations(ctx: _Context) -> list[dict]:
     """stations[]: one entry per station note, so a joint station (one id
-    on several subdivisions, spec 4.3) has one entry per subdivision."""
+    on several subdivisions, spec 4.3) has one entry per subdivision; and a
+    team track that belongs to no station, at its switch's MP."""
     names = {n.note_id: n.str_field("name") for n in ctx.of_kind("station")}
     switchbacks = {n.str_field("serves") for n in ctx.of_kind("switchback")}
+    per_id: dict[str, int] = {}
+    for st in ctx.model.stations:
+        per_id[st.id] = per_id.get(st.id, 0) + 1
     out = []
     for st in ctx.model.stations:
-        out.append({
-            "id": st.id,
-            "name": names.get(st.note_id),
-            "railroad": st.railroad,
-            "subdivision": st.subdivision,
-            "mp": _round(st.mp),
-            "mp_entry": _round(st.mp_entry),
-            "mp_exit": _round(st.mp_exit),
-            "terminus": st.terminus,
-            "switchback": st.id in switchbacks,
-            "siding_ft": None,
-            "siding_cars": None,
-            "main_ft": None,
-            "main_cars": None,
-            "house_tracks": [],
-        })
+        entry = _station_entry(ctx, "station", st.id, names.get(st.note_id),
+                               st.railroad, st.subdivision, st.mp, st.mp_entry,
+                               st.mp_exit, st.terminus, st.id in switchbacks)
+        m = ctx.measurers.get((st.railroad, st.subdivision))
+        siding = _siding(ctx, st.switch_ids) if m is not None else None
+        if siding is not None:
+            siding_in, ends = siding
+            entry["siding_ft"], entry["siding_cars"] = ctx.feet(siding_in), ctx.cars(siding_in)
+            ends_mp = [m.mp_of_switch(ctx.by_id[i]) for i in ends]
+            if None not in ends_mp:
+                main_in = _main_between(ctx, m, min(ends_mp), max(ends_mp))
+                entry["main_ft"], entry["main_cars"] = ctx.feet(main_in), ctx.cars(main_in)
+        entry["house_tracks"] = _house_tracks(ctx, st.id, st.railroad, per_id[st.id] > 1)
+        out.append(entry)
+    for tt in ctx.of_kind("team_track"):
+        if tt.str_field("station") is None:
+            mp = ctx.model.branch_mp.get(tt.id)
+            out.append(_station_entry(ctx, "team_track", tt.id, tt.str_field("name"),
+                                      tt.railroad, tt.subdivision, mp, mp, mp,
+                                      False, tt.id in switchbacks))
     return sorted(out, key=lambda s: (s["railroad"] or "", s["subdivision"] or "",
                                       _mp_key(s["mp"]), s["id"]))
 
@@ -118,6 +228,43 @@ def _yard_limits(ctx: _Context) -> list[dict]:
     } for z in ctx.model.yard_limits]
     return sorted(zones, key=lambda z: (z["railroad"] or "", z["subdivision"] or "",
                                         z["mp_start"], z["id"]))
+
+
+def _industries(ctx: _Context, kind: str) -> list[dict]:
+    """industries[] (kind industry) or team_tracks[] (kind team_track)."""
+    switchbacks = {n.str_field("serves") for n in ctx.of_kind("switchback")}
+    out = []
+    for n in ctx.of_kind(kind):
+        spots = n.fields.get("car_spots")
+        _track, length = ctx.usable_in(n)
+        out.append({
+            "id": n.id, "name": n.str_field("name"), "station": n.str_field("station"),
+            "branch_mp": _round(ctx.model.branch_mp.get(n.id)),
+            "switchback": n.id in switchbacks,
+            "car_spots": spots if isinstance(spots, int) and not isinstance(spots, bool)
+            else CAR_SPOTS_DEFAULT,
+            "spur_capacity_cars": ctx.cars(length) if length is not None else None,
+            "car_types": n.str_list_field("car_types"),
+            "loads_in": n.str_list_field("loads_in"),
+            "loads_out": n.str_list_field("loads_out"),
+        })
+    return sorted(out, key=lambda i: (_mp_key(i["branch_mp"]), i["id"]))
+
+
+def _yards(ctx: _Context) -> list[dict]:
+    """yards[]: the yard tracks of each location, by the location's id."""
+    by_id: dict[str, list[dict]] = {}
+    for n in ctx.of_kind("yard_track"):
+        track_id, length = ctx.usable_in(n)
+        by_id.setdefault(n.id, []).append({
+            "label": n.str_field("label"), "function": n.str_field("function"),
+            "railroads": n.str_list_field("railroads"), "track_id": track_id,
+            "length_ft": ctx.feet(length) if length is not None else None,
+            "capacity_cars": ctx.cars(length) if length is not None else None,
+        })
+    return [{"id": ident, "kind": ctx.location_kind.get(ident),
+             "tracks": sorted(tracks, key=lambda t: t["label"] or "")}
+            for ident, tracks in sorted(by_id.items())]
 
 
 def build_export_v2(layout: Layout, issues: list[Issue] | None = None) -> dict:
@@ -139,5 +286,8 @@ def build_export_v2(layout: Layout, issues: list[Issue] | None = None) -> dict:
         "railroads": _railroads(ctx),
         "stations": _stations(ctx),
         "yard_limits": _yard_limits(ctx),
+        "industries": _industries(ctx, "industry"),
+        "team_tracks": _industries(ctx, "team_track"),
+        "yards": _yards(ctx),
         "issues": [i.as_dict() for i in issues],
     }

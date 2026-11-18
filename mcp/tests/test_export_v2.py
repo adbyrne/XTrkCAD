@@ -126,7 +126,7 @@ def test_tool_rejects_unknown_format(tmp_path):
 # WP: terminus at MP_ZERO (x=0). XP: limits from its switchback switch,
 # turnout 5 at x=190 = MP 15.833. Boards: WP x=5, 40; XP x=145, 195.
 
-_STATION_KEYS = {"id", "name", "railroad", "subdivision", "mp", "mp_entry", "mp_exit",
+_STATION_KEYS = {"id", "kind", "name", "railroad", "subdivision", "mp", "mp_entry", "mp_exit",
                  "terminus", "switchback", "siding_ft", "siding_cars", "main_ft",
                  "main_cars", "house_tracks"}
 
@@ -143,7 +143,8 @@ def test_stations_mileposts(clean):
     st = _stations(clean)
     assert (st["WP"]["mp"], st["WP"]["mp_entry"], st["WP"]["mp_exit"]) == (0.0, 0.0, 0.0)
     assert st["XP"]["mp"] == st["XP"]["mp_entry"] == st["XP"]["mp_exit"] == 15.833
-    assert [s["id"] for s in clean["stations"]] == ["WP", "XP"]   # by MP
+    # By MP; MILLER_TEAM is a team track with no station (MP 8.333).
+    assert [s["id"] for s in clean["stations"]] == ["WP", "MILLER_TEAM", "XP"]
 
 
 def test_stations_names_and_owners(clean):
@@ -194,3 +195,86 @@ def test_joint_station_has_one_entry_per_subdivision(tmp_path):
     wp = [s for s in data["stations"] if s["id"] == "WP"]
     assert {(s["railroad"], s["subdivision"], s["mp"]) for s in wp} == {
         ("NYE", "NLS", 0.0), ("CO", None, 205.0)}
+
+
+# -- phase 3: lengths and capacities ------------------------------------------
+# Usable length: the connected non-turnout tracks (switch throats excluded),
+# as the capacity reports measure. HO: 87.1 to 1, 2 cars per model foot.
+# Clean fixture: the Service track (3) is 240 in; MILLER_TEAM's spur (9) is
+# (108,-5)-(140,-15); the Staging track (4) is 240 in.
+
+from xtrkcad_mcp.models import cars_per_real_ft  # noqa: E402
+from xtrkcad_mcp.stations import model_in_to_proto_ft  # noqa: E402
+
+from .test_conventions import LINE, ZERO, _layout, _st  # noqa: E402
+
+SPUR_9_IN = (32 ** 2 + 10 ** 2) ** 0.5
+
+
+def _ft(inches):
+    return round(model_in_to_proto_ft(inches, "HO"), 3)
+
+
+def _cars(inches):
+    return int(inches / 12.0 * cars_per_real_ft("HO"))
+
+
+def test_house_tracks(clean):
+    xp = _stations(clean)["XP"]
+    assert xp["house_tracks"] == [
+        {"label": None, "track_id": 3, "length_ft": _ft(240), "capacity_cars": _cars(240)}]
+    assert _stations(clean)["WP"]["house_tracks"] == []
+
+
+def test_industries(clean):
+    assert clean["industries"] == [{
+        "id": "QM1", "name": "Quilly Mine #1", "station": "XP", "branch_mp": None,
+        "switchback": False, "car_spots": 2, "spur_capacity_cars": _cars(240),
+        "car_types": ["HM"], "loads_in": ["empties"], "loads_out": ["coal"],
+    }]
+
+
+def test_team_tracks(clean):
+    tt = {t["id"]: t for t in clean["team_tracks"]}
+    assert set(tt) == {"XP_TEAM", "MILLER_TEAM"}
+    assert tt["XP_TEAM"]["station"] == "XP" and tt["XP_TEAM"]["car_spots"] == 3
+    m = tt["MILLER_TEAM"]
+    assert (m["station"], m["branch_mp"], m["car_spots"]) == (None, 8.333, 2)
+    assert m["spur_capacity_cars"] == _cars(SPUR_9_IN)
+    assert (m["car_types"], m["loads_in"], m["loads_out"]) == ([], [], [])
+
+
+def test_team_track_without_station_is_a_station(clean):
+    # Spec 8: kind team_track, mp = its branch_mp.
+    miller = _stations(clean)["MILLER_TEAM"]
+    assert miller["kind"] == "team_track" and miller["name"] == "Miller team track"
+    assert miller["mp"] == miller["mp_entry"] == miller["mp_exit"] == 8.333
+    assert {s["kind"] for s in clean["stations"] if s["id"] != "MILLER_TEAM"} == {"station"}
+    assert "XP_TEAM" not in _stations(clean)
+
+
+def test_yards(clean):
+    yards = {y["id"]: y for y in clean["yards"]}
+    assert {i: y["kind"] for i, y in yards.items()} == {
+        "EAST": "staging", "QM1": "industry", "WP": "station"}
+    assert yards["EAST"]["tracks"] == [{
+        "label": "S1", "function": "staging", "railroads": [], "track_id": 4,
+        "length_ft": _ft(240), "capacity_cars": _cars(240)}]
+    assert [t["label"] for t in yards["WP"]["tracks"]] == ["Track 2"]
+    assert yards["QM1"]["tracks"][0]["function"] == "loading"
+
+
+def test_siding_and_main_lengths(tmp_path):
+    # LINE: switches 2 (x=60) and 5 (x=180); passing track 4 and main track
+    # 3 both run 68..172 between the switch throats.
+    data = build_export_v2(_layout(tmp_path, [ZERO, _st("XP", 100)], tracks=LINE))
+    xp = _stations(data)["XP"]
+    assert (xp["mp_entry"], xp["mp_exit"]) == (5.0, 15.0)
+    assert (xp["siding_ft"], xp["siding_cars"]) == (_ft(104), _cars(104))
+    assert (xp["main_ft"], xp["main_cars"]) == (_ft(104), _cars(104))
+
+
+def test_no_siding_no_lengths(clean):
+    for st in clean["stations"]:
+        assert st["siding_ft"] is None and st["siding_cars"] is None
+        assert st["main_ft"] is None and st["main_cars"] is None
