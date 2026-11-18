@@ -664,10 +664,16 @@ mainline.
 | `export_layout_data(path, output_path="")` | Compute mileposts, siding lengths, and industry spur data; write `layout_data.json`. |
 
 Both tools derive all metadata from the `.xtc` notes — no separate YAML file
-is needed.  Pass an optional `stations_yaml` argument to override note-derived
-values (legacy path, for backwards compatibility).
+is needed.
 
-### layout_data.json structure
+`export_layout_data` writes schema version 2 by default, from layouts that
+follow the Operating Data Conventions (JSON Notes with a `kind`); the schema is
+in [`mcp/docs/layout_data_v2.md`](../mcp/docs/layout_data_v2.md). It writes
+nothing while `check_conventions` finds errors, unless `force=True`. Layouts
+still using text-prefix notes (`STATION:`, `INDUSTRY:`, ...) use
+`format="v1"`, which also accepts the legacy `stations_yaml` override.
+
+### layout_data.json structure (v1)
 
 ```json
 {
