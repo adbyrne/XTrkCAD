@@ -197,6 +197,35 @@ class Layout:
         ]
 
 
+# Maps the suffix of a standard layer name (after stripping the leading
+# "L{n}-" or "L{n}H-" prefix) to a Fugate category.
+_SUFFIX_TO_CATEGORY: dict[str, str] = {
+    "main":       "mainline",
+    "mainline":   "mainline",
+    "passing":    "passing",
+    "storage":    "storage",
+    "staging":    "staging",
+    "connecting": "connecting",
+    "service":    "service",
+    "benchwork":  "ignore",
+    "track":      "mainline",   # backward compat with pre-spec generated files
+}
+
+
+def category_from_layer_name(name: str) -> str | None:
+    """Return Fugate category inferred from a standard layer name, or None.
+
+    Matches the trailing category segment so sub-division names work too,
+    e.g. "L1-CO-Staging" -> "staging" (last "-"-delimited token), not just
+    the plain "L1-Staging" form.
+    """
+    # Strip optional leading "L{digits}[H]-" prefix (e.g. "L1-", "L1H-", "l2-")
+    suffix = re.sub(r"^l\d+h?-", "", name.lower())
+    if suffix in _SUFFIX_TO_CATEGORY:
+        return _SUFFIX_TO_CATEGORY[suffix]
+    return _SUFFIX_TO_CATEGORY.get(suffix.rsplit("-", 1)[-1])
+
+
 def level_from_layer_name(name: str) -> str:
     """Return the level key from a standard layer name, or '0' if unrecognised.
 
