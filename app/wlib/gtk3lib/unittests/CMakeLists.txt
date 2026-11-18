@@ -38,10 +38,17 @@ xtrkcad_add_unit_test(textpositiontest TextPositionTest MATH
 	INCLUDES ${_xtrkcad_wlib_ut_includes}
 	LIBS xtrkcad-wlib PkgConfig::GTK3)
 
+# setting values in entry fields
+# entry.c is included by the test, so xtrkcad-wlib is not linked
+xtrkcad_add_unit_test(entrytest EntryTest
+	FOLDER UnitTestsWLib
+	INCLUDES ${_xtrkcad_wlib_ut_includes}
+	LIBS PkgConfig::GTK3)
+
 # These tests create GTK widgets, so they need a display (CI runs them under
 # xvfb-run). Jobs without one, and the ASan/Valgrind jobs, where GTK's own
 # allocations show up as leaks, leave them out with -LE gtk-display. Label any
 # new test here that calls into GTK.
-set_tests_properties(PreferenceTest MRUListTest TextPositionTest
+set_tests_properties(PreferenceTest MRUListTest TextPositionTest EntryTest
 	PROPERTIES LABELS gtk-display
 )

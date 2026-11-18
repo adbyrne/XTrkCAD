@@ -195,6 +195,8 @@ struct entry {
 	char *valueP;            //< location of entered value
 	unsigned valueL;         //< maximum length of entered value
 	wEntryCallBack_p action; //< callback
+	bool userEdited;         //< user typed since the entry got focus
+	bool settingText;        //< text is being set by wEntrySetValue
 };
 
 struct expander {
