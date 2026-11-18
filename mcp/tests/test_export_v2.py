@@ -310,3 +310,44 @@ def test_siding_counts_turnouts_on_the_siding(tmp_path):
                                            tracks=tracks)))["XP"]
     turnout_in = 8.0   # turnout 30's through route, 110..118
     assert xp["siding_ft"] == _ft(42 + turnout_in + 54)
+
+
+# -- phase 4: switchbacks, facilities, segments --------------------------------
+
+def test_switchbacks(clean):
+    # XP_SWB sits on tail track 7, (198,5)-(230,15), leaving main switch 5.
+    assert clean["switchbacks"] == [{
+        "id": "XP_SWB", "serves": "XP", "switch_ids": [5], "track_id": 7,
+        "tail_ft": _ft(SPUR_9_IN)}]
+
+
+def test_switchback_switches_field_wins(tmp_path):
+    text = CLEAN_FIXTURE.read_text(encoding="utf-8").replace(
+        '""serves"": ""XP""}', '""serves"": ""XP"", ""switches"": [5, 8]}')
+    p = tmp_path / "swb.xtc"
+    p.write_text(text, encoding="utf-8")
+    assert build_export_v2(parse_file(p))["switchbacks"][0]["switch_ids"] == [5, 8]
+
+
+def test_facilities(clean):
+    assert clean["facilities"] == [{
+        "id": "WP_COAL", "name": "Coal trestle", "type": "coal", "location": "WP",
+        "track_id": 3}]
+
+
+def test_segments(clean):
+    # Consecutive stations[] on the subdivision: WP (MP 0), MILLER_TEAM
+    # (MP 8.333), XP (MP 15.833); 12 layout inches per MP.
+    assert clean["segments"] == [
+        {"from_station": "WP", "to_station": "MILLER_TEAM", "railroad": "NYE",
+         "subdivision": "NLS", "length_ft": _ft(100)},
+        {"from_station": "MILLER_TEAM", "to_station": "XP", "railroad": "NYE",
+         "subdivision": "NLS", "length_ft": _ft(90)},
+    ]
+
+
+def test_all_sections_present(clean):
+    assert list(clean) == [
+        "schema_version", "conventions_version", "generated", "layout", "scale",
+        "layout_units", "railroads", "stations", "yard_limits", "industries",
+        "team_tracks", "yards", "switchbacks", "facilities", "segments", "issues"]

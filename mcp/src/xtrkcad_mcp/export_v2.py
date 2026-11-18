@@ -17,8 +17,9 @@ import datetime
 import math
 
 from .conventions import (CONVENTIONS_VERSION, LOCATION_KINDS, ConventionNote,
-                          Issue, check_conventions, layer_categories,
-                          read_convention_notes, resolve_ownership, snap_note)
+                          Issue, _main_layers, check_conventions, layer_categories,
+                          main_turnouts_from, read_convention_notes,
+                          resolve_ownership, snap_note)
 from .mileposts import Line, MilepostModel, _lines, _Measurer, _setup_line
 from .models import Layout, TrackObject, cars_per_real_ft
 from .stations import _bfs_usable_length, _snap_to_segment, model_in_to_proto_ft
@@ -291,6 +292,72 @@ def _yards(ctx: _Context) -> list[dict]:
             for ident, tracks in sorted(by_id.items())]
 
 
+def _switchbacks(ctx: _Context) -> list[dict]:
+    """switchbacks[]: each switchback note's tail track (where the note
+    sits) and the main switch(es) acting as the switchback switch: the
+    note's ``switches``, else the switches its tail leaves (spec 4.9)."""
+    main = _main_layers(ctx.layout)
+    out = []
+    for n in ctx.of_kind("switchback"):
+        tail = ctx.snapped.get(n.note_id)
+        switches = n.fields.get("switches")
+        if isinstance(switches, list) and switches:
+            ids = [sw for sw in switches if isinstance(sw, int)]
+        elif tail is not None:
+            ids = [t.id for t in main_turnouts_from(ctx.layout, tail, main)]
+        else:
+            ids = []
+        _track, length = ctx.usable_in(n)
+        out.append({
+            "id": n.id, "serves": n.str_field("serves"), "switch_ids": ids,
+            "track_id": tail.id if tail is not None else None,
+            "tail_ft": ctx.feet(length) if length is not None else None,
+        })
+    return sorted(out, key=lambda sb: sb["id"])
+
+
+def _facilities(ctx: _Context) -> list[dict]:
+    out = []
+    for n in ctx.of_kind("facility"):
+        track = ctx.snapped.get(n.note_id)
+        out.append({"id": n.id, "name": n.str_field("name"), "type": n.str_field("type"),
+                    "location": n.str_field("location"),
+                    "track_id": track.id if track is not None else None})
+    return sorted(out, key=lambda f: f["id"])
+
+
+def _segments(ctx: _Context, stations: list[dict]) -> list[dict]:
+    """segments[]: main-track length between consecutive stations[] (by MP)
+    on each subdivision, from their MPs."""
+    out = []
+    for line in ctx.lines:
+        if line.scale_in is None:
+            continue
+        on_line = [s for s in stations if (s["railroad"], s["subdivision"]) == line.key()
+                   and s["mp"] is not None]
+        for a, b in zip(on_line, on_line[1:]):
+            mp_a = _exact_mp(ctx, a)
+            mp_b = _exact_mp(ctx, b)
+            out.append({
+                "from_station": a["id"], "to_station": b["id"],
+                "railroad": line.railroad, "subdivision": line.subdivision,
+                "length_ft": ctx.feet(abs(mp_b - mp_a) * line.scale_in),
+            })
+    return out
+
+
+def _exact_mp(ctx: _Context, station: dict) -> float:
+    """A stations[] entry's unrounded MP, so segment lengths don't carry
+    the rounding of the MPs."""
+    if station["kind"] == "team_track":
+        value = ctx.model.branch_mp.get(station["id"])
+    else:
+        value = next((s.mp for s in ctx.model.stations
+                      if s.id == station["id"] and s.railroad == station["railroad"]
+                      and s.subdivision == station["subdivision"]), None)
+    return value if value is not None else station["mp"]
+
+
 def build_export_v2(layout: Layout, issues: list[Issue] | None = None) -> dict:
     """The layout_data.json v2 structure for a parsed layout.
 
@@ -300,6 +367,7 @@ def build_export_v2(layout: Layout, issues: list[Issue] | None = None) -> dict:
     if issues is None:
         issues = check_conventions(layout)
     ctx = _Context(layout)
+    stations = _stations(ctx)
     return {
         "schema_version": SCHEMA_VERSION,
         "conventions_version": CONVENTIONS_VERSION,
@@ -308,10 +376,13 @@ def build_export_v2(layout: Layout, issues: list[Issue] | None = None) -> dict:
         "scale": layout.scale or None,
         "layout_units": "in",
         "railroads": _railroads(ctx),
-        "stations": _stations(ctx),
+        "stations": stations,
         "yard_limits": _yard_limits(ctx),
         "industries": _industries(ctx, "industry"),
         "team_tracks": _industries(ctx, "team_track"),
         "yards": _yards(ctx),
+        "switchbacks": _switchbacks(ctx),
+        "facilities": _facilities(ctx),
+        "segments": _segments(ctx, stations),
         "issues": [i.as_dict() for i in issues],
     }
