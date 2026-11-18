@@ -120,3 +120,77 @@ def test_tool_rejects_unknown_format(tmp_path):
     with pytest.raises(ValueError):
         server.export_layout_data(str(CLEAN_FIXTURE), str(tmp_path / "x.json"),
                                   format="v3")
+
+
+# -- phase 2: stations and yard limits ----------------------------------------
+# WP: terminus at MP_ZERO (x=0). XP: limits from its switchback switch,
+# turnout 5 at x=190 = MP 15.833. Boards: WP x=5, 40; XP x=145, 195.
+
+_STATION_KEYS = {"id", "name", "railroad", "subdivision", "mp", "mp_entry", "mp_exit",
+                 "terminus", "switchback", "siding_ft", "siding_cars", "main_ft",
+                 "main_cars", "house_tracks"}
+
+
+def _stations(data):
+    return {s["id"]: s for s in data["stations"]}
+
+
+def test_stations_fields(clean):
+    assert all(set(s) == _STATION_KEYS for s in clean["stations"])
+
+
+def test_stations_mileposts(clean):
+    st = _stations(clean)
+    assert (st["WP"]["mp"], st["WP"]["mp_entry"], st["WP"]["mp_exit"]) == (0.0, 0.0, 0.0)
+    assert st["XP"]["mp"] == st["XP"]["mp_entry"] == st["XP"]["mp_exit"] == 15.833
+    assert [s["id"] for s in clean["stations"]] == ["WP", "XP"]   # by MP
+
+
+def test_stations_names_and_owners(clean):
+    st = _stations(clean)
+    assert st["WP"]["name"] == "Williamsport" and st["XP"]["name"] == "Xina Pass"
+    assert {(s["railroad"], s["subdivision"]) for s in clean["stations"]} == {("NYE", "NLS")}
+
+
+def test_stations_terminus_and_switchback(clean):
+    st = _stations(clean)
+    assert (st["WP"]["terminus"], st["WP"]["switchback"]) == (True, False)
+    # A switchback note (XP_SWB, serves XP) makes XP a switchback station.
+    assert (st["XP"]["terminus"], st["XP"]["switchback"]) == (False, True)
+
+
+def test_yard_limits(clean):
+    assert clean["yard_limits"] == [
+        {"id": "WP", "railroad": "NYE", "subdivision": "NLS",
+         "mp_start": 0.0, "mp_end": 3.333, "source": "board"},
+        {"id": "XP", "railroad": "NYE", "subdivision": "NLS",
+         "mp_start": 12.083, "mp_end": 16.25, "source": "board"},
+    ]
+
+
+def test_joint_station_has_one_entry_per_subdivision(tmp_path):
+    # Spec 4.3: WP on two railroads' mains, one station note on each, same id.
+    text = CLEAN_FIXTURE.read_text(encoding="utf-8")
+    text = text.replace('LAYERS CURRENT 0\n',
+                        'LAYERS 4 1 0 0 0 0 0 0 0 "L2-CO-Main"\nLAYERS CURRENT 0\n')
+    text = text.replace('LAYERGROUP MEMBERS 4 "1;2;3;4"\n',
+                        'LAYERGROUP MEMBERS 4 "1;2;3;4"\n'
+                        'LAYERGROUP DEFINE 5 "C&O"\nLAYERGROUP MEMBERS 5 "5"\n')
+    text = text.replace('LAYERGROUP MEMBERS 0 "1"', 'LAYERGROUP MEMBERS 0 "1;5"')
+    notes = (
+        'NOTE 130 4 0 0 0.000000 0.000000 0 3 "{""kind"": ""railroad"", ""id"": ""CO"", '
+        '""name"": ""Chesapeake & Ohio"", ""group"": ""C&O""}"\n'
+        'NOTE 131 4 0 0 0.000000 70.000000 0 3 "{""kind"": ""reference"", ""id"": ""CO_ZERO"", '
+        '""mp"": 200, ""mp_scale"": 12}"\n'
+        'NOTE 132 4 0 0 60.000000 70.000000 0 3 "{""kind"": ""station"", ""id"": ""WP"", '
+        '""name"": ""Williamsport""}"\n'
+        '\nSTRAIGHT 40 4 0 0 0 HO 0\n\tE 0.000000 70.000000 270.000000\n'
+        '\tE 240.000000 70.000000 90.000000\n\tEND$SEGS\n')
+    text = text.replace("\nSTRAIGHT 1 ", "\n" + notes + "\nSTRAIGHT 1 ", 1)
+    p = tmp_path / "joint.xtc"
+    p.write_text(text, encoding="utf-8")
+    data = build_export_v2(parse_file(p))
+    assert not [i for i in data["issues"] if i["severity"] != "info"]
+    wp = [s for s in data["stations"] if s["id"] == "WP"]
+    assert {(s["railroad"], s["subdivision"], s["mp"]) for s in wp} == {
+        ("NYE", "NLS", 0.0), ("CO", None, 205.0)}

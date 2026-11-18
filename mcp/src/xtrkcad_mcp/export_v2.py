@@ -80,6 +80,46 @@ def _railroads(ctx: _Context) -> list[dict]:
     return out
 
 
+def _mp_key(value: float | None) -> float:
+    return value if value is not None else float("inf")
+
+
+def _stations(ctx: _Context) -> list[dict]:
+    """stations[]: one entry per station note, so a joint station (one id
+    on several subdivisions, spec 4.3) has one entry per subdivision."""
+    names = {n.note_id: n.str_field("name") for n in ctx.of_kind("station")}
+    switchbacks = {n.str_field("serves") for n in ctx.of_kind("switchback")}
+    out = []
+    for st in ctx.model.stations:
+        out.append({
+            "id": st.id,
+            "name": names.get(st.note_id),
+            "railroad": st.railroad,
+            "subdivision": st.subdivision,
+            "mp": _round(st.mp),
+            "mp_entry": _round(st.mp_entry),
+            "mp_exit": _round(st.mp_exit),
+            "terminus": st.terminus,
+            "switchback": st.id in switchbacks,
+            "siding_ft": None,
+            "siding_cars": None,
+            "main_ft": None,
+            "main_cars": None,
+            "house_tracks": [],
+        })
+    return sorted(out, key=lambda s: (s["railroad"] or "", s["subdivision"] or "",
+                                      _mp_key(s["mp"]), s["id"]))
+
+
+def _yard_limits(ctx: _Context) -> list[dict]:
+    zones = [{
+        "id": z.id, "railroad": z.railroad, "subdivision": z.subdivision,
+        "mp_start": _round(z.mp_start), "mp_end": _round(z.mp_end), "source": z.source,
+    } for z in ctx.model.yard_limits]
+    return sorted(zones, key=lambda z: (z["railroad"] or "", z["subdivision"] or "",
+                                        z["mp_start"], z["id"]))
+
+
 def build_export_v2(layout: Layout, issues: list[Issue] | None = None) -> dict:
     """The layout_data.json v2 structure for a parsed layout.
 
@@ -97,5 +137,7 @@ def build_export_v2(layout: Layout, issues: list[Issue] | None = None) -> dict:
         "scale": layout.scale or None,
         "layout_units": "in",
         "railroads": _railroads(ctx),
+        "stations": _stations(ctx),
+        "yard_limits": _yard_limits(ctx),
         "issues": [i.as_dict() for i in issues],
     }
