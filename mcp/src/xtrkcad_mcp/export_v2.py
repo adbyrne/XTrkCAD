@@ -14,6 +14,7 @@ IOTtrains imports v2.
 from __future__ import annotations
 
 import datetime
+import math
 
 from .conventions import (CONVENTIONS_VERSION, LOCATION_KINDS, ConventionNote,
                           Issue, check_conventions, layer_categories,
@@ -24,7 +25,6 @@ from .stations import _bfs_usable_length, _snap_to_segment, model_in_to_proto_ft
 
 SCHEMA_VERSION = 2
 CAR_SPOTS_DEFAULT = 2            # spec 4.5
-_MP_TOLERANCE = 1e-6
 
 
 class _Context:
@@ -114,12 +114,13 @@ def _mp_key(value: float | None) -> float:
 
 
 def _siding(ctx: _Context, switch_ids: list[int]) -> tuple[float, list[int]] | None:
-    """The passing track joining two of a station's switches: its usable
-    length and the two switches. None when the station has no siding."""
+    """The passing track joining two main switches, at least one of them
+    the station's: its length and the two switches. One is enough for a
+    terminus, whose runaround starts at its terminus switch. None when the
+    station has no siding."""
     switches = set(switch_ids)
     passing = {t.id for t in ctx.layout.tracks
-               if t.kind != "TURNOUT"
-               and ctx.categories.get(t.layer, ("",))[0] == "passing"}
+               if ctx.categories.get(t.layer, ("",))[0] == "passing"}
     seen: set[int] = set()
     for start in sorted(passing):
         if start in seen:
@@ -136,24 +137,48 @@ def _siding(ctx: _Context, switch_ids: list[int]) -> tuple[float, list[int]] | N
                 if nxt.id in passing and nxt.id not in seen:
                     seen.add(nxt.id)
                     stack.append(nxt.id)
-                elif nxt.kind == "TURNOUT" and nxt.id in switches:
+                elif (nxt.kind == "TURNOUT"
+                      and ctx.categories.get(nxt.layer, ("",))[0] == "mainline"):
                     ends.add(nxt.id)
-        if len(ends) == 2:
+        if len(ends) == 2 and ends & switches:
+            # Turnouts on the passing track itself (spurs off the siding)
+            # count: cars stand on their through route. The station's main
+            # switches are on the main, so they are not in comp.
             return sum(t.length_model_inches() for t in comp), sorted(ends)
     return None
 
 
-def _main_between(ctx: _Context, m: _Measurer, lo: float, hi: float) -> float:
-    """Usable main track between two MPs: the main line's non-turnout tracks
-    whose both ends lie in [lo, hi]."""
-    total = 0.0
-    for t in ctx.layout.tracks:
-        if t.kind == "TURNOUT" or t.layer not in m.line.layers:
+def _main_between(ctx: _Context, layers: set[int], a: int, b: int) -> float | None:
+    """Usable main track between switches a and b: the non-turnout tracks
+    on the shortest main-track path between them. Measuring along the path
+    (not by MP range) keeps it right where the main loops back on itself.
+    None when no main-track path joins them."""
+    import heapq
+    dist = {a: 0.0}
+    prev: dict[int, int] = {}
+    heap = [(0.0, a)]
+    while heap:
+        d, tid = heapq.heappop(heap)
+        if tid == b:
+            break
+        if d > dist.get(tid, math.inf):
             continue
-        mps = [m.mp_at(t, ep.x, ep.y) for ep in t.endpoints]
-        if mps and all(v is not None and lo - _MP_TOLERANCE <= v <= hi + _MP_TOLERANCE
-                       for v in mps):
-            total += t.length_model_inches()
+        for ep in ctx.by_id[tid].endpoints:
+            nxt = ctx.by_id.get(ep.connected_to) if ep.connected_to is not None else None
+            if nxt is None or nxt.layer not in layers:
+                continue
+            nd = d + nxt.length_model_inches()
+            if nd < dist.get(nxt.id, math.inf):
+                dist[nxt.id], prev[nxt.id] = nd, tid
+                heapq.heappush(heap, (nd, nxt.id))
+    if b not in dist:
+        return None
+    total, tid = 0.0, prev.get(b)
+    while tid is not None and tid != a:
+        track = ctx.by_id[tid]
+        if track.kind != "TURNOUT":
+            total += track.length_model_inches()
+        tid = prev.get(tid)
     return total
 
 
@@ -205,9 +230,8 @@ def _stations(ctx: _Context) -> list[dict]:
         if siding is not None:
             siding_in, ends = siding
             entry["siding_ft"], entry["siding_cars"] = ctx.feet(siding_in), ctx.cars(siding_in)
-            ends_mp = [m.mp_of_switch(ctx.by_id[i]) for i in ends]
-            if None not in ends_mp:
-                main_in = _main_between(ctx, m, min(ends_mp), max(ends_mp))
+            main_in = _main_between(ctx, m.line.layers, *ends)
+            if main_in is not None:
                 entry["main_ft"], entry["main_cars"] = ctx.feet(main_in), ctx.cars(main_in)
         entry["house_tracks"] = _house_tracks(ctx, st.id, st.railroad, per_id[st.id] > 1)
         out.append(entry)

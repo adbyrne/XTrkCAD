@@ -278,3 +278,35 @@ def test_no_siding_no_lengths(clean):
     for st in clean["stations"]:
         assert st["siding_ft"] is None and st["siding_cars"] is None
         assert st["main_ft"] is None and st["main_cars"] is None
+
+
+def test_terminus_runaround_siding(tmp_path):
+    # Like NYE's HC: the terminus switch (5, where MP_ZERO sits) is also the
+    # first switch of a runaround beyond it (passing track 4, to switch 2).
+    zero = (0, {"kind": "reference", "id": "MP_ZERO", "mp": 0, "mp_scale": 12}, None, 176, 0)
+    notes = [zero, _st("WP", 100, terminus=True, ref_tag="MP_ZERO"), _st("SK", 228)]
+    wp = _stations(build_export_v2(_layout(tmp_path, notes, tracks=LINE)))["WP"]
+    assert wp["terminus"] is True and wp["mp"] == 0.0
+    assert (wp["siding_ft"], wp["siding_cars"]) == (_ft(104), _cars(104))
+    assert (wp["main_ft"], wp["main_cars"]) == (_ft(104), _cars(104))
+
+
+def test_siding_counts_turnouts_on_the_siding(tmp_path):
+    # A spur leaving the siding: its turnout is on the passing layer and
+    # cars stand on its through route, so it counts (the main switches
+    # at the siding's ends don't).
+    tracks = LINE.replace(
+        "STRAIGHT 4 1 0 0 0 HO 0\n\tT 2 68.000000 4.000000 260.000000\n"
+        "\tT 5 172.000000 4.000000 100.000000\n",
+        "STRAIGHT 4 1 0 0 0 HO 0\n\tT 2 68.000000 4.000000 260.000000\n"
+        "\tT 30 110.000000 4.000000 100.000000\n\tEND$SEGS\n\n"
+        "TURNOUT 30 1 0 0 0 HO 2 110.000000 4.000000 0 0.000000 \"S\t#6 Left\t\"\n"
+        "\tT 4 110.000000 4.000000 280.000000\n\tT 31 118.000000 4.000000 100.000000\n"
+        "\tE 118.000000 8.000000 80.000000\n\tEND$SEGS\n\n"
+        "STRAIGHT 31 1 0 0 0 HO 0\n\tT 30 118.000000 4.000000 280.000000\n"
+        "\tT 5 172.000000 4.000000 100.000000\n")
+    assert "TURNOUT 30" in tracks
+    xp = _stations(build_export_v2(_layout(tmp_path, [ZERO, _st("XP", 100)],
+                                           tracks=tracks)))["XP"]
+    turnout_in = 8.0   # turnout 30's through route, 110..118
+    assert xp["siding_ft"] == _ft(42 + turnout_in + 54)
