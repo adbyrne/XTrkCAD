@@ -102,6 +102,7 @@ or later.
 | `get_track_lengths` | Total track length by kind and layer |
 | `get_curve_stats` | Curve radius statistics (min/max/mean/distribution) |
 | `get_operation_density` | Fugate OD formula — max cars and cars moved per session |
+| `check_conventions` | Checks the layout against the Operating Data Conventions (v1): JSON Notes, Layer Groups, note placement, mileposts. Lists errors, warnings and info, each with a stable rule id |
 
 ### Reports (txt / md / html / json)
 
@@ -259,6 +260,8 @@ src/xtrkcad_mcp/
   templates.py   — Template library loader
   templates/     — 12 stub .xtc files + index.yaml catalog
   stations.py    — note annotations (JSON and text), station routing, capacities, export
+  conventions.py — check_conventions: Operating Data Conventions rules
+  mileposts.py   — milepost anchors, calculated mileposts, station and yard limits
   svg_views.py   — plan and elevation SVG views
   cli.py         — xtrkcad-report command-line entry point
 ```
