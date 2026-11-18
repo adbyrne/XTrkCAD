@@ -129,7 +129,7 @@ static char manageNoteNameBuf[NOTENAME_SIZE];
 static paramData_t manageNotesNamePLs[] = {
 	{ PD_STRING, manageNoteNameBuf, "name", PDO_NOTBLANK, I2VP(30), N_("ROOT-Level Name"), 0, 0, sizeof( manageNoteNameBuf ) }
 };
-static paramGroup_t manageNotesNamePG = { "managenotesname", 0, manageNotesNamePLs, COUNT( manageNotesNamePLs ) };
+static paramGroup_t manageNotesNamePG = { "managenotesname", PGO_LAYOUT_CLOSE, manageNotesNamePLs, COUNT( manageNotesNamePLs ) };
 
 /**
  * Ok callback for the "enter a name" dialog (manageNotesNamePG).
@@ -369,6 +369,7 @@ static void DoManageNotes(void *unused)
 EXPORT addButtonCallBack_t InitManageNotesDialog(void)
 {
 	FormRegister(&manageNotesPG);
+	manageNotesPG.reloadProc = DoManageNotes;
 	FormRegister(&manageNotesNamePG);
 	return &DoManageNotes;
 }

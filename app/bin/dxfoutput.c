@@ -43,7 +43,7 @@ static void DxfLine(
         wDrawWidth width,
         wDrawColor color)
 {
-	long c = wDrawGetRGB( color );
+	long c = color;
 	long s = (d->options & DC_DASH) ? 1 : ((d->options & DC_DOT) ? 2 : 0);
 
 	DynString command = NaS;
@@ -68,7 +68,7 @@ static void DxfArc(
         wDrawWidth width,
         wDrawColor color)
 {
-	long c = wDrawGetRGB( color );
+	long c = color;
 	long s = (d->options & DC_DASH) ? 1 : ((d->options & DC_DOT) ? 2 : 0);
 
 	DynString command = NaS;
@@ -108,7 +108,7 @@ static void DxfString(
         FONTSIZE_T fontSize,
         wDrawColor color)
 {
-	long c = wDrawGetRGB( color );
+	long c = color;
 
 	DynString command = NaS;
 	DynStringMalloc(&command, 100);

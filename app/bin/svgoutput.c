@@ -121,7 +121,7 @@ static void SvgDrawLine(
 	               p0.x, roomSize.y - p0.y,
 	               p1.x, roomSize.y - p1.y,
 	               (double)width,
-	               wDrawGetRGB(color),
+	               color,
 	               lineOpt);
 }
 
@@ -157,7 +157,7 @@ static void SvgDrawArc(
 		                 roomSize.y - p.y,
 		                 r,
 		                 w,
-		                 wDrawGetRGB(color),
+		                 color,
 		                 false,
 		                 lineOpt);
 	} else {
@@ -169,7 +169,7 @@ static void SvgDrawArc(
 		              angle1,
 		              drawCenter,
 		              w,
-		              wDrawGetRGB(color),
+		              color,
 		              lineOpt);
 	}
 
@@ -206,7 +206,7 @@ static void SvgDrawString(
 	               p.x,
 	               roomSize.y - p.y,
 	               fontSize,
-	               wDrawGetRGB(color),
+	               color,
 	               text);
 
 	MyFree(text);
@@ -266,7 +266,7 @@ static void SvgDrawFillPoly(
 	}
 
 	width = (wDrawWidth)(width >= MINIMUMLINEWIDTH ? width : svgLineWidth[width]);
-	SvgPolyLineCommand((SVGParent *)(d->d), cnt, points,  wDrawGetRGB(color),
+	SvgPolyLineCommand((SVGParent *)(d->d), cnt, points,  color,
 	                   (double)width, fillStyle == DRAW_FILL, lineOpt);
 
 	free(points);
@@ -289,7 +289,7 @@ static void SvgDrawFillCircle(drawCmd_p d, coOrd center, DIST_T radius,
 	                 roomSize.y - center.y,
 	                 radius,
 	                 0,
-	                 wDrawGetRGB(color),
+	                 color,
 	                 true,
 	                 0);
 }
@@ -311,7 +311,7 @@ SvgDrawRectangle(drawCmd_p d, coOrd corner1, coOrd corner2, wDrawColor color,
 	SvgRectCommand((SVGParent *)(d->d),
 	               corner1.x, roomSize.y - corner1.y,
 	               corner2.x, roomSize.y - corner2.y,
-	               wDrawGetRGB(color),
+	               color,
 	               fillOpt);
 }
 

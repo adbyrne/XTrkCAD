@@ -256,11 +256,25 @@ CreateTableHeader(void)
 	DynStringFree(&line);
 }
 
+/**
+ * Rebuild the Parts List for a newly loaded layout. EnumerateTracks()
+ * leaves the old list showing when the new layout has no parts, so the
+ * dialog is hidden first and only comes back with real content.
+ *
+ * \param unused IN unused, required by paramGroup_t.reloadProc
+ */
+static void EnumReload(void *unused)
+{
+	wHide( enumW );
+	EnumerateTracks( NULL );
+}
+
 void EnumerateStart(void)
 {
 
 	if (enumW == NULL) {
 		FormRegister( &enumPG );
+		enumPG.reloadProc = EnumReload;
 		enumW = FormCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")),
 		                          NULL, NULL,
 		                          NULL, FormCancel_Current,

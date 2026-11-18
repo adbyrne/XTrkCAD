@@ -150,4 +150,5 @@ BOOL_T ReadMainNote(char *line)
 void InitCmdNote()
 {
 	FormRegister(&notePG);
+	notePG.reloadProc = DoNote;
 }

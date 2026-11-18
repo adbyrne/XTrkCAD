@@ -40,6 +40,14 @@
  * the right call before loading a new file's LAYERGROUP lines. */
 void LayerGroupResetAll(void);
 
+/** Set the current groups aside and start with an empty registry (demo
+ * playback, together with SaveLayers()). */
+void LayerGroupSaveAll(void);
+
+/** Drop the current groups and bring back the ones LayerGroupSaveAll() set
+ * aside. Does nothing if nothing was set aside. */
+void LayerGroupRestoreAll(void);
+
 /** Number of groups currently defined. */
 int LayerGroupCount(void);
 

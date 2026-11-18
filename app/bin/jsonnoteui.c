@@ -573,8 +573,8 @@ JsonFieldApplyEdit(BOOL_T isDelete)
 	 * comment.
 	 *
 	 * wEntrySetValue() (wlib's entry.c) deliberately no-ops on a focused
-	 * entry -- "contents should not be changed programmatically while the
-	 * user is editing it". Worse, entry.c's own focus-out handler
+	 * entry the user has typed in -- "don't overwrite what the user is
+	 * typing", which is the case here. Worse, entry.c's own focus-out handler
 	 * (entryFocusOutEvent) copies the *widget's still-displayed* text back
 	 * into the bound struct field the moment focus leaves it -- so moving
 	 * focus away *before* clearing the struct would just have the focus-out

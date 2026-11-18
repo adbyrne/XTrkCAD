@@ -46,7 +46,7 @@ void FormMenuPush(void* dp)
 static void ColorSelectPush(void* dp, wDrawColor dc)
 {
 	paramData_p p = (paramData_p)dp;
-	long rgb = wDrawGetRGB(dc);
+	long rgb = dc;
 
 	// make sure that the special colors for select/unselect aren't used elsewhere
 	while (dc == drawColorPreviewSelected || dc == drawColorPreviewUnselected) {
@@ -57,12 +57,12 @@ static void ColorSelectPush(void* dp, wDrawColor dc)
 		{
 			break;
 		}
-		dc = wDrawFindColor(rgb);
+		dc = rgb;
 	}
 
 	if (DO_MACRO_RECORD(p)) {
 		FormMacroRecord( "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
-		                 wDrawGetRGB(dc));
+		                 dc);
 	}
 
 	if ((p->option & PDO_NOPSHUPD) == 0 && p->valueP) {

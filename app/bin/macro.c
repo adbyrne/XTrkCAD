@@ -897,6 +897,7 @@ static void PlaybackQuit(void)
 	DoSetScale(oldScaleName);
 	inPlaybackQuit = FALSE;
 	DoChangeNotification(CHANGE_ALL);
+	FormReloadLayoutDialogs();
 	CloseDemoWindows();
 	curDemo = -1;
 	wPrefSetInteger("misc", "playbackspeed", playbackSpeed);
@@ -2410,7 +2411,7 @@ static void ParamPlayback(char *line)
 			case PD_COLORLIST:
 				line += len;
 				rgb = atol(line);
-				dc = wDrawFindColor(rgb);
+				dc = rgb;
 				if (p->control) {
 					wColorSelectButtonSetColor((wButton_p)p->control, dc);
 				}

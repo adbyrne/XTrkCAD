@@ -108,18 +108,14 @@ static void finish_drawing(struct draw *bd, cairo_t *cr);
  *
 *******************************************************************************/
 
-static unsigned long GtkDrawSetColor(
+static void GtkDrawSetColor(
         cairo_t * cairo,
         wDrawColor color,
         GdkRGBA *gcolor )
 {
-
-	gcolor->red = ((color&0xFF0000)>>16)/255.0;
-	gcolor->green = ((color&0xFF00)>>8)/255.0;
-	gcolor->blue  = (color&0xFF)/255.0;
-	gcolor->alpha = 1.0;
-	cairo_set_source_rgba(cairo, gcolor->red, gcolor->green, gcolor->blue, 1.0 );
-	return color;
+	*gcolor = wlibGetColor(color);
+	cairo_set_source_rgba(cairo, gcolor->red, gcolor->green, gcolor->blue,
+	                      gcolor->alpha);
 }
 
 static cairo_t *gtkDrawCreateCairoContext(struct draw *bd,
@@ -199,7 +195,7 @@ static cairo_t *gtkDrawCreateCairoContext(struct draw *bd,
 	setCairoDashStyle(cairo, lineType);
 
 
-	GdkRGBA gcolor = wlibGetColor(color, TRUE);
+	GdkRGBA gcolor;
 	GtkDrawSetColor(cairo, color, &gcolor);
 
 	/* Only a one-shot context is clipped here. The batch context gets its

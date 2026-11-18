@@ -80,14 +80,6 @@ void gtk_widget_set_size_request(GtkWidget *widget, gint width, gint height)
 wDrawColor wDrawColorWhite = 0xFFFFFF;
 wDrawColor wDrawColorBlack = 0x000000;
 
-GdkRGBA wlibGetColor(wDrawColor color, wBool_t normal)
-{
-	GdkRGBA c = { 0.0, 0.0, 0.0, 1.0 };
-	(void)color;
-	(void)normal;
-	return c;
-}
-
 void wlibControlGetSize(wControl_p b)
 {
 	(void)b;

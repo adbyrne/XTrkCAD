@@ -118,6 +118,10 @@ learned from a real bug rather than anticipated up front:
   show themselves on construction otherwise, and an earlier version of this code visibly leaked a
   stray empty window before that call was added. Copy `ReportsShowDialog()`'s existing setup
   rather than re-deriving it.
+- **An open report reloads itself when a new layout is loaded.** `ReportsShowDialog()` sets the
+  dialog's `reloadProc` to `rd->refreshProc`, so a new report needs nothing extra -- but its
+  menu callback must recompute everything from the current layout, which it already does for
+  the Refresh button. See \ref dialogs-and-layout-loading.
 - **Turntable stalls (or other legitimately-always-open endpoints) may need special-casing.**
   `QueryTrack(trk, Q_CAN_ADD_ENDPOINTS)` is how Gaps distinguishes an open turntable stall (open
   by design, counted separately) from a genuine unconnected endpoint -- decide deliberately

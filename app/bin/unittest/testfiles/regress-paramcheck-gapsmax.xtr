@@ -1,0 +1,41 @@
+# Gaps report, Maximum gap choice (Development Issues #85). Two pairs of open
+# track ends face each other: one 0.2 in apart, one 0.6 in apart. With the
+# default (Connection distance, 0.1 in) neither is a near miss; 0.25 in finds
+# the first, 1.0 in both. Back to the default, none again. The choice is
+# remembered: reopening the report keeps it.
+VERSION 13 5.4.0
+DEMOINIT
+ROOMSIZE 48.000000 x 24.000000
+SCALE HO
+LAYERS 0 1 0 1 255 0 0 0 0 "Main" 1 7 18.000000 0.000000 1.131804 0.183697 0.367394
+LAYERS CURRENT 0
+NOTE MAIN 0 0 0 0 0 "Two gaps for the Gaps report's Maximum gap test."
+STRAIGHT 1 0 0 0 0 HO 2 0.000000 0.000000
+	E4 2.000000 6.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 20.000000 6.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END$SEGS
+STRAIGHT 2 0 0 0 0 HO 2 0.000000 0.000000
+	E4 20.200000 6.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 40.000000 6.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END$SEGS
+STRAIGHT 3 0 0 0 0 HO 2 0.000000 0.000000
+	E4 2.000000 16.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 20.000000 16.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END$SEGS
+STRAIGHT 4 0 0 0 0 HO 2 0.000000 0.000000
+	E4 20.600000 16.000000 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 40.000000 16.000000 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END$SEGS
+PARAMETER misc cmdReportsGaps
+PARAMCHECK reportsgaps list count 0
+PARAMETER reportsgaps maxgap 1
+PARAMCHECK reportsgaps list count 1
+PARAMETER reportsgaps maxgap 3
+PARAMCHECK reportsgaps list count 2
+PARAMETER reportsgaps cancel
+PARAMETER misc cmdReportsGaps
+PARAMCHECK reportsgaps maxgap 3
+PARAMCHECK reportsgaps list count 2
+PARAMETER reportsgaps maxgap 0
+PARAMCHECK reportsgaps list count 0
+PARAMETER reportsgaps cancel

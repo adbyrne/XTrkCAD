@@ -247,5 +247,6 @@ static void DoSelectLayersDialog(void *unused)
 EXPORT addButtonCallBack_t InitSelectLayersDialog(void)
 {
 	FormRegister(&selectLayersPG);
+	selectLayersPG.reloadProc = DoSelectLayersDialog;
 	return &DoSelectLayersDialog;
 }

@@ -542,6 +542,10 @@ bug:
   been there (dev ML #4676-#4678). Last, a hand-laid turnout with its points on the easement:
   `RemoveTrack()` trims the easement beyond the points, and `TrimJoint()` keeps that easement as
   the rest, with its end where the trim ends, for the turnout to connect to.
+  `gapsmax` covers the Gaps report's Maximum gap choice (Development Issues #85): two pairs of
+  facing open ends, 0.2 in and 0.6 in apart, give 0, 1 and 2 near-miss rows at Connection
+  distance, 0.25 in and 1.0 in (`PARAMCHECK reportsgaps list count`), and reopening the report
+  keeps the choice.
   `switchmotor` moves a turnout without its switch motor: the motor stands for its turnout (Robert
   Heller, dev ML #4675), so its box has to follow, and Undo gives both back.
   `UpdateSwitchMotorBoxes()` works every motor's box out again from its turnout where

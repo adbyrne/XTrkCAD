@@ -239,7 +239,7 @@ SaveParamPref(const char *section, const char *prefName, paramData_p p)
 		wPrefSetInteger(section, prefName, *(long*)p->valueP);
 		break;
 	case PD_COLORLIST:
-		wPrefSetInteger(section, prefName, wDrawGetRGB(*(wDrawColor*)p->valueP));
+		wPrefSetInteger(section, prefName, *(wDrawColor*)p->valueP);
 		break;
 	case PD_LIST:
 		snprintf(columnWidthsKey, sizeof(columnWidthsKey), "%s-columnwidths",

@@ -3623,7 +3623,7 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 	wIcon_p icon;
 
 	lineColor = wDrawColorBlack;
-	benchColor = wDrawFindColor( wRGB(255,192,0) );
+	benchColor = wRGB(255,192,0);
 	//FormCreateControls( &drawPG, DrawDlgUpdate );
 
 	//FormCreateControls( &drawModPG, DrawModDlgUpdate) ;

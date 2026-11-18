@@ -195,6 +195,8 @@ struct entry {
 	char *valueP;            //< location of entered value
 	unsigned valueL;         //< maximum length of entered value
 	wEntryCallBack_p action; //< callback
+	bool userEdited;         //< user typed since the entry got focus
+	bool settingText;        //< text is being set by wEntrySetValue
 };
 
 struct expander {
@@ -382,17 +384,23 @@ void wlibAddButtonToToolbar(wControl_p buttonControl, const char *helpStr);
 
 /* color.c */
 
-typedef struct {
-	unsigned char red;
-	unsigned char green;
-	unsigned char blue;
-	GdkColor normalColor;
-	GdkColor invertColor;
-	long rgb;
-	int colorChar;
-} colorMap_t;
+/**
+ * Convert a color to GdkRGBA. A wDrawColor is a plain 0xRRGGBB value;
+ * the top byte is ignored and the result is always opaque.
+ *
+ * \param color IN color as 0xRRGGBB
+ * \return the color with each channel in [0.0, 1.0]
+ */
+static inline GdkRGBA wlibGetColor(wDrawColor color)
+{
+	GdkRGBA out;
 
-GdkRGBA wlibGetColor(wDrawColor color, wBool_t normal);
+	out.red = ((color & 0xFF0000) >> 16) / 255.0;
+	out.green = ((color & 0x00FF00) >> 8) / 255.0;
+	out.blue = (color & 0x0000FF) / 255.0;
+	out.alpha = 1.0;
+	return out;
+}
 
 /* control.c */
 wControl_p wlibControlNew(wType_e type, wControl_p parent, const char *name,

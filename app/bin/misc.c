@@ -607,6 +607,7 @@ static void DoClearAfter(void)
 	SetLayoutFullPath("");
 	SetWindowTitle();
 	LayoutBackGroundInit(TRUE);
+	FormReloadLayoutDialogs();
 }
 
 EXPORT void DoClear(void * unused)

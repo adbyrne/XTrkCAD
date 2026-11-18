@@ -58,14 +58,18 @@ void wEntrySetValue(
 		abort();
 	}
 
-	// the contents should not be changed programmatically while
-	// the user is editing it
-	// TODO: find replacement  for signal_block
-	if( !(gtk_widget_has_focus(b->widget))) {
+	struct entry* entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
 
-		gtk_entry_set_text(GTK_ENTRY(b->widget), arg);
-
+	// don't overwrite what the user is typing. An entry that only has
+	// focus (e.g. just tabbed into) is updated: its focus-out would
+	// otherwise write the stale text back.
+	if (gtk_widget_has_focus(b->widget) && entry->userEdited) {
+		return;
 	}
+	entry->settingText = TRUE;
+	gtk_entry_set_text(GTK_ENTRY(b->widget), arg);
+	entry->settingText = FALSE;
+	entry->userEdited = FALSE;
 }
 
 /**
@@ -83,6 +87,48 @@ const char *wEntryGetValue(
 	}
 
 	return gtk_entry_get_text(GTK_ENTRY(b->widget));
+}
+
+/**
+ * Note that the user edited the text. Changes made by wEntrySetValue are
+ * ignored.
+ *
+ * \param widget 	IN the entry
+ * \param b 	IN the control
+ */
+
+static void entryChanged(
+        GtkEditable *widget,
+        wControl_p b)
+{
+	struct entry* entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
+
+	(void)widget;
+	if (!entry->settingText) {
+		entry->userEdited = TRUE;
+	}
+}
+
+/**
+ * Start a new edit when the entry gets focus
+ *
+ * \param widget 	IN the entry
+ * \param event 	IN focus event
+ * \param b 	IN the control
+ * \return GDK_EVENT_PROPAGATE
+ */
+
+static int entryFocusInEvent(
+        GtkWidget *widget,
+        GdkEventFocus *event,
+        wControl_p b)
+{
+	struct entry* entry = CONTROL_GET_ATTRIBUTES_PTR(b, entry);
+
+	(void)widget;
+	(void)event;
+	entry->userEdited = FALSE;
+	return GDK_EVENT_PROPAGATE;
 }
 
 /**
@@ -117,6 +163,24 @@ static int entryFocusOutEvent(
 	}
 	// Allow other handlers deal with this
 	return GDK_EVENT_PROPAGATE;
+}
+
+/**
+ * Make the entry focusable and connect its signal handlers
+ *
+ * \param b IN the entry control
+ */
+
+static void entryConnectSignals(wControl_p b)
+{
+	gtk_widget_set_can_focus(b->widget, TRUE);
+	gtk_widget_add_events(b->widget, GDK_FOCUS_CHANGE_MASK);
+	g_signal_connect(G_OBJECT(b->widget), "focus-out-event",
+	                 G_CALLBACK(entryFocusOutEvent), b);
+	g_signal_connect(G_OBJECT(b->widget), "focus-in-event",
+	                 G_CALLBACK(entryFocusInEvent), b);
+	g_signal_connect(G_OBJECT(b->widget), "changed",
+	                 G_CALLBACK(entryChanged), b);
 }
 
 static void
@@ -205,10 +269,7 @@ wControl_p wEntryCreate(
 	// link into help
 	wlibAddTooltip(b->widget, parent->name, helpStr);
 
-	gtk_widget_set_can_focus( b->widget, TRUE );
-	gtk_widget_add_events(b->widget, GDK_FOCUS_CHANGE_MASK);
-	g_signal_connect(G_OBJECT(b->widget), "focus-out-event",
-	                 G_CALLBACK(entryFocusOutEvent), b);
+	entryConnectSignals(b);
 
 	if (option & BO_READONLY) {
 		gtk_editable_set_editable(GTK_EDITABLE(b->widget), FALSE);

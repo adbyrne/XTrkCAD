@@ -839,7 +839,7 @@ static void SpeedRedraw(
 
 	y = (xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
 	     +SLIDER_THICKNESS/2.0);
-	drawColor  = wDrawFindColor(wRGB(160, 160, 160));
+	drawColor  = wRGB(160, 160, 160);
 	coOrd pos0, pos1, siz;
 	y /= speedD.dpi;
 	siz.x = SLIDER_WIDTH/speedD.dpi;
@@ -3034,14 +3034,28 @@ static void TrainStopGoPlayback(char * line)
 }
 
 
-static void CmdTrainExit(void * unused)
+/**
+ * Leave train mode if it is active, without Reset(). Reset() doesn't cancel
+ * the current command while programMode == MODE_TRAIN (see command.c), so
+ * this is the only way out. Also called before a new layout replaces the
+ * current one: the trains and the Train Control dialog point at tracks
+ * that ClearTracks() frees.
+ */
+EXPORT void TrainModeExit(void)
 {
-	// Do the actual mode exit directly - Reset() no longer cancels the
-	// current command while programMode == MODE_TRAIN (see command.c), so
-	// leave train mode and hand curCommand back to the describe tool
-	// first; Reset() then only does its normal design-mode cleanup.
+	if (programMode != MODE_TRAIN) {
+		return;
+	}
 	CmdTrain(C_CANCEL, zero);
 	SetCurrentCommand(describeCmdInx);
+}
+
+
+static void CmdTrainExit(void * unused)
+{
+	// Leave train mode and hand curCommand back to the describe tool
+	// first; Reset() then only does its normal design-mode cleanup.
+	TrainModeExit();
 	Reset();
 	InfoDefaultControls();
 }

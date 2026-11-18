@@ -302,6 +302,7 @@ static void DoControlMgr( void * junk )
 EXPORT addButtonCallBack_t ControlMgrInit( void )
 {
 	FormRegister( &controlPG );
+	controlPG.reloadProc = DoControlMgr;
 
 	RegisterChangeNotification( ContMgmChange );
 	return &DoControlMgr;

@@ -484,6 +484,7 @@ static void ReportsShowDialog(reportsDialog_t *rd, const char *title)
 {
 	if (rd->window == NULL) {
 		FormRegister( rd->pg );
+		rd->pg->reloadProc = rd->refreshProc;
 		rd->window = FormCreateDialog( rd->pg, MakeWindowTitle(title),
 		                               NULL, NULL,
 		                               NULL, rd->cancelProc ? rd->cancelProc : FormCancel_Current,
@@ -1698,11 +1699,25 @@ static void DoReportsGapsFilter(void *unused)
 	ShowReportsFilterDialog(&reportsGapsFilter);
 }
 
+/** Development Issues #85: the Gaps report's own "Maximum gap" choice.
+ * Index 0 is the Connection Distance preference (the editor's own snap
+ * distance, and this report's only threshold before); the others widen the
+ * report without changing how the editor connects track. Real layouts have
+ * missed joins a little wider than the 0.1 in default. Saved as a
+ * preference (reportsgaps.maxgap). */
+static wIndex_t reportsGapsMaxGapInx = 0;
+static const DIST_T reportsGapsMaxGapValues[] = { 0.0, 0.25, 0.5, 1.0 };
+#define REPORTS_GAPS_MAXGAP_COUNT \
+	((wIndex_t)(sizeof reportsGapsMaxGapValues / sizeof reportsGapsMaxGapValues[0]))
+
 static paramData_t reportsGapsPLs[] = {
 #define I_REPORTSGAPSSUMMARY (0)
 #define reportsGapsSummary (reportsGapsPLs[I_REPORTSGAPSSUMMARY].control)
 	{ PD_MESSAGE, "", "summary", 0, I2VP(37) },
-#define I_REPORTSGAPSLIST (1)
+#define I_REPORTSGAPSMAXGAP (1)
+#define reportsGapsMaxGap (reportsGapsPLs[I_REPORTSGAPSMAXGAP].control)
+	{ PD_DROPLIST, &reportsGapsMaxGapInx, "maxgap", PDO_LISTINDEX, I2VP(200), NULL, 0 },
+#define I_REPORTSGAPSLIST (2)
 #define reportsGapsList (reportsGapsPLs[I_REPORTSGAPSLIST].control)
 	{ PD_LIST, NULL, "list", 0, &reportsGapsListData, NULL, 0 },
 	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsGapsRefreshOp },
@@ -1740,6 +1755,47 @@ static int reportsGapsTurntableCnt = 0;
  * pattern exists to prevent. Not optional for a dialog with a changeProc. */
 static BOOL_T reportsGapsPopulating = FALSE;
 
+/** The distance the Gaps report pairs open endpoints within: the Maximum
+ * gap choice, never less than the Connection Distance preference (a pair
+ * the editor would connect is always reported). */
+static DIST_T ReportsGapsMaxGap(void)
+{
+	DIST_T dist = 0.0;
+
+	if ( reportsGapsMaxGapInx > 0 &&
+	     reportsGapsMaxGapInx < REPORTS_GAPS_MAXGAP_COUNT ) {
+		dist = reportsGapsMaxGapValues[reportsGapsMaxGapInx];
+	}
+	return dist > connectDistance ? dist : connectDistance;
+}
+
+/** Fill the Maximum gap dropdown and select the current choice. Rebuilt on
+ * each run, so the Connection distance entry shows the preference's
+ * current value. */
+static void ReportsPopulateMaxGapList(void)
+{
+	char label[64];
+	wIndex_t i;
+
+	if ( reportsGapsMaxGapInx < 0 ||
+	     reportsGapsMaxGapInx >= REPORTS_GAPS_MAXGAP_COUNT ) {
+		reportsGapsMaxGapInx = 0;       // a stale or edited preference
+	}
+	reportsGapsPopulating = TRUE;
+	wListClear( reportsGapsMaxGap );
+	for ( i = 0; i < REPORTS_GAPS_MAXGAP_COUNT; i++ ) {
+		if ( i == 0 ) {
+			snprintf( label, sizeof label, _("Connection distance (%.2f in)"),
+			          connectDistance );
+		} else {
+			snprintf( label, sizeof label, _("%.2f in"), reportsGapsMaxGapValues[i] );
+		}
+		wComboBoxAddValue( reportsGapsMaxGap, label, I2VP((int)i) );
+	}
+	wListSetIndex( reportsGapsMaxGap, reportsGapsMaxGapInx );
+	reportsGapsPopulating = FALSE;
+}
+
 /** Populate the interactive list from reportsGapsList_da -- one row per
  * near-miss pair, tab-separated, each row's context set to that pair's
  * address so ReportsDlgUpdateGaps() can recover it on selection. */
@@ -1773,10 +1829,16 @@ static wBool_t ReportsDlgUpdateGaps(paramGroup_cp pg, int inx, void *valueP)
 	reportsGapPair_t *entry;
 	coOrd mid;
 
-	if (inx != I_REPORTSGAPSLIST) {
+	if (reportsGapsPopulating) {
 		return TRUE;
 	}
-	if (reportsGapsPopulating) {
+	/* A new Maximum gap takes effect at once, like the Notes report's
+	 * filters (SF #802), without a separate Refresh. */
+	if (inx == I_REPORTSGAPSMAXGAP) {
+		ReportsGaps(NULL);
+		return TRUE;
+	}
+	if (inx != I_REPORTSGAPSLIST) {
 		return TRUE;
 	}
 
@@ -1814,13 +1876,16 @@ static void ReportsCancelGaps(paramGroup_cp pg)
  * ReportsRefreshPrintText() (Save/Print). */
 static void ReportsBuildGapsText(DynString *out)
 {
-	char summaryLine[200];
+	char summaryLine[300];
+	DIST_T maxGap = ReportsGapsMaxGap();
 
 	DynStringMalloc( out, 256 );
 	ReportsAddHeader( out, _("Gaps Report") );
 
 	snprintf( summaryLine, sizeof summaryLine,
-	          "\n%s: %d\n%s: %d\n%s: %d\n",
+	          "\n%s: %.4f in%s\n%s: %d\n%s: %d\n%s: %d\n",
+	          _("Maximum gap"), maxGap,
+	          maxGap == connectDistance ? _(" (Connection distance)") : "",
 	          _("Near-miss pairs"), reportsGapsList_da.cnt,
 	          _("Isolated open endpoints"), reportsGapsIsolatedCnt,
 	          _("Turntable stalls excluded"), reportsGapsTurntableCnt );
@@ -1861,6 +1926,7 @@ void ReportsGaps( void * unused )
 	int i, j, cnt;
 	int turntableCnt = 0;
 	int isolatedCnt = 0;
+	DIST_T maxGap = ReportsGapsMaxGap();
 
 	ReportsClearIndicator();
 
@@ -1941,7 +2007,7 @@ void ReportsGaps( void * unused )
 				continue;
 			}
 			dist = FindDistance( entries[i].pos, entries[j].pos );
-			if ( dist <= connectDistance ) {
+			if ( dist <= maxGap ) {
 				reportsGapPair_t *pair;
 				DYNARR_APPEND( reportsGapPair_t, reportsGapsList_da, 10 );
 				pair = &DYNARR_LAST( reportsGapPair_t, reportsGapsList_da );
@@ -1977,13 +2043,14 @@ void ReportsGaps( void * unused )
 
 		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
 		LOG( log_reports, 1,
-		     ( "reports: Gaps computed -- %d pair(s), %d isolated, %d turntable stall(s) excluded\n",
-		       reportsGapsList_da.cnt, isolatedCnt, turntableCnt ) )
+		     ( "reports: Gaps computed -- %d pair(s) within %.4f, %d isolated, %d turntable stall(s) excluded\n",
+		       reportsGapsList_da.cnt, maxGap, isolatedCnt, turntableCnt ) )
 
 		ReportsShowDialog( &reportsGapsDlg, _("Gaps Report") );
+		ReportsPopulateMaxGapList();
 		snprintf( summary, sizeof summary,
-		          _("%d near-miss pair(s), %d isolated open endpoint(s), %d turntable stall(s) excluded"),
-		          reportsGapsList_da.cnt, isolatedCnt, turntableCnt );
+		          _("%d near-miss pair(s) within %.2f in, %d isolated open endpoint(s), %d turntable stall(s) excluded"),
+		          reportsGapsList_da.cnt, maxGap, isolatedCnt, turntableCnt );
 		wMessageSetValue( reportsGapsSummary, summary );
 	}
 

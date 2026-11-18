@@ -343,7 +343,7 @@ BOOL_T DeleteTrack( track_p, BOOL_T );
 #define REGRESS_CHECK_COLOR( TITLE, P1, P2, FIELD ) \
 	if ( ! IsColorClose(P1->FIELD, P2->FIELD) ) { \
 		sprintf( cp, TITLE ": Actual %6x, Expected %6x\n", \
-			(int)wDrawGetRGB(P1->FIELD), (int)wDrawGetRGB(P2->FIELD) ); \
+			(int)P1->FIELD, (int)P2->FIELD ); \
 		return FALSE; \
 	}
 wBool_t IsPosClose( coOrd, coOrd );

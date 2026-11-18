@@ -790,6 +790,7 @@ static void LayoutOk(const void * unused)
 	}
 
 	free(thisLayout.copyOfLayoutProps);
+	thisLayout.copyOfLayoutProps = NULL;
 	DynStringFree(&thisLayout.copyBackgroundFileName);
 
 	wHide(layoutW);
@@ -839,6 +840,7 @@ static void LayoutCancel( paramGroup_cp unused)
 	FormLoadControls(&layoutPG);
 
 	free(thisLayout.copyOfLayoutProps);
+	thisLayout.copyOfLayoutProps = NULL;
 	DynStringFree(&thisLayout.copyBackgroundFileName);
 
 	wHide(layoutW);
@@ -881,6 +883,11 @@ void DoLayout(void * unused)
 
 	LoadGaugeList(layoutPLs[GAUGEINX].control,
 	              thisLayout.props.curScaleDescInx); /* set correct gauge list here */
+	// The dialog can be reopened while it is open (e.g. reloaded after a new
+	// layout was loaded): drop the previous Cancel copy first, or Cancel would
+	// restore the old layout's background.
+	free(thisLayout.copyOfLayoutProps);
+	DynStringFree(&thisLayout.copyBackgroundFileName);
 	thisLayout.copyOfLayoutProps = malloc(sizeof(struct sLayoutProps));
 
 	if (!thisLayout.copyOfLayoutProps) {
@@ -907,6 +914,7 @@ void DoLayout(void * unused)
 EXPORT addButtonCallBack_t LayoutInit(void)
 {
 	FormRegister(&layoutPG);
+	layoutPG.reloadProc = DoLayout;
 	RegisterChangeNotification(LayoutChange);
 	layout_p = layoutPLs;
 	layout_pg_p = &layoutPG;

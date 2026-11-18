@@ -397,7 +397,7 @@ static BOOL_T CarPartRead(char* line)
 	 * this reserved slot rather than treating it as a real part value. */
 	dim.truckCenterOffset = 0.0;
 	CarPartNew(NULL, curParamFileIndex, LookupScale(scale), title, options, type,
-	           &dim, wDrawFindColor(rgb));
+	           &dim, rgb);
 	MyFree(title);
 	return TRUE;
 }
@@ -429,7 +429,7 @@ BOOL_T CarPartWrite(
 	              partP->options & ~CAR_DESC_IS_LOCO, partP->type, partP->dim.carLength,
 	              partP->dim.carWidth,
 	              partP->dim.truckCenter, partP->dim.coupledLength,
-	              wDrawGetRGB(partP->color)) > 0;
+	              partP->color) > 0;
 
 	SetUserLocale();
 

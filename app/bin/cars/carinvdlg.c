@@ -1237,7 +1237,7 @@ CreateItemFromCsv(tabString_t *tabs, long *dlgIndex,
 		}
 	}
 	item = CarItemNew(NULL, PARAM_CUSTOM, index, scale, title, options, type,
-	                  &dim, wDrawFindColor(color),
+	                  &dim, color,
 	                  purchPrice, currPrice, condition, purchDate, srvcDate);
 
 	if (item&&tabs[M_NOTES].len > 0) {
@@ -1369,7 +1369,7 @@ static int CarInvExportCsv(
 		CsvFormatFloat(f, item->dim.coupledLength, 3, ",");
 		CsvFormatFloat(f, item->dim.truckCenterOffset, 3, ",");
 		CsvFormatFloat(f, item->dim.truckCenter, 3, ",");
-		CsvFormatLong(f, wDrawGetRGB(item->color), ",");
+		CsvFormatLong(f, item->color, ",");
 		CsvFormatFloat(f, item->data.purchPrice, 2, ",");
 		CsvFormatFloat(f, item->data.currPrice, 2, ",");
 		CsvFormatLong(f, item->data.condition, ",");
@@ -1534,6 +1534,19 @@ static void CarInvDlgChange(long changes)
 	}
 }
 
+/**
+ * Empty the inventory list before ClearCars() frees the car items it
+ * points to. Clearing the list later, from LoadSortedList(), makes GTK
+ * report the selection change, and CarInvDlgUpdate() would then read the
+ * freed items. The list is filled again when the dialog is reloaded.
+ */
+void CarInvDlgClearList(void)
+{
+	if (carInvPG.win != NULL) {
+		wListClear(carInvPLs[I_CI_LIST].control);
+	}
+}
+
 EXPORT void DoCarDlg(void* unused)
 {
 	if (carInvPG.win == NULL) {
@@ -1552,6 +1565,7 @@ EXPORT void DoCarDlg(void* unused)
 void InitCarInvDlg(void)
 {
 	FormRegister( &carInvPG );
+	carInvPG.reloadProc = DoCarDlg;
 	log_carInvDlg = LogFindIndex("carInvDlg");
 	RegisterChangeNotification( CarInvDlgChange );
 }
