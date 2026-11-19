@@ -134,6 +134,19 @@ then by Layer Groups named after a category (`Mainline`, `Passing`, `Storage`,
 `Staging`, `Connecting`, `Service`), then by the layer-name suffix
 (`L1-Staging`).
 
+Storage, in Op Density, is how many cars can be parked on the layout while trains
+still run on the main and passing tracks. With convention notes on the layout
+(Operating Data Conventions v1.1), the result and the report add two views to
+Fugate's by-layer one:
+
+- **Industries and yards**: each industry's and team track's `car_spots` against its
+  track capacity (the unserved remainder), yard tracks and `storage` tracks.
+  Industries on main or passing track are listed apart and stay out of the totals.
+- **Railroad service**: each `facility` note's `car_spots`. Only spots a note gives
+  count, and they count as storage in `max_cars` unless the facility's track is
+  already counted by length (a Storage, Staging or Passing layer). A facility
+  without `car_spots` is listed as not counted.
+
 ### Annotation and export
 
 These tools measure track capacity and compute station mileposts from notes placed
@@ -262,6 +275,7 @@ src/xtrkcad_mcp/
   stations.py    — note annotations (JSON and text), station routing, capacities, export
   conventions.py — check_conventions: Operating Data Conventions rules
   export_v2.py   — export_layout_data v2 (layout_data.json schema 2)
+  od_views.py    — Op Density views from the notes: industries and yards, service
   mileposts.py   — milepost anchors, calculated mileposts, station and yard limits
   svg_views.py   — plan and elevation SVG views
   cli.py         — xtrkcad-report command-line entry point
