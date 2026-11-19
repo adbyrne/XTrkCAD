@@ -1,0 +1,9 @@
+XTrackCAD Track Clearance Report
+XTrackCAD
+Demo
+
+
+Clearance: 13 ft (1.791 in)
+Tracks closer than the clearance: 0
+
+No tracks closer than the clearance.
