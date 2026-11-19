@@ -72,9 +72,10 @@ git tag mcp-v0.1.0 && git push origin mcp-v0.1.0
 
 It runs the tests (it calls `ci-mcp.yml`), checks the tag matches `pyproject.toml`, builds the
 sdist and wheel with `uv build`, and drafts a GitHub Release named "XTrkCAD MCP server
-<version>" with both attached; publish the draft by hand after a look. A dispatch
-(`gh workflow run release-mcp.yml`) runs the tests and builds the package as an artifact
-without releasing. The app's `release.yml` never publishes the MCP, and its `v*.*.*` tags
+<version>" with both attached; publish the draft by hand after a look. A trial tag,
+`mcp-v0.1.0-test1`, does the whole run and drafts a prerelease; delete the draft and the tag
+afterwards. A dispatch (`gh workflow run release-mcp.yml`) runs the tests and builds the
+package as an artifact without releasing. The app's `release.yml` never publishes the MCP, and its `v*.*.*` tags
 don't start this workflow.
 
 `.github/dependabot.yml` has Dependabot open one grouped pull request a week that updates

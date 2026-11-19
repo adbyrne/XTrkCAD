@@ -6,9 +6,11 @@ name: Release (MCP)
 #
 #   git tag mcp-v0.1.0 && git push origin mcp-v0.1.0
 #
-# The tag must match mcp/pyproject.toml's version (check-version). A dispatch
-# runs the tests and builds the package as an artifact, without releasing.
-# The draft is published by hand once it has been looked at.
+# The tag must match mcp/pyproject.toml's version (check-version). A trial
+# tag, mcp-v<version>-test<N>, does the whole run and drafts a prerelease:
+# delete that draft and the tag afterwards. A dispatch (once this file is on
+# main) runs the tests and builds the package as an artifact, without
+# releasing. A draft is published by hand once it has been looked at.
 
 on:
   push:
@@ -43,6 +45,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/mcp-v')
         run: |
           tag="${GITHUB_REF#refs/tags/mcp-v}"
+          tag="${tag%-test*}"          # a trial tag, mcp-v<version>-test<N>
           if [ "$tag" != "${{ steps.version.outputs.version }}" ]; then
             echo "::error::tag mcp-v$tag doesn't match mcp/pyproject.toml version ${{ steps.version.outputs.version }}"
             exit 1
@@ -74,6 +77,8 @@ jobs:
           TAG: ${{ github.ref_name }}
           VERSION: ${{ needs.build.outputs.version }}
         run: |
-          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --draft \
-            --title "XTrkCAD MCP server $VERSION" \
+          trial=""
+          case "$TAG" in *-test*) trial="--prerelease" ;; esac
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --draft $trial \
+            --title "XTrkCAD MCP server $VERSION${trial:+ (trial $TAG)}" \
             --notes "The MCP server for XTrkCAD layouts, version $VERSION. Install the wheel with pip or uv; see mcp/README.md."
