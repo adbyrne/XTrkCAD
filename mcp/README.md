@@ -188,7 +188,8 @@ Text notes with the older prefixes (`STATION: WP !TERM`, `INDUSTRY: KIEL Kiel Co
 `YARD_TRACK: WP Track 2`, ...) are read the same way.  Passing siding capacity is
 inferred automatically from `L{n}-Passing` layers — no note is required on the
 passing track itself.  The [Operating Data Conventions](docs/operating-conventions.md) describe every
-kind and field.
+kind and field; the [tutorial](docs/operating-conventions-tutorial.md) adds them to the Hillside
+layout step by step.
 
 | Tool | Description |
 |---|---|
