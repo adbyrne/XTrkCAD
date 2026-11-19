@@ -16,9 +16,12 @@
 # - main 26-28 with a siding (29-31) at 2 in: clear; near its frog the
 #   diverging track is close but at the frog angle, so not a run.
 # At 12 ft (1.65 in) the three runs at 1.4/1.5 in are listed; at 15 ft
-# (2.07 in) the 2 in pairs are listed too. The report saved at 13 ft is
-# compared with trackclearance-expected/. REDRAW resolves the tracks'
-# connections (macro.c), which the report reads.
+# (2.07 in) the 2 in pairs are listed too. Rows at one spot share a place:
+# the 1.4 in siding's curve and straight are one place, so 4 rows make 3
+# places. Then Refresh marks changes: deleting track 2 gives 3 rows and
+# "1 fixed"; undoing the delete gives 4 rows again and "1 new". The reports
+# saved at each step are compared with trackclearance-expected/. REDRAW
+# resolves the tracks' connections (macro.c), which the report reads.
 VERSION 13 5.4.0
 DEMOINIT
 ROOMSIZE 64.000000 x 64.000000
@@ -165,4 +168,20 @@ PARAMETER misc cmdReportsClearance
 PARAMCHECK reportsclearance clearance 3
 PARAMETER reportsclearance clearance 1
 PARAMCHECK reportsclearance list count 4
+PARAMETER reportsclearance cancel
+UNDORESUME
+PARAMETER misc cmdReportsClearance
+COMMAND Select
+MOUSE 2 20.000 7.400
+MOUSE 4 20.000 7.400
+PARAMETER misc cmdDelete
+PARAMETER reportsclearance refresh
+PARAMCHECK reportsclearance list count 3
+FILESELECT report-clearance-fixed.txt
+PARAMETER reportsclearance save
+UNDOSTEP
+PARAMETER reportsclearance refresh
+PARAMCHECK reportsclearance list count 4
+FILESELECT report-clearance-new.txt
+PARAMETER reportsclearance save
 PARAMETER reportsclearance cancel

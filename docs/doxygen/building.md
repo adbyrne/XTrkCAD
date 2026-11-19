@@ -557,7 +557,10 @@ bug:
   0.8 in overlap and a track 18 in above another are not; of two Peco #6 sidings, the one run out
   to 1.4 in is listed and the one at 2 in isn't, frog included. It checks the count at every
   Clearance choice and that the choice is remembered, and compares the report saved at 13 ft with
-  `testfiles/trackclearance-expected/` (`RegressionParamCheck.trackclearance_check`).
+  `testfiles/trackclearance-expected/` (`RegressionParamCheck.trackclearance_check`): 4 rows in 3
+  places, the siding's curve and straight being one. Then it deletes track 2 and presses Refresh
+  (3 rows, "1 fixed"), undoes the delete (`UNDORESUME`/`UNDOSTEP`) and presses Refresh again
+  (4 rows, the restored pair marked "new"), saving the report at each step.
   `switchmotor` moves a turnout without its switch motor: the motor stands for its turnout (Robert
   Heller, dev ML #4675), so its box has to follow, and Undo gives both back.
   `UpdateSwitchMotorBoxes()` works every motor's box out again from its turnout where

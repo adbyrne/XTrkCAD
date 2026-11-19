@@ -631,8 +631,18 @@ void ReportsShortTracks(void *unused);
  * `spacingIn` is the closest spacing along the run, `lengthIn` the run's
  * length, both in layout inches. Layers are 1-based, as shown in the
  * Layers dialog. `pos` (the run's midpoint on track A) and `scale` place
- * the indicator when a row is selected. */
+ * the indicator when a row is selected.
+ *
+ * `place` groups runs at one spot (1 = the spot with the closest spacing):
+ * runs that share a track, or whose tracks are joined, and that touch or
+ * nearly touch -- a siding drawn too close along both its curve and its
+ * straight is one place. `change` compares with the report before the last
+ * Refresh: REPORTS_CLEARANCE_NEW for a run that wasn't there,
+ * REPORTS_CLEARANCE_CHANGED for one whose spacing or length changed.
+ * `start`/`end` are the run's ends on track A. */
 typedef struct {
+	int      place;
+	int      change;
 	TRKINX_T trackA;
 	unsigned int layerA;
 	const char *layerNameA;
@@ -643,11 +653,21 @@ typedef struct {
 	DIST_T   lengthIn;
 	coOrd    pos;
 	SCALEINX_T scale;
+	coOrd    start;
+	coOrd    end;
 } reportsClearanceRun_t;
+
+/** reportsClearanceRun_t.change: same as before the last Refresh. */
+#define REPORTS_CLEARANCE_SAME (0)
+/** reportsClearanceRun_t.change: not there before the last Refresh. */
+#define REPORTS_CLEARANCE_NEW (1)
+/** reportsClearanceRun_t.change: its spacing or length changed. */
+#define REPORTS_CLEARANCE_CHANGED (2)
 
 /**
  * Format the Track Clearance report's table body, one row per close run,
- * in the order given: track A, its layer and layer name, track B, its
+ * in the order given: its place, its change since the last Refresh ("new",
+ * "changed" or blank), track A, its layer and layer name, track B, its
  * layer and layer name, the closest spacing (3 decimals) and the run's
  * length (2 decimals), in inches. Numbers and layer names only: the column
  * titles come from the caller, translated. Pure function, unit tested

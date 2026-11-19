@@ -2692,17 +2692,17 @@ static reportsDialog_t reportsClearanceDlg = {
 	ReportsBuildClearanceText, ReportsTrackClearance,
 	ReportsDlgUpdateClearance, ReportsCancelClearance
 };
-static reportsOpCtx_t reportsClearanceRefreshOp = { &reportsClearanceDlg, REPORTSOP_REFRESH };
 static reportsOpCtx_t reportsClearanceSaveOp    = { &reportsClearanceDlg, REPORTSOP_SAVE };
 static reportsOpCtx_t reportsClearancePrintOp   = { &reportsClearanceDlg, REPORTSOP_PRINT };
 
-static wWinPix_t reportsClearanceListWidths[] = { 60, 50, 110, 60, 50, 110, 80, 80 };
+static wWinPix_t reportsClearanceListWidths[] = { 50, 70, 60, 50, 110, 60, 50, 110, 80, 80 };
 static const char * reportsClearanceListTitles[] = {
+	N_("Place"), N_("Change"),
 	N_("Track A"), N_("Layer #"), N_("Layer Name"),
 	N_("Track B"), N_("Layer #"), N_("Layer Name"),
 	N_("Spacing (in)"), N_("Length (in)")
 };
-static paramListData_t reportsClearanceListData = { 8, 600, 8, reportsClearanceListWidths,
+static paramListData_t reportsClearanceListData = { 8, 700, 10, reportsClearanceListWidths,
                                                     reportsClearanceListTitles
                                                   };
 
@@ -2716,6 +2716,22 @@ static reportsFilter_t reportsClearanceFilter;
 static void DoReportsClearanceFilter(void *unused)
 {
 	ShowReportsFilterDialog(&reportsClearanceFilter);
+}
+
+/** TRUE while a Refresh button press recomputes: only then are rows
+ * compared with the report before it. Opening the report, changing the
+ * Clearance or loading another layout starts afresh, without marks. */
+static BOOL_T reportsClearanceMarkChanges = FALSE;
+
+/** "Refresh" button: recompute and mark what changed since the last run.
+ *
+ * \param unused IN unused, required by the PD_BUTTON signature
+ */
+static void DoReportsClearanceRefresh(void *unused)
+{
+	reportsClearanceMarkChanges = TRUE;
+	ReportsTrackClearance(NULL);
+	reportsClearanceMarkChanges = FALSE;
 }
 
 /** The Clearance choice: prototype distance between track centres, in feet.
@@ -2734,6 +2750,9 @@ static const DIST_T reportsClearanceFtValues[] = { 12.0, 13.0, 14.0, 15.0 };
 /** Tracks this far apart in height (HO inches, scaled; about a car's
  * height) can't foul each other: an upper deck above a lower one. */
 #define REPORTS_CLEARANCE_MIN_HEIGHT (2.0)
+/** Runs this close (HO inches, scaled) on shared or joined tracks are one
+ * place. */
+#define REPORTS_CLEARANCE_PLACE_GAP (2.0)
 
 static paramData_t reportsClearancePLs[] = {
 #define I_REPORTSCLEARANCESUMMARY (0)
@@ -2745,7 +2764,7 @@ static paramData_t reportsClearancePLs[] = {
 #define I_REPORTSCLEARANCELIST (2)
 #define reportsClearanceList (reportsClearancePLs[I_REPORTSCLEARANCELIST].control)
 	{ PD_LIST, NULL, "list", 0, &reportsClearanceListData, NULL, 0 },
-	{ PD_BUTTON, DoReportsOp, "refresh", 0, NULL, NULL, 0, &reportsClearanceRefreshOp },
+	{ PD_BUTTON, DoReportsClearanceRefresh, "refresh", 0, NULL, NULL, 0, NULL },
 	{ PD_BUTTON, DoReportsOp, "save", PDO_DLGCMDBUTTON, NULL, NULL, 0, &reportsClearanceSaveOp },
 	{ PD_BUTTON, DoReportsOp, "print", 0, NULL, NULL, 0, &reportsClearancePrintOp },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, NULL, 0, NULL },
@@ -2763,6 +2782,18 @@ static dynArr_t reportsClearanceList_da;
 /** TRUE while the list or the Clearance dropdown is being rebuilt -- same
  * re-entrancy guard as reportsShortPopulating. */
 static BOOL_T reportsClearancePopulating = FALSE;
+
+/** The previous run's rows, compared with on a Refresh. */
+static dynArr_t reportsClearancePrev_da;
+/** How many places the list has. */
+static int reportsClearancePlaceCnt = 0;
+/** Whether the current list was compared with a previous run, and what
+ * that found: runs gone (fixed), new runs, and runs whose spacing or length
+ * changed. */
+static BOOL_T reportsClearanceMarked = FALSE;
+static int reportsClearanceFixedCnt = 0;
+static int reportsClearanceNewCnt = 0;
+static int reportsClearanceChangedCnt = 0;
 
 /** One sample along a track: where, and the track's direction there. */
 typedef struct {
@@ -2829,7 +2860,10 @@ static void ReportsPopulateClearanceList(void)
 		reportsClearanceRun_t *entry =
 		        &DYNARR_N(reportsClearanceRun_t, reportsClearanceList_da, i);
 
-		snprintf( row, sizeof row, "%d\t%u\t%s\t%d\t%u\t%s\t%.3f\t%.2f",
+		snprintf( row, sizeof row, "%d\t%s\t%d\t%u\t%s\t%d\t%u\t%s\t%.3f\t%.2f",
+		          entry->place,
+		          entry->change == REPORTS_CLEARANCE_NEW ? _("new") :
+		          entry->change == REPORTS_CLEARANCE_CHANGED ? _("changed") : "",
 		          entry->trackA, entry->layerA, entry->layerNameA ? entry->layerNameA : "",
 		          entry->trackB, entry->layerB, entry->layerNameB ? entry->layerNameB : "",
 		          entry->spacingIn, entry->lengthIn );
@@ -2888,18 +2922,27 @@ static void ReportsBuildClearanceText(DynString *out)
 	DynStringMalloc( out, 256 );
 	ReportsAddHeader( out, _("Track Clearance Report") );
 
-	snprintf( summaryLine, sizeof summaryLine, "\n%s: %.0f ft (%.3f in)\n%s: %d\n",
+	snprintf( summaryLine, sizeof summaryLine,
+	          "\n%s: %.0f ft (%.3f in)\n%s: %d\n%s: %d\n",
 	          _("Clearance"), ft, ReportsClearanceFtToIn( ft ),
+	          _("Places"), reportsClearancePlaceCnt,
 	          _("Tracks closer than the clearance"), reportsClearanceList_da.cnt );
 	DynStringCatCStr( out, summaryLine );
+	if ( reportsClearanceMarked ) {
+		snprintf( summaryLine, sizeof summaryLine, "%s: %d %s, %d %s, %d %s\n",
+		          _("Since last refresh"), reportsClearanceFixedCnt, _("fixed"),
+		          reportsClearanceNewCnt, _("new"), reportsClearanceChangedCnt, _("changed") );
+		DynStringCatCStr( out, summaryLine );
+	}
 
 	if ( reportsClearanceList_da.cnt == 0 ) {
 		DynStringCatCStrs( out, "\n", _("No tracks closer than the clearance."), "\n",
 		                   NULL );
 	} else {
-		char headerLine[200];
+		char headerLine[240];
 		snprintf( headerLine, sizeof headerLine,
-		          "\n%6s | %5s | %-14s | %6s | %5s | %-14s | %7s | %7s\n",
+		          "\n%5s | %-7s | %6s | %5s | %-14s | %6s | %5s | %-14s | %7s | %7s\n",
+		          _("Place"), _("Change"),
 		          _("Track"), _("Layer"), _("Layer Name"),
 		          _("Track"), _("Layer"), _("Layer Name"),
 		          _("Spacing"), _("Length") );
@@ -2908,6 +2951,21 @@ static void ReportsBuildClearanceText(DynString *out)
 		                            &DYNARR_N(reportsClearanceRun_t, reportsClearanceList_da, 0),
 		                            reportsClearanceList_da.cnt );
 	}
+}
+
+/** By place, then track A and track B: a place's rows together. */
+static int ReportsClearancePlaceCompare(const void *a, const void *b)
+{
+	const reportsClearanceRun_t *ra = a;
+	const reportsClearanceRun_t *rb = b;
+
+	if ( ra->place != rb->place ) {
+		return (ra->place > rb->place) - (ra->place < rb->place);
+	}
+	if ( ra->trackA != rb->trackA ) {
+		return (ra->trackA > rb->trackA) - (ra->trackA < rb->trackA);
+	}
+	return (ra->trackB > rb->trackB) - (ra->trackB < rb->trackB);
 }
 
 /** Closest first, then by track A and track B. */
@@ -3041,7 +3099,157 @@ static void ReportsClearanceAddRun(track_p a, track_p b,
 	entry->lengthIn = (last - first) * step;
 	entry->pos = DYNARR_N( reportsClearanceSample_t, *samples,
 	                       (first + last) / 2 ).pos;
+	entry->start = DYNARR_N( reportsClearanceSample_t, *samples, first ).pos;
+	entry->end = DYNARR_N( reportsClearanceSample_t, *samples, last ).pos;
 	entry->scale = GetTrkScale(a);
+}
+
+/** TRUE when runs a and b share a track or have tracks joined to each
+ * other, and come within ``gap`` of each other: one place. */
+static BOOL_T ReportsClearanceSamePlace(const reportsClearanceRun_t *a,
+                                        const reportsClearanceRun_t *b, DIST_T gap)
+{
+	TRKINX_T ta[2] = { a->trackA, a->trackB };
+	TRKINX_T tb[2] = { b->trackA, b->trackB };
+	const coOrd *pa[3] = { &a->start, &a->pos, &a->end };
+	const coOrd *pb[3] = { &b->start, &b->pos, &b->end };
+	BOOL_T related = FALSE;
+	int i, j;
+
+	for ( i = 0; i < 2 && !related; i++ ) {
+		for ( j = 0; j < 2 && !related; j++ ) {
+			track_p x, y;
+
+			if ( ta[i] == tb[j] ) {
+				related = TRUE;
+				break;
+			}
+			x = FindTrack( ta[i] );
+			y = FindTrack( tb[j] );
+			related = x != NULL && y != NULL && ReportsClearanceJoined( x, y );
+		}
+	}
+	if ( !related ) {
+		return FALSE;
+	}
+	for ( i = 0; i < 3; i++ ) {
+		for ( j = 0; j < 3; j++ ) {
+			if ( FindDistance( *pa[i], *pb[j] ) <= gap ) {
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
+/** The place a run belongs to, following the links set by
+ * ReportsClearanceNumberPlaces(). */
+static int ReportsClearanceRoot(const int *root, int i)
+{
+	while ( root[i] != i ) {
+		i = root[i];
+	}
+	return i;
+}
+
+/** Number the places: runs at one spot (ReportsClearanceSamePlace(), taken
+ * transitively) share a number, the place with the closest spacing first.
+ * The list must be sorted closest first. */
+static void ReportsClearanceNumberPlaces(DIST_T gap)
+{
+	int n = reportsClearanceList_da.cnt;
+	int *root = MyMalloc( (n > 0 ? n : 1) * sizeof *root );
+	int *number = MyMalloc( (n > 0 ? n : 1) * sizeof *number );
+	int i, j, next = 0;
+
+	for ( i = 0; i < n; i++ ) {
+		root[i] = i;
+		number[i] = 0;
+	}
+	for ( i = 0; i < n; i++ ) {
+		for ( j = i + 1; j < n; j++ ) {
+			int ri, rj;
+
+			if ( !ReportsClearanceSamePlace(
+			             &DYNARR_N( reportsClearanceRun_t, reportsClearanceList_da, i ),
+			             &DYNARR_N( reportsClearanceRun_t, reportsClearanceList_da, j ), gap ) ) {
+				continue;
+			}
+			ri = ReportsClearanceRoot( root, i );
+			rj = ReportsClearanceRoot( root, j );
+			if ( ri != rj ) {
+				/* The closer one (lower index) leads the place. */
+				root[ri > rj ? ri : rj] = ri < rj ? ri : rj;
+			}
+		}
+	}
+	for ( i = 0; i < n; i++ ) {
+		int r = ReportsClearanceRoot( root, i );
+
+		if ( number[r] == 0 ) {
+			number[r] = ++next;
+		}
+		DYNARR_N( reportsClearanceRun_t, reportsClearanceList_da, i ).place = number[r];
+	}
+	reportsClearancePlaceCnt = next;
+	MyFree( root );
+	MyFree( number );
+}
+
+/** Compare with the previous run (reportsClearancePrev_da): mark new and
+ * changed rows, count the runs gone. A run matches one of the same two
+ * tracks that overlaps it (midpoints within half their lengths plus
+ * ``slack``). */
+static void ReportsClearanceMarkChanges(DIST_T slack)
+{
+	int i, j;
+	int prevCnt = reportsClearancePrev_da.cnt;
+	BOOL_T *matched = MyMalloc( (prevCnt > 0 ? prevCnt : 1) * sizeof *matched );
+
+	for ( j = 0; j < prevCnt; j++ ) {
+		matched[j] = FALSE;
+	}
+	reportsClearanceNewCnt = 0;
+	reportsClearanceChangedCnt = 0;
+	for ( i = 0; i < reportsClearanceList_da.cnt; i++ ) {
+		reportsClearanceRun_t *r =
+		        &DYNARR_N( reportsClearanceRun_t, reportsClearanceList_da, i );
+		int hit = -1;
+
+		for ( j = 0; j < prevCnt && hit < 0; j++ ) {
+			reportsClearanceRun_t *p =
+			        &DYNARR_N( reportsClearanceRun_t, reportsClearancePrev_da, j );
+			BOOL_T samePair = ( p->trackA == r->trackA && p->trackB == r->trackB )
+			                  || ( p->trackA == r->trackB && p->trackB == r->trackA );
+
+			if ( !matched[j] && samePair
+			     && FindDistance( p->pos, r->pos )
+			     <= (p->lengthIn + r->lengthIn) / 2.0 + slack ) {
+				hit = j;
+			}
+		}
+		if ( hit < 0 ) {
+			r->change = REPORTS_CLEARANCE_NEW;
+			reportsClearanceNewCnt++;
+		} else {
+			reportsClearanceRun_t *p =
+			        &DYNARR_N( reportsClearanceRun_t, reportsClearancePrev_da, hit );
+
+			matched[hit] = TRUE;
+			if ( fabs( p->spacingIn - r->spacingIn ) > 1e-3
+			     || fabs( p->lengthIn - r->lengthIn ) > 1e-3 ) {
+				r->change = REPORTS_CLEARANCE_CHANGED;
+				reportsClearanceChangedCnt++;
+			}
+		}
+	}
+	reportsClearanceFixedCnt = 0;
+	for ( j = 0; j < prevCnt; j++ ) {
+		if ( !matched[j] ) {
+			reportsClearanceFixedCnt++;
+		}
+	}
+	MyFree( matched );
 }
 
 void ReportsTrackClearance( void * unused )
@@ -3158,9 +3366,25 @@ void ReportsTrackClearance( void * unused )
 		qsort( reportsClearanceList_da.ptr, (size_t)reportsClearanceList_da.cnt,
 		       sizeof(reportsClearanceRun_t), ReportsClearanceCompare );
 	}
+	ReportsClearanceNumberPlaces( REPORTS_CLEARANCE_PLACE_GAP * factor );
+	reportsClearanceMarked = reportsClearanceMarkChanges;
+	if ( reportsClearanceMarked ) {
+		ReportsClearanceMarkChanges( REPORTS_CLEARANCE_MIN_RUN * factor );
+	}
+	if ( reportsClearanceList_da.cnt > 1 ) {
+		qsort( reportsClearanceList_da.ptr, (size_t)reportsClearanceList_da.cnt,
+		       sizeof(reportsClearanceRun_t), ReportsClearancePlaceCompare );
+	}
+	/* This run is what the next Refresh compares with. */
+	DYNARR_RESET( reportsClearanceRun_t, reportsClearancePrev_da );
+	for ( i = 0; i < reportsClearanceList_da.cnt; i++ ) {
+		DYNARR_APPEND( reportsClearanceRun_t, reportsClearancePrev_da, 10 );
+		DYNARR_LAST( reportsClearanceRun_t, reportsClearancePrev_da ) =
+		        DYNARR_N( reportsClearanceRun_t, reportsClearanceList_da, i );
+	}
 
 	{
-		char summary[200];
+		char summary[320];
 		DIST_T ft = ReportsClearanceFt();
 
 		if ( log_reports < 0 ) { log_reports = LogFindIndex( "reports" ); }
@@ -3170,9 +3394,18 @@ void ReportsTrackClearance( void * unused )
 
 		ReportsShowDialog( &reportsClearanceDlg, _("Track Clearance Report") );
 		ReportsPopulateClearanceChoices();
-		snprintf( summary, sizeof summary,
-		          _("%d place(s) where tracks are closer than %.0f ft (%.2f in)"),
-		          reportsClearanceList_da.cnt, ft, ReportsClearanceFtToIn( ft ) );
+		if ( reportsClearanceMarked ) {
+			snprintf( summary, sizeof summary,
+			          _("%d place(s) (%d row(s)) closer than %.0f ft (%.2f in) -- since last refresh: %d fixed, %d new, %d changed"),
+			          reportsClearancePlaceCnt, reportsClearanceList_da.cnt, ft,
+			          ReportsClearanceFtToIn( ft ), reportsClearanceFixedCnt,
+			          reportsClearanceNewCnt, reportsClearanceChangedCnt );
+		} else {
+			snprintf( summary, sizeof summary,
+			          _("%d place(s) (%d row(s)) where tracks are closer than %.0f ft (%.2f in)"),
+			          reportsClearancePlaceCnt, reportsClearanceList_da.cnt, ft,
+			          ReportsClearanceFtToIn( ft ) );
+		}
 		wMessageSetValue( reportsClearanceSummary, summary );
 	}
 

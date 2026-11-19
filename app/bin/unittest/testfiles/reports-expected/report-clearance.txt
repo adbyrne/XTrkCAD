@@ -4,6 +4,8 @@ Demo
 
 
 Clearance: 13 ft (1.791 in)
+Places: 0
 Tracks closer than the clearance: 0
+Since last refresh: 0 fixed, 0 new, 0 changed
 
 No tracks closer than the clearance.

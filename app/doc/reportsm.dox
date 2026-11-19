@@ -479,7 +479,24 @@ close to its neighbour.
 Each row gives the two tracks (<b>Track A</b>, <b>Track B</b>) with their
 layers (<b>Layer #</b>/<b>Layer Name</b>), the closest <b>Spacing</b>
 between their centrelines and the <b>Length</b> of the stretch where they
-are too close, both in inches. The closest places are listed first.
+are too close, both in inches.
+
+Rows at one spot share a <b>Place</b> number: rows whose tracks are the
+same or joined to each other, and whose stretches touch or nearly touch. A
+siding drawn too close along both its curve and its straight is one place
+with two rows; so is a group of yard tracks crowding each other. Places are
+numbered closest first, and a place's rows are listed together, so fixing
+one place shows whether its neighbours are still there.
+
+The <b>Change</b> column compares with the report before the last
+<b>Refresh</b>: <b>new</b> marks a stretch that wasn't there, <b>changed</b>
+one whose spacing or length changed, and the summary line also counts the
+stretches that are gone (fixed). After moving a track, press
+<b>Refresh</b> to see whether the place went away, only moved, or whether
+the move crowded something next to it. Opening the report, changing the
+<b>Clearance</b> or loading another layout starts afresh, without marks. A
+track that is split or rebuilt gets new ids, so its stretch can show as
+fixed and new at once.
 
 Two tracks count as side by side where they run within 5 degrees of
 parallel, closer than the clearance, for at least 1 inch (in HO; scaled
@@ -496,7 +513,8 @@ scale; 13 ft, the usual US practice, by default (1.79 in in HO). Changing
 the choice updates the report at once, and it is remembered for next time.
 The saved or printed report states the clearance used.
 
-A summary line above the list gives the number of places found, updated
+A summary line above the list gives the number of places and rows found,
+and after a <b>Refresh</b> how many were fixed, new or changed, updated
 whenever the report is generated or refreshed.
 
 The report is interactive, the same way the Gaps Report (\ref

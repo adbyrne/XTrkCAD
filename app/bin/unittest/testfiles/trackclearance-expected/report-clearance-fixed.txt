@@ -1,0 +1,14 @@
+XTrackCAD Track Clearance Report
+XTrackCAD
+Demo
+
+
+Clearance: 13 ft (1.791 in)
+Places: 2
+Tracks closer than the clearance: 3
+Since last refresh: 1 fixed, 0 new, 0 changed
+
+Place | Change  |  Track | Layer | Layer Name     |  Track | Layer | Layer Name     | Spacing |  Length
+    1 |         |     22 |     1 | Main           |     24 |     2 | Passing        |   1.334 |    1.50
+    1 |         |     22 |     1 | Main           |     25 |     2 | Passing        |   1.400 |   16.50
+    2 |         |      3 |     3 | Storage        |      4 |     3 | Storage        |   1.500 |   17.50
