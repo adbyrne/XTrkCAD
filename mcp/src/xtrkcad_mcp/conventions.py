@@ -594,6 +594,33 @@ def _layer_issue(severity: str, rule: str, message: str, layer: int,
     return Issue(severity, rule, message, hint=hint, layer=layer, group=group)
 
 
+def _check_passing_joins(layout: Layout, issues: list[Issue]) -> None:
+    """A passing track leaves the main at a turnout. One joined straight to
+    main track (not a turnout) is usually a piece drawn on the wrong layer:
+    XTrkCAD puts a new track on the current layer, not on the layer of the
+    track it joins. The station's siding then can't be found."""
+    categories = layer_categories(layout)
+    by_id = {t.id: t for t in layout.tracks}
+
+    def category(track: TrackObject) -> str:
+        return categories.get(track.layer, ("",))[0]
+
+    for track in layout.tracks:
+        if track.kind == "TURNOUT" or category(track) != "passing":
+            continue
+        for ep in track.endpoints:
+            other = by_id.get(ep.connected_to) if ep.connected_to is not None else None
+            if other is None or other.kind == "TURNOUT" or category(other) != "mainline":
+                continue
+            issues.append(Issue(
+                "warning", "PASSING_JOINS_MAIN",
+                f"Passing track {track.id} ({_layer_name(layout, track.layer)}) joins main "
+                f"track {other.id} ({_layer_name(layout, other.layer)}) without a turnout",
+                hint="Probably a piece drawn on the wrong layer (a new track goes on the "
+                     "current layer): move one of them to the other's layer.",
+                layer=track.layer, track_id=track.id, x=ep.x, y=ep.y))
+
+
 def _check_groups(layout: Layout, notes: list[ConventionNote], issues: list[Issue]) -> None:
     """Category, railroad and subdivision Layer Group rules (spec 3.1, 3.2)."""
     with_track = track_layers(layout)
@@ -976,6 +1003,7 @@ def check_conventions(layout: Layout) -> list[Issue]:
     _check_kind_fields(notes, issues)
     _check_house_tracks(notes, issues)
     _check_groups(layout, notes, issues)
+    _check_passing_joins(layout, issues)
     snapped = _check_placement(layout, notes, issues)
     _check_car_spots(layout, notes, snapped, issues)
     from .mileposts import check_mileposts   # mileposts imports this module
