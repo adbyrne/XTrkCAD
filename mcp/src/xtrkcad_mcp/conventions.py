@@ -783,9 +783,10 @@ def main_turnouts_from(layout: Layout, start: TrackObject, main: set[int]) -> li
 
 def _check_placement(layout: Layout, notes: list[ConventionNote],
                      issues: list[Issue]) -> dict[int, TrackObject]:
-    """Spec 4.0 positions, 4.2 anchors, 4.3 stations, 4.4 YL boards, 4.9.
-    Returns note id -> the track it snapped to."""
+    """Spec 4.0 positions, 4.2 anchors, 4.3 stations, 4.4 YL boards, 4.5
+    industries on main, 4.9. Returns note id -> the track it snapped to."""
     main = _main_layers(layout)
+    passing = {idx for idx, (cat, _) in layer_categories(layout).items() if cat == "passing"}
     snapped: dict[int, TrackObject] = {}
     for note in notes:
         if note.kind in _UNPOSITIONED_KINDS:
@@ -832,6 +833,13 @@ def _check_placement(layout: Layout, notes: list[ConventionNote],
                     f"Yard-limit board {note.id} is not on main track", note, track))
             else:
                 boards.setdefault(note.id, []).append(note)
+        elif note.kind in _DESTINATION_KINDS and (on_main or track.layer in passing):
+            # Allowed (spec 4.5, v1.1): usually a timetable stop. Info, so
+            # the Op Density report can keep its spots out of storage.
+            where = "main" if on_main else "passing"
+            issues.append(_placed_issue(
+                "info", "INDUSTRY_ON_MAIN",
+                f"{note.kind} {note.id} is on {where} track", note, track))
         elif note.kind == "switchback":
             _check_switchback(layout, note, track, main, by_id, issues)
         elif note.kind == "terminus" and (track.kind != "TURNOUT" or not on_main):
