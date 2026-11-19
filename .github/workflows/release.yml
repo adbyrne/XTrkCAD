@@ -1,7 +1,7 @@
 name: Release
 
-# Builds Release packages on every push to main where the build and
-# tests pass. Packages are uploaded as GitHub Actions artifacts (14-day
+# Builds Release packages on every push to main that changes the app's
+# paths (see paths: below) where the build and tests pass. Packages are uploaded as GitHub Actions artifacts (14-day
 # retention) on every push. When a version tag (v*.*.*) is pushed, a
 # permanent GitHub Release is also created with all packages attached,
 # once the tag matches ProgramVersion.cmake and every install test passed
@@ -17,6 +17,18 @@ on:
   push:
     branches:
       - main
+    # The app's paths: the same list in ci-gtk3, ci-gtk3-preview,
+    # ci-windows-msvc, codeql and release (tools/check-workflow-paths.sh checks
+    # they match). A change only outside them runs none of these workflows; a
+    # new top-level directory goes into all five.
+    paths:
+      - '*'
+      - 'app/**'
+      - 'CMake/**'
+      - 'distribution/**'
+      - 'docs/**'
+      - 'tools/**'
+      - '.github/**'
     tags:
       - 'v*.*.*'
   workflow_dispatch:

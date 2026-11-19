@@ -20,9 +20,33 @@ on:
     branches:
       - main
       - test/**
+    # The app's paths: the same list in ci-gtk3, ci-gtk3-preview,
+    # ci-windows-msvc, codeql and release (tools/check-workflow-paths.sh checks
+    # they match). A change only outside them runs none of these workflows; a
+    # new top-level directory goes into all five.
+    paths:
+      - '*'
+      - 'app/**'
+      - 'CMake/**'
+      - 'distribution/**'
+      - 'docs/**'
+      - 'tools/**'
+      - '.github/**'
   pull_request:
     branches:
       - main
+    # The app's paths: the same list in ci-gtk3, ci-gtk3-preview,
+    # ci-windows-msvc, codeql and release (tools/check-workflow-paths.sh checks
+    # they match). A change only outside them runs none of these workflows; a
+    # new top-level directory goes into all five.
+    paths:
+      - '*'
+      - 'app/**'
+      - 'CMake/**'
+      - 'distribution/**'
+      - 'docs/**'
+      - 'tools/**'
+      - '.github/**'
   workflow_dispatch:
 
 permissions:

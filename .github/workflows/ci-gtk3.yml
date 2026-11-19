@@ -4,9 +4,33 @@ on:
     branches:
       - main
       - test/**
+    # The app's paths: the same list in ci-gtk3, ci-gtk3-preview,
+    # ci-windows-msvc, codeql and release (tools/check-workflow-paths.sh checks
+    # they match). A change only outside them runs none of these workflows; a
+    # new top-level directory goes into all five.
+    paths:
+      - '*'
+      - 'app/**'
+      - 'CMake/**'
+      - 'distribution/**'
+      - 'docs/**'
+      - 'tools/**'
+      - '.github/**'
   pull_request:
     branches:
       - main
+    # The app's paths: the same list in ci-gtk3, ci-gtk3-preview,
+    # ci-windows-msvc, codeql and release (tools/check-workflow-paths.sh checks
+    # they match). A change only outside them runs none of these workflows; a
+    # new top-level directory goes into all five.
+    paths:
+      - '*'
+      - 'app/**'
+      - 'CMake/**'
+      - 'distribution/**'
+      - 'docs/**'
+      - 'tools/**'
+      - '.github/**'
   # Lets hg-sync-default.yml start CI on the branches it pushes.
   workflow_dispatch:
 
@@ -476,6 +500,17 @@ jobs:
               echo "\`advanced.md\` too. If not, this is just a heuristic nudge -- ignore it."
             } >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  workflow-paths-check:
+    # Gating: the app workflows (this one, ci-gtk3-preview, ci-windows-msvc,
+    # codeql, release) must trigger on the same paths: list. It's kept by hand
+    # in each, so a drift would quietly skip CI or a release for some changes.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check the app workflows' paths lists match
+        run: sh tools/check-workflow-paths.sh
 
   astyle-check:
     # Gating: fails if any tracked app/bin, app/wlib, app/help, or app/tools file is not
