@@ -17,6 +17,7 @@ from xtrkcad_mcp.config import load_config
 from xtrkcad_mcp.track_plan import (
     PlanError,
     build_track_plan,
+    clearance_point,
     offset_run_length,
     parse_track_plan,
     plan_route,
@@ -100,6 +101,36 @@ def test_offset_run_length_for_ho():
     assert offset_run_length(peco.left, 2.0, 20.0) == pytest.approx(16.83, abs=0.01)
 
 
+# -- clearance points -----------------------------------------------------------------
+
+def test_clearance_point_of_a_peco_number_6():
+    """Where the diverging track is 13 ft (prototype) from the straight one,
+    1.79 in in HO: on the straight past the turnout, 13.9 in from the points
+    (the frog is 7.1 in from them)."""
+    peco = find_turnouts("PECO Code 83 #6", "HO")
+    for hand in (peco.left, peco.right):
+        x = clearance_point(hand, 13 * 12 / 87.1, 2.0, 20.0)
+        assert x == pytest.approx(13.9, abs=0.1)
+
+
+def test_clearance_inside_the_turnout():
+    """A clearance smaller than the turnout's own offset (1 in) is reached
+    on the turnout's diverging route."""
+    peco = find_turnouts("PECO Code 83 #6", "HO")
+    assert clearance_point(peco.left, 0.65, 2.0, 20.0) == pytest.approx(7.1, abs=0.05)
+
+
+def test_clearance_at_full_spacing_is_where_tracks_run_parallel():
+    peco = find_turnouts("PECO Code 83 #6", "HO")
+    assert clearance_point(peco.left, 2.0, 2.0, 20.0) == pytest.approx(
+        offset_run_length(peco.left, 2.0, 20.0), abs=1e-6)
+
+
+def test_clearance_default_is_13_ft_scaled(hillside):
+    assert _spec(hillside).clearance_in == pytest.approx(13 * 12 / 87.1)
+    assert _spec(hillside, clearance="2in").clearance_in == pytest.approx(2.0)
+
+
 # -- what gets built -----------------------------------------------------------------
 
 def _pieces(result, kind=None, layer=None):
@@ -124,11 +155,25 @@ def test_passing_siding(hillside):
     siding = _pieces(result, layer=2)
     straights = [p for p in siding if isinstance(p, Straight)]
     clear = max(straights, key=lambda s: s.length())
-    assert clear.length() == pytest.approx(30.0, abs=1e-6)
     assert {round(clear.p0[0], 6), round(clear.p1[0], 6)} == {14.0}   # 2 in toward the room
     assert len(result.model.open_ends()) == 2
     station = result.feature("AL")
-    assert station["siding_cars"] == 5
+    # "5 cars" is between the clearance points; the straight part is shorter
+    # by the curved track beyond each clearance point.
+    assert station["capacity_in"] == pytest.approx(30.0, abs=1e-6)
+    assert station["capacity_cars"] == 5
+    tail = station["run_in"] - station["clearance_in"]
+    assert station["clear_in"] == pytest.approx(30.0 - 2 * tail, abs=0.02)   # rounded figures
+    assert clear.length() == pytest.approx(station["clear_in"], abs=0.01)
+    assert station["clearance_in"] == pytest.approx(13.9, abs=0.1)
+
+
+def test_wider_clearance_lengthens_the_siding(hillside):
+    """At a 2 in clearance the clearance point is where the tracks run
+    parallel, so the whole 30 in is straight."""
+    result = _build(hillside, clearance="2in",
+                    stations=[{"id": "AL", "shelf": "west_wall", "siding": "5 cars"}])
+    assert result.feature("AL")["clear_in"] == pytest.approx(30.0, abs=1e-6)
 
 
 def test_spur_ends_open_with_its_length(hillside):
@@ -138,7 +183,10 @@ def test_spur_ends_open_with_its_length(hillside):
                    "points_toward": "start"}]}])
     assert result.errors == []
     spur = result.feature("AL_FEED")
-    assert spur["length_in"] == pytest.approx(18.0)
+    assert spur["capacity_in"] == pytest.approx(18.0)
+    assert spur["capacity_cars"] == 3
+    assert spur["clear_in"] == pytest.approx(
+        18.0 - (spur["run_in"] - spur["clearance_in"]), abs=1e-6)
     assert spur["layer"] == 3
     ends = result.model.open_ends()
     assert len(ends) == 3
@@ -156,13 +204,15 @@ def test_facility_spur_on_service_layer(hillside):
 
 
 def test_spur_beside_a_siding_on_its_own_side_runs_end_to_end(hillside):
-    """On the siding's side a spur can't overlap it: 57.7 + 2 + 34.8 in > 87 in (2 in between the two track ends)."""
+    """On the siding's side a spur can't overlap it: the 5-car siding (30 in
+    between clearance points, 57.8 in switch to switch) plus 2 in plus the
+    spur (31.9 in) is more than the shelf's 87 in."""
     result = _build(hillside, stations=[{
-        "id": "CE", "shelf": "east_wall", "siding": "4 cars",
+        "id": "CE", "shelf": "east_wall", "siding": "5 cars",
         "spurs": [{"id": "CE_COAL", "kind": "facility", "type": "coal",
                    "length": "3 cars", "side": "room", "points_toward": "start"}]}])
     assert result.model is None
-    assert "94.5 in" in result.errors[0] and "east_wall" in result.errors[0]
+    assert result.errors == ["station CE: needs 91.8 in on shelf east_wall, 87.0 in free there"]
 
 
 def test_yard_at_route_start(hillside):
@@ -171,7 +221,9 @@ def test_yard_at_route_start(hillside):
     assert result.errors == []
     yard = result.feature("HY")
     assert len(yard["tracks"]) == 3
-    assert all(t["length_in"] >= 36.0 - 1e-6 for t in yard["tracks"])
+    caps = [t["capacity_in"] for t in yard["tracks"]]
+    assert min(caps) == pytest.approx(36.0, abs=1e-6)     # the last two tracks
+    assert all(t["capacity_cars"] >= 6 for t in yard["tracks"])
     bumpers = sorted(round(e[0], 6) for _p, _i, e in result.model.open_ends()
                      if abs(e[1] - 1.0) < 1e-6)
     assert bumpers == [12.0, 14.0, 16.0]
@@ -227,6 +279,16 @@ def test_spurs_ending_face_to_face_keep_their_distance(hillside):
     assert result.errors == []
     gap = abs(result.feature("B")["end"][1] - result.feature("A")["end"][1])
     assert gap >= 2.0 - 1e-6
+
+
+def test_spur_shorter_than_its_curve_is_an_error(hillside):
+    """Between its clearance point and where it runs parallel a spur has
+    about 2.9 in of curve: it can't be shorter than that."""
+    result = _build(hillside, stations=[{
+        "id": "AL", "shelf": "west_wall", "siding": "5 cars",
+        "spurs": [{"id": "A", "length": "2in", "side": "wall", "points_toward": "start"}]}])
+    assert result.model is None
+    assert "A" in result.errors[0] and "clearance" in result.errors[0]
 
 
 # -- the tool -------------------------------------------------------------------------

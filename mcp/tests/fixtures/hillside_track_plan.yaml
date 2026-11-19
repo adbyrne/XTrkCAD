@@ -29,7 +29,7 @@ stations:
   - id: AL
     name: Alder
     shelf: west_wall
-    siding: 5 cars             # clear length between the turnouts
+    siding: 5 cars             # what it holds, between the clearance points
     siding_side: room
     spurs:
       - {id: AL_FEED, name: Alder Feed Mill, length: 3 cars, side: wall,

@@ -285,9 +285,15 @@ def generate_track_plan(config_path: str, layout_path: str, output_path: str = "
 
     Returns:
         {written, output_path, backup_path, pieces, open_ends, features,
-        errors}. features: the yard (its tracks' lengths in in and cars),
-        stations (siding length, terminus tail), spurs (length, layer, end
-        point).
+        errors}. features: the yard (each track's capacity_in and
+        capacity_cars), stations and spurs (capacity_in, capacity_cars:
+        what the track holds between its clearance points; clear_in: its
+        straight part; clearance_in: from the points to the clearance
+        point), a terminus's tail, a spur's layer and end point.
+
+    Lengths in the plan are what a track holds, between clearance points:
+    where it is ``clearance`` (default 13 ft scaled) from the track it
+    leaves, so a car there doesn't foul it.
     """
     from xtrkcad_mcp.generator import _version_backup
     from xtrkcad_mcp.track_plan import PlanError, build_track_plan, parse_track_plan
