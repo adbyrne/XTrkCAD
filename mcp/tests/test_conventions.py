@@ -1372,3 +1372,51 @@ def test_facility_bad_car_spots(tmp_path, value):
     issues = _check(tmp_path, [(2, {"kind": "facility", "id": "WP_COAL", "type": "coal",
                                     "car_spots": value}, None, 50, 40.0)])
     assert "NOTE_FIELD_TYPE" in _rules(issues)
+
+
+# -- v1.1: car spots the track can't hold --------------------------------------
+
+# A 10 in service spur (layer 2): 1 HO car (2 cars per model foot).
+SHORT_SPUR = """STRAIGHT 1 0 0 0 0 HO 0
+\tE 0.000000 0.000000 270.000000
+\tE 100.000000 0.000000 90.000000
+\tEND$SEGS
+
+STRAIGHT 3 2 0 0 0 HO 0
+\tE 0.000000 40.000000 270.000000
+\tE 10.000000 40.000000 90.000000
+\tEND$SEGS
+"""
+
+
+def _spots_issues(tmp_path, note, tracks=None):
+    issues = _check(tmp_path, [(2, note, None, 5, 40.0)], tracks=tracks)
+    return [i for i in issues if i.rule == "CAR_SPOTS_EXCEED_TRACK"]
+
+
+@pytest.mark.parametrize("note", [
+    {"kind": "industry", "id": "QM2"},                       # default 2 spots
+    {"kind": "industry", "id": "QM2", "car_spots": 2},
+    {"kind": "team_track", "id": "QM2", "car_spots": 3},
+    {"kind": "facility", "id": "WP_COAL", "type": "coal", "car_spots": 2},
+    {"kind": "storage", "id": "CAR_BARN", "car_spots": 2},
+])
+def test_car_spots_exceed_track_is_warning(tmp_path, note):
+    issues = _spots_issues(tmp_path, note, tracks=SHORT_SPUR)
+    assert [(i.severity, i.track_id) for i in issues] == [("warning", 3)]
+
+
+@pytest.mark.parametrize("note", [
+    {"kind": "industry", "id": "QM2", "car_spots": 1},
+    {"kind": "facility", "id": "WP_TT", "type": "turntable"},  # no spots, no check
+    {"kind": "storage", "id": "CAR_BARN"},
+])
+def test_car_spots_the_track_holds(tmp_path, note):
+    assert _spots_issues(tmp_path, note, tracks=SHORT_SPUR) == []
+
+
+def test_car_spots_on_a_long_track(tmp_path):
+    # The default service track runs 100 in: 16 cars.
+    assert _spots_issues(tmp_path, {"kind": "industry", "id": "QM2", "car_spots": 16}) == []
+    assert len(_spots_issues(tmp_path, {"kind": "industry", "id": "QM2",
+                                        "car_spots": 17})) == 1

@@ -44,7 +44,8 @@ def test_facility_without_car_spots_is_not_counted():
     service = get_operation_density(str(CLEAN_FIXTURE))["service"]
     assert service["facilities"] == [{
         "id": "WP_COAL", "type": "coal", "location": "WP", "track_id": 3,
-        "car_spots": None, "capacity_cars": 40, "counted": False}]
+        "car_spots": None, "capacity_cars": 40, "counted": False,
+        "over_capacity": False}]
     assert service["car_spots"] == 0
     assert service["not_counted"] == ["WP_COAL"]
 
@@ -78,7 +79,8 @@ def test_industry_spots_and_unserved_track():
     qm1 = _industry(result, "QM1")
     # QM1: 2 spots on 240 in of service track (40 cars).
     assert qm1 == {"id": "QM1", "kind": "industry", "station": "XP", "car_spots": 2,
-                   "capacity_cars": 40, "unserved_cars": 38, "on_main": False}
+                   "capacity_cars": 40, "unserved_cars": 38, "on_main": False,
+                   "over_capacity": False}
     assert _industry(result, "XP_TEAM")["kind"] == "team_track"
 
 
@@ -107,7 +109,8 @@ def test_yards_and_storage_from_notes():
     assert yards["WP"]["tracks"] == [
         {"label": "Track 2", "function": "classification", "capacity_cars": 40}]
     assert yards["WP"]["capacity_cars"] == 40
-    assert view["storage"] == [{"id": "CAR_BARN", "car_spots": None, "capacity_cars": 40}]
+    assert view["storage"] == [{"id": "CAR_BARN", "car_spots": None, "capacity_cars": 40,
+                              "over_capacity": False}]
     assert view["totals"]["yard_capacity_cars"] == sum(y["capacity_cars"] for y in view["yards"])
 
 
@@ -147,3 +150,21 @@ def test_report_without_notes_has_no_note_views(tmp_path):
     write_operation_density_report(str(PLAIN_FIXTURE), str(out), format="md")
     text = out.read_text(encoding="utf-8")
     assert "## Industries and Yards" not in text and "## Railroad Service" not in text
+
+
+def test_report_warns_when_spots_exceed_track(tmp_path):
+    # QM1: 41 spots on 240 in of track (40 cars).
+    p = _variant(tmp_path, '""car_spots"": 2, ""car_types"": [""HM""]',
+                 '""car_spots"": 41, ""car_types"": [""HM""]')
+    result = get_operation_density(str(p))
+    assert _industry(result, "QM1")["over_capacity"] is True
+    assert _industry(result, "XP_TEAM")["over_capacity"] is False
+    out = tmp_path / "od.md"
+    write_operation_density_report(str(p), str(out), format="md")
+    assert "Warning: QM1 has 41 car spots; its track holds 40 cars." in out.read_text(
+        encoding="utf-8")
+
+
+def test_facility_over_capacity(tmp_path):
+    view = get_operation_density(str(_with_coal_spots(tmp_path, 41)))["service"]
+    assert view["facilities"][0]["over_capacity"] is True

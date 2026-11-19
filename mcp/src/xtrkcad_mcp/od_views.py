@@ -25,6 +25,12 @@ _COUNTED_BY_LENGTH = ("storage", "staging", "passing")
 _ON_MAIN = ("mainline", "passing")
 
 
+def _over(spots: int | None, capacity: int | None) -> bool:
+    """More car spots than the track holds (the check's
+    CAR_SPOTS_EXCEED_TRACK warning)."""
+    return spots is not None and capacity is not None and spots > capacity
+
+
 def note_views(layout: Layout, category: Callable[[int], str]) -> dict | None:
     """The industries-and-yards and service views, or None when the layout
     has no convention notes. ``category`` maps a layer index to its Op
@@ -54,6 +60,7 @@ def _industries_and_yards(export: dict, on_main: set[str]) -> dict:
                 "car_spots": ind["car_spots"], "capacity_cars": cap,
                 "unserved_cars": max(cap - ind["car_spots"], 0) if cap is not None else None,
                 "on_main": ind["id"] in on_main,
+                "over_capacity": _over(ind["car_spots"], cap),
             })
     industries.sort(key=lambda i: i["id"])
     yards = []
@@ -63,7 +70,9 @@ def _industries_and_yards(export: dict, on_main: set[str]) -> dict:
         yards.append({"id": yard["id"], "kind": yard["kind"], "tracks": tracks,
                       "capacity_cars": sum(t["capacity_cars"] or 0 for t in tracks)})
     storage = [{"id": st["id"], "car_spots": st["car_spots"],
-                "capacity_cars": st["capacity_cars"]} for st in export["storage"]]
+                "capacity_cars": st["capacity_cars"],
+                "over_capacity": _over(st["car_spots"], st["capacity_cars"])}
+               for st in export["storage"]]
     off_main = [i for i in industries if not i["on_main"]]
     return {
         "industries": industries,
@@ -89,6 +98,7 @@ def _service(export: dict, by_id: dict, category: Callable[[int], str]) -> dict:
             "id": fac["id"], "type": fac["type"], "location": fac["location"],
             "track_id": fac["track_id"], "car_spots": spots,
             "capacity_cars": fac["capacity_cars"], "counted": spots is not None,
+            "over_capacity": _over(spots, fac["capacity_cars"]),
         })
         track = by_id.get(fac["track_id"])
         if spots is not None and (track is None
@@ -104,6 +114,12 @@ def _service(export: dict, by_id: dict, category: Callable[[int], str]) -> dict:
 
 def _n(value) -> str:
     return "-" if value is None else str(value)
+
+
+def _warnings(entries: list[dict]) -> list[tuple]:
+    return [("text", f"Warning: {e['id']} has {e['car_spots']} car spots; "
+                     f"its track holds {e['capacity_cars']} cars.")
+            for e in entries if e.get("over_capacity")]
 
 
 def view_sections(data: dict) -> list[tuple[str, list[tuple]]]:
@@ -125,6 +141,7 @@ def view_sections(data: dict) -> list[tuple[str, list[tuple]]]:
                            [[i["id"], i["kind"], _n(i["station"]), str(i["car_spots"]),
                              _n(i["capacity_cars"]), _n(i["unserved_cars"]),
                              "yes" if i["on_main"] else ""] for i in iy["industries"]]))
+        blocks += _warnings(iy["industries"]) + _warnings(iy["storage"])
         if tot["on_main_spots"]:
             blocks.append(("text", f"On main or passing track: {tot['on_main_spots']} car "
                                    "spots, not storage (a spotted car blocks the line)."))
@@ -149,6 +166,7 @@ def view_sections(data: dict) -> list[tuple[str, list[tuple]]]:
                            [[f["id"], _n(f["type"]), _n(f["location"]), _n(f["car_spots"]),
                              _n(f["capacity_cars"]), "yes" if f["counted"] else "no"]
                             for f in service["facilities"]]))
+        blocks += _warnings(service["facilities"])
         if service["not_counted"]:
             blocks.append(("text", "Not counted (no car_spots): "
                                    + ", ".join(service["not_counted"])))

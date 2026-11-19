@@ -24,6 +24,7 @@ from .models import (
     TrackObject,
     _normalize_angle,
     arc_polyline,
+    cars_per_real_ft,
     category_from_layer_name,
 )
 
@@ -103,6 +104,7 @@ _SEVERITY_ORDER = ("error", "warning", "info")
 # (spec 4.0). Layout inches.
 SNAP_WARN = 3.0      # farther than a note normally sits from its track
 SNAP_ERROR = 24.0    # nothing this close on the layer: the note is misplaced
+CAR_SPOTS_DEFAULT = 2   # an industry's or team track's car spots (spec 4.5)
 
 # Kinds whose notes have no position (spec 4.1).
 _UNPOSITIONED_KINDS = ("railroad", "subdivision")
@@ -902,6 +904,58 @@ def _check_switchback(layout: Layout, note: ConventionNote, tail: TrackObject,
             hint='Say which act as the switchback switch: "switches": [track ids].'))
 
 
+def note_usable_length(layout: Layout, note: ConventionNote,
+                       track: TrackObject) -> tuple[int, float | None]:
+    """The track a note marks and its usable length in model inches: the
+    connected non-turnout tracks, switch throats excluded. A note on a
+    turnout measures the nearest non-turnout track instead (None when
+    there is none)."""
+    from .stations import _bfs_usable_length, _snap_to_segment
+    if track.kind == "TURNOUT":
+        tid, _t, _d = _snap_to_segment(layout, note.x, note.y, note.layer,
+                                       exclude_turnouts=True)
+        if tid < 0:
+            return track.id, None
+        track = next(t for t in layout.tracks if t.id == tid)
+    return track.id, _bfs_usable_length(layout, track.id)
+
+
+def track_cars(layout: Layout, inches: float) -> int:
+    """Whole cars on a length of track, as the capacity reports count."""
+    return int(inches / 12.0 * cars_per_real_ft(layout.scale or "HO"))
+
+
+def _check_car_spots(layout: Layout, notes: list[ConventionNote],
+                     snapped: dict[int, TrackObject], issues: list[Issue]) -> None:
+    """v1.1: more car spots than the track holds. Industries and team
+    tracks are checked with their default spots too; facilities and
+    storage tracks only when the note gives car_spots."""
+    for note in notes:
+        if note.kind not in _DESTINATION_KINDS + ("facility", "storage"):
+            continue
+        spots = note.fields.get("car_spots")
+        if not (isinstance(spots, int) and not isinstance(spots, bool) and spots > 0):
+            if note.kind not in _DESTINATION_KINDS:
+                continue
+            spots = CAR_SPOTS_DEFAULT
+        track = snapped.get(note.note_id)
+        if track is None:
+            continue
+        track_id, length = note_usable_length(layout, note, track)
+        if length is None:
+            continue
+        cars = track_cars(layout, length)
+        if spots > cars:
+            given = "car_spots" in note.fields
+            issue = _note_issue(
+                "warning", "CAR_SPOTS_EXCEED_TRACK",
+                f"{note.kind} {note.id}: {spots} car spots"
+                f"{'' if given else ' (default)'}, its track holds {cars}",
+                note, hint=f"Give \"car_spots\": {cars} or less, or lengthen the track.")
+            issue.track_id = track_id
+            issues.append(issue)
+
+
 def sort_issues(issues: list[Issue]) -> list[Issue]:
     return sorted(issues, key=lambda i: (
         _SEVERITY_ORDER.index(i.severity), i.rule,
@@ -919,6 +973,7 @@ def check_conventions(layout: Layout) -> list[Issue]:
     _check_house_tracks(notes, issues)
     _check_groups(layout, notes, issues)
     snapped = _check_placement(layout, notes, issues)
+    _check_car_spots(layout, notes, snapped, issues)
     from .mileposts import check_mileposts   # mileposts imports this module
     issues += check_mileposts(layout, notes, snapped)
     return sort_issues(issues)
