@@ -116,7 +116,7 @@ All write-report tools accept a `format` parameter: `"txt"` (default), `"md"`, `
 | `write_turnout_report` | Turnout count and density per 100 ft, by layer |
 | `write_gaps_report` | Open endpoints, near-miss pairs, turntable stall summary |
 | `write_radius_map` | SVG colour-coded curve radius map |
-| `write_station_distance_report` | Station-to-station distances |
+| `write_station_distance_report` | Station-to-station distances. With convention notes: per railroad and subdivision, from each station's MP and the subdivision's `mp_scale` (a joint station once on each); otherwise track-graph distances between `STATION:` notes |
 
 ### Limiting a tool to part of the layout
 
@@ -276,6 +276,7 @@ src/xtrkcad_mcp/
   conventions.py — check_conventions: Operating Data Conventions rules
   export_v2.py   — export_layout_data v2 (layout_data.json schema 2)
   od_views.py    — Op Density views from the notes: industries and yards, service
+  station_distances.py — station distance report from the milepost model
   mileposts.py   — milepost anchors, calculated mileposts, station and yard limits
   svg_views.py   — plan and elevation SVG views
   cli.py         — xtrkcad-report command-line entry point

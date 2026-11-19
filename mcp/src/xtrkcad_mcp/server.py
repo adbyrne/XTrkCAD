@@ -13,6 +13,7 @@ from xtrkcad_mcp.config import load_config
 from xtrkcad_mcp.conventions import CONVENTIONS_VERSION, check_conventions as _check_conventions
 from xtrkcad_mcp.export_v2 import build_export_v2
 from xtrkcad_mcp.od_views import note_views, txt_table, view_sections
+from xtrkcad_mcp import station_distances as _sd
 from xtrkcad_mcp.models import (
     SCALE_RATIOS,
     Layout,
@@ -2772,7 +2773,16 @@ def write_station_distance_report(
 ) -> str:
     """Write a station distance report to a file.
 
-    Reports the shortest track-graph distance between every pair of STATION:
+    With convention notes (a railroad note and stations with MPs, Operating
+    Data Conventions v1), the report is built from the milepost model: one
+    table per railroad and subdivision, stations in MP order, and every
+    pair's distance as the MP difference times that subdivision's own
+    mp_scale (the main-track distance). A joint station is listed once on
+    each subdivision. route_layer_names, exclude_turnouts and stations_yaml
+    don't apply there; the report says so when they are given.
+
+    Otherwise (STATION: text notes, no MP anchors) it reports the shortest
+    track-graph distance between every pair of STATION:
     notes in model inches and mileposts.  Milepost scale is read from a
     stations.yaml file (mp_scale field, layout inches per MP); defaults to
     12 (1 MP = 12 layout inches) when no stations.yaml is provided.
@@ -2803,6 +2813,26 @@ def write_station_distance_report(
     p = _resolve_plan(path)
     layout = _load_layout(path, layers, groups)
     fmt = _resolve_format(output_path, format)
+    v2 = _sd.station_distances_v2(layout)
+    if v2 is not None:
+        out = Path(output_path)
+        n_st, n_pairs = _sd.counts(v2)
+        unused = [name for name, given in (("route_layer_names", route_layer_names),
+                                           ("exclude_turnouts", exclude_turnouts),
+                                           ("stations_yaml", stations_yaml)) if given]
+        if fmt == "json":
+            import json
+            out.write_text(json.dumps({"source": "mileposts", **v2,
+                                       "options_not_used": unused}, indent=2),
+                           encoding="utf-8")
+            return (f"Wrote JSON station distance report to {out} "
+                    f"({n_st} station(s), {n_pairs} pair(s))")
+        note = (f"_{', '.join(unused)} don't apply to milepost distances._"
+                if unused else "")
+        lines = _sd.markdown(v2, layout.title1 or p.stem, _md_table, note)
+        out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return (f"Wrote station distance report to {out} "
+                f"({n_st} station(s), {n_pairs} pair(s))")
     stations = extract_stations(layout)
     results = compute_distances(
         layout,
