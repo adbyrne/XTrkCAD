@@ -316,13 +316,36 @@ def _switchbacks(ctx: _Context) -> list[dict]:
     return sorted(out, key=lambda sb: sb["id"])
 
 
+def _given_car_spots(note: ConventionNote) -> int | None:
+    """A facility's or storage track's car_spots: only as the note gives
+    it, no default (spec 4.8, v1.1)."""
+    spots = note.fields.get("car_spots")
+    return spots if isinstance(spots, int) and not isinstance(spots, bool) else None
+
+
+def _parked(ctx: _Context, note: ConventionNote) -> dict:
+    """The track, length, capacity and car_spots of a facility or storage
+    note."""
+    track_id, length = ctx.usable_in(note)
+    return {
+        "track_id": track_id,
+        "length_ft": ctx.feet(length) if length is not None else None,
+        "capacity_cars": ctx.cars(length) if length is not None else None,
+        "car_spots": _given_car_spots(note),
+    }
+
+
+def _storage(ctx: _Context) -> list[dict]:
+    """storage[]: stand-alone car storage tracks (spec 4.8)."""
+    out = [{"id": n.id, "name": n.str_field("name"), **_parked(ctx, n)}
+           for n in ctx.of_kind("storage")]
+    return sorted(out, key=lambda st: st["id"])
+
+
 def _facilities(ctx: _Context) -> list[dict]:
-    out = []
-    for n in ctx.of_kind("facility"):
-        track = ctx.snapped.get(n.note_id)
-        out.append({"id": n.id, "name": n.str_field("name"), "type": n.str_field("type"),
-                    "location": n.str_field("location"),
-                    "track_id": track.id if track is not None else None})
+    out = [{"id": n.id, "name": n.str_field("name"), "type": n.str_field("type"),
+            "location": n.str_field("location"), **_parked(ctx, n)}
+           for n in ctx.of_kind("facility")]
     return sorted(out, key=lambda f: f["id"])
 
 
@@ -381,6 +404,7 @@ def build_export_v2(layout: Layout, issues: list[Issue] | None = None) -> dict:
         "industries": _industries(ctx, "industry"),
         "team_tracks": _industries(ctx, "team_track"),
         "yards": _yards(ctx),
+        "storage": _storage(ctx),
         "switchbacks": _switchbacks(ctx),
         "facilities": _facilities(ctx),
         "segments": _segments(ctx, stations),
