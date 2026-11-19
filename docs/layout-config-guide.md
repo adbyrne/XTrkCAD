@@ -34,14 +34,13 @@ benchwork_file:  hillside_benchwork.yaml
 
 mainline: single
 curve_radius: 20in
+track_plan_file: hillside_track_plan.yaml
 switch_size: "#6"
 levels: 2
-
-grid: []
 ```
 
-**`name` and `scale`** are required.  Scale controls the minimum curve radius
-default and the template geometry used when placing track elements in the grid.
+**`name` and `scale`** are required.  Scale sets the default minimum curve
+radius, and the car length and track spacing the track plan uses (section 5).
 Accepted scale names: `Z N TT HO S O G I Nn3 HOn3 On3 Sn3`.
 
 **`floor_plan_file` and `benchwork_file`** load the room geometry and benchwork
@@ -106,11 +105,11 @@ operations across a multi-deck layout.  Helix or ramp track can be assigned to
 a special pseudo-level (e.g. `L1H-Connecting`) and will appear as its own row.
 
 **`mainline`, `curve_radius`, `switch_size`** are optional.  If you omit
-`curve_radius` the generator uses the scale minimum (18 in for HO).  These
-values influence grid-cell sizing and which track templates are selected.
+`curve_radius` the generator uses the scale minimum (18 in for HO);
+`curve_radius` is also the track plan's default radius.
 
-**`grid: []`** is an empty track placement list.  Section 6 covers the grid
-syntax once the room and benchwork are in place.
+**`track_plan_file`** names the track plan that `generate_track_plan` lays
+along the benchwork, once the room and benchwork are in place (section 5).
 
 ---
 
@@ -493,7 +492,7 @@ one per track type across all decks (`Mainline` holds L1-Main and L2-Main,
 `Staging` holds L1-Staging and L2-Staging, and so on) and, on a multi-deck
 layout, one per deck (`Level 1`, `Level 2`).  Use them in XTrkCAD to show,
 select or report on a whole category or deck at once.  The category groups
-also tell `get_operation_density` how to classify track (see section 7).
+also tell `get_operation_density` how to classify track (see section 6).
 
 The generated file uses XTrkCAD's current file format (`VERSION 13`), so it
 needs XTrkCAD 5.4 or later.
@@ -636,37 +635,7 @@ station per shelf.
 
 ---
 
-## 6. Grid placements
-
-`hillside_division.yaml` has `grid: []` — no track elements placed yet.  When
-you are ready to add track, each entry in the `grid:` list places a track
-element type into a spreadsheet-style cell range:
-
-```yaml
-grid:
-  - A1-B4=mainline
-  - C3-E5=yard=single-ended, 3 tracks
-  - F2=station=passing siding, 80ft
-  - B6-B8@2=helix=22in radius, 2% grade, 18in rise
-```
-
-The cell range (`A1-B4`) maps onto the room using `grid_size` as the cell side
-length (derived from `curve_radius` if not set explicitly: the curve diameter
-rounded up to a whole foot, at least 3 ft — 4 ft for Hillside's 20-inch radius).  Column letters run east; row numbers run north from row 1 at the
-south wall.
-
-An `@2` suffix on the range assigns the element to Level 2.
-
-Valid element types: `yard`, `staging`, `mainline`, `station`, `helix`,
-`siding`, `module`.  Optional parameters after the second `=` are passed to the
-template selector (e.g. `single-ended`, track count, minimum length in feet,
-grade).
-
----
-
----
-
-## 7. Track annotations and layout export
+## 6. Track annotations and layout export
 
 Once you have placed track in XTrkCAD, add notes that describe the operational
 geography.  The MCP server reads these notes to compute mileposts, siding

@@ -76,8 +76,6 @@ or later.
 |---|---|
 | `list_track_plans` | List `.xtc`/`.xtce` files in a directory |
 | `load_layout_config` | Load and validate a YAML layout config; returns questionnaire for missing fields |
-| `list_templates` | List available track element templates, optionally filtered by category |
-| `get_template_info` | Detailed metadata for one template by id |
 | `generate_layout` | Generate an initial `.xtc` file from a YAML config, with standard layers and Layer Groups |
 | `generate_track_plan` | Lay a track plan (`track_plan_file`) along the benchwork shelves of that `.xtc`: main, corner curves, stub yard, passing sidings or a terminus runaround, spurs, with turnouts from XTrkCAD's parameter files; says what doesn't fit and by how much |
 | `merge_benchwork` | Replace floor/benchwork layers in an existing `.xtc`, preserving all track objects and NOTEs |
@@ -190,16 +188,16 @@ passing track itself.  `docs/layout-config-guide.md` section 6 describes every f
 name: My Layout
 scale: HO
 room: 12x16           # width × depth in feet
-curve_radius: 22in    # minimum mainline radius
+curve_radius: 20in    # minimum mainline radius
 mainline: single      # single or double
-grid:
-  - A1=yard=single-ended, 3 tracks, 60ft
-  - B3-C4=staging=double-ended, 6 tracks, 80ft
-  - E2=station=passing siding, 100ft
+benchwork_file: my_benchwork.yaml
+track_plan_file: my_track_plan.yaml   # for generate_track_plan
 ```
 
-Grid entries use the DSL `[col][row]=type[=params]`. Column letters (`A`, `B`, …) map
-left-to-right; row numbers map top-to-bottom. Ranges (`B3-C4`) span multiple cells.
+`generate_layout` writes the room, benchwork and layers; `generate_track_plan` then lays
+the track plan along the benchwork shelves: the route of the main, a stub yard, stations
+with passing sidings or a terminus runaround, and spurs. The format, with the Hillside
+example, is in `docs/layout-config-guide.md`, section 5.
 
 ### Floor plan
 
@@ -246,20 +244,7 @@ floor_plan:                     # inline in the same config
 
 `floor_plan_file` is resolved relative to the config file's directory.  Use it when
 multiple layout experiments share the same physical room — each layout config references
-the same floor plan file, varying only its `benchwork:` and `grid:` sections.
-
-### Template categories
-
-`yard` · `staging` · `station` · `mainline` · `helix` · `siding`
-
-Each template carries an `od_role` used by `get_operation_density`:
-
-| Role | Fugate formula contribution |
-|---|---|
-| `storage` | `max_cars += 0.8 × track_ft` |
-| `staging` | `max_cars += 0.8 × ft`; `cars_moved += 0.4 × ft × 2` |
-| `passing` | `max_cars += 0.8 × ft / 2`; `cars_moved += 0.4 × ft` |
-| `connecting` | `cars_moved += 0.4 × ft` |
+the same floor plan file, varying only its benchwork and track plan.
 
 ## Module structure
 
@@ -268,11 +253,9 @@ src/xtrkcad_mcp/
   server.py      — MCP tool definitions (FastMCP)
   parser.py      — .xtc / .xtce file parser
   models.py      — Layout, Track, Endpoint dataclasses + scale ratios
-  config.py      — YAML layout config loader + grid DSL parser
+  config.py      — YAML layout config loader
                    FloorPlan / FloorRoom / FloorDoor / FloorPartition / FloorRestricted
   generator.py   — .xtc file generator from LayoutConfig
-  templates.py   — Template library loader
-  templates/     — 12 stub .xtc files + index.yaml catalog
   stations.py    — note annotations (JSON and text), station routing, capacities, export
   conventions.py — check_conventions: Operating Data Conventions rules
   export_v2.py   — export_layout_data v2 (layout_data.json schema 2)

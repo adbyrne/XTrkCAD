@@ -12,12 +12,10 @@ Required keys
 Optional keys
 -------------
   mainline: single          # single (default) | dual
-  curve_radius: 22in        # model inches; 'ft' suffix also accepted
+  curve_radius: 20in        # model inches; 'ft' suffix also accepted
   switch_size: "#6"         # default "#6"
   levels: 1                 # multi-deck count
   level_separation: 18in    # vertical spacing between decks
-  level_break: E            # grid row where upper deck begins
-  grid_size: 3ft            # grid cell size; derived from curve_radius if omitted
   track_types:              # which Fugate track-type layers to generate (default: all 6)
     - Main
     - Passing
@@ -160,18 +158,12 @@ Example inline list:
       start_angle: 90
       sweep_angle: 90
 
-grid section
-------------
-Track element placements expressed as grid-cell ranges:
+track plan
+----------
+  track_plan_file: path/to/track_plan.yaml   # or an inline track_plan: mapping
 
-  grid:
-    - A3-C5=yard=single-ended, 3 tracks, 60ft min
-    - F6-F8=staging=double-ended, 4 tracks
-    - B1-B8=mainline
-    - E4=station=passing siding, 100ft
-    - G2-G4=helix=22in radius, 2% grade, 18in rise
-
-  Valid element types: yard  staging  mainline  station  helix  siding  module
+Read by generate_track_plan (track_plan.py): the shelves the main runs along,
+a stub yard at the start, and stations with sidings and spurs.
 
 SUGGESTED PROMPTS
 =================
@@ -209,6 +201,13 @@ Reviewing and validating the floor plan:
    per room, door clearance zones, and restricted areas. Flag any overlaps or
    anything that might conflict with track placement."
 
+Laying a first track plan:
+
+  "Lay a single-track main around the [west, north and east] shelves of
+   Level 1, with a [3]-track yard at the start and a passing-siding station on
+   each wall; end the line at a terminus. Write the track_plan file and run
+   generate_track_plan."
+
 Iterating on an existing plan:
 
   "Here is my current floor_plan YAML section: [paste]. I need to add a partial
@@ -216,7 +215,6 @@ Iterating on an existing plan:
 """
 
 import math
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -231,35 +229,10 @@ SCALE_MIN_RADIUS_IN: dict[str, float] = {
 
 KNOWN_SCALES = frozenset(SCALE_MIN_RADIUS_IN)
 
-VALID_ELEMENT_TYPES = frozenset({
-    "yard", "staging", "mainline", "station", "helix", "siding", "module",
-})
-
 # Standard Fugate track-type layer names (ordered; matches generator._TRACK_TYPES)
 VALID_TRACK_TYPES = frozenset({
     "Main", "Passing", "Storage", "Staging", "Connecting", "Service",
 })
-
-
-_CELL_RE = re.compile(r'^([A-Z]+)(\d+)$')
-_RANGE_RE = re.compile(r'^([A-Z]+)(\d+)-([A-Z]+)(\d+)$')
-
-
-def _default_grid_cell_ft(radius_in: float) -> float:
-    """Grid cell = the curve diameter (2 × radius) rounded up to a whole foot, min 3."""
-    return max(3.0, math.ceil((2.0 * radius_in) / 12.0))
-
-
-def _parse_cell_or_range(s: str) -> tuple[str, int, str, int]:
-    """'A3' → (A,3,A,3);  'A3-C5' → (A,3,C,5)."""
-    m = _RANGE_RE.match(s)
-    if m:
-        return m.group(1), int(m.group(2)), m.group(3), int(m.group(4))
-    m = _CELL_RE.match(s)
-    if m:
-        col, row = m.group(1), int(m.group(2))
-        return col, row, col, row
-    raise ValueError(f"invalid cell/range {s!r} — expected A3 or A3-C5")
 
 
 def _parse_room(s: str) -> tuple[float, float]:
@@ -282,24 +255,6 @@ def _parse_length_in(s: str) -> float:
     if s.endswith("ft") or s.endswith("'"):
         return float(s.rstrip("ft'").strip()) * 12.0
     return float(s)
-
-
-@dataclass
-class GridPlacement:
-    col_start: str
-    row_start: int
-    col_end: str
-    row_end: int
-    element_type: str
-    params: str
-    raw: str = ""
-    level: int = 1  # layout level this element lives on (1, 2, …)
-
-    @property
-    def cell_range(self) -> str:
-        if self.col_start == self.col_end and self.row_start == self.row_end:
-            return f"{self.col_start}{self.row_start}"
-        return f"{self.col_start}{self.row_start}-{self.col_end}{self.row_end}"
 
 
 @dataclass
@@ -432,10 +387,7 @@ class LayoutConfig:
     switch_size: str = "#6"
     levels: int = 1
     level_separation_in: float = 18.0
-    level_break_row: str = ""
-    grid_size_ft: float = 0.0
 
-    placements: list[GridPlacement] = field(default_factory=list)
     benchwork_sections: list[Benchwork] = field(default_factory=list)
     benchwork_file: str = ""   # path to standalone benchwork YAML (relative to config)
     floor_plan: "FloorPlan | None" = None
@@ -455,31 +407,6 @@ class ConfigResult:
     warnings: list[str]
     summary: str
     ready: bool                     # True when no required fields are missing
-
-
-def _parse_grid_entry(s: str) -> GridPlacement:
-    """'A3-C5=yard=3 tracks, single-ended' → GridPlacement."""
-    parts = s.split("=", 2)
-    if len(parts) < 2:
-        raise ValueError(f"need at least cell=type, got {s!r}")
-    cell_part = parts[0].strip().upper()
-    element_type = parts[1].strip().lower()
-    params = parts[2].strip() if len(parts) > 2 else ""
-    if element_type not in VALID_ELEMENT_TYPES:
-        raise ValueError(
-            f"unknown element type {element_type!r}; "
-            f"valid: {', '.join(sorted(VALID_ELEMENT_TYPES))}"
-        )
-    # Optional @N level tag on the range: "A1-B2@2" → level 2
-    level = 1
-    if "@" in cell_part:
-        cell_part, level_str = cell_part.split("@", 1)
-        try:
-            level = int(level_str)
-        except ValueError:
-            pass  # bad tag → default level 1
-    col_s, row_s, col_e, row_e = _parse_cell_or_range(cell_part)
-    return GridPlacement(col_s, row_s, col_e, row_e, element_type, params, raw=s, level=level)
 
 
 def _rect_vertices(
@@ -884,15 +811,6 @@ def load_config(path: str | Path) -> ConfigResult:
         except ValueError:
             warnings.append(f"invalid level_separation {raw['level_separation']!r}")
 
-    if "level_break" in raw:
-        config.level_break_row = str(raw["level_break"]).strip().upper()
-
-    if "grid_size" in raw:
-        try:
-            config.grid_size_ft = _parse_length_in(str(raw["grid_size"]))
-        except ValueError:
-            warnings.append(f"invalid grid_size {raw['grid_size']!r}")
-
     # --- Benchwork (file reference takes precedence over inline) ---
     if "benchwork_file" in raw:
         bw_path = Path(str(raw["benchwork_file"]).strip()).expanduser()
@@ -985,19 +903,15 @@ def load_config(path: str | Path) -> ConfigResult:
     if "distinct_track_colors" in raw:
         config.distinct_track_colors = bool(raw["distinct_track_colors"])
 
-    # --- Grid placements ---
-    for entry in raw.get("grid", []):
-        try:
-            config.placements.append(_parse_grid_entry(str(entry).strip()))
-        except ValueError as e:
-            warnings.append(f"skipping grid entry {entry!r}: {e}")
+    for gone in ("grid", "grid_size", "level_break"):
+        if gone in raw:
+            warnings.append(f"{gone} is no longer used: lay track with track_plan_file "
+                            "and generate_track_plan")
 
     # --- Fill scale-dependent defaults ---
     if config.scale in SCALE_MIN_RADIUS_IN:
         if config.curve_radius_in <= 0.0:
             config.curve_radius_in = SCALE_MIN_RADIUS_IN[config.scale]
-        if config.grid_size_ft <= 0.0:
-            config.grid_size_ft = _default_grid_cell_ft(config.curve_radius_in)
 
     missing = _required_missing(config)
     ready = len(missing) == 0
@@ -1031,8 +945,7 @@ def _build_summary(config: LayoutConfig) -> str:
         f"Scale:   {config.scale}  |  Room: {config.room_width_ft:.0f}×{config.room_depth_ft:.0f} ft",
         f"Main:    {config.mainline}  |  Levels: {config.levels}"
         + (f"  (separation: {config.level_separation_in:.0f} in)" if config.levels > 1 else ""),
-        f"Radius:  {config.curve_radius_in:.1f} in  |  Switch: {config.switch_size}"
-        f"  |  Grid cell: {config.grid_size_ft:.0f} ft",
+        f"Radius:  {config.curve_radius_in:.1f} in  |  Switch: {config.switch_size}",
     ]
     if config.floor_plan:
         fp = config.floor_plan
@@ -1071,9 +984,6 @@ def _build_summary(config: LayoutConfig) -> str:
         for lv in sorted(by_level):
             labels = ", ".join(by_level[lv])
             lines.append(f"  Benchwork L{lv} ({len(by_level[lv])} sections): {labels}")
-    if config.placements:
-        lines.append(f"Elements ({len(config.placements)}):")
-        for pl in config.placements:
-            param_str = f"  [{pl.params}]" if pl.params else ""
-            lines.append(f"  {pl.cell_range} → {pl.element_type}{param_str}")
+    if config.track_plan_file or config.track_plan:
+        lines.append(f"Track plan: {config.track_plan_file or 'inline'}")
     return "\n".join(lines)

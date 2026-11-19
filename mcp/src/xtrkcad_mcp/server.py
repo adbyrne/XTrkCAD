@@ -150,7 +150,7 @@ def load_layout_config(config_path: str) -> dict:
           summary  — human-readable plan (populated when ready=True)
           missing  — list of {field, question} for fields still needed
           warnings — list of validation warnings
-          config   — parsed config values (name, scale, room, placements, ...)
+          config   — parsed config values (name, scale, room, benchwork, ...)
     """
     result = load_config(config_path)
     cfg = result.config
@@ -170,8 +170,6 @@ def load_layout_config(config_path: str) -> dict:
             "switch_size": cfg.switch_size,
             "levels": cfg.levels,
             "level_separation_in": cfg.level_separation_in,
-            "level_break_row": cfg.level_break_row,
-            "grid_size_ft": cfg.grid_size_ft,
             "benchwork_file": cfg.benchwork_file,
             "benchwork_sections": [
                 {
@@ -190,96 +188,16 @@ def load_layout_config(config_path: str) -> dict:
                 "partitions": len(fp.partitions),
                 "restricted": len(fp.restricted),
             } if fp else None,
-            "placements": [
-                {
-                    "range": pl.cell_range,
-                    "type": pl.element_type,
-                    "params": pl.params,
-                }
-                for pl in cfg.placements
-            ],
+            "track_plan_file": cfg.track_plan_file,
         },
     }
 
 
 @mcp.tool()
-def list_templates(category: str = "") -> list[dict]:
-    """List available layout element templates from the template library.
-
-    Args:
-        category: Filter by category (yard, staging, station, mainline, helix,
-                  siding). Empty returns all categories.
-
-    Returns:
-        List of template summaries with id, name, category, description,
-        mainline_connection, od_role, and stub flag.
-    """
-    from xtrkcad_mcp.templates import load_library
-    lib = load_library()
-    items = lib.by_category(category) if category else lib.templates
-    return [
-        {
-            "id": t.id,
-            "name": t.name,
-            "category": t.category,
-            "description": t.description,
-            "mainline_connection": t.mainline_connection,
-            "od_role": t.od_role,
-            "stub": t.stub,
-        }
-        for t in items
-    ]
-
-
-@mcp.tool()
-def get_template_info(template_id: str) -> dict:
-    """Get full details for a template including parameters and OD role.
-
-    Args:
-        template_id: Template identifier (e.g. 'yard/single-ended').
-
-    Returns:
-        Full template metadata with parameters and connection points,
-        or an error dict if not found.
-    """
-    from xtrkcad_mcp.templates import load_library
-    lib = load_library()
-    t = lib.by_id(template_id)
-    if t is None:
-        return {
-            "error": f"template {template_id!r} not found",
-            "available": [x.id for x in lib.templates],
-        }
-    return {
-        "id": t.id,
-        "name": t.name,
-        "category": t.category,
-        "description": t.description,
-        "file": t.file,
-        "mainline_connection": t.mainline_connection,
-        "od_role": t.od_role,
-        "scales": t.scales or ["all"],
-        "stub": t.stub,
-        "connection_points": t.connection_points,
-        "parameters": [
-            {
-                "name": p.name,
-                "type": p.type,
-                "required": p.required,
-                "description": p.description,
-                "default": p.default,
-                "unit": p.unit,
-                "min": p.min,
-                "max": p.max,
-            }
-            for p in t.parameters
-        ],
-    }
-
-
-@mcp.tool()
 def generate_layout(config_path: str, output_path: str = "") -> dict:
-    """Generate an initial .xtc layout file from a YAML config.
+    """Generate an initial .xtc layout file from a YAML config: the room,
+    floor plan, benchwork, and the standard layers and Layer Groups. It lays
+    no track; generate_track_plan does that next.
 
     If the config is missing required fields (name, scale, room) the tool
     returns a questionnaire — a list of fields to prompt the user for —
@@ -294,8 +212,8 @@ def generate_layout(config_path: str, output_path: str = "") -> dict:
                      directory, named after the layout (e.g. my_layout.xtc).
 
     Returns:
-        Dict with output_path, backup_path, placed list, skipped list,
-        warnings, and config summary — or missing/warnings if config incomplete.
+        Dict with output_path, backup_path, warnings, and config summary — or
+        missing/warnings if config incomplete.
     """
     from xtrkcad_mcp.config import load_config
     from xtrkcad_mcp.generator import default_output_path, generate
@@ -321,17 +239,6 @@ def generate_layout(config_path: str, output_path: str = "") -> dict:
         "ready": True,
         "output_path": str(result.output_path),
         "backup_path": str(result.backup_path) if result.backup_path else None,
-        "placed": [
-            {
-                "template_id": p.template_id,
-                "grid_range": p.grid_range,
-                "origin_x_in": round(p.x, 2),
-                "origin_y_in": round(p.y, 2),
-                "track_ids": p.track_ids,
-            }
-            for p in result.placed
-        ],
-        "skipped": result.skipped,
         "warnings": result.warnings,
         "summary": cfg_result.summary,
     }
