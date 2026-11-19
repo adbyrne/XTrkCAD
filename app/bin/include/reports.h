@@ -619,6 +619,58 @@ void ReportsFormatShortList(DynString *out, const reportsShortTrack_t *list,
  */
 void ReportsShortTracks(void *unused);
 
+/** One close run in the Track Clearance report (Development Issues #87):
+ * two tracks running side by side, within a few degrees of parallel, with
+ * their centrelines closer than the report's clearance (the distance
+ * between track centres at which cars on two tracks clear each other) over
+ * at least a minimum length. A car standing on one fouls the other there.
+ * It finds both a turnout leg that levels off too close to the other leg
+ * (or the track beyond it) and two unconnected tracks laid too close; near
+ * a frog the tracks are close but at the frog angle, so that is not a run.
+ *
+ * `spacingIn` is the closest spacing along the run, `lengthIn` the run's
+ * length, both in layout inches. Layers are 1-based, as shown in the
+ * Layers dialog. `pos` (the run's midpoint on track A) and `scale` place
+ * the indicator when a row is selected. */
+typedef struct {
+	TRKINX_T trackA;
+	unsigned int layerA;
+	const char *layerNameA;
+	TRKINX_T trackB;
+	unsigned int layerB;
+	const char *layerNameB;
+	DIST_T   spacingIn;
+	DIST_T   lengthIn;
+	coOrd    pos;
+	SCALEINX_T scale;
+} reportsClearanceRun_t;
+
+/**
+ * Format the Track Clearance report's table body, one row per close run,
+ * in the order given: track A, its layer and layer name, track B, its
+ * layer and layer name, the closest spacing (3 decimals) and the run's
+ * length (2 decimals), in inches. Numbers and layer names only: the column
+ * titles come from the caller, translated. Pure function, unit tested
+ * directly.
+ *
+ * \param[in,out] out appended to, not cleared first
+ * \param[in] list array of close runs
+ * \param[in] count number of entries in list
+ */
+void ReportsFormatClearanceList(DynString *out,
+                                const reportsClearanceRun_t *list,
+                                int count);
+
+/**
+ * Menu callback (Development Issues #87): compute and show/refresh the
+ * Track Clearance report -- every place two tracks run side by side closer
+ * than the Clearance choice (see reportsClearanceRun_t), closest first.
+ * Interactive: selecting a row pans/indicates at the run's midpoint.
+ *
+ * \param[in] unused menu-callback signature, unused
+ */
+void ReportsTrackClearance(void *unused);
+
 /* ---------------------------------------------------------------------
  * Notes Report (SF #799, part of the JSON Note umbrella SF #795): every
  * note on the layout, grouped first by Type (Text/Weblink/Document/JSON,

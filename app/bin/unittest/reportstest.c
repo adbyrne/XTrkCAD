@@ -815,6 +815,69 @@ static void test_kinked_multiple_rows(void **state)
 	DynStringFree(&out);
 }
 
+/* Track Clearance -- Development Issues #87. */
+
+static void test_clearance_empty_list(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 16);
+
+	ReportsFormatClearanceList(&out, NULL, 0);
+
+	assert_string_equal(DynStringToCStr(&out), "");
+	DynStringFree(&out);
+}
+
+static void test_clearance_single_row(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 32);
+	reportsClearanceRun_t list[1] = {
+		{
+			.trackA = 91, .layerA = 9, .layerNameA = "L2-Main",
+			.trackB = 101, .layerB = 10, .layerNameB = "L2-Passing",
+			.spacingIn = 1.387, .lengthIn = 22.5
+		}
+	};
+
+	ReportsFormatClearanceList(&out, list, 1);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "    91 |     9 | L2-Main        |    101 |    10 | L2-Passing     |"
+	                    "   1.387 |   22.50\n");
+	DynStringFree(&out);
+}
+
+static void test_clearance_multiple_rows(void **state)
+{
+	(void) state;
+	DynString out;
+	DynStringMalloc(&out, 128);
+	reportsClearanceRun_t list[2] = {
+		{
+			.trackA = 4, .layerA = 3, .layerNameA = "Yard",
+			.trackB = 5, .layerB = 3, .layerNameB = "Yard",
+			.spacingIn = 1.5, .lengthIn = 36.0
+		},
+		{
+			.trackA = 120, .layerA = 1, .layerNameA = "Main",
+			.trackB = 250, .layerB = 2, .layerNameB = NULL,
+			.spacingIn = 1.75, .lengthIn = 4.25
+		}
+	};
+
+	ReportsFormatClearanceList(&out, list, 2);
+
+	assert_string_equal(DynStringToCStr(&out),
+	                    "     4 |     3 | Yard           |      5 |     3 | Yard           |"
+	                    "   1.500 |   36.00\n"
+	                    "   120 |     1 | Main           |    250 |     2 |                |"
+	                    "   1.750 |    4.25\n");
+	DynStringFree(&out);
+}
+
 static void test_notes_empty_list(void **state)
 {
 	(void) state;
@@ -1043,6 +1106,9 @@ int main(void)
 		cmocka_unit_test(test_kinked_single_row),
 		cmocka_unit_test(test_kinked_multiple_rows),
 		cmocka_unit_test(test_notes_empty_list),
+		cmocka_unit_test(test_clearance_empty_list),
+		cmocka_unit_test(test_clearance_single_row),
+		cmocka_unit_test(test_clearance_multiple_rows),
 		cmocka_unit_test(test_notes_single_row),
 		cmocka_unit_test(test_notes_prints_raw_json_body),
 		cmocka_unit_test(test_notes_all_groups_present),
