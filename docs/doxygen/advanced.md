@@ -64,15 +64,21 @@ packages to a temporary prerelease named after the branch for someone to review;
 
 | Workflow | Runs on | Fails the run? |
 |---|---|---|
-| `ci-gtk3.yml` | push to `%main` or `test/**`, PR into `%main`, dispatch | yes: the gate |
-| `ci-gtk3-preview.yml` | push to `%main` or `test/**`, PR into `%main` | no, advisory |
-| `ci-windows-msvc.yml` | push to `%main` or `test/**`, PR into `%main`, dispatch | no, advisory while MSVC is experimental |
-| `ci-mcp.yml` | the same, only when `mcp/` or the workflow changed | yes, for `mcp/` |
-| `codeql.yml` | push to `%main`, PR into `%main`, weekly (Monday) | yes |
-| `release.yml` | push to `%main`, `v*.*.*` tag, dispatch | see \ref release-workflow "release.yml" |
+| `ci-gtk3.yml` | push to `%main` or `test/**`, PR into `%main` (app paths), dispatch | yes: the gate |
+| `ci-gtk3-preview.yml` | push to `%main` or `test/**`, PR into `%main` (app paths) | no, advisory |
+| `ci-windows-msvc.yml` | push to `%main` or `test/**`, PR into `%main` (app paths), dispatch | no, advisory while MSVC is experimental |
+| `codeql.yml` | push to `%main`, PR into `%main` (app paths), weekly (Monday) | yes |
+| `release.yml` | push to `%main` (app paths), `v*.*.*` tag, dispatch | see \ref release-workflow "release.yml" |
 | `install-tests-only.yml` | an install-test script changes (PR into `%main`, `test/**`), dispatch | yes |
 | `hg-sync-default.yml` | daily 10:23 UTC, dispatch | opens an issue instead |
 | `gtk3-toolchain.yml`, `gtk3-qa-reports.yml`, `packages-linux.yml`, `packages-macos.yml`, `packages-windows.yml`, `install-tests.yml` | only when another workflow calls them | as the caller's jobs |
+
+"App paths": the pushes and PRs of these five workflows only count when they change the app,
+meaning a top-level file or something under `app/`, `CMake/`, `distribution/`, `docs/`,
+`tools/` or `.github/`. A change only outside those runs none of them. The list is kept by hand
+in all five files, so a new top-level directory goes into each; `ci-gtk3.yml`'s
+`workflow-paths-check` job runs `tools/check-workflow-paths.sh`, which fails when the lists
+differ. Tags, dispatches and CodeQL's weekly run don't look at paths.
 
 A push to any other branch runs nothing, and neither does a PR into a branch other than `%main`,
 e.g. a feature branch's PR into another feature branch. Run CI on such a branch by hand:
