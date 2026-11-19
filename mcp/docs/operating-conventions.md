@@ -52,6 +52,9 @@ rules. It belongs to the operations system (IOTtrains for NYE), which refers to 
 ### 3.1 Category groups (reserved names)
 `Mainline`, `Passing`, `Staging`, `Storage`, `Service`, `Connecting`, `Scenery`, `Ignore` (Fugate).
 - error: a layer in two category groups.
+- warning: a passing track joined to main track without a turnout: usually a piece drawn on the
+  wrong layer (XTrkCAD puts a new track on the current layer), and the station's siding can't be
+  found.
 - warning: a layer holding track in no category group. Its category then comes from the
   `L<n>-Suffix` layer name (`L1-CO-Staging` -> Staging), else Mainline.
 
@@ -318,6 +321,7 @@ main (upper level); its interchange tracks are where the two meet.
 | duplicate ids (4.0) | error |
 | note not on any track / far from its track | error / warning |
 | category, railroad, subdivision group conflicts (3) | error |
+| passing track joined to main track without a turnout (3.1) | warning |
 | anchors and MP scale (4.2) | error |
 | switchback tail on main (4.9) | error |
 | defaults applied (`car_spots`, category from layer name) | info |
