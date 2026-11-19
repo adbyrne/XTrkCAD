@@ -1,6 +1,7 @@
 """XTrkCAD MCP server — layout read and write tools."""
 
 import datetime
+import html
 import logging
 import math
 import os
@@ -11,6 +12,7 @@ from mcp.server.fastmcp import FastMCP
 from xtrkcad_mcp.config import load_config
 from xtrkcad_mcp.conventions import CONVENTIONS_VERSION, check_conventions as _check_conventions
 from xtrkcad_mcp.export_v2 import build_export_v2
+from xtrkcad_mcp.od_views import note_views, txt_table, view_sections
 from xtrkcad_mcp.models import (
     SCALE_RATIOS,
     Layout,
@@ -908,7 +910,8 @@ def get_operation_density(
     """Compute Operation Density statistics using Joe Fugate's methodology (MRH Oct 2014).
 
     Formulas:
-      max_cars   = 0.8 × (storage_cars + staging_cars + passing_cars / 2)
+      max_cars   = 0.8 × (storage_cars + service_car_spots + staging_cars
+                          + passing_cars / 2)
       cars_moved = 0.4 × (staging_cars × 2 + passing_cars + connecting_cars)
       max_to_main_pct = max_cars / mainline_cars × 100
 
@@ -928,10 +931,19 @@ def get_operation_density(
         groups: Optional Layer Group names (see get_layer_groups); selects
             every layer in each group, combined with layers.
 
+    service_car_spots are the car_spots of facility notes whose track the
+    by-layer count doesn't already include as storage, staging or passing
+    (spec v1.1, 9.1): a coal trestle or repair track on a Service layer.
+
     Returns:
         Dict with room info, track by category, by_level breakdown, and
         operations sub-dict with max_cars, cars_moved_per_session,
-        max_to_main_pct, max_to_main_label, and estimated_trains.
+        max_to_main_pct, max_to_main_label, estimated_trains and
+        service_car_spots. With convention notes on the layout, also
+        industries_and_yards (car spots against track capacity per
+        industry, yards, storage tracks, totals) and service (facilities,
+        their car_spots, which count, which don't); both None without
+        notes.
         by_level groups totals by physical level parsed from layer names
         (e.g. "L1-Main" → level "1"); layers without a standard prefix
         appear under level "0".
@@ -980,8 +992,11 @@ def get_operation_density(
     staging_cars = _cars("staging")
     connecting_cars = _cars("connecting")
 
-    # Fugate formulas
-    max_cars = int(0.8 * (storage_cars + staging_cars + passing_cars / 2.0))
+    views = note_views(layout, _category)
+    service_spots = views["service"]["storage_car_spots"] if views else 0
+
+    # Fugate formulas; facility car spots are parked cars, so storage.
+    max_cars = int(0.8 * (storage_cars + service_spots + staging_cars + passing_cars / 2.0))
     cars_moved = int(0.4 * (staging_cars * 2.0 + passing_cars + connecting_cars))
 
     max_to_main_pct = (max_cars / mainline_cars * 100.0) if mainline_cars > 0 else 0.0
@@ -1055,10 +1070,13 @@ def get_operation_density(
             "max_to_main_label": label,
             "assumed_train_length_cars": train_length_cars,
             "estimated_trains": trains,
+            "service_car_spots": service_spots,
         },
+        "industries_and_yards": views["industries_and_yards"] if views else None,
+        "service": views["service"] if views else None,
         "note": (
             "Methodology: Joe Fugate, MRH Oct 2014 'Layout Design Assessment'. "
-            "max_cars=0.8×(storage+staging+passing/2 cars). "
+            "max_cars=0.8×(storage+facility car spots+staging+passing/2 cars). "
             "cars_moved=0.4×(staging×2+passing+connecting cars). "
             "Assign layer_categories to get meaningful category splits."
         ),
@@ -1166,6 +1184,16 @@ def write_operation_density_report(
         f"  Cars moved/session (0.4×staging×2+pass+conn): {ops['cars_moved_per_session']}",
         f"  Max-to-main ratio: {ops['max_to_main_pct']:.1f}%  → {ops['max_to_main_label']}",
         f"  Est. trains (@ {ops['assumed_train_length_cars']} cars/train): {ops['estimated_trains']}",
+    ]
+    sections = view_sections(data)
+    for heading, blocks in sections:
+        lines += ["", heading.upper()]
+        for block in blocks:
+            if block[0] == "table":
+                lines += txt_table(block[1], block[2])
+            else:
+                lines.append(f"  {block[1]}")
+    lines += [
         "",
         f"Note: {data['note']}",
     ]
@@ -1233,8 +1261,16 @@ def write_operation_density_report(
                 f"| Cars moved / session | **{ops['cars_moved_per_session']}** |",
                 f"| Max-to-main ratio | **{ops['max_to_main_pct']:.1f}%** → {ops['max_to_main_label']} |",
                 f"| Estimated trains | {ops['estimated_trains']} (@ {ops['assumed_train_length_cars']} cars) |",
-                "", f"> {data['note']}",
             ]
+            for heading, blocks in sections:
+                md += ["", f"## {heading}"]
+                for block in blocks:
+                    md.append("")
+                    if block[0] == "table":
+                        md += _md_table(block[1], block[2])
+                    else:
+                        md.append(block[1])
+            md += ["", f"> {data['note']}"]
             out.write_text("\n".join(md) + "\n", encoding="utf-8")
         else:  # html
             html_tbl = _html_table(tbl_hdrs, tbl_rows)
@@ -1257,8 +1293,16 @@ def write_operation_density_report(
                 f"<h2>Track by Category</h2>{html_tbl}"
                 f"<h2>Track by Level</h2>{lv_html_tbl}"
                 f"<h2>Operation Density (Joe Fugate, MRH Oct 2014)</h2>{metrics}"
-                f"<p><em>{data['note']}</em></p>"
             )
+            for heading, blocks in sections:
+                body += f"<h2>{heading}</h2>"
+                for block in blocks:
+                    if block[0] == "table":
+                        body += _html_table(block[1], [[html.escape(c) for c in r]
+                                                       for r in block[2]])
+                    else:
+                        body += f"<p>{html.escape(block[1])}</p>"
+            body += f"<p><em>{data['note']}</em></p>"
             out.write_text(_html_page(title, body), encoding="utf-8")
     return f"Report written to {out}"
 
