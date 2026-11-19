@@ -24,9 +24,14 @@ Tool result: `{written, output, counts: {error, warning, info}, errors, notices}
 - Mileposts are in MP units; `mp_scale` and `mp_unit` give layout length per MP unit.
 - Car counts (`_cars`, `capacity_cars`, `spur_capacity_cars`) are whole cars by the scale's
   cars per model foot (HO: 2), as the capacity reports count them.
-- Usable length is the connected non-turnout track a note marks; switch throats are left out.
-  A siding also counts the turnouts on the siding itself (spurs leaving it), since cars stand on
-  their through route.
+- Usable length is what a track holds: the connected non-turnout track a note marks, between
+  its **clearance points**. Near a turnout a car fouls the turnout's other leg until the two
+  tracks are 13 ft apart (prototype, between centres; scaled), so that part doesn't count. The
+  track beyond a turnout's points is shared by both routes and isn't reduced. Switch throats
+  are left out. A siding also counts the turnouts on the siding itself (spurs leaving it), since
+  cars stand on their through route; the main between a siding's switches stops at the
+  clearance point near each switch too. A track measured within a thousandth of a car of a
+  whole number of cars counts as that many.
 - Numbers are rounded to 3 decimals. A value that can't be worked out is `null`; the reason is
   in `issues`.
 - Lists are sorted: stations, yard limits and segments by railroad, subdivision, then MP;

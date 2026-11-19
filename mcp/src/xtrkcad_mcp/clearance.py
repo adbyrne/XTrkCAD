@@ -22,6 +22,8 @@ from .models import SCALE_RATIOS, Layout, TrackObject, _normalize_angle, arc_pol
 CLEARANCE_FT = 13.0
 _STEP = 0.05             # sampling step along a track, layout inches
 _REACH = 48.0            # how far the other leg's track is followed, inches
+_LEVEL_RUN = 1.0         # tracks that separate by less than _LEVEL_RISE over this run ...
+_LEVEL_RISE = 0.001      # ... have stopped separating: they run parallel
 
 
 def default_clearance_in(scale: str) -> float:
@@ -103,7 +105,12 @@ def fouled_length(layout: Layout, turnout: TrackObject, first: TrackObject,
                   clearance: float, allowed: set[int] | None = None) -> float:
     """How much of the track starting with ``first`` (beyond ``turnout``)
     is within ``clearance`` of the turnout's other leg(s) and the track
-    beyond them: where a car fouls them. 0 for track beyond the points."""
+    beyond them: where a car fouls them. 0 for track beyond the points.
+
+    Tracks drawn closer than ``clearance`` never reach it: the clearance
+    point is then where they stop separating (run parallel, or start to
+    close again), as generate_track_plan does for a spacing below the
+    clearance."""
     by_id = {t.id: t for t in layout.tracks}
     leg = _entry_index(turnout, first.id)
     if leg is None or leg == 0 or len(turnout.endpoints) < 3:
@@ -127,12 +134,24 @@ def fouled_length(layout: Layout, turnout: TrackObject, first: TrackObject,
         return _segments_distance(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f,
                                   others) >= clearance
 
+    def separation(a, b, f):
+        return _segments_distance(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, others)
+
     walked = 0.0
+    history: list[tuple[float, float]] = []      # (walked, separation)
     for _t, pts in _follow(layout, by_id, first, entry, math.inf, allowed):
         for a, b in zip(pts, pts[1:]):
             seg = math.dist(a, b)
             n = max(1, int(seg / _STEP))
             for k in range(n + 1):
+                here = walked + seg * k / n
+                sep = separation(a, b, k / n)
+                history.append((here, sep))
+                back = next((h for h in reversed(history) if here - h[0] >= _LEVEL_RUN), None)
+                if back is not None and sep - back[1] < _LEVEL_RISE:
+                    # Stopped separating short of the clearance: they run
+                    # parallel (or close again) from where the rise ended.
+                    return next(w for w, v in history if v >= back[1] - 1e-9)
                 if clear_at(a, b, k / n):
                     lo, hi = max(0, k - 1) / n, k / n      # refine the crossing
                     for _ in range(30):

@@ -116,3 +116,26 @@ def test_export_siding_and_spurs_match_the_plan(hillside, tmp_path):
     spurs = {i["id"]: i["spur_capacity_cars"] for i in export["industries"]}
     assert spurs["AL_FEED"] == features["AL_FEED"]["capacity_cars"]
     assert spurs["BI_LUMBER"] == features["BI_LUMBER"]["capacity_cars"]
+
+
+def test_tracks_closer_than_the_clearance_count_from_where_they_run_parallel(tmp_path):
+    """Drawn 1.4 in apart, short of 13 ft (1.79 in): the tracks never reach
+    the clearance, so the clearance point is where they stop separating.
+    Otherwise the whole track would count as fouled (NYE's Stans Knob)."""
+    import yaml
+    plan = yaml.safe_load((FIXTURES_DIR / "hillside_track_plan.yaml").read_text())
+    plan["track_spacing"] = "1.4in"
+    cfg = yaml.safe_load(HILLSIDE.read_text())
+    (tmp_path / "plan.yaml").write_text(yaml.safe_dump(plan))
+    cfg.update(track_plan_file=str(tmp_path / "plan.yaml"),
+               floor_plan_file=str(FIXTURES_DIR / cfg["floor_plan_file"]),
+               benchwork_file=str(FIXTURES_DIR / cfg["benchwork_file"]))
+    (tmp_path / "cfg.yaml").write_text(yaml.safe_dump(cfg))
+    out = tmp_path / "close.xtc"
+    generate_layout(str(tmp_path / "cfg.yaml"), str(out))
+    result = generate_track_plan(str(tmp_path / "cfg.yaml"), str(out))
+    assert result["written"] is True, result
+    feed = next(f for f in result["features"] if f["id"] == "AL_FEED")
+    layout = parse_file(out)
+    spur = _track_at(layout, 11.0, 115.0, 3)          # 1.4 in toward the wall
+    assert clear_usable_length(layout, spur.id) == pytest.approx(feed["capacity_in"], abs=0.3)
