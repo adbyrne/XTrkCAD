@@ -41,25 +41,48 @@ Configure in `~/.claude/settings.json` (Claude Code) or `claude_desktop_config.j
 }
 ```
 
+`generate_track_plan` reads turnouts from XTrkCAD's parameter files (`.xtp`). Run from the
+source tree it finds them in `app/lib/params`; an installed package looks in
+`$XTRKCAD_PARAMS_DIR`, then in an XTrkCAD install (`~/.local/share/xtrkcad*/params`,
+`/usr/local/share/xtrkcad*/params`, `/usr/share/xtrkcad*/params`).
+
 ## Tests
 
 ```sh
-uv run --extra dev pytest    # 423 tests
+uv run --extra dev pytest
 ```
 
 ## CI
 
 `.github/workflows/ci-mcp.yml` runs the tests on Linux (Ubuntu 24.04 and 26.04), macOS and
-Windows whenever `mcp/` or the workflow changes; it's separate from the C application's CI.
-Python is pinned to 3.14: unpinned, `uv` picked macOS's 3.15, which `rpds-py`'s PyO3 build
-can't target yet.
+Windows on pushes to `main` or `test/**` and PRs into `main` that change `mcp/` or one of the
+two MCP workflows. It's separate from the C application's CI, and the other way round: the
+app's workflows (`ci-gtk3.yml`, `release.yml`, ...) only run for the app's paths, so a change
+only under `mcp/` runs just this one. Python is pinned to 3.14: unpinned, `uv` picked macOS's
+3.15, which `rpds-py`'s PyO3 build can't target yet.
+
+## Release
+
+`.github/workflows/release-mcp.yml` publishes the package. Bump `version` in
+`pyproject.toml`, then tag:
+
+```sh
+git tag mcp-v0.1.0 && git push origin mcp-v0.1.0
+```
+
+It runs the tests (it calls `ci-mcp.yml`), checks the tag matches `pyproject.toml`, builds the
+sdist and wheel with `uv build`, and drafts a GitHub Release named "XTrkCAD MCP server
+<version>" with both attached; publish the draft by hand after a look. A dispatch
+(`gh workflow run release-mcp.yml`) runs the tests and builds the package as an artifact
+without releasing. The app's `release.yml` never publishes the MCP, and its `v*.*.*` tags
+don't start this workflow.
 
 `.github/dependabot.yml` has Dependabot open one grouped pull request a week that updates
 `uv.lock`. It skips new major versions of the `mcp` SDK, since moving to one changes the
 server's code, not just the lock file.
 
 The MCP server isn't part of XTrkCAD upstream (SourceForge Hg), so this directory, its
-workflow and the Dependabot config exist only in the GitHub repository.
+workflows and the Dependabot config exist only in the GitHub repository.
 
 ## Layout files
 

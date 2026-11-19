@@ -1,0 +1,79 @@
+name: Release (MCP)
+
+# Builds the MCP server package (mcp/: sdist and wheel) and, for an
+# mcp-v<version> tag, drafts a GitHub Release with both attached. Git-only,
+# like the rest of mcp/; the app's release.yml never publishes it.
+#
+#   git tag mcp-v0.1.0 && git push origin mcp-v0.1.0
+#
+# The tag must match mcp/pyproject.toml's version (check-version). A dispatch
+# runs the tests and builds the package as an artifact, without releasing.
+# The draft is published by hand once it has been looked at.
+
+on:
+  push:
+    tags:
+      - 'mcp-v*'
+  workflow_dispatch:
+
+jobs:
+  tests:
+    uses: ./.github/workflows/ci-mcp.yml
+
+  build:
+    needs: tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          python-version: "3.14"
+      - name: Read the package version
+        id: version
+        working-directory: mcp
+        run: |
+          version=$(uv run --no-project python -c \
+            "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "MCP package version: $version"
+      - name: check-version (tag matches pyproject.toml)
+        if: startsWith(github.ref, 'refs/tags/mcp-v')
+        run: |
+          tag="${GITHUB_REF#refs/tags/mcp-v}"
+          if [ "$tag" != "${{ steps.version.outputs.version }}" ]; then
+            echo "::error::tag mcp-v$tag doesn't match mcp/pyproject.toml version ${{ steps.version.outputs.version }}"
+            exit 1
+          fi
+      - name: Build sdist and wheel
+        working-directory: mcp
+        run: uv build --out-dir dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-mcp-${{ steps.version.outputs.version }}
+          path: mcp/dist/*
+          if-no-files-found: error
+
+  github-release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/mcp-v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: xtrkcad-mcp-${{ needs.build.outputs.version }}
+          path: dist
+      - name: Draft the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --draft \
+            --title "XTrkCAD MCP server $VERSION" \
+            --notes "The MCP server for XTrkCAD layouts, version $VERSION. Install the wheel with pip or uv; see mcp/README.md."

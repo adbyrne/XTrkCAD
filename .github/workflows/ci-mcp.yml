@@ -7,15 +7,21 @@ on:
     paths:
       - 'mcp/**'
       - '.github/workflows/ci-mcp.yml'
+      - '.github/workflows/release-mcp.yml'
   pull_request:
     branches:
       - main
     paths:
       - 'mcp/**'
       - '.github/workflows/ci-mcp.yml'
+      - '.github/workflows/release-mcp.yml'
+  # release-mcp.yml runs these tests before it builds anything.
+  workflow_call:
 
 # MCP (mcp/) has its own workflow rather than a job in ci-gtk3.yml, so it
 # keeps an independent CI status separate from the (much larger) C app suite.
+# The app workflows don't run for a change only under mcp/ (their paths: list
+# leaves it out), and release.yml doesn't publish the MCP: release-mcp.yml does.
 
 jobs:
   mcp-tests:
