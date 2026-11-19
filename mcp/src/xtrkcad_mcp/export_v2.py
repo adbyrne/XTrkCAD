@@ -22,6 +22,7 @@ from .conventions import (CONVENTIONS_VERSION, LOCATION_KINDS, ConventionNote,
                           note_usable_length, read_convention_notes,
                           resolve_ownership, snap_note, track_cars)
 from .mileposts import Line, MilepostModel, _lines, _Measurer, _setup_line
+from .clearance import default_clearance_in, fouled_length
 from .models import Layout, TrackObject
 from .stations import _bfs_usable_length, _snap_to_segment, model_in_to_proto_ft
 
@@ -53,6 +54,7 @@ class _Context:
         self.categories = layer_categories(layout)
         self.scale = layout.scale or "HO"
         self.location_kind = {n.id: n.kind for n in self.notes if n.kind in LOCATION_KINDS}
+        self.clearance = default_clearance_in(self.scale)
 
     def feet(self, inches: float) -> float:
         return round(model_in_to_proto_ft(inches, self.scale), 3)
@@ -121,6 +123,7 @@ def _siding(ctx: _Context, switch_ids: list[int]) -> tuple[float, list[int]] | N
         if start in seen:
             continue
         stack, comp, ends = [start], [], set()
+        at_end: list[tuple[TrackObject, TrackObject]] = []      # (switch, siding track)
         seen.add(start)
         while stack:
             track = ctx.by_id[stack.pop()]
@@ -135,11 +138,17 @@ def _siding(ctx: _Context, switch_ids: list[int]) -> tuple[float, list[int]] | N
                 elif (nxt.kind == "TURNOUT"
                       and ctx.categories.get(nxt.layer, ("",))[0] == "mainline"):
                     ends.add(nxt.id)
+                    at_end.append((nxt, track))
         if len(ends) == 2 and ends & switches:
             # Turnouts on the passing track itself (spurs off the siding)
             # count: cars stand on their through route. The station's main
-            # switches are on the main, so they are not in comp.
-            return sum(t.length_model_inches() for t in comp), sorted(ends)
+            # switches are on the main, so they are not in comp. What it
+            # holds stops at the clearance point near each main switch.
+            ids = {t.id for t in comp}
+            fouled = sum(fouled_length(ctx.layout, sw, tr, ctx.clearance, allowed=ids)
+                         for sw, tr in at_end)
+            return max(0.0, sum(t.length_model_inches() for t in comp) - fouled), \
+                sorted(ends)
     return None
 
 
@@ -168,13 +177,22 @@ def _main_between(ctx: _Context, layers: set[int], a: int, b: int) -> float | No
                 heapq.heappush(heap, (nd, nxt.id))
     if b not in dist:
         return None
-    total, tid = 0.0, prev.get(b)
+    total, tid, path = 0.0, prev.get(b), []
     while tid is not None and tid != a:
         track = ctx.by_id[tid]
+        path.append(track)
         if track.kind != "TURNOUT":
             total += track.length_model_inches()
         tid = prev.get(tid)
-    return total
+    # What the main between the switches holds stops at the clearance point
+    # near each: a car nearer fouls the siding.
+    ids = {t.id for t in path}
+    fouled = 0.0
+    if path:
+        for sw, first in ((ctx.by_id[b], path[0]), (ctx.by_id[a], path[-1])):
+            if first.kind != "TURNOUT":
+                fouled += fouled_length(ctx.layout, sw, first, ctx.clearance, allowed=ids)
+    return max(0.0, total - fouled)
 
 
 def _house_tracks(ctx: _Context, station_id: str, railroad: str | None,
