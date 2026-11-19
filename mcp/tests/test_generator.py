@@ -696,8 +696,8 @@ def test_floor_plan_restricted_vertex(floor_plan_result):
     assert "96.000000 0.000000 0" in floor_plan_result
 
 def test_floor_plan_partition_vertex(floor_plan_result):
-    # alcove_wall: x0=48, y0=156, vertical → SW corner of polygon
-    assert "48.000000 156.000000 0" in floor_plan_result
+    # furnace_wall: x0=92, y0=0, vertical → SW corner of polygon
+    assert "92.000000 0.000000 0" in floor_plan_result
 
 def test_floor_plan_door_clearance_vertex(floor_plan_result):
     # east door inward: wall_x=144, clearance=36 → x0=108, y0=36

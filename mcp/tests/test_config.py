@@ -559,11 +559,11 @@ def test_floor_plan_partition_count():
 def test_floor_plan_partition_fields():
     result = load_config(FLOOR_PLAN_CONFIG)
     p = result.config.floor_plan.partitions[0]
-    assert p.label == "alcove_wall"
-    assert p.x0 == pytest.approx(48.0)
-    assert p.y0 == pytest.approx(156.0)
-    assert p.x1 == pytest.approx(48.0)
-    assert p.y1 == pytest.approx(192.0)
+    assert p.label == "furnace_wall"
+    assert p.x0 == pytest.approx(92.0)
+    assert p.y0 == pytest.approx(0.0)
+    assert p.x1 == pytest.approx(92.0)
+    assert p.y1 == pytest.approx(36.0)
     assert p.thickness == pytest.approx(4.0)
 
 def test_floor_plan_restricted_count():
@@ -591,10 +591,10 @@ def test_floor_plan_file_missing_warns(tmp_path):
 # Benchwork fixture — Hillside Division (hillside_benchwork.yaml)
 # ---------------------------------------------------------------------------
 
-def test_hillside_benchwork_loads_six_sections():
-    # 4 L1 wall shelves + 2 L2 upper-deck sections
+def test_hillside_benchwork_loads_five_sections():
+    # 3 L1 wall shelves (west, north, east) + 2 L2 upper-deck sections
     result = load_config(FLOOR_PLAN_CONFIG)
-    assert len(result.config.benchwork_sections) == 6
+    assert len(result.config.benchwork_sections) == 5
 
 
 def test_hillside_benchwork_no_warnings():
@@ -606,8 +606,7 @@ def test_hillside_benchwork_labels():
     result = load_config(FLOOR_PLAN_CONFIG)
     labels = [bw.label for bw in result.config.benchwork_sections]
     assert "west_wall" in labels
-    assert "north_wall_west" in labels
-    assert "north_wall_east" in labels
+    assert "north_wall" in labels
     assert "east_wall" in labels
 
 
@@ -631,26 +630,15 @@ def test_hillside_benchwork_west_wall_vertices():
     assert min(xs) == pytest.approx(0.0)
     assert max(xs) == pytest.approx(24.0)
     assert min(ys) == pytest.approx(0.0)
-    assert max(ys) == pytest.approx(156.0)
+    assert max(ys) == pytest.approx(168.0)
 
 
-def test_hillside_benchwork_north_wall_west_vertices():
+def test_hillside_benchwork_north_wall_vertices():
     result = load_config(FLOOR_PLAN_CONFIG)
-    bw = next(b for b in result.config.benchwork_sections if b.label == "north_wall_west")
+    bw = next(b for b in result.config.benchwork_sections if b.label == "north_wall")
     xs = [v[0] for v in bw.vertices]
     ys = [v[1] for v in bw.vertices]
     assert min(xs) == pytest.approx(0.0)
-    assert max(xs) == pytest.approx(48.0)
-    assert min(ys) == pytest.approx(168.0)
-    assert max(ys) == pytest.approx(192.0)
-
-
-def test_hillside_benchwork_north_wall_east_vertices():
-    result = load_config(FLOOR_PLAN_CONFIG)
-    bw = next(b for b in result.config.benchwork_sections if b.label == "north_wall_east")
-    xs = [v[0] for v in bw.vertices]
-    ys = [v[1] for v in bw.vertices]
-    assert min(xs) == pytest.approx(52.0)
     assert max(xs) == pytest.approx(144.0)
     assert min(ys) == pytest.approx(168.0)
     assert max(ys) == pytest.approx(192.0)
@@ -664,4 +652,4 @@ def test_hillside_benchwork_east_wall_vertices():
     assert min(xs) == pytest.approx(120.0)
     assert max(xs) == pytest.approx(144.0)
     assert min(ys) == pytest.approx(72.0)
-    assert max(ys) == pytest.approx(192.0)
+    assert max(ys) == pytest.approx(168.0)

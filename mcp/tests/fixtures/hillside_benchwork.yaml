@@ -4,8 +4,10 @@
 #
 # Room constraints honored:
 #   - East wall entry door: y=36 to y=72  → east shelf starts at y=72
-#   - NW alcove wall: x=48, y=156 to y=192 → west shelf stops at y=156
 #   - SE corner HVAC restricted: x=96–144, y=0–36 → south end of east shelf clear
+#
+# Level 1 is a U around the west, north and east walls: the north shelf runs the
+# full width and the west and east shelves run up to it, so no two overlap.
 #
 # elevation: top surface of benchwork above floor, real inches.
 # thickness: board depth below top surface (L1=3.5", L2=1.5").
@@ -15,7 +17,7 @@
 #   L1: 40" — all around-the-walls sections
 #   L2: 58" — upper deck sections (40" + 18" separation)
 
-# West wall shelf — full run from south wall to the alcove stub wall
+# West wall shelf — from the south wall up to the north shelf
 - label: west_wall
   shape: rect
   level: 1
@@ -24,28 +26,17 @@
   x: 0
   y: 0
   width: 24        # 2 ft deep into room
-  length: 156      # runs from y=0 to y=156 (stops at alcove wall)
+  length: 168      # runs from y=0 to y=168 (meets the north shelf)
 
-# North wall shelf — alcove portion (west of alcove_wall partition at x=48)
-- label: north_wall_west
+# North wall shelf — the full width of the room
+- label: north_wall
   shape: rect
   level: 1
   elevation: 40in
   thickness: 3.5in
   x: 0
   y: 168           # 192 - 24 = 168 (24 in from north wall)
-  width: 48        # x=0 to x=48 (stops at west face of alcove_wall)
-  length: 24       # 2 ft deep
-
-# North wall shelf — main-room portion (east of alcove_wall partition at x=48+4=52)
-- label: north_wall_east
-  shape: rect
-  level: 1
-  elevation: 40in
-  thickness: 3.5in
-  x: 52            # 4" clear of east face of alcove_wall (x=48+4)
-  y: 168
-  width: 92        # x=52 to x=144
+  width: 144       # x=0 to x=144
   length: 24       # 2 ft deep
 
 # East wall shelf — above the entry door clearance zone
@@ -57,7 +48,7 @@
   x: 120           # 144 - 24 = 120 (24 in from east wall)
   y: 72            # starts above door clearance (door top = y 72)
   width: 24        # 2 ft deep into room
-  length: 120      # runs from y=72 to y=192
+  length: 96       # runs from y=72 to y=168 (meets the north shelf)
 
 # ---------------------------------------------------------------------------
 # Level 2 — upper deck (demonstrating elevation field with two deck heights)

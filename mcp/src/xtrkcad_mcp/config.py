@@ -246,7 +246,7 @@ _RANGE_RE = re.compile(r'^([A-Z]+)(\d+)-([A-Z]+)(\d+)$')
 
 
 def _default_grid_cell_ft(radius_in: float) -> float:
-    """Grid cell = 2 × curve diameter rounded up to nearest foot, min 3."""
+    """Grid cell = the curve diameter (2 × radius) rounded up to a whole foot, min 3."""
     return max(3.0, math.ceil((2.0 * radius_in) / 12.0))
 
 

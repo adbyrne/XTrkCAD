@@ -916,7 +916,7 @@ def test_load_layout_config_returns_benchwork_sections():
     result = load_layout_config(str(HILLSIDE_CONFIG))
     assert "benchwork_sections" in result["config"]
     sections = result["config"]["benchwork_sections"]
-    assert len(sections) == 6  # 4 L1 + 2 L2 sections
+    assert len(sections) == 5  # 3 L1 + 2 L2 sections
 
 
 def test_load_layout_config_benchwork_section_fields():

@@ -32,7 +32,7 @@ floor_plan_file: hillside_floor_plan.yaml
 benchwork_file:  hillside_benchwork.yaml
 
 mainline: single
-curve_radius: 22in
+curve_radius: 20in
 switch_size: "#6"
 levels: 2
 
@@ -169,22 +169,22 @@ polygon on the Floor layer.
 
 ```yaml
 partitions:
-  - label: alcove_wall
-    x0: 48in
-    y0: 156in
-    x1: 48in
-    y1: 192in
+  - label: furnace_wall
+    x0: 92in
+    y0: 0in
+    x1: 92in
+    y1: 36in
     thickness: 4in
 ```
 
 A partition is a partial wall that does not follow a room perimeter — a knee
-wall, a column, a stub wall separating an alcove.  `x0`/`y0` and `x1`/`y1` are
+wall, a column, a stub wall closing off a utility corner.  `x0`/`y0` and `x1`/`y1` are
 its endpoints; `thickness` is the wall depth.  The generator renders it as a
 medium-gray filled rectangle on the Floor layer.
 
-The Hillside alcove wall runs from (48, 156) to (48, 192) — a 36-inch vertical
-stub in the NW corner.  It splits the north wall benchwork into two sections
-(see `hillside_benchwork.yaml`).
+The Hillside furnace wall runs from (92, 0) to (92, 36) — a 36-inch vertical
+stub closing off the furnace corner (the restricted area below) from the room.
+The rectangle is drawn east of `x0`, so it fills x=92 to 96.
 
 If a door opening falls along a partition the generator automatically cuts a gap
 in the rendered wall — both in the `.xtc` Floor layer and in `write_plan_view`'s
@@ -237,7 +237,7 @@ geometry for your planning — benchwork placement is your design decision.
   x: 0
   y: 0
   width: 24
-  length: 156
+  length: 168
 ```
 
 | Field | Meaning |
@@ -262,7 +262,7 @@ east–west; `length` runs north–south.
   x: 0
   y: 0
   width: 24        # 2 ft deep into room
-  length: 156      # y=0 to y=156 (stops at alcove wall)
+  length: 168      # y=0 to y=168 (meets the north shelf)
 ```
 
 **`rotated_rect`** — rectangle rotated about its centre.  Use this for 45°
@@ -337,28 +337,19 @@ builds a miter-joined offset polygon from the centreline.
 
 ### The Hillside benchwork
 
-The Hillside Division uses `rect` for all four wall shelves.  The north wall is
-split into two sections to clear the alcove partition at x=48:
+The Hillside Division uses `rect` for its three Level 1 wall shelves, a U
+around the west, north and east walls.  The north shelf runs the full width of
+the room; the west and east shelves run up to it, so no two sections overlap:
 
 ```yaml
-- label: north_wall_west
+- label: north_wall
   shape: rect
   level: 1
   elevation: 40in
   thickness: 3.5in
   x: 0
   y: 168           # 192 - 24 = 168 (24 in from north wall)
-  width: 48        # x=0 to x=48 (stops at west face of alcove_wall)
-  length: 24
-
-- label: north_wall_east
-  shape: rect
-  level: 1
-  elevation: 40in
-  thickness: 3.5in
-  x: 52            # 4" clear of east face of alcove_wall (x=48+4)
-  y: 168
-  width: 92        # x=52 to x=144
+  width: 144       # x=0 to x=144, the full width
   length: 24
 ```
 
@@ -373,7 +364,7 @@ The east wall shelf starts at y=72 to leave headroom above the entry door:
   x: 120           # 144 - 24 = 120 (24 in from east wall)
   y: 72            # starts above door clearance zone
   width: 24
-  length: 120      # y=72 to y=192
+  length: 96       # y=72 to y=168 (meets the north shelf)
 ```
 
 The two Level 2 sections demonstrate the `elevation:` field — same footprint as
@@ -406,8 +397,9 @@ the L1 north and east walls but 18 inches higher:
 When a corner module meets a wall shelf, extend the wall shelf to the corner
 module's *outer toe* — the outermost face that touches the wall — not just to
 the inner face.  This keeps the outer edge of the benchwork visually continuous
-at the wall face.  In the Hillside example the west wall runs all the way to
-y=0 because the SW corner module's toe sits at (0, 0).
+at the wall face.  In the Hillside example the west and east shelves run up to
+the north shelf (y=168), and the north shelf runs the full width to both walls,
+so the outer edge is continuous along every wall.
 
 ---
 
@@ -488,7 +480,7 @@ If a `.xtc` file already exists at `out` it is backed up automatically as
 `hillside_division_v1.xtc`, `_v2`, etc. before being overwritten.
 
 Open the `.xtc` in XTrkCAD.  The Floor layer (0) shows the room perimeter,
-door clearance zones, the alcove partition, and the HVAC restricted area.  The
+door clearance zones, the furnace wall partition, and the HVAC restricted area.  The
 L1-Benchwork layer (7) shows Level 1 shelf outlines.  The L2-Benchwork layer
 (14) shows Level 2 shelves.  Layers 1–6 (L1-Main through L1-Service) and 8–13
 (L2-Main through L2-Service) are ready for track placement.  Use the Layers
@@ -579,8 +571,8 @@ grid:
 ```
 
 The cell range (`A1-B4`) maps onto the room using `grid_size` as the cell side
-length (derived from `curve_radius` if not set explicitly — 3 ft for a 22-inch
-HO minimum).  Column letters run east; row numbers run north from row 1 at the
+length (derived from `curve_radius` if not set explicitly: the curve diameter
+rounded up to a whole foot, at least 3 ft — 4 ft for Hillside's 20-inch radius).  Column letters run east; row numbers run north from row 1 at the
 south wall.
 
 An `@2` suffix on the range assigns the element to Level 2.

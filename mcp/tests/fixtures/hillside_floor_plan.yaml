@@ -23,12 +23,13 @@ doors:
     clearance: 36in
 
 partitions:
-  # Short stub wall in the NW corner separating a utility alcove
-  - label: alcove_wall
-    x0: 48in
-    y0: 156in
-    x1: 48in
-    y1: 192in
+  # Stub wall closing off the furnace corner from the room: x=92 to 96, on
+  # the west side of the restricted area
+  - label: furnace_wall
+    x0: 92in
+    y0: 0in
+    x1: 92in
+    y1: 36in
     thickness: 4in
 
 restricted:
