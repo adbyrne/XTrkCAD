@@ -1329,3 +1329,94 @@ def test_terminus_note_for_station_not_marked_terminus(tmp_path):
 def test_terminus_note_not_at_a_switch(tmp_path):
     issues = _placed(tmp_path, [_st("HC", 228, terminus=True), _term("HC", 120)], tracks=LINE)
     assert "TERMINUS_NOT_AT_SWITCH" in _rules(issues)
+
+
+# -- v1.1: industry on main or passing, car_spots on facility/storage --------
+
+@pytest.mark.parametrize("kind", ["industry", "team_track"])
+@pytest.mark.parametrize("layer, y", [(0, 0.0), (1, 20.0)])
+def test_industry_on_main_or_passing_is_info(tmp_path, kind, layer, y):
+    issues = _check(tmp_path, [(layer, {"kind": kind, "id": "KIEL", "car_spots": 2},
+                                None, 50, y)])
+    on_main = [i for i in issues if i.rule == "INDUSTRY_ON_MAIN"]
+    assert [i.severity for i in on_main] == ["info"]
+    assert on_main[0].track_id == layer + 1
+
+
+@pytest.mark.parametrize("kind", ["industry", "team_track"])
+def test_industry_on_service_track_is_not_on_main(tmp_path, kind):
+    issues = _check(tmp_path, [(2, {"kind": kind, "id": "KIEL", "car_spots": 2},
+                                None, 50, 40.0)])
+    assert "INDUSTRY_ON_MAIN" not in _rules(issues)
+
+
+@pytest.mark.parametrize("kind", ["facility", "storage"])
+def test_car_spots_on_facility_or_storage_is_accepted(tmp_path, kind):
+    fields = {"type": "coal"} if kind == "facility" else {}
+    issues = _check(tmp_path, [(2, {"kind": kind, "id": "WP_COAL", "car_spots": 3,
+                                    **fields}, None, 50, 40.0)])
+    assert _rules(issues) == []
+
+
+@pytest.mark.parametrize("kind", ["facility", "storage"])
+def test_facility_or_storage_without_car_spots_has_no_default(tmp_path, kind):
+    """No default, no notice from the check (spec 4.8: the Op Density
+    report lists it as not counted instead)."""
+    fields = {"type": "turntable"} if kind == "facility" else {}
+    issues = _check(tmp_path, [(2, {"kind": kind, "id": "WP_TT", **fields}, None, 50, 40.0)])
+    assert _rules(issues) == []
+
+
+@pytest.mark.parametrize("value", [0, 2.5, "3", True])
+def test_facility_bad_car_spots(tmp_path, value):
+    issues = _check(tmp_path, [(2, {"kind": "facility", "id": "WP_COAL", "type": "coal",
+                                    "car_spots": value}, None, 50, 40.0)])
+    assert "NOTE_FIELD_TYPE" in _rules(issues)
+
+
+# -- v1.1: car spots the track can't hold --------------------------------------
+
+# A 10 in service spur (layer 2): 1 HO car (2 cars per model foot).
+SHORT_SPUR = """STRAIGHT 1 0 0 0 0 HO 0
+\tE 0.000000 0.000000 270.000000
+\tE 100.000000 0.000000 90.000000
+\tEND$SEGS
+
+STRAIGHT 3 2 0 0 0 HO 0
+\tE 0.000000 40.000000 270.000000
+\tE 10.000000 40.000000 90.000000
+\tEND$SEGS
+"""
+
+
+def _spots_issues(tmp_path, note, tracks=None):
+    issues = _check(tmp_path, [(2, note, None, 5, 40.0)], tracks=tracks)
+    return [i for i in issues if i.rule == "CAR_SPOTS_EXCEED_TRACK"]
+
+
+@pytest.mark.parametrize("note", [
+    {"kind": "industry", "id": "QM2"},                       # default 2 spots
+    {"kind": "industry", "id": "QM2", "car_spots": 2},
+    {"kind": "team_track", "id": "QM2", "car_spots": 3},
+    {"kind": "facility", "id": "WP_COAL", "type": "coal", "car_spots": 2},
+    {"kind": "storage", "id": "CAR_BARN", "car_spots": 2},
+])
+def test_car_spots_exceed_track_is_warning(tmp_path, note):
+    issues = _spots_issues(tmp_path, note, tracks=SHORT_SPUR)
+    assert [(i.severity, i.track_id) for i in issues] == [("warning", 3)]
+
+
+@pytest.mark.parametrize("note", [
+    {"kind": "industry", "id": "QM2", "car_spots": 1},
+    {"kind": "facility", "id": "WP_TT", "type": "turntable"},  # no spots, no check
+    {"kind": "storage", "id": "CAR_BARN"},
+])
+def test_car_spots_the_track_holds(tmp_path, note):
+    assert _spots_issues(tmp_path, note, tracks=SHORT_SPUR) == []
+
+
+def test_car_spots_on_a_long_track(tmp_path):
+    # The default service track runs 100 in: 16 cars.
+    assert _spots_issues(tmp_path, {"kind": "industry", "id": "QM2", "car_spots": 16}) == []
+    assert len(_spots_issues(tmp_path, {"kind": "industry", "id": "QM2",
+                                        "car_spots": 17})) == 1

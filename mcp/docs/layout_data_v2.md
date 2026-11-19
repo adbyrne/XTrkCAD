@@ -48,6 +48,7 @@ Tool result: `{written, output, counts: {error, warning, info}, errors, notices}
 | `industries` | Industries |
 | `team_tracks` | Team tracks |
 | `yards` | Yard tracks, grouped by the location they belong to |
+| `storage` | Stand-alone car storage tracks |
 | `switchbacks` | Switchbacks |
 | `facilities` | Facilities (coal, water, ...) |
 | `segments` | Main-track lengths between consecutive stations |
@@ -104,9 +105,16 @@ empty when not given).
 `id`, `serves` (the location using it), `switch_ids` (the note's `switches`, else the main
 switches its tail track leaves), `track_id` (the tail track the note sits on), `tail_ft`.
 
+## storage[]
+
+`id`, `name`, `track_id`, `length_ft`, `capacity_cars`, and `car_spots`: the cars parked
+there on purpose, as the note gives it, or `null` (no default; conventions v1.1).
+
 ## facilities[]
 
-`id`, `name`, `type`, `location`, `track_id`.
+`id`, `name`, `type`, `location`, `track_id`, `length_ft`, `capacity_cars`, and
+`car_spots` as for `storage[]` (v1.1). A coal trestle or repair track with `car_spots`
+holds parked cars; a turntable or water tank usually has none.
 
 ## segments[]
 

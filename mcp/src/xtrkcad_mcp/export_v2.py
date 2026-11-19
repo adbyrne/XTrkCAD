@@ -18,14 +18,14 @@ import math
 
 from .conventions import (CONVENTIONS_VERSION, LOCATION_KINDS, ConventionNote,
                           Issue, _main_layers, check_conventions, layer_categories,
-                          main_turnouts_from, read_convention_notes,
-                          resolve_ownership, snap_note)
+                          CAR_SPOTS_DEFAULT, main_turnouts_from,
+                          note_usable_length, read_convention_notes,
+                          resolve_ownership, snap_note, track_cars)
 from .mileposts import Line, MilepostModel, _lines, _Measurer, _setup_line
-from .models import Layout, TrackObject, cars_per_real_ft
+from .models import Layout, TrackObject
 from .stations import _bfs_usable_length, _snap_to_segment, model_in_to_proto_ft
 
 SCHEMA_VERSION = 2
-CAR_SPOTS_DEFAULT = 2            # spec 4.5
 
 
 class _Context:
@@ -59,7 +59,7 @@ class _Context:
 
     def cars(self, inches: float) -> int:
         """Fugate: whole cars per model foot, as the capacity reports count."""
-        return int(inches / 12.0 * cars_per_real_ft(self.scale))
+        return track_cars(self.layout, inches)
 
     def usable_in(self, note: ConventionNote) -> tuple[int | None, float | None]:
         """The track a note marks and its usable length: the connected
@@ -67,13 +67,7 @@ class _Context:
         track = self.snapped.get(note.note_id)
         if track is None:
             return None, None
-        if track.kind == "TURNOUT":
-            tid, _t, _d = _snap_to_segment(self.layout, note.x, note.y, note.layer,
-                                           exclude_turnouts=True)
-            if tid < 0:
-                return track.id, None
-            track = self.by_id[tid]
-        return track.id, _bfs_usable_length(self.layout, track.id)
+        return note_usable_length(self.layout, note, track)
 
     def of_kind(self, kind: str) -> list[ConventionNote]:
         return [n for n in self.notes if n.kind == kind]
@@ -316,13 +310,36 @@ def _switchbacks(ctx: _Context) -> list[dict]:
     return sorted(out, key=lambda sb: sb["id"])
 
 
+def _given_car_spots(note: ConventionNote) -> int | None:
+    """A facility's or storage track's car_spots: only as the note gives
+    it, no default (spec 4.8, v1.1)."""
+    spots = note.fields.get("car_spots")
+    return spots if isinstance(spots, int) and not isinstance(spots, bool) else None
+
+
+def _parked(ctx: _Context, note: ConventionNote) -> dict:
+    """The track, length, capacity and car_spots of a facility or storage
+    note."""
+    track_id, length = ctx.usable_in(note)
+    return {
+        "track_id": track_id,
+        "length_ft": ctx.feet(length) if length is not None else None,
+        "capacity_cars": ctx.cars(length) if length is not None else None,
+        "car_spots": _given_car_spots(note),
+    }
+
+
+def _storage(ctx: _Context) -> list[dict]:
+    """storage[]: stand-alone car storage tracks (spec 4.8)."""
+    out = [{"id": n.id, "name": n.str_field("name"), **_parked(ctx, n)}
+           for n in ctx.of_kind("storage")]
+    return sorted(out, key=lambda st: st["id"])
+
+
 def _facilities(ctx: _Context) -> list[dict]:
-    out = []
-    for n in ctx.of_kind("facility"):
-        track = ctx.snapped.get(n.note_id)
-        out.append({"id": n.id, "name": n.str_field("name"), "type": n.str_field("type"),
-                    "location": n.str_field("location"),
-                    "track_id": track.id if track is not None else None})
+    out = [{"id": n.id, "name": n.str_field("name"), "type": n.str_field("type"),
+            "location": n.str_field("location"), **_parked(ctx, n)}
+           for n in ctx.of_kind("facility")]
     return sorted(out, key=lambda f: f["id"])
 
 
@@ -381,6 +398,7 @@ def build_export_v2(layout: Layout, issues: list[Issue] | None = None) -> dict:
         "industries": _industries(ctx, "industry"),
         "team_tracks": _industries(ctx, "team_track"),
         "yards": _yards(ctx),
+        "storage": _storage(ctx),
         "switchbacks": _switchbacks(ctx),
         "facilities": _facilities(ctx),
         "segments": _segments(ctx, stations),

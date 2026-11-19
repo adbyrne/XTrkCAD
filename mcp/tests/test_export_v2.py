@@ -330,9 +330,38 @@ def test_switchback_switches_field_wins(tmp_path):
 
 
 def test_facilities(clean):
+    # WP_COAL sits on service track 3, (0,30)-(240,30); no car_spots given.
     assert clean["facilities"] == [{
         "id": "WP_COAL", "name": "Coal trestle", "type": "coal", "location": "WP",
-        "track_id": 3}]
+        "track_id": 3, "length_ft": _ft(240), "capacity_cars": 40, "car_spots": None}]
+
+
+def _replaced(tmp_path, old, new):
+    text = CLEAN_FIXTURE.read_text(encoding="utf-8")
+    assert text.count(old) == 1
+    p = tmp_path / "replaced.xtc"
+    p.write_text(text.replace(old, new), encoding="utf-8")
+    return build_export_v2(parse_file(p))
+
+
+def test_facility_car_spots(tmp_path):
+    """v1.1: car_spots on a facility, exported as given (no default)."""
+    export = _replaced(tmp_path, '""location"": ""WP""}"', '""location"": ""WP"", ""car_spots"": 3}"')
+    assert export["facilities"][0]["car_spots"] == 3
+
+
+# -- v1.1: storage[] -----------------------------------------------------------
+
+def test_storage(clean):
+    # CAR_BARN sits on service track 3 as well.
+    assert clean["storage"] == [{
+        "id": "CAR_BARN", "name": "Car barn", "track_id": 3,
+        "length_ft": _ft(240), "capacity_cars": 40, "car_spots": None}]
+
+
+def test_storage_car_spots(tmp_path):
+    export = _replaced(tmp_path, '""name"": ""Car barn""}"', '""name"": ""Car barn"", ""car_spots"": 6}"')
+    assert export["storage"][0]["car_spots"] == 6
 
 
 def test_segments(clean):
@@ -350,4 +379,5 @@ def test_all_sections_present(clean):
     assert list(clean) == [
         "schema_version", "conventions_version", "generated", "layout", "scale",
         "layout_units", "railroads", "stations", "yard_limits", "industries",
-        "team_tracks", "yards", "switchbacks", "facilities", "segments", "issues"]
+        "team_tracks", "yards", "storage", "switchbacks", "facilities", "segments",
+        "issues"]
