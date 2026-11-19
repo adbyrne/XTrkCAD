@@ -613,13 +613,23 @@ stations:
 | `turnout` | Manufacturer and number, matched against XTrkCAD's parameter files: `"PECO Code 83 #6"` finds the #6 left and right hand turnouts |
 | `track_offset` | The main's distance from the wall (default: the shelf's centre) |
 | `track_spacing` | Between parallel tracks (default 2 in in HO, scaled for other scales) |
+| `clearance` | Track centres this far apart clear each other: a car standing beyond the clearance point doesn't foul the other track (default 13 ft scaled, 1.79 in in HO) |
 | `route` | The shelves the main runs along, in order.  It starts at the first shelf's far end and ends at the last one's; each corner gets a curve |
-| `yard` | A stub yard at the start: `tracks`, `track_length` (the shortest track's clear length), `side` |
-| `stations` | One per shelf: `siding` (clear length between the turnouts), `siding_side`, optional `at` (from the shelf's start; default centred), `spurs`.  `terminus: true` makes it the end of the line: the siding becomes a runaround with `tail` of plain track beyond it |
-| `spurs` | `kind` (`industry`, `team_track` or `facility`, with a facility `type`), `length`, `side`, and `points_toward`: which end of the line the turnout's points face |
+| `yard` | A stub yard at the start: `tracks`, `track_length` (what the shortest track holds), `side` |
+| `stations` | One per shelf: `siding` (what the siding holds), `siding_side`, optional `at` (from the shelf's start; default centred), `spurs`.  `terminus: true` makes it the end of the line: the siding becomes a runaround with `tail` of plain track beyond it |
+| `spurs` | `kind` (`industry`, `team_track` or `facility`, with a facility `type`), `length` (what the spur holds), `side`, and `points_toward`: which end of the line the turnout's points face |
 
 Lengths take `in`, `ft` or `cars` (one car is the scale's car length, 6 in in
 HO).  A side is `wall` or `room`, or `left`/`right` of the direction of travel.
+
+A siding, spur or yard track's length is what it **holds**: the track between its
+**clearance points**, where it is far enough from the track it leaves that cars on
+the two clear each other (`clearance`, 13 ft between centres on the prototype).
+A car standing nearer the switch fouls the other track.  For a Peco #6 in HO the
+clearance point is 13.95 in from the points, about a car length past the frog;
+the tool builds each track long enough to hold what you asked between its
+clearance points, and reports for each `capacity_in`/`capacity_cars` (what it
+holds), `clear_in` (its straight part) and `clearance_in`.
 
 The main goes on `L1-Main` with the turnouts it runs through, sidings on
 `L1-Passing`, the yard and industry spurs on `L1-Storage`, and facility spurs on
@@ -627,7 +637,7 @@ The main goes on `L1-Main` with the turnouts it runs through, sidings on
 side the two run end to end.
 
 When something doesn't fit, nothing is written, and the error says what and by
-how much, e.g. `station BI: needs 105.7 in on shelf north_wall, 80.0 in free
+how much, e.g. `station BI: needs 99.9 in on shelf north_wall, 80.0 in free
 there` for a 12-car siding.  A layout that already has track on the plan's level is refused, so
 generate the layout again to start over.  Version 1 of the tool takes straight
 (rectangular) shelves along the walls, meeting at right angles, with one

@@ -79,6 +79,7 @@ class TrackPlanSpec:
     turnout: str
     track_offset_in: float | None
     track_spacing_in: float
+    clearance_in: float     # track centres this far apart clear each other
     car_in: float
     route: list[str]
     yard: YardSpec | None
@@ -87,7 +88,8 @@ class TrackPlanSpec:
 
 
 _PLAN_KEYS = {"level", "curve_radius", "turnout", "track_offset", "track_spacing",
-              "route", "yard", "stations", "notes"}
+              "clearance", "route", "yard", "stations", "notes"}
+_CLEARANCE_FT = 13.0     # prototype track centres at a clearance point (US practice)
 _YARD_KEYS = {"id", "name", "tracks", "track_length", "side"}
 _STATION_KEYS = {"id", "name", "shelf", "at", "siding", "siding_side", "terminus", "tail",
                  "spurs"}
@@ -152,6 +154,7 @@ def parse_track_plan(raw: dict, config: LayoutConfig) -> TrackPlanSpec:
         raise PlanError("track plan: no curve_radius (here or in the layout config)")
     offset = raw.get("track_offset")
     spacing = raw.get("track_spacing")
+    clearance = raw.get("clearance")
 
     yard = None
     if raw.get("yard") is not None:
@@ -212,6 +215,8 @@ def parse_track_plan(raw: dict, config: LayoutConfig) -> TrackPlanSpec:
         else None,
         track_spacing_in=_length(spacing, car_in, "track_spacing") if spacing is not None
         else 2.0 * 87.1 / ratio,
+        clearance_in=_length(clearance, car_in, "clearance") if clearance is not None
+        else _CLEARANCE_FT * 12.0 / ratio,
         car_in=car_in, route=route, yard=yard, stations=stations,
         notes=bool(raw.get("notes", False)))
 
@@ -412,6 +417,64 @@ def _offset_run(defn: TurnoutDef, spacing: float, radius: float):
     return along, straight, r
 
 
+def _diverging_samples(defn: TurnoutDef, step: float = 0.02) -> list[tuple[float, float]]:
+    """Points along a turnout's diverging route, in its local frame (x from
+    the points toward the frog, |y| off the straight route), from the
+    definition's own segments."""
+    segs = defn.segments
+    best: list[tuple[float, float]] = []
+    for line in defn.paths:
+        ids = [int(t) for t in re.findall(r"\s(\d+)", line.split('"')[-1]) if int(t) > 0]
+        pts: list[tuple[float, float]] = []
+        for i in ids:
+            if i > len(segs):
+                continue
+            w = segs[i - 1].split()
+            if w[0] == "S":
+                x0, y0, x1, y1 = map(float, w[3:7])
+                n = max(2, int(math.dist((x0, y0), (x1, y1)) / step))
+                pts += [(x0 + (x1 - x0) * k / n, abs(y0 + (y1 - y0) * k / n))
+                        for k in range(n + 1)]
+            elif w[0] == "C":
+                r, cx, cy, a0, sw = abs(float(w[3])), float(w[4]), float(w[5]), \
+                    float(w[6]), float(w[7])
+                n = max(2, int(r * math.radians(sw) / step))
+                for k in range(n + 1):
+                    dx, dy = direction(a0 + sw * k / n)
+                    pts.append((cx + r * dx, abs(cy + r * dy)))
+        if pts and max(y for _x, y in pts) > max((y for _x, y in best), default=-1.0):
+            best = pts
+    return sorted(best)
+
+
+def clearance_point(defn: TurnoutDef, clearance: float, spacing: float,
+                    radius: float) -> float:
+    """How far from a turnout's points (along the straight route) its
+    diverging track is ``clearance`` from the straight one: through the
+    turnout, then the run out at the frog angle and the curve back to
+    parallel at ``spacing``. At or beyond ``spacing``, where they run
+    parallel."""
+    along, straight, r = _offset_run(defn, spacing, radius)
+    if clearance >= spacing - 1e-9:
+        return along
+    th = math.radians(defn.frog_angle)
+    xd, yd = defn.diverge_length, abs(defn.diverge_offset)
+    pts = _diverging_samples(defn)
+    pts += [(xd + t * math.cos(th), yd + t * math.sin(th))
+            for t in [straight * k / 200 for k in range(201)]]
+    x2 = xd + straight * math.cos(th) + r * math.sin(th)
+    pts += [(x2 - r * math.sin(phi), spacing - r * (1.0 - math.cos(phi)))
+            for phi in [th * (1 - k / 200) for k in range(201)]]
+    prev = None
+    for x, y in pts:
+        if y >= clearance:
+            if prev is None or y == prev[1]:
+                return x
+            return prev[0] + (x - prev[0]) * (clearance - prev[1]) / (y - prev[1])
+        prev = (x, y)
+    return along
+
+
 def _curve_between(pid, layer, center, radius, pa, pb, sweep_deg):
     """A curve through two points; ends stored clockwise as XTrkCAD does."""
     a = compass(pa[0] - center[0], pa[1] - center[1])
@@ -445,6 +508,9 @@ class _Builder:
         self.fp, self.straight, self.r = _offset_run(turnouts.left, spec.track_spacing_in,
                                                      spec.curve_radius_in)
         self.theta = turnouts.left.frog_angle
+        self.xc = clearance_point(turnouts.left, spec.clearance_in, spec.track_spacing_in,
+                                  spec.curve_radius_in)
+        self.tail = self.fp - self.xc      # curve between clearance point and parallel
         self.main_turnouts: list[tuple[float, float]] = []   # [a, b] main intervals
         self.errors: list[str] = []
 
@@ -501,11 +567,13 @@ class _Builder:
 
 
 def _pack_station(st: StationSpec, fp: float, L: float,
-                  end_gap: float = _END_GAP) -> tuple[float, list, float]:
+                  end_gap: float = _END_GAP, xc: float | None = None) -> tuple[float, list, float]:
     """Lay out a station's parts in u: the siding (or runaround) at 0, then
-    each spur where it adds least to the station's length. Returns (width,
-    placements [(spur, u_points, dirn)], siding width)."""
-    width_s = 2.0 * fp + st.siding_in
+    each spur where it adds least to the station's length. Lengths are
+    between clearance points (``xc`` from a turnout's points). Returns
+    (width, placements [(spur, u_points, dirn)], siding width)."""
+    xc = fp if xc is None else xc
+    width_s = st.siding_in + 2.0 * xc
     main: list[tuple[float, float]] = [(0.0, L), (width_s - L, width_s)]
     sides: dict[str, list[tuple[float, float]]] = {"siding": [(0.0, width_s)]}
     lo, hi = 0.0, width_s + (st.tail_in if st.terminus else 0.0)
@@ -517,7 +585,7 @@ def _pack_station(st: StationSpec, fp: float, L: float,
         return all(iv[1] + gap <= a or iv[0] >= b + gap for a, b in taken)
 
     for sp in st.spurs:
-        span = fp + sp.length_in
+        span = xc + sp.length_in
         best = None
         u = lo - span - 2 * end_gap
         while u <= hi + 2 * end_gap:
@@ -564,7 +632,11 @@ def build_track_plan(spec: TrackPlanSpec, config: LayoutConfig,
         y = spec.yard
         run = route.runs[0]
         sign = b.lat(run, y.side)
-        s_y = run.s0 + (y.tracks - 1) * b.fp + y.track_length_in
+        # Track k's points are (k-1) offset runs out from the throat; each
+        # track holds cars from its clearance point with the next track out,
+        # so the last two tracks are the shortest.
+        s_y = run.s0 + y.track_length_in + (
+            (y.tracks - 2) * b.fp + b.xc if y.tracks > 1 else 0.0)
         if s_y > run.s1:
             b.errors.append(f"yard {y.id}: needs {s_y - run.s0:.1f} in on shelf {run.shelf}, "
                             f"which has {run.s1 - run.s0:.1f} in")
@@ -582,7 +654,7 @@ def build_track_plan(spec: TrackPlanSpec, config: LayoutConfig,
                                                   b.layer["Storage"])
                     b.model.add(Straight(0, b.layer["Storage"], t.ends()[1][:2],
                                          route.at(run, run.s0, v_k)))
-                    usable = s_y - k * b.fp - run.s0
+                    usable = s_y - (k - 1) * b.fp - b.xc - run.s0
                     s_k, v_k = s_next, v_next
                 else:
                     if y.tracks > 1:
@@ -591,9 +663,10 @@ def build_track_plan(spec: TrackPlanSpec, config: LayoutConfig,
                     else:
                         b.model.add(Straight(0, b.layer["Storage"], route.at(run, s_y, 0.0),
                                              route.at(run, run.s0, 0.0)))
-                    usable = s_y - (y.tracks - 1) * b.fp - run.s0
-                tracks.append({"label": f"Track {k}", "length_in": round(usable, 2),
-                               "cars": int(usable / car + 1e-9)})
+                    usable = (s_y - (y.tracks - 2) * b.fp - b.xc - run.s0
+                              if y.tracks > 1 else y.track_length_in)
+                tracks.append({"label": f"Track {k}", "capacity_in": round(usable, 2),
+                               "capacity_cars": int(usable / car + 1e-9)})
             features.append({"id": y.id, "kind": "yard", "name": y.name, "shelf": run.shelf,
                              "tracks": tracks, "throat": route.at(run, s_y, 0.0)})
             main_start = s_y
@@ -605,7 +678,7 @@ def build_track_plan(spec: TrackPlanSpec, config: LayoutConfig,
         hi = run.s1
         try:
             width, spurs, siding_u = _pack_station(
-                st, b.fp, b.L, _END_GAP * 87.1 / SCALE_RATIOS.get(scale, 87.1))
+                st, b.fp, b.L, _END_GAP * 87.1 / SCALE_RATIOS.get(scale, 87.1), b.xc)
         except PlanError as e:
             b.errors.append(str(e))
             continue
@@ -621,8 +694,14 @@ def build_track_plan(spec: TrackPlanSpec, config: LayoutConfig,
             continue
         sign = b.lat(run, st.siding_side)
         b.check_edge(f"station {st.id}", run, sign, spec.track_spacing_in)
+        clear = st.siding_in - 2.0 * b.tail
+        if clear < 0:
+            b.errors.append(f"station {st.id}: a {st.siding_in:.1f} in siding is shorter than "
+                            f"its two curves beyond the clearance points "
+                            f"({2.0 * b.tail:.1f} in)")
+            continue
         s_a = u0 + siding_u
-        s_b = s_a + 2.0 * b.fp + st.siding_in
+        s_b = s_a + st.siding_in + 2.0 * b.xc
         ta = b.turnout(run, s_a, 0.0, +1, sign, b.layer["Main"])
         tb = b.turnout(run, s_b, 0.0, -1, sign, b.layer["Main"])
         b.main_turnout(s_a, s_a + b.L)
@@ -632,8 +711,10 @@ def build_track_plan(spec: TrackPlanSpec, config: LayoutConfig,
         b.model.add(Straight(0, b.layer["Passing"], route.at(run, *pa), route.at(run, *pb)))
         features.append({
             "id": st.id, "kind": "station", "name": st.name, "shelf": st.shelf,
-            "siding_in": round(st.siding_in, 2), "siding_cars": int(st.siding_in / car + 1e-9),
-            "terminus": st.terminus,
+            "capacity_in": round(st.siding_in, 2),
+            "capacity_cars": int(st.siding_in / car + 1e-9),
+            "clear_in": round(clear, 2), "clearance_in": round(b.xc, 2),
+            "run_in": round(b.fp, 2), "terminus": st.terminus,
             "tail_in": round(route.length - s_b, 2) if st.terminus else None,
             "switches": [route.at(run, s_a, 0.0), route.at(run, s_b, 0.0)],
         })
@@ -642,17 +723,24 @@ def build_track_plan(spec: TrackPlanSpec, config: LayoutConfig,
         for sp, u, (ma, mb) in spurs:
             sign_s = b.lat(run, sp.side)
             b.check_edge(f"spur {sp.id}", run, sign_s, spec.track_spacing_in)
+            parallel = sp.length_in - b.tail
+            if parallel <= 1e-9:
+                b.errors.append(f"spur {sp.id}: {sp.length_in:.1f} in is no longer than its "
+                                f"curve beyond the clearance point ({b.tail:.1f} in)")
+                continue
             dirn = +1 if sp.points_toward == "start" else -1
             s_p = u0 + (ma if dirn > 0 else mb)
             layer = b.layer["Service"] if sp.kind == "facility" else b.layer["Storage"]
             t = b.turnout(run, s_p, 0.0, dirn, sign_s, b.layer["Main"])
             b.main_turnout(s_p, s_p + dirn * b.L)
             s2, v2 = b.offset_run(run, t, s_p, 0.0, dirn, sign_s, layer)
-            end = (s2 + dirn * sp.length_in, v2)
+            end = (s2 + dirn * parallel, v2)
             b.model.add(Straight(0, layer, route.at(run, s2, v2), route.at(run, *end)))
             features.append({"id": sp.id, "kind": sp.kind, "name": sp.name, "type": sp.type,
-                             "station": st.id, "length_in": round(sp.length_in, 2),
-                             "cars": int(sp.length_in / car + 1e-9), "layer": layer,
+                             "station": st.id, "capacity_in": round(sp.length_in, 2),
+                             "capacity_cars": int(sp.length_in / car + 1e-9),
+                             "clear_in": round(parallel, 2), "clearance_in": round(b.xc, 2),
+                             "run_in": round(b.fp, 2), "layer": layer,
                              "side": sp.side, "end": route.at(run, *end)})
 
     if b.errors:
