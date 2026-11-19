@@ -454,9 +454,23 @@ def clearance_point(defn: TurnoutDef, clearance: float, spacing: float,
     turnout, then the run out at the frog angle and the curve back to
     parallel at ``spacing``. At or beyond ``spacing``, where they run
     parallel."""
+    return _clearance_run(defn, clearance, spacing, radius)[0]
+
+
+def clearance_tail(defn: TurnoutDef, clearance: float, spacing: float,
+                   radius: float) -> float:
+    """Track length, measured along the diverging track, from its clearance
+    point to where it runs parallel: the part of the run out that holds
+    cars. The check and the export measure capacity along the track, so
+    the planner builds to this."""
+    return _clearance_run(defn, clearance, spacing, radius)[1]
+
+
+def _clearance_run(defn: TurnoutDef, clearance: float, spacing: float,
+                   radius: float) -> tuple[float, float]:
     along, straight, r = _offset_run(defn, spacing, radius)
     if clearance >= spacing - 1e-9:
-        return along
+        return along, 0.0
     th = math.radians(defn.frog_angle)
     xd, yd = defn.diverge_length, abs(defn.diverge_offset)
     pts = _diverging_samples(defn)
@@ -465,14 +479,18 @@ def clearance_point(defn: TurnoutDef, clearance: float, spacing: float,
     x2 = xd + straight * math.cos(th) + r * math.sin(th)
     pts += [(x2 - r * math.sin(phi), spacing - r * (1.0 - math.cos(phi)))
             for phi in [th * (1 - k / 200) for k in range(201)]]
-    prev = None
-    for x, y in pts:
+    # Path length from each point to the end (where the track runs parallel).
+    rest = [0.0] * len(pts)
+    for i in range(len(pts) - 2, -1, -1):
+        rest[i] = rest[i + 1] + math.dist(pts[i], pts[i + 1])
+    for i, (x, y) in enumerate(pts):
         if y >= clearance:
-            if prev is None or y == prev[1]:
-                return x
-            return prev[0] + (x - prev[0]) * (clearance - prev[1]) / (y - prev[1])
-        prev = (x, y)
-    return along
+            if i == 0 or y == pts[i - 1][1]:
+                return x, rest[i]
+            f = (clearance - pts[i - 1][1]) / (y - pts[i - 1][1])
+            xc = pts[i - 1][0] + (x - pts[i - 1][0]) * f
+            return xc, rest[i] + math.dist(pts[i], pts[i - 1]) * (1 - f)
+    return along, 0.0
 
 
 def _curve_between(pid, layer, center, radius, pa, pb, sweep_deg):
@@ -508,9 +526,14 @@ class _Builder:
         self.fp, self.straight, self.r = _offset_run(turnouts.left, spec.track_spacing_in,
                                                      spec.curve_radius_in)
         self.theta = turnouts.left.frog_angle
-        self.xc = clearance_point(turnouts.left, spec.clearance_in, spec.track_spacing_in,
-                                  spec.curve_radius_in)
-        self.tail = self.fp - self.xc      # curve between clearance point and parallel
+        self.clearance_x = clearance_point(turnouts.left, spec.clearance_in,
+                                           spec.track_spacing_in, spec.curve_radius_in)
+        # Track from the clearance point to where it runs parallel, along the
+        # track (what holds cars there); xc is where that starts, measured
+        # along the main as the layout is laid out.
+        self.tail = clearance_tail(turnouts.left, spec.clearance_in, spec.track_spacing_in,
+                                   spec.curve_radius_in)
+        self.xc = self.fp - self.tail
         self.main_turnouts: list[tuple[float, float]] = []   # [a, b] main intervals
         self.errors: list[str] = []
 
@@ -713,7 +736,7 @@ def build_track_plan(spec: TrackPlanSpec, config: LayoutConfig,
             "id": st.id, "kind": "station", "name": st.name, "shelf": st.shelf,
             "capacity_in": round(st.siding_in, 2),
             "capacity_cars": int(st.siding_in / car + 1e-9),
-            "clear_in": round(clear, 2), "clearance_in": round(b.xc, 2),
+            "clear_in": round(clear, 2), "clearance_in": round(b.clearance_x, 2),
             "run_in": round(b.fp, 2), "terminus": st.terminus,
             "tail_in": round(route.length - s_b, 2) if st.terminus else None,
             "switches": [route.at(run, s_a, 0.0), route.at(run, s_b, 0.0)],
@@ -739,7 +762,8 @@ def build_track_plan(spec: TrackPlanSpec, config: LayoutConfig,
             features.append({"id": sp.id, "kind": sp.kind, "name": sp.name, "type": sp.type,
                              "station": st.id, "capacity_in": round(sp.length_in, 2),
                              "capacity_cars": int(sp.length_in / car + 1e-9),
-                             "clear_in": round(parallel, 2), "clearance_in": round(b.xc, 2),
+                             "clear_in": round(parallel, 2),
+                             "clearance_in": round(b.clearance_x, 2),
                              "run_in": round(b.fp, 2), "layer": layer,
                              "side": sp.side, "end": route.at(run, *end)})
 

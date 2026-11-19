@@ -163,7 +163,7 @@ def test_passing_siding(hillside):
     assert station["capacity_in"] == pytest.approx(30.0, abs=1e-6)
     assert station["capacity_cars"] == 5
     tail = station["run_in"] - station["clearance_in"]
-    assert station["clear_in"] == pytest.approx(30.0 - 2 * tail, abs=0.02)   # rounded figures
+    assert station["clear_in"] == pytest.approx(30.0 - 2 * tail, abs=0.1)   # along the main vs the track
     assert clear.length() == pytest.approx(station["clear_in"], abs=0.01)
     assert station["clearance_in"] == pytest.approx(13.9, abs=0.1)
 
@@ -186,7 +186,7 @@ def test_spur_ends_open_with_its_length(hillside):
     assert spur["capacity_in"] == pytest.approx(18.0)
     assert spur["capacity_cars"] == 3
     assert spur["clear_in"] == pytest.approx(
-        18.0 - (spur["run_in"] - spur["clearance_in"]), abs=1e-6)
+        18.0 - (spur["run_in"] - spur["clearance_in"]), abs=0.1)
     assert spur["layer"] == 3
     ends = result.model.open_ends()
     assert len(ends) == 3

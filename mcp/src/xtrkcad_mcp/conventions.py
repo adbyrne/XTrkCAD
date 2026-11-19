@@ -907,22 +907,26 @@ def _check_switchback(layout: Layout, note: ConventionNote, tail: TrackObject,
 def note_usable_length(layout: Layout, note: ConventionNote,
                        track: TrackObject) -> tuple[int, float | None]:
     """The track a note marks and its usable length in model inches: the
-    connected non-turnout tracks, switch throats excluded. A note on a
-    turnout measures the nearest non-turnout track instead (None when
-    there is none)."""
-    from .stations import _bfs_usable_length, _snap_to_segment
+    connected non-turnout tracks between their clearance points (where a
+    car no longer fouls the turnout's other leg; clearance.py). A note on a
+    turnout measures the nearest non-turnout track instead (None when there
+    is none)."""
+    from .clearance import clear_usable_length
+    from .stations import _snap_to_segment
     if track.kind == "TURNOUT":
         tid, _t, _d = _snap_to_segment(layout, note.x, note.y, note.layer,
                                        exclude_turnouts=True)
         if tid < 0:
             return track.id, None
         track = next(t for t in layout.tracks if t.id == tid)
-    return track.id, _bfs_usable_length(layout, track.id)
+    return track.id, clear_usable_length(layout, track.id)
 
 
 def track_cars(layout: Layout, inches: float) -> int:
-    """Whole cars on a length of track, as the capacity reports count."""
-    return int(inches / 12.0 * cars_per_real_ft(layout.scale or "HO"))
+    """Whole cars on a length of track, as the capacity reports count. A
+    thousandth of a car is allowed for rounding, so a track measured at
+    29.9999 in for a planned 30 still holds its 5 HO cars."""
+    return int(inches / 12.0 * cars_per_real_ft(layout.scale or "HO") + 1e-3)
 
 
 def _check_car_spots(layout: Layout, notes: list[ConventionNote],
