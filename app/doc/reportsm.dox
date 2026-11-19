@@ -34,6 +34,9 @@ the Parts List (\ref cmdEnum) window.
 - \subpage cmdReportsshort -- short track pieces, such as the ones joining
   two tracks can insert, and any that are on an unexpected layer.
 
+- \subpage cmdReportsclearance -- places where two tracks run side by side
+  closer than the clearance, so a car on one fouls the other.
+
 - \subpage cmdReportsfilter
 
 */
@@ -460,6 +463,64 @@ is included by default. A track appears when its own layer is included;
 its connected tracks' layers are shown whatever the filter.
 
 The <b>Done</b> button closes the <b>Short Tracks Report</b> window.
+
+*/
+
+/**
+\page cmdReportsclearance Track Clearance Report
+
+The <b>Track Clearance Report</b> command lists every place where two
+tracks run side by side closer than the <b>Clearance</b>: the distance
+between track centres at which cars on two tracks clear each other. Where
+tracks are closer, a car standing on one fouls the other. Such places are
+usually drawing errors: a passing siding or yard track drawn a little too
+close to its neighbour.
+
+Each row gives the two tracks (<b>Track A</b>, <b>Track B</b>) with their
+layers (<b>Layer #</b>/<b>Layer Name</b>), the closest <b>Spacing</b>
+between their centrelines and the <b>Length</b> of the stretch where they
+are too close, both in inches. The closest places are listed first.
+
+Two tracks count as side by side where they run within 5 degrees of
+parallel, closer than the clearance, for at least 1 inch (in HO; scaled
+for other scales). That finds both a siding or spur that levels off too
+close to the track it leaves and two unconnected tracks laid too close.
+Next to a turnout's frog its two routes are close but at an angle, so they
+are not listed; neither are tracks that cross, tracks that meet end to
+end, nor tracks at different heights, such as an upper deck above a lower
+one (more than 2 inches apart in height in HO).
+
+The <b>Clearance</b> drop-down gives the prototype distance between track
+centres: 12, 13, 14 or 15 ft, each shown with its size in the layout's
+scale; 13 ft, the usual US practice, by default (1.79 in in HO). Changing
+the choice updates the report at once, and it is remembered for next time.
+The saved or printed report states the clearance used.
+
+A summary line above the list gives the number of places found, updated
+whenever the report is generated or refreshed.
+
+The report is interactive, the same way the Gaps Report (\ref
+cmdReportsgaps) is: selecting a row pans the <b>Main Canvas</b> (\ref
+mainW) to the middle of the stretch on <b>Track A</b> and draws a
+temporary open-circle indicator there. The indicator is purely visual --
+it's never saved with the layout and disappears as soon as the report
+window closes. Its color can be changed on the <b>Colors</b> (\ref
+cmdRgbcolor) dialog, under <b>Report Indicator</b>.
+
+The <b>Refresh</b> button recomputes the report in place -- useful after
+moving a listed track, without closing and reopening the report window.
+
+The <b>Save As...</b> button opens a <i>File Save</i> dialog window that's
+used to name and save the report to a text file.
+
+The <b>Print</b> button opens the <i>Print</i> dialog which is used to
+print the report.
+
+The <b>Filter...</b> button (\ref cmdReportsfilter) opens a dialog to scope
+this report to specific Layers/Groups (\ref cmdLayergroup) -- every layer
+is included by default. Both tracks of a pair must be on included layers.
+
+The <b>Done</b> button closes the <b>Track Clearance Report</b> window.
 
 */
 

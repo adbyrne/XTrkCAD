@@ -552,6 +552,12 @@ bug:
   layer, is compared with `testfiles/shorttracks-expected/` (`RegressionParamCheck.shorttracks_check`,
   the same `tools/check-reports-test.sh` as the reports test). The script needs a `REDRAW` after
   the tracks: it resolves their connections, which the report reads.
+  `trackclearance` covers the Track Clearance report (Development Issues #87): plain straights
+  1.4 and 1.5 in apart are listed, while straights 2 in apart, a crossing, two tracks in line, a
+  0.8 in overlap and a track 18 in above another are not; of two Peco #6 sidings, the one run out
+  to 1.4 in is listed and the one at 2 in isn't, frog included. It checks the count at every
+  Clearance choice and that the choice is remembered, and compares the report saved at 13 ft with
+  `testfiles/trackclearance-expected/` (`RegressionParamCheck.trackclearance_check`).
   `switchmotor` moves a turnout without its switch motor: the motor stands for its turnout (Robert
   Heller, dev ML #4675), so its box has to follow, and Undo gives both back.
   `UpdateSwitchMotorBoxes()` works every motor's box out again from its turnout where
