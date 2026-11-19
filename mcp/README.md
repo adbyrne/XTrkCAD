@@ -79,6 +79,7 @@ or later.
 | `list_templates` | List available track element templates, optionally filtered by category |
 | `get_template_info` | Detailed metadata for one template by id |
 | `generate_layout` | Generate an initial `.xtc` file from a YAML config, with standard layers and Layer Groups |
+| `generate_track_plan` | Lay a track plan (`track_plan_file`) along the benchwork shelves of that `.xtc`: main, corner curves, stub yard, passing sidings or a terminus runaround, spurs, with turnouts from XTrkCAD's parameter files; says what doesn't fit and by how much |
 | `merge_benchwork` | Replace floor/benchwork layers in an existing `.xtc`, preserving all track objects and NOTEs |
 | `add_track_layers` | Add the standard `L{n}-*` track-type layers to an existing `.xtc` |
 | `rename_layers` | Rename layers by name, e.g. to standard names op-density recognizes |
@@ -276,6 +277,8 @@ src/xtrkcad_mcp/
   conventions.py — check_conventions: Operating Data Conventions rules
   export_v2.py   — export_layout_data v2 (layout_data.json schema 2)
   od_views.py    — Op Density views from the notes: industries and yards, service
+  trackgeom.py   — track pieces in memory (turnouts from .xtp files), .xtc records
+  track_plan.py  — generate_track_plan: the route along the shelves, yard, stations
   station_distances.py — station distance report from the milepost model
   mileposts.py   — milepost anchors, calculated mileposts, station and yard limits
   svg_views.py   — plan and elevation SVG views

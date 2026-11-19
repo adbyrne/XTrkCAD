@@ -2,19 +2,20 @@
 
 This guide walks you through building a layout configuration file from scratch,
 using the **Hillside Division** — a simple two-deck HO layout in a 12×16 ft room
-— as the worked example.  By the end you will have three YAML files that together
-describe the room geometry, the benchwork plan, and the track layout; and a tool
-that converts them into an XTrkCAD `.xtc` file.
+— as the worked example.  By the end you will have four YAML files that together
+describe the layout, the room, the benchwork and the track plan; and two tools
+that turn them into an XTrkCAD `.xtc` file with the track already laid.
 
 The complete Hillside Division files live in `mcp/tests/fixtures/`:
 
 | File | Purpose |
 |------|---------|
-| `hillside_division.yaml` | Top-level config — scale, levels, links to the other two files |
+| `hillside_division.yaml` | Top-level config — scale, levels, links to the other three files |
 | `hillside_floor_plan.yaml` | Room geometry — walls, doors, partitions, restricted areas |
 | `hillside_benchwork.yaml` | Physical benchwork — shelf shapes, elevations, thicknesses |
+| `hillside_track_plan.yaml` | Track plan — the main, the yard, the stations and their spurs |
 
-All three files use the same coordinate system: **origin (0, 0) at the SW corner
+All four files use the same coordinate system: **origin (0, 0) at the SW corner
 of the room, X increases east, Y increases north, dimensions in model inches**
 (1 inch in the file = 1 inch on the physical layout).
 
@@ -108,7 +109,7 @@ a special pseudo-level (e.g. `L1H-Connecting`) and will appear as its own row.
 `curve_radius` the generator uses the scale minimum (18 in for HO).  These
 values influence grid-cell sizing and which track templates are selected.
 
-**`grid: []`** is an empty track placement list.  Section 5 covers the grid
+**`grid: []`** is an empty track placement list.  Section 6 covers the grid
 syntax once the room and benchwork are in place.
 
 ---
@@ -414,6 +415,7 @@ from Claude or any MCP-compatible client:
 |------|-------------|
 | `load_layout_config` | Validate a config and show a summary before generating |
 | `generate_layout` | Write the `.xtc` file from a validated config |
+| `generate_track_plan` | Lay the config's track plan into that `.xtc` (section 5) |
 | `merge_benchwork` | Replace floor/benchwork layers in an existing layout (preserves tracks and NOTEs) |
 | `write_plan_view` | Top-down SVG plan — one deck or all decks |
 | `write_elevation_view` | Wall-profile SVG showing benchwork heights |
@@ -491,7 +493,7 @@ one per track type across all decks (`Mainline` holds L1-Main and L2-Main,
 `Staging` holds L1-Staging and L2-Staging, and so on) and, on a multi-deck
 layout, one per deck (`Level 1`, `Level 2`).  Use them in XTrkCAD to show,
 select or report on a whole category or deck at once.  The category groups
-also tell `get_operation_density` how to classify track (see section 6).
+also tell `get_operation_density` how to classify track (see section 7).
 
 The generated file uses XTrkCAD's current file format (`VERSION 13`), so it
 needs XTrkCAD 5.4 or later.
@@ -556,7 +558,85 @@ using the standard suffix rules with no extra arguments.
 
 ---
 
-## 5. Grid placements
+## 5. Laying the track plan
+
+`hillside_division.yaml` names a fourth file, `track_plan_file:
+hillside_track_plan.yaml`.  It describes the track you want, not its geometry:
+which shelves the main runs along, a yard at the start, and a station on each
+wall.  `generate_track_plan` works out the curves, turnouts and track and adds
+them to the `.xtc` from `generate_layout`:
+
+```
+generate_layout("hillside_division.yaml", "hillside_division.xtc")
+generate_track_plan("hillside_division.yaml", "hillside_division.xtc")
+```
+
+The Hillside plan is a single-track main from a stub yard at the south end of
+the west wall, north to Alder, east along the north wall through Birch, and
+south down the east wall to Cedar, the end of the line, short of the door:
+
+```yaml
+level: 1
+curve_radius: 20in
+turnout: "PECO Code 83 #6"     # from XTrkCAD's parameter files, both hands
+track_offset: 12in             # the main's distance from the wall
+
+route:                         # the main line, in order, along these shelves
+  - west_wall
+  - north_wall
+  - east_wall
+
+yard:                          # stub yard at the start of the route
+  id: HY
+  name: Hillside Yard
+  tracks: 3
+  track_length: 6 cars
+  side: room
+
+stations:
+  - id: AL
+    name: Alder
+    shelf: west_wall
+    siding: 5 cars
+    siding_side: room
+    spurs:
+      - {id: AL_FEED, name: Alder Feed Mill, length: 3 cars, side: wall,
+         points_toward: start}
+      - {id: AL_TEAM, name: Alder team track, kind: team_track, length: 2 cars,
+         side: wall, points_toward: end}
+  # ... Birch on the north wall, Cedar (terminus: true) on the east wall
+```
+
+| Key | Meaning |
+|-----|---------|
+| `level` | The deck the track goes on; every shelf in `route` must be on it |
+| `curve_radius` | The corner curves and the curves back to parallel after a turnout (default: the top-level `curve_radius`) |
+| `turnout` | Manufacturer and number, matched against XTrkCAD's parameter files: `"PECO Code 83 #6"` finds the #6 left and right hand turnouts |
+| `track_offset` | The main's distance from the wall (default: the shelf's centre) |
+| `track_spacing` | Between parallel tracks (default 2 in in HO, scaled for other scales) |
+| `route` | The shelves the main runs along, in order.  It starts at the first shelf's far end and ends at the last one's; each corner gets a curve |
+| `yard` | A stub yard at the start: `tracks`, `track_length` (the shortest track's clear length), `side` |
+| `stations` | One per shelf: `siding` (clear length between the turnouts), `siding_side`, optional `at` (from the shelf's start; default centred), `spurs`.  `terminus: true` makes it the end of the line: the siding becomes a runaround with `tail` of plain track beyond it |
+| `spurs` | `kind` (`industry`, `team_track` or `facility`, with a facility `type`), `length`, `side`, and `points_toward`: which end of the line the turnout's points face |
+
+Lengths take `in`, `ft` or `cars` (one car is the scale's car length, 6 in in
+HO).  A side is `wall` or `room`, or `left`/`right` of the direction of travel.
+
+The main goes on `L1-Main` with the turnouts it runs through, sidings on
+`L1-Passing`, the yard and industry spurs on `L1-Storage`, and facility spurs on
+`L1-Service`.  A spur on the other side from a siding sits beside it; on the same
+side the two run end to end.
+
+When something doesn't fit, nothing is written, and the error says what and by
+how much, e.g. `station BI: needs 105.7 in on shelf north_wall, 80.0 in free
+there` for a 12-car siding.  A layout that already has track on the plan's level is refused, so
+generate the layout again to start over.  Version 1 of the tool takes straight
+(rectangular) shelves along the walls, meeting at right angles, with one
+station per shelf.
+
+---
+
+## 6. Grid placements
 
 `hillside_division.yaml` has `grid: []` — no track elements placed yet.  When
 you are ready to add track, each entry in the `grid:` list places a track
@@ -586,7 +666,7 @@ grade).
 
 ---
 
-## 6. Track annotations and layout export
+## 7. Track annotations and layout export
 
 Once you have placed track in XTrkCAD, add notes that describe the operational
 geography.  The MCP server reads these notes to compute mileposts, siding
@@ -724,4 +804,4 @@ Key fields:
 4. Set `elevation:` and `thickness:` on every section.
 5. Set `levels:` in the top-level config to match your deck count.
 6. Generate the `.xtc` and open it in XTrkCAD to verify the floor plan and benchwork look right before placing any track.
-7. Add grid entries to rough in the track plan.
+7. Write the track plan and run `generate_track_plan`, then open the `.xtc` in XTrkCAD and refine the plan from there.
