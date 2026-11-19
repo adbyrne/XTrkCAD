@@ -440,6 +440,8 @@ class LayoutConfig:
     benchwork_file: str = ""   # path to standalone benchwork YAML (relative to config)
     floor_plan: "FloorPlan | None" = None
     floor_plan_file: str = ""  # path to standalone floor plan YAML (relative to config)
+    track_plan: "dict | None" = None   # the track plan for generate_track_plan, as written
+    track_plan_file: str = ""  # path to standalone track plan YAML (relative to config)
 
     # Layer generation options
     track_types: "list[str] | None" = None  # None = all 6 standard types
@@ -912,6 +914,24 @@ def load_config(path: str | Path) -> ConfigResult:
         config.benchwork_sections = _parse_benchwork_sections(raw_bw_list, warnings)
     elif "benchwork" in raw:
         config.benchwork_sections = _parse_benchwork_sections(raw["benchwork"], warnings)
+
+    # --- Track plan (generate_track_plan; read there, kept as written) ---
+    if "track_plan_file" in raw:
+        tp_path = Path(str(raw["track_plan_file"]).strip()).expanduser()
+        if not tp_path.is_absolute():
+            tp_path = p.parent / tp_path
+        config.track_plan_file = str(tp_path)
+        try:
+            tp_raw = yaml.safe_load(tp_path.read_text()) or {}
+        except FileNotFoundError:
+            warnings.append(f"track_plan_file not found: {tp_path}")
+            tp_raw = None
+        except yaml.YAMLError as _e:
+            warnings.append(f"track_plan_file YAML parse error: {_e}")
+            tp_raw = None
+        config.track_plan = tp_raw if isinstance(tp_raw, dict) else None
+    elif isinstance(raw.get("track_plan"), dict):
+        config.track_plan = raw["track_plan"]
 
     # --- Floor plan (file reference takes precedence over inline) ---
     if "floor_plan_file" in raw:

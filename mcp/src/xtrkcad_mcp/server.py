@@ -337,6 +337,111 @@ def generate_layout(config_path: str, output_path: str = "") -> dict:
     }
 
 
+_OBJECT_KEYWORDS = ("STRAIGHT", "CURVE", "TURNOUT", "TURNTABLE", "JOINT", "BEZIER",
+                    "CORNU", "DRAW", "NOTE", "TEXT", "BLOCK", "SWITCHMOTOR", "SIGNAL",
+                    "CONTROL", "SENSOR", "STRUCTURE", "CAR")
+
+
+def _max_object_id(text: str) -> int:
+    best = 0
+    for line in text.splitlines():
+        parts = line.split(None, 2)
+        if len(parts) >= 2 and parts[0] in _OBJECT_KEYWORDS and parts[1].isdigit():
+            best = max(best, int(parts[1]))
+    return best
+
+
+def _round_point(p) -> list[float]:
+    return [round(p[0], 2), round(p[1], 2)]
+
+
+@mcp.tool()
+def generate_track_plan(config_path: str, layout_path: str, output_path: str = "") -> dict:
+    """Lay a track plan along the benchwork shelves of a generated layout.
+
+    The track plan is the config's track_plan_file (or inline track_plan):
+    the shelves the main runs along, in order, a stub yard at the start and
+    stations along the way (passing siding or terminus runaround, and
+    spurs). Run generate_layout first: its .xtc has the benchwork and the
+    L<n>-Main/Passing/Storage/Service layers the track goes on. Turnouts
+    come from XTrkCAD's parameter files (e.g. "PECO Code 83 #6").
+
+    Nothing is written while anything doesn't fit; the errors say what and
+    by how much. A layout that already has track on the plan's level is
+    refused: generate the layout again to start over.
+
+    Args:
+        config_path: The layout config YAML (with track_plan_file).
+        layout_path: The .xtc from generate_layout.
+        output_path: Where to write; defaults to layout_path, which is first
+            backed up as <name>_vN.xtc.
+
+    Returns:
+        {written, output_path, backup_path, pieces, open_ends, features,
+        errors}. features: the yard (its tracks' lengths in in and cars),
+        stations (siding length, terminus tail), spurs (length, layer, end
+        point).
+    """
+    from xtrkcad_mcp.generator import _version_backup
+    from xtrkcad_mcp.track_plan import PlanError, build_track_plan, parse_track_plan
+
+    def refused(*errors: str) -> dict:
+        return {"written": False, "errors": list(errors)}
+
+    cfg_result = load_config(config_path)
+    config = cfg_result.config
+    if config.track_plan is None:
+        return refused("the config has no track_plan_file or track_plan"
+                       + (f" ({'; '.join(cfg_result.warnings)})" if cfg_result.warnings
+                          else ""))
+    try:
+        spec = parse_track_plan(config.track_plan, config)
+    except PlanError as e:
+        return refused(str(e))
+    src = _resolve_plan(layout_path)
+    if not src.exists():
+        return refused(f"layout not found: {src}; run generate_layout first")
+    layout = parse_file(src)
+    layers = {info.name: idx for idx, info in layout.layers.items()}
+    level_layers = {idx for name, idx in layers.items()
+                    if name.startswith(f"L{spec.level}-")}
+    existing = [t for t in layout.tracks if t.layer in level_layers and t.kind != "DRAW"]
+    if existing:
+        return refused(f"{src.name} already has {len(existing)} track pieces on level "
+                       f"{spec.level}; generate the layout again to start over")
+    try:
+        result = build_track_plan(spec, config, layers)
+    except (PlanError, LookupError) as e:
+        return refused(str(e))
+    if result.errors:
+        return refused(*result.errors)
+
+    text = src.read_text(encoding="utf-8")
+    records = result.model.xtc_records(first_id=_max_object_id(text) + 1)
+    lines = text.rstrip("\n").split("\n")
+    tail = []
+    if lines and lines[-1].strip() == "END$TRACKS":
+        tail = [lines.pop()]
+    out = Path(output_path).expanduser() if output_path else src
+    backup = _version_backup(out)
+    out.write_text("\n".join(lines + records + tail) + "\n", encoding="utf-8")
+
+    def clean(feature: dict) -> dict:
+        return {k: (_round_point(v) if k in ("throat", "end") else
+                    [_round_point(p) for p in v] if k == "switches" else v)
+                for k, v in feature.items()}
+
+    return {
+        "written": True,
+        "output_path": str(out),
+        "backup_path": str(backup) if backup else None,
+        "pieces": len(result.model.pieces),
+        "open_ends": len(result.model.open_ends()),
+        "features": [clean(f) for f in result.features],
+        "errors": [],
+    }
+
+
 @mcp.tool()
 def merge_benchwork(
     layout_path: str,

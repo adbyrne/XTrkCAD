@@ -227,3 +227,90 @@ def test_spurs_ending_face_to_face_keep_their_distance(hillside):
     assert result.errors == []
     gap = abs(result.feature("B")["end"][1] - result.feature("A")["end"][1])
     assert gap >= 2.0 - 1e-6
+
+
+# -- the tool -------------------------------------------------------------------------
+
+def _benchwork_file(tmp_path):
+    """Hillside from generate_layout: benchwork and layers, no track yet."""
+    from xtrkcad_mcp.server import generate_layout
+    out = tmp_path / "hillside.xtc"
+    assert generate_layout(str(HILLSIDE), str(out))["ready"] is True
+    return out
+
+
+def test_config_names_the_track_plan_file(hillside):
+    assert hillside.track_plan_file.endswith("hillside_track_plan.yaml")
+    assert hillside.track_plan["route"] == ["west_wall", "north_wall", "east_wall"]
+
+
+def test_generate_track_plan_writes_connected_track(tmp_path):
+    from xtrkcad_mcp.parser import parse_file
+    from xtrkcad_mcp.server import generate_track_plan
+    layout = _benchwork_file(tmp_path)
+    result = generate_track_plan(str(HILLSIDE), str(layout))
+    assert result["written"] is True, result
+    assert result["backup_path"]                  # the benchwork-only file is kept
+    parsed = parse_file(layout)
+    tracks = [t for t in parsed.tracks if t.kind in ("STRAIGHT", "CURVE", "TURNOUT")]
+    assert len(tracks) == result["pieces"] == 61
+    open_ends = [ep for t in tracks for ep in t.endpoints if ep.connected_to is None]
+    assert len(open_ends) == result["open_ends"] == 8
+    by_id = {t.id: t for t in parsed.tracks}
+    for t in tracks:                             # every link points back
+        for ep in t.endpoints:
+            if ep.connected_to is not None:
+                assert any(e.connected_to == t.id for e in by_id[ep.connected_to].endpoints)
+    assert {f["id"] for f in result["features"]} >= {"HY", "AL", "BI", "CE", "CE_COAL"}
+
+
+def test_generate_track_plan_new_ids_follow_the_file(tmp_path):
+    from xtrkcad_mcp.parser import parse_file
+    from xtrkcad_mcp.server import generate_track_plan
+    layout = _benchwork_file(tmp_path)
+    before = layout.read_text(encoding="utf-8")
+    ids = [int(ln.split()[1]) for ln in before.splitlines()
+           if ln.split() and ln.split()[0] in ("DRAW", "NOTE") and ln.split()[1].isdigit()]
+    generate_track_plan(str(HILLSIDE), str(layout))
+    tracks = parse_file(layout).tracks
+    assert min(t.id for t in tracks if t.kind != "DRAW") > max(ids)
+
+
+def test_generate_track_plan_refuses_a_file_with_track(tmp_path):
+    from xtrkcad_mcp.server import generate_track_plan
+    layout = _benchwork_file(tmp_path)
+    assert generate_track_plan(str(HILLSIDE), str(layout))["written"] is True
+    again = generate_track_plan(str(HILLSIDE), str(layout))
+    assert again["written"] is False
+    assert "already has" in again["errors"][0]
+
+
+def test_generate_track_plan_returns_fit_errors(tmp_path):
+    from xtrkcad_mcp.server import generate_track_plan
+    layout = _benchwork_file(tmp_path)
+    plan = yaml.safe_load((FIXTURES_DIR / "hillside_track_plan.yaml").read_text())
+    plan["stations"][1]["siding"] = "12 cars"
+    (tmp_path / "plan.yaml").write_text(yaml.safe_dump(plan))
+    cfg = yaml.safe_load(HILLSIDE.read_text())
+    cfg.update(track_plan_file=str(tmp_path / "plan.yaml"),
+               floor_plan_file=str(FIXTURES_DIR / cfg["floor_plan_file"]),
+               benchwork_file=str(FIXTURES_DIR / cfg["benchwork_file"]))
+    (tmp_path / "cfg.yaml").write_text(yaml.safe_dump(cfg))
+    before = layout.read_text(encoding="utf-8")
+    result = generate_track_plan(str(tmp_path / "cfg.yaml"), str(layout))
+    assert result["written"] is False
+    assert "BI" in result["errors"][0]
+    assert layout.read_text(encoding="utf-8") == before
+
+
+def test_generate_track_plan_without_a_plan(tmp_path):
+    from xtrkcad_mcp.server import generate_track_plan
+    cfg = tmp_path / "cfg.yaml"
+    cfg.write_text("name: T\nscale: HO\nroom: 10x10ft\n")
+    result = generate_track_plan(str(cfg), str(tmp_path / "x.xtc"))
+    assert result["written"] is False and "track_plan" in result["errors"][0]
+
+
+def test_notes_option_not_yet_available(hillside):
+    with pytest.raises(PlanError, match="notes"):
+        _spec(hillside, notes=True)

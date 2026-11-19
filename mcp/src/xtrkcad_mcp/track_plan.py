@@ -127,6 +127,9 @@ def parse_track_plan(raw: dict, config: LayoutConfig) -> TrackPlanSpec:
     if not isinstance(raw, dict):
         raise PlanError("track plan: expected a mapping")
     _check_keys(raw, _PLAN_KEYS, "track plan")
+    if raw.get("notes"):
+        raise PlanError("track plan: notes: true (writing the convention notes too) "
+                        "isn't available yet; leave it out")
     scale = config.scale or "HO"
     car_in = 12.0 / cars_per_real_ft(scale)
     ratio = SCALE_RATIOS.get(scale, 87.1)
