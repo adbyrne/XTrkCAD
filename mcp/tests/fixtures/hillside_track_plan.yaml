@@ -1,0 +1,58 @@
+# Hillside Division — track plan for generate_track_plan.
+#
+# A single-track main around the west, north and east walls on Level 1, from
+# a stub yard at the south end of the west wall to a terminus short of the
+# door on the east wall, with one station on each wall.
+#
+# Lengths take "in", "ft" or "cars" (one car = the scale's car length: HO 6 in).
+# "side" is wall or room (or left/right of the direction of travel);
+# "points_toward" is which end of the line a spur's turnout points face.
+
+level: 1
+curve_radius: 20in
+turnout: "PECO Code 83 #6"     # from XTrkCAD's parameter files, both hands
+track_offset: 12in             # the main's distance from the wall
+
+route:                         # the main line, in order, along these shelves
+  - west_wall                  # starts at the shelf's south end
+  - north_wall
+  - east_wall                  # ends at the shelf's south end, short of the door
+
+yard:                          # stub yard at the start of the route
+  id: HY
+  name: Hillside Yard
+  tracks: 3
+  track_length: 6 cars
+  side: room
+
+stations:
+  - id: AL
+    name: Alder
+    shelf: west_wall
+    siding: 5 cars             # clear length between the turnouts
+    siding_side: room
+    spurs:
+      - {id: AL_FEED, name: Alder Feed Mill, length: 3 cars, side: wall,
+         points_toward: start}
+      - {id: AL_TEAM, name: Alder team track, kind: team_track, length: 2 cars,
+         side: wall, points_toward: end}
+
+  - id: BI
+    name: Birch
+    shelf: north_wall
+    siding: 5 cars
+    siding_side: room
+    spurs:
+      - {id: BI_LUMBER, name: Birch Lumber, length: 4 cars, side: wall,
+         points_toward: end}
+
+  - id: CE
+    name: Cedar
+    shelf: east_wall
+    terminus: true             # the end of the line: a runaround and a tail
+    siding: 4 cars
+    siding_side: room
+    tail: 2 cars               # plain track beyond the runaround, for the engine
+    spurs:
+      - {id: CE_COAL, name: Cedar coal trestle, kind: facility, type: coal,
+         length: 3 cars, side: wall, points_toward: start}

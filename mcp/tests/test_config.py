@@ -11,10 +11,6 @@ from xtrkcad_mcp.config import (
     FloorPlan,
     FloorRestricted,
     FloorRoom,
-    GridPlacement,
-    _default_grid_cell_ft,
-    _parse_cell_or_range,
-    _parse_grid_entry,
     _parse_length_in,
     _parse_room,
     load_config,
@@ -69,75 +65,6 @@ def test_parse_length_bare_number():
 # _parse_cell_or_range
 # ---------------------------------------------------------------------------
 
-def test_parse_single_cell():
-    assert _parse_cell_or_range("A3") == ("A", 3, "A", 3)
-
-def test_parse_range():
-    assert _parse_cell_or_range("A3-C5") == ("A", 3, "C", 5)
-
-def test_parse_multi_letter_col():
-    assert _parse_cell_or_range("AB12") == ("AB", 12, "AB", 12)
-
-def test_parse_bad_cell():
-    with pytest.raises(ValueError, match="invalid cell/range"):
-        _parse_cell_or_range("3A")
-
-
-# ---------------------------------------------------------------------------
-# _default_grid_cell_ft
-# ---------------------------------------------------------------------------
-
-def test_grid_cell_ho_22in():
-    # 2 * 22 / 12 = 3.67 → ceil = 4
-    assert _default_grid_cell_ft(22.0) == 4.0
-
-def test_grid_cell_n_9_75in():
-    # 2 * 9.75 / 12 = 1.625 → ceil = 2, but min=3 → 3
-    assert _default_grid_cell_ft(9.75) == 3.0
-
-def test_grid_cell_o_54in():
-    # 2 * 54 / 12 = 9.0 → 9
-    assert _default_grid_cell_ft(54.0) == 9.0
-
-
-# ---------------------------------------------------------------------------
-# _parse_grid_entry
-# ---------------------------------------------------------------------------
-
-def test_parse_grid_single_cell():
-    p = _parse_grid_entry("E4=station=passing siding, 100ft")
-    assert p.col_start == "E" and p.row_start == 4
-    assert p.col_end == "E" and p.row_end == 4
-    assert p.element_type == "station"
-    assert p.params == "passing siding, 100ft"
-
-def test_parse_grid_range():
-    p = _parse_grid_entry("A3-C5=yard=single-ended, 3 tracks")
-    assert p.col_start == "A" and p.row_start == 3
-    assert p.col_end == "C" and p.row_end == 5
-    assert p.element_type == "yard"
-
-def test_parse_grid_no_params():
-    p = _parse_grid_entry("B1-B8=mainline")
-    assert p.element_type == "mainline"
-    assert p.params == ""
-
-def test_parse_grid_cell_range_property():
-    p = _parse_grid_entry("A3-C5=yard=params")
-    assert p.cell_range == "A3-C5"
-
-def test_parse_grid_single_cell_range_property():
-    p = _parse_grid_entry("E4=station")
-    assert p.cell_range == "E4"
-
-def test_parse_grid_unknown_type():
-    with pytest.raises(ValueError, match="unknown element type"):
-        _parse_grid_entry("A1=turntable=params")
-
-def test_parse_grid_missing_type():
-    with pytest.raises(ValueError):
-        _parse_grid_entry("A1")
-
 
 # ---------------------------------------------------------------------------
 # load_config — full fixture
@@ -169,24 +96,6 @@ def test_load_full_config_radius():
     result = load_config(FULL_CONFIG)
     assert result.config.curve_radius_in == pytest.approx(22.0)
 
-def test_load_full_config_levels():
-    result = load_config(FULL_CONFIG)
-    assert result.config.levels == 2
-    assert result.config.level_separation_in == pytest.approx(18.0)
-    assert result.config.level_break_row == "E"
-
-def test_load_full_config_grid_cell_size():
-    result = load_config(FULL_CONFIG)
-    # 22in radius → 2*22/12=3.67 → ceil=4
-    assert result.config.grid_size_ft == pytest.approx(4.0)
-
-def test_load_full_config_placements():
-    result = load_config(FULL_CONFIG)
-    assert len(result.config.placements) == 5
-    types = [p.element_type for p in result.config.placements]
-    assert "yard" in types
-    assert "staging" in types
-    assert "helix" in types
 
 def test_load_full_config_summary_not_empty():
     result = load_config(FULL_CONFIG)
@@ -240,11 +149,6 @@ def test_scale_default_radius_filled(tmp_path):
     result = load_config(cfg)
     assert result.config.curve_radius_in == pytest.approx(9.75)
 
-def test_scale_default_grid_size_filled(tmp_path):
-    cfg = tmp_path / "layout.yaml"
-    cfg.write_text("name: T\nscale: N\nroom: 8x12\n")
-    result = load_config(cfg)
-    assert result.config.grid_size_ft == pytest.approx(3.0)
 
 def test_explicit_radius_overrides_default(tmp_path):
     cfg = tmp_path / "layout.yaml"
@@ -275,13 +179,6 @@ def test_bad_mainline_warns(tmp_path):
     result = load_config(cfg)
     assert any("mainline" in w for w in result.warnings)
     assert result.config.mainline == "single"
-
-def test_bad_grid_entry_warns(tmp_path):
-    cfg = tmp_path / "layout.yaml"
-    cfg.write_text("name: T\nscale: HO\nroom: 12x16\ngrid:\n  - A1=badtype=x\n")
-    result = load_config(cfg)
-    assert any("skipping grid entry" in w for w in result.warnings)
-    assert result.config.placements == []
 
 
 # ---------------------------------------------------------------------------
@@ -472,30 +369,6 @@ def test_benchwork_file_precedence_warns_when_both(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# grid — @N level tag
-# ---------------------------------------------------------------------------
-
-def test_parse_grid_level_default_is_1():
-    p = _parse_grid_entry("A1-B2=yard=single-ended")
-    assert p.level == 1
-
-
-def test_parse_grid_level_at_tag():
-    p = _parse_grid_entry("A1-B2@2=yard=upper yard")
-    assert p.level == 2
-    assert p.col_start == "A"
-    assert p.row_start == 1
-    assert p.col_end == "B"
-    assert p.row_end == 2
-
-
-def test_parse_grid_level_single_cell():
-    p = _parse_grid_entry("C3@3=station=passing siding")
-    assert p.level == 3
-    assert p.col_start == "C"
-
-
-# ---------------------------------------------------------------------------
 # FloorPlan / floor_plan_file (Hillside Division generic tutorial fixture)
 # ---------------------------------------------------------------------------
 
@@ -559,11 +432,11 @@ def test_floor_plan_partition_count():
 def test_floor_plan_partition_fields():
     result = load_config(FLOOR_PLAN_CONFIG)
     p = result.config.floor_plan.partitions[0]
-    assert p.label == "alcove_wall"
-    assert p.x0 == pytest.approx(48.0)
-    assert p.y0 == pytest.approx(156.0)
-    assert p.x1 == pytest.approx(48.0)
-    assert p.y1 == pytest.approx(192.0)
+    assert p.label == "furnace_wall"
+    assert p.x0 == pytest.approx(92.0)
+    assert p.y0 == pytest.approx(0.0)
+    assert p.x1 == pytest.approx(92.0)
+    assert p.y1 == pytest.approx(36.0)
     assert p.thickness == pytest.approx(4.0)
 
 def test_floor_plan_restricted_count():
@@ -591,10 +464,10 @@ def test_floor_plan_file_missing_warns(tmp_path):
 # Benchwork fixture — Hillside Division (hillside_benchwork.yaml)
 # ---------------------------------------------------------------------------
 
-def test_hillside_benchwork_loads_six_sections():
-    # 4 L1 wall shelves + 2 L2 upper-deck sections
+def test_hillside_benchwork_loads_five_sections():
+    # 3 L1 wall shelves (west, north, east) + 2 L2 upper-deck sections
     result = load_config(FLOOR_PLAN_CONFIG)
-    assert len(result.config.benchwork_sections) == 6
+    assert len(result.config.benchwork_sections) == 5
 
 
 def test_hillside_benchwork_no_warnings():
@@ -606,8 +479,7 @@ def test_hillside_benchwork_labels():
     result = load_config(FLOOR_PLAN_CONFIG)
     labels = [bw.label for bw in result.config.benchwork_sections]
     assert "west_wall" in labels
-    assert "north_wall_west" in labels
-    assert "north_wall_east" in labels
+    assert "north_wall" in labels
     assert "east_wall" in labels
 
 
@@ -631,26 +503,15 @@ def test_hillside_benchwork_west_wall_vertices():
     assert min(xs) == pytest.approx(0.0)
     assert max(xs) == pytest.approx(24.0)
     assert min(ys) == pytest.approx(0.0)
-    assert max(ys) == pytest.approx(156.0)
+    assert max(ys) == pytest.approx(168.0)
 
 
-def test_hillside_benchwork_north_wall_west_vertices():
+def test_hillside_benchwork_north_wall_vertices():
     result = load_config(FLOOR_PLAN_CONFIG)
-    bw = next(b for b in result.config.benchwork_sections if b.label == "north_wall_west")
+    bw = next(b for b in result.config.benchwork_sections if b.label == "north_wall")
     xs = [v[0] for v in bw.vertices]
     ys = [v[1] for v in bw.vertices]
     assert min(xs) == pytest.approx(0.0)
-    assert max(xs) == pytest.approx(48.0)
-    assert min(ys) == pytest.approx(168.0)
-    assert max(ys) == pytest.approx(192.0)
-
-
-def test_hillside_benchwork_north_wall_east_vertices():
-    result = load_config(FLOOR_PLAN_CONFIG)
-    bw = next(b for b in result.config.benchwork_sections if b.label == "north_wall_east")
-    xs = [v[0] for v in bw.vertices]
-    ys = [v[1] for v in bw.vertices]
-    assert min(xs) == pytest.approx(52.0)
     assert max(xs) == pytest.approx(144.0)
     assert min(ys) == pytest.approx(168.0)
     assert max(ys) == pytest.approx(192.0)
@@ -664,4 +525,19 @@ def test_hillside_benchwork_east_wall_vertices():
     assert min(xs) == pytest.approx(120.0)
     assert max(xs) == pytest.approx(144.0)
     assert min(ys) == pytest.approx(72.0)
-    assert max(ys) == pytest.approx(192.0)
+    assert max(ys) == pytest.approx(168.0)
+
+
+def test_load_full_config_levels():
+    result = load_config(FULL_CONFIG)
+    assert result.config.levels == 2
+    assert result.config.level_separation_in == pytest.approx(18.0)
+
+
+@pytest.mark.parametrize("key, value", [("grid", "[]"), ("grid_size", "3ft"),
+                                        ("level_break", "E")])
+def test_grid_keys_are_gone_with_a_warning(tmp_path, key, value):
+    cfg = tmp_path / "layout.yaml"
+    cfg.write_text(f"name: T\nscale: HO\nroom: 12x16\n{key}: {value}\n")
+    result = load_config(cfg)
+    assert any(key in w and "generate_track_plan" in w for w in result.warnings)

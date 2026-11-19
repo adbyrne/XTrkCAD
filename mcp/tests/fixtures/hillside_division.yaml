@@ -12,8 +12,8 @@ floor_plan_file: hillside_floor_plan.yaml
 benchwork_file: hillside_benchwork.yaml
 
 mainline: single
-curve_radius: 22in
+curve_radius: 20in
+track_plan_file: hillside_track_plan.yaml
 switch_size: "#6"
 levels: 2
 
-grid: []

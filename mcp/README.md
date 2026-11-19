@@ -41,25 +41,49 @@ Configure in `~/.claude/settings.json` (Claude Code) or `claude_desktop_config.j
 }
 ```
 
+`generate_track_plan` reads turnouts from XTrkCAD's parameter files (`.xtp`). Run from the
+source tree it finds them in `app/lib/params`; an installed package looks in
+`$XTRKCAD_PARAMS_DIR`, then in an XTrkCAD install (`~/.local/share/xtrkcad*/params`,
+`/usr/local/share/xtrkcad*/params`, `/usr/share/xtrkcad*/params`).
+
 ## Tests
 
 ```sh
-uv run --extra dev pytest    # 423 tests
+uv run --extra dev pytest
 ```
 
 ## CI
 
 `.github/workflows/ci-mcp.yml` runs the tests on Linux (Ubuntu 24.04 and 26.04), macOS and
-Windows whenever `mcp/` or the workflow changes; it's separate from the C application's CI.
-Python is pinned to 3.14: unpinned, `uv` picked macOS's 3.15, which `rpds-py`'s PyO3 build
-can't target yet.
+Windows on pushes to `main` or `test/**` and PRs into `main` that change `mcp/` or one of the
+two MCP workflows. It's separate from the C application's CI, and the other way round: the
+app's workflows (`ci-gtk3.yml`, `release.yml`, ...) only run for the app's paths, so a change
+only under `mcp/` runs just this one. Python is pinned to 3.14: unpinned, `uv` picked macOS's
+3.15, which `rpds-py`'s PyO3 build can't target yet.
+
+## Release
+
+`.github/workflows/release-mcp.yml` publishes the package. Bump `version` in
+`pyproject.toml`, then tag:
+
+```sh
+git tag mcp-v0.1.0 && git push origin mcp-v0.1.0
+```
+
+It runs the tests (it calls `ci-mcp.yml`), checks the tag matches `pyproject.toml`, builds the
+sdist and wheel with `uv build`, and drafts a GitHub Release named "XTrkCAD MCP server
+<version>" with both attached; publish the draft by hand after a look. A trial tag,
+`mcp-v0.1.0-test1`, does the whole run and drafts a prerelease; delete the draft and the tag
+afterwards. A dispatch (`gh workflow run release-mcp.yml`) runs the tests and builds the
+package as an artifact without releasing. The app's `release.yml` never publishes the MCP, and its `v*.*.*` tags
+don't start this workflow.
 
 `.github/dependabot.yml` has Dependabot open one grouped pull request a week that updates
 `uv.lock`. It skips new major versions of the `mcp` SDK, since moving to one changes the
 server's code, not just the lock file.
 
 The MCP server isn't part of XTrkCAD upstream (SourceForge Hg), so this directory, its
-workflow and the Dependabot config exist only in the GitHub repository.
+workflows and the Dependabot config exist only in the GitHub repository.
 
 ## Layout files
 
@@ -76,9 +100,8 @@ or later.
 |---|---|
 | `list_track_plans` | List `.xtc`/`.xtce` files in a directory |
 | `load_layout_config` | Load and validate a YAML layout config; returns questionnaire for missing fields |
-| `list_templates` | List available track element templates, optionally filtered by category |
-| `get_template_info` | Detailed metadata for one template by id |
 | `generate_layout` | Generate an initial `.xtc` file from a YAML config, with standard layers and Layer Groups |
+| `generate_track_plan` | Lay a track plan (`track_plan_file`) along the benchwork shelves of that `.xtc`: main, corner curves, stub yard, passing sidings or a terminus runaround, spurs, with turnouts from XTrkCAD's parameter files; says what doesn't fit and by how much |
 | `merge_benchwork` | Replace floor/benchwork layers in an existing `.xtc`, preserving all track objects and NOTEs |
 | `add_track_layers` | Add the standard `L{n}-*` track-type layers to an existing `.xtc` |
 | `rename_layers` | Rename layers by name, e.g. to standard names op-density recognizes |
@@ -189,16 +212,16 @@ passing track itself.  `docs/layout-config-guide.md` section 6 describes every f
 name: My Layout
 scale: HO
 room: 12x16           # width × depth in feet
-curve_radius: 22in    # minimum mainline radius
+curve_radius: 20in    # minimum mainline radius
 mainline: single      # single or double
-grid:
-  - A1=yard=single-ended, 3 tracks, 60ft
-  - B3-C4=staging=double-ended, 6 tracks, 80ft
-  - E2=station=passing siding, 100ft
+benchwork_file: my_benchwork.yaml
+track_plan_file: my_track_plan.yaml   # for generate_track_plan
 ```
 
-Grid entries use the DSL `[col][row]=type[=params]`. Column letters (`A`, `B`, …) map
-left-to-right; row numbers map top-to-bottom. Ranges (`B3-C4`) span multiple cells.
+`generate_layout` writes the room, benchwork and layers; `generate_track_plan` then lays
+the track plan along the benchwork shelves: the route of the main, a stub yard, stations
+with passing sidings or a terminus runaround, and spurs. The format, with the Hillside
+example, is in `docs/layout-config-guide.md`, section 5.
 
 ### Floor plan
 
@@ -245,20 +268,7 @@ floor_plan:                     # inline in the same config
 
 `floor_plan_file` is resolved relative to the config file's directory.  Use it when
 multiple layout experiments share the same physical room — each layout config references
-the same floor plan file, varying only its `benchwork:` and `grid:` sections.
-
-### Template categories
-
-`yard` · `staging` · `station` · `mainline` · `helix` · `siding`
-
-Each template carries an `od_role` used by `get_operation_density`:
-
-| Role | Fugate formula contribution |
-|---|---|
-| `storage` | `max_cars += 0.8 × track_ft` |
-| `staging` | `max_cars += 0.8 × ft`; `cars_moved += 0.4 × ft × 2` |
-| `passing` | `max_cars += 0.8 × ft / 2`; `cars_moved += 0.4 × ft` |
-| `connecting` | `cars_moved += 0.4 × ft` |
+the same floor plan file, varying only its benchwork and track plan.
 
 ## Module structure
 
@@ -267,15 +277,15 @@ src/xtrkcad_mcp/
   server.py      — MCP tool definitions (FastMCP)
   parser.py      — .xtc / .xtce file parser
   models.py      — Layout, Track, Endpoint dataclasses + scale ratios
-  config.py      — YAML layout config loader + grid DSL parser
+  config.py      — YAML layout config loader
                    FloorPlan / FloorRoom / FloorDoor / FloorPartition / FloorRestricted
   generator.py   — .xtc file generator from LayoutConfig
-  templates.py   — Template library loader
-  templates/     — 12 stub .xtc files + index.yaml catalog
   stations.py    — note annotations (JSON and text), station routing, capacities, export
   conventions.py — check_conventions: Operating Data Conventions rules
   export_v2.py   — export_layout_data v2 (layout_data.json schema 2)
   od_views.py    — Op Density views from the notes: industries and yards, service
+  trackgeom.py   — track pieces in memory (turnouts from .xtp files), .xtc records
+  track_plan.py  — generate_track_plan: the route along the shelves, yard, stations
   station_distances.py — station distance report from the milepost model
   mileposts.py   — milepost anchors, calculated mileposts, station and yard limits
   svg_views.py   — plan and elevation SVG views
