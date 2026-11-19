@@ -187,7 +187,8 @@ on the layout.  Annotations are XTrkCAD JSON Notes with a `kind` and an `id`:
 Text notes with the older prefixes (`STATION: WP !TERM`, `INDUSTRY: KIEL Kiel Co @WP`,
 `YARD_TRACK: WP Track 2`, ...) are read the same way.  Passing siding capacity is
 inferred automatically from `L{n}-Passing` layers — no note is required on the
-passing track itself.  `docs/layout-config-guide.md` section 6 describes every field.
+passing track itself.  The [Operating Data Conventions](docs/operating-conventions.md) describe every
+kind and field.
 
 | Tool | Description |
 |---|---|
@@ -221,7 +222,7 @@ track_plan_file: my_track_plan.yaml   # for generate_track_plan
 `generate_layout` writes the room, benchwork and layers; `generate_track_plan` then lays
 the track plan along the benchwork shelves: the route of the main, a stub yard, stations
 with passing sidings or a terminus runaround, and spurs. The format, with the Hillside
-example, is in `docs/layout-config-guide.md`, section 5.
+example, is in [`docs/layout-config-guide.md`](docs/layout-config-guide.md), section 5.
 
 ### Floor plan
 

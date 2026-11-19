@@ -635,47 +635,16 @@ station per shelf.
 
 ---
 
-## 6. Track annotations and layout export
+## 6. Next: operating data
 
-Once you have placed track in XTrkCAD, add notes that describe the operational
-geography.  The MCP server reads these notes to compute mileposts, siding
-lengths, and industry spur data, then writes them to `layout_data.json` for use
-by dispatcher and timetable tools.
-
-### Annotation notes
-
-Use XTrkCAD's **JSON Note** (the Note command's JSON variant).  Each note holds
-one JSON object with a `kind` and an `id`; the other fields depend on the kind:
-
-| Kind | Fields | Meaning |
-|------|--------|---------|
-| `reference` | `id`, optional `mp_scale` | Named reference point.  `{"kind": "reference", "id": "MP_ZERO"}` is the milepost origin: place it at the first decision point (first switch south of the originating yard).  `mp_scale` is the number of layout inches per milepost unit; it defaults to 12. |
-| `station` | `id`, optional `terminus`, `switchback`, `ref_tag` | Station stop.  `"terminus": true` marks a terminus (no through exit; `milepost_exit` is null).  `"switchback": true` marks a switchback (train enters, shoves to the far end, exits back out the same switch).  `ref_tag` names a `reference` point that resolves the exit milepost when the station's own note can't reach the exit switch (e.g. a switchback station's exit). |
-| `industry` | `id`, optional `name`, `station` | Industry spur; place the note on or near the spur track.  `id` is the short ID used in reports, `name` the display name.  `station` names the station whose yard limits contain this industry; leave it out for on-line spurs directly off the mainline. |
-| `house_track` | `id` | A station's freight-house or team track; `id` is the station. |
-| `storage` | `id` | A standalone freight spur that isn't a station house track. |
-| `yard_track` | `id`, `label` | One track in a yard; `id` is the yard, `label` the track's name. |
-
-Passing siding capacity comes from the `L{n}-Passing` layers, so passing tracks
-need no note.
-
-**Examples for the Hillside Division** (`mcp/tests/fixtures/hillside_track.xtc`):
-
-```json
-{"kind": "reference", "id": "MP_ZERO"}
-{"kind": "station", "id": "SOUTH"}
-{"kind": "station", "id": "NORTH"}
-{"kind": "industry", "id": "FREIGHT", "name": "Freight House", "station": "SOUTH"}
-```
-
-Place each note close to the track it describes: the server snaps each note
-to the nearest track endpoint (or, for `yard_track`, the nearest track
-segment) to measure distances.
-
-Plain text notes with a prefix are read the same way, e.g.
-`STATION: NORTH !TERM`, `INDUSTRY: FREIGHT Freight House @SOUTH`,
-`REFERENCE: MP_ZERO mp_scale=8` or `YARD_TRACK: WP Track 2`, so layouts
-annotated before JSON Notes existed keep working.
+The layout from sections 1–5 has its room, benchwork and track.  To operate it,
+the layout file also records its railroad as built: stations, industries, yards,
+mileposts and which layers are main track.  That's the job of the
+[Operating Data Conventions](operating-conventions.md): JSON Notes placed on the
+track and Layer Groups, which `check_conventions` checks and
+`export_layout_data` writes out as `layout_data.json`
+([schema](layout_data_v2.md)).  Part 2, the operating-conventions tutorial,
+picks up the Hillside layout where this guide leaves it.
 
 ### Reporting on part of a layout
 
@@ -696,72 +665,6 @@ get_station_distances("my_layout.xtc", groups=["C&O"])
 `Passing`, `Storage`, `Staging`, `Connecting`, `Service`), then the layer
 name's suffix (`L1-Staging`, `L2-CO-Passing`).  Anything else counts as
 mainline.
-
-### Export tools
-
-| Tool | What it does |
-|------|-------------|
-| `validate_layout(path)` | Check that every station note snaps close to a track and that the `MP_ZERO` reference exists.  Returns error/warning counts and a list of issues. |
-| `export_layout_data(path, output_path="")` | Compute mileposts, siding lengths, and industry spur data; write `layout_data.json`. |
-
-Both tools derive all metadata from the `.xtc` notes — no separate YAML file
-is needed.
-
-`export_layout_data` writes schema version 2 by default, from layouts that
-follow the Operating Data Conventions (JSON Notes with a `kind`); the schema is
-in [`mcp/docs/layout_data_v2.md`](../mcp/docs/layout_data_v2.md). It writes
-nothing while `check_conventions` finds errors, unless `force=True`. Layouts
-still using text-prefix notes (`STATION:`, `INDUSTRY:`, ...) use
-`format="v1"`, which also accepts the legacy `stations_yaml` override.
-
-### layout_data.json structure (v1)
-
-```json
-{
-  "generated": "2026-06-14T12:00:00+00:00",
-  "layout": "Hillside Division",
-  "scale": "HO",
-  "mp_scale": 8.0,
-  "stations": [
-    {
-      "station_id": "SOUTH",
-      "milepost_entry": 0.0,
-      "milepost_exit": 8.0,
-      "siding_length_ft": null,
-      "siding_length_cars": null,
-      "house_track_ft": 174.2,
-      "house_track_cars": 3,
-      "main_length_ft": null,
-      "main_length_cars": null,
-      "switchback": false,
-      "terminus": false
-    }
-  ],
-  "industries": [
-    {
-      "industry_id": "FREIGHT",
-      "name": "Freight House",
-      "connected_station": "SOUTH",
-      "branch_milepost": 2.1,
-      "car_spots": 3
-    }
-  ],
-  "segments": [
-    { "from_station": "SOUTH", "to_station": "NORTH", "length_ft": 696.8 }
-  ],
-  "yard_tracks": [],
-  "warnings": []
-}
-```
-
-Key fields:
-- **`mp_scale`** — layout inches per milepost unit; use this to convert milepost
-  differences to prototype feet: `Δmp × mp_scale × (scale_ratio / 12)`.
-- **`milepost_exit`** — null for terminus stations and for stations where exit
-  geometry cannot be computed.
-- **`connected_station`** — null for on-line industries (directly off the
-  mainline); the parent station id for industries within a yard's limits.
-- **`car_spots`** — derived from spur track length measurement (Fugate formula).
 
 ---
 
