@@ -1,7 +1,8 @@
 \page creating-a-report Creating a New Report
 
 How to add a new entry to the `Reports` menu (SF #217) -- unconnected endpoints, track lengths,
-curve stats, turnout density, equipment suitability, gaps, kinked joints and short tracks are all
+curve stats, turnout density, equipment suitability, gaps, kinked joints, short tracks and track
+clearance are all
 built on the same shared viewer, declared in `app/bin/include/reports.h` and implemented in
 `app/bin/reports.c`/`app/bin/reportsformat.c`. Read those two source files alongside this page --
 they're the authoritative reference; this page is the map.

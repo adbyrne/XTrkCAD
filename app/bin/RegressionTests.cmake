@@ -93,7 +93,7 @@ endforeach()
 # The paramcheck test cases (RegressionParamCheck.<case>, script
 # regress-paramcheck-<case>.xtr). Set once: the home dirs, the tests and the
 # INPUT ERROR pattern below all use it.
-set(_xtrkcad_paramcheck_cases block wrong undo props gapsmax longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends splitops trimmerge blockmove switchmotor easement shorttracks)
+set(_xtrkcad_paramcheck_cases block wrong undo props gapsmax longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends splitops trimmerge blockmove switchmotor easement shorttracks trackclearance)
 foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
@@ -398,6 +398,21 @@ add_test(NAME RegressionParamCheck.shorttracks_check
 )
 set_tests_properties(RegressionParamCheck.shorttracks_check PROPERTIES
     FIXTURES_REQUIRED regression_shorttracks
+    LABELS "regression;regression-ci"
+)
+# The Track Clearance report saved by its own test (Development Issues #87),
+# on a fixture with close runs (plain straights and Peco #6 sidings), against
+# trackclearance-expected/.
+set_tests_properties(RegressionParamCheck.trackclearance PROPERTIES
+    FIXTURES_SETUP regression_trackclearance
+    FAIL_REGULAR_EXPRESSION "NOTICE ID: MSG_PLAYBACK_LISTENTRY")
+add_test(NAME RegressionParamCheck.trackclearance_check
+    COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-reports-test.sh"
+        "${_xtrkcad_compare_dir}/trackclearance-expected"
+        "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-trackclearance/.${XTRKCAD_BIN}"
+)
+set_tests_properties(RegressionParamCheck.trackclearance_check PROPERTIES
+    FIXTURES_REQUIRED regression_trackclearance
     LABELS "regression;regression-ci"
 )
 if(WIN32)
