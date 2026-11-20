@@ -262,3 +262,45 @@ def arc_polyline(
         return math.hypot(ex - x2, ey - y2)
 
     return pts_ccw if dist_end(pts_ccw) <= dist_end(pts_cw) else pts_cw
+
+
+def _ends_radiate_from_one_centre(ends: list[Endpoint]) -> bool:
+    """Whether every end points straight out from one common centre, at one
+    radius: the positions of a turntable. The centre is where the ends'
+    direction lines meet (least squares), so part of a circle works too."""
+    dirs = [(math.sin(math.radians(e.angle)), math.cos(math.radians(e.angle))) for e in ends]
+    a11 = a12 = a22 = b1 = b2 = 0.0
+    for e, (dx, dy) in zip(ends, dirs):
+        m11, m12, m22 = 1 - dx * dx, -dx * dy, 1 - dy * dy       # I - d d^T
+        a11 += m11
+        a12 += m12
+        a22 += m22
+        b1 += m11 * e.x + m12 * e.y
+        b2 += m12 * e.x + m22 * e.y
+    det = a11 * a22 - a12 * a12
+    if abs(det) < 1e-9:                                         # all parallel
+        return False
+    cx, cy = (b1 * a22 - b2 * a12) / det, (a11 * b2 - a12 * b1) / det
+    radii = []
+    for e, (dx, dy) in zip(ends, dirs):
+        vx, vy = e.x - cx, e.y - cy
+        r = math.hypot(vx, vy)
+        if r < 0.5 or vx * dx + vy * dy <= 0:                   # at the centre, or inward
+            return False
+        if abs(vx * dy - vy * dx) > 0.02 * r + 0.02:           # not along its own line
+            return False
+        radii.append(r)
+    mean = sum(radii) / len(radii)
+    return all(abs(r - mean) <= 0.02 * mean for r in radii)
+
+
+def turntable_like_ids(layout: "Layout") -> set[int]:
+    """Ids of turntables: XTrkCAD's own TURNTABLE objects, and turnouts with
+    more than 4 ends that all point out from one centre (a sectional
+    turntable from a parameter file, e.g. Walthers 933-2840). Their unused
+    positions are open by design, not gaps."""
+    ids = {t.id for t in layout.tracks if t.kind == "TURNTABLE"}
+    ids |= {t.id for t in layout.tracks
+            if t.kind == "TURNOUT" and len(t.endpoints) > 4
+            and _ends_radiate_from_one_centre(t.endpoints)}
+    return ids
