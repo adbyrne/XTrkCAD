@@ -179,6 +179,14 @@ def test_location_ids_share_one_namespace(tmp_path):
     assert "ID_DUPLICATE_LOCATION" in _rules(issues)
 
 
+def test_duplicate_location_message_reads_well(tmp_path):
+    issues = _check(tmp_path, [ST_WP, (2, {"kind": "industry", "id": "WP"}),
+                               (2, {"kind": "team_track", "id": "WP", "car_spots": 1})])
+    assert [i.message for i in issues if i.rule == "ID_DUPLICATE_LOCATION"] == [
+        "Location id 'WP' is used by a station and an industry",
+        "Location id 'WP' is used by a station and a team track"]
+
+
 def test_staging_shares_location_namespace(tmp_path):
     issues = _check(tmp_path, [(2, {"kind": "industry", "id": "E"}),
                                (2, {"kind": "staging", "id": "E"})])

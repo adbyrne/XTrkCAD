@@ -343,6 +343,12 @@ def resolve_ownership(layout: Layout, notes: list[ConventionNote]) -> None:
             note.railroad = sub_railroad.get(sub)
 
 
+def _a_kind(kind: str) -> str:
+    """A note kind as a reader says it, with its article: "an industry"."""
+    words = kind.replace("_", " ")
+    return ("an " if words[0] in "aeiou" else "a ") + words
+
+
 def _check_ids(notes: list[ConventionNote], issues: list[Issue]) -> dict[str, str]:
     """Duplicate-id rules. Returns location id -> its kind."""
     locations: dict[str, list[ConventionNote]] = {}
@@ -360,7 +366,8 @@ def _check_ids(notes: list[ConventionNote], issues: list[Issue]) -> dict[str, st
         for extra in group[1:]:
             issues.append(_note_issue(
                 "error", "ID_DUPLICATE_LOCATION",
-                f"Location id {loc_id!r} is used by a {first.kind} and a {extra.kind}"
+                f"Location id {loc_id!r} is used by {_a_kind(first.kind)} and "
+                f"{_a_kind(extra.kind)}"
                 if extra.kind != first.kind else
                 f"Two {extra.kind} notes with id {loc_id!r}",
                 extra, hint="Stations, industries, team tracks and staging yards share one id namespace."))
