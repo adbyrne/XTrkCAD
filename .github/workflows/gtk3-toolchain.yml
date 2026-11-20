@@ -119,7 +119,8 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Regression suite
-        run: ctest --test-dir build -L regression-ci --output-on-failure -VV
+        # tools/ctest-with-backtraces.sh: a crashing test leaves a gdb backtrace in the log.
+        run: tools/ctest-with-backtraces.sh ctest --test-dir build -L regression-ci --output-on-failure -VV
 
   c-tests-sanitizers:
     name: c-tests-sanitizers (ubuntu-${{ inputs.ubuntu }})
