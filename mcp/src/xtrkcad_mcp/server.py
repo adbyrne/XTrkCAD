@@ -1342,6 +1342,13 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
     New layer IDs are assigned starting from max_existing_id + 1, so there
     is no risk of collision with hand-built or previously edited files.
 
+    Also adds the category Layer Groups the convention check and the reports
+    read (Mainline, Passing, Storage, Staging, Connecting, Service), each
+    holding its L<n>- layers, as generate_layout does; a group the layout
+    already has is left alone. A file older than version 13 gets no groups
+    (XTrkCAD writes them from 5.x on): save it in XTrkCAD first. The result
+    lists groups_added, and a notice when none could be added.
+
     Args:
         path: Path to the .xtc layout file (absolute or relative to
               XTRKCAD_PLANS_DIR).
@@ -1354,7 +1361,8 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
         and already_present (layer names that were already there).
     """
     import re
-    from xtrkcad_mcp.generator import _TRACK_COLORS, _TRACK_TYPES, _version_backup
+    from xtrkcad_mcp.generator import (_TRACK_COLORS, _TRACK_TYPES, _TYPE_GROUP_NAMES,
+                                       _version_backup)
 
     p = _resolve_plan(path)
     layout = parse_file(p)
@@ -1382,14 +1390,6 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
             else:
                 to_add.append((lv, name))
 
-    if not to_add:
-        return {
-            "output_path": str(p),
-            "backup_path": None,
-            "added": [],
-            "already_present": already_present,
-        }
-
     # Build new LAYERS lines; IDs are strictly additive
     def _lv_color(lv: int) -> int:
         return _TRACK_COLORS[lv - 1] if lv <= len(_TRACK_COLORS) else 0
@@ -1404,6 +1404,43 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
         )
         added_names.append(name)
         next_id += 1
+
+    # The category Layer Groups (Mainline, Passing, ...) the check and the
+    # reports read, as generate_layout makes them: one per track type, its
+    # L<n>- layers as members. A group the layout already has is left alone.
+    # XTrkCAD reads LAYERGROUP records from file version 13 on.
+    name_to_id = {layer.name: idx for idx, layer in layout.layers.items()}
+    for i, (_lv, name) in enumerate(to_add):
+        name_to_id[name] = max_id + 1 + i
+    existing_groups = {g.name for g in layout.layer_groups}
+    next_group = max((g.index for g in layout.layer_groups), default=-1) + 1
+    group_lines: list[str] = []
+    groups_added: list[str] = []
+    notice = ""
+    if layout.param_version and layout.param_version < 13:
+        notice = ("No Layer Groups added: this file's version is older than 13. Save it in "
+                  "XTrkCAD 5.4 first, then run add_track_layers again for the groups.")
+    else:
+        for t_name in _TRACK_TYPES:
+            group = _TYPE_GROUP_NAMES.get(t_name, t_name)
+            if group in existing_groups:
+                continue
+            members = [name_to_id[f"L{lv}-{t_name}"] for lv in range(1, levels + 1)]
+            group_lines.append(f'LAYERGROUP DEFINE {next_group} "{group}"')
+            group_lines.append(f'LAYERGROUP MEMBERS {next_group} '
+                               f'"{";".join(str(m + 1) for m in members)}"')
+            groups_added.append(group)
+            next_group += 1
+
+    if not to_add and not group_lines:
+        return {
+            "output_path": str(p),
+            "backup_path": None,
+            "added": [],
+            "already_present": already_present,
+            "groups_added": [],
+            "notice": notice,
+        }
 
     # Insert new LAYERS lines just before LAYERS CURRENT
     file_lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -1420,6 +1457,15 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
         )
 
     updated = file_lines[:insert_at] + new_layer_lines + file_lines[insert_at:]
+    if group_lines:
+        # After the last LAYERGROUP record, else after LAYERS CURRENT, where
+        # XTrkCAD writes them.
+        at = next((i + 1 for i in range(len(updated) - 1, -1, -1)
+                   if updated[i].startswith("LAYERGROUP")), None)
+        if at is None:
+            at = next((i + 1 for i, ln in enumerate(updated)
+                       if ln.strip().startswith("LAYERS CURRENT")), insert_at + len(new_layer_lines))
+        updated = updated[:at] + group_lines + updated[at:]
     backup = _version_backup(p)
     p.write_text("\n".join(updated) + "\n", encoding="utf-8")
 
@@ -1428,6 +1474,8 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
         "backup_path": str(backup) if backup else None,
         "added": added_names,
         "already_present": already_present,
+        "groups_added": groups_added,
+        "notice": notice,
     }
 
 

@@ -727,7 +727,9 @@ layers are named by line section:
    ```
 
    That adds `L1-Main`, `L1-Passing`, `L1-Storage`, `L1-Staging`, `L1-Connecting` and
-   `L1-Service` (the file is backed up first; close it in XTrkCAD before, or reload it after).
+   `L1-Service`, and the category Layer Groups holding them (`Mainline`, `Passing`, ...; a
+   group you already have is left alone). The file is backed up first; close it in XTrkCAD
+   before, or reload it after.
 
 4. **Move the track onto them, in XTrkCAD.** Make `L1-Main` the current layer, select the main
    line's tracks section by section, and use **Edit > Move To Current Layer**. Then the same
@@ -736,8 +738,11 @@ layers are named by line section:
    keep the scenery and structures. This is the long part on a big layout; the MCP can't move
    tracks between layers (yet).
 
-5. **Make the category Layer Groups** (**Manage > Layer Groups**): `Mainline` holding
-   `L1-Main`, `Passing` holding `L1-Passing`, and so on, as in chapter 3. Save.
+5. **Look at the category Layer Groups** (**Manage > Layer Groups**): step 3 made them,
+   `Mainline` holding `L1-Main` and so on, as in chapter 3. If you keep some track on other
+   layers (a staging layer of your own, say), add those layers to the right group. Save, and
+   ask for the check again: once no track is left on a layer outside the groups, the
+   category warnings are gone.
 
 6. **Then chapters 4 to 13 as written**: MP zero (a line from staging to staging has no zero
    on the layout: give it a start and an end anchor instead [5.1]), the stations (DVRR's layer
