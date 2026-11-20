@@ -22,6 +22,7 @@ from xtrkcad_mcp.models import (
     category_from_layer_name,
     level_from_layer_name,
     max_to_main_label,
+    turntable_like_ids,
 )
 from xtrkcad_mcp.svg_views import generate_elevation_view, generate_plan_view
 from xtrkcad_mcp.parser import TRACK_KINDS, parse_file
@@ -43,6 +44,11 @@ mcp = FastMCP("xtrkcad")
 
 _PLANS_DIR = Path(os.environ.get("XTRKCAD_PLANS_DIR", "."))
 _XTRKCAD_BINARY = os.environ.get("XTRKCAD_BINARY", "")
+
+
+# Every tool that rewrites a layout says this (MCP review 2026-11-20, finding 2).
+CLOSE_IN_XTRKCAD = ("Close the layout in XTrkCAD before editing it with a tool, or reload "
+                    "it after: XTrkCAD doesn't lock files, so whichever saves last wins.")
 
 
 def _resolve_plans_dir(directory: str | None) -> Path:
@@ -206,6 +212,8 @@ def generate_layout(config_path: str, output_path: str = "") -> dict:
     Any existing .xtc at output_path is versioned (copied to _v1.xtc, _v2.xtc,
     etc.) before overwriting.
 
+    Close the layout in XTrkCAD before editing it with a tool, or reload it after: XTrkCAD doesn't lock files, so whichever saves last wins.
+
     Args:
         config_path: Path to the YAML layout config file.
         output_path: Path for the .xtc output. Defaults to the config
@@ -276,6 +284,8 @@ def generate_track_plan(config_path: str, layout_path: str, output_path: str = "
     Nothing is written while anything doesn't fit; the errors say what and
     by how much. A layout that already has track on the plan's level is
     refused: generate the layout again to start over.
+
+    Close the layout in XTrkCAD before editing it with a tool, or reload it after: XTrkCAD doesn't lock files, so whichever saves last wins.
 
     Args:
         config_path: The layout config YAML (with track_plan_file).
@@ -372,6 +382,8 @@ def merge_benchwork(
     Any existing file at output_path is versioned (copied to _v1.xtc, etc.)
     before overwriting. If output_path is omitted the existing file is
     replaced in-place (also versioned).
+
+    Close the layout in XTrkCAD before editing it with a tool, or reload it after: XTrkCAD doesn't lock files, so whichever saves last wins.
 
     Args:
         layout_path: Path to the existing .xtc file with track objects.
@@ -1343,6 +1355,8 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
     New layer IDs are assigned starting from max_existing_id + 1, so there
     is no risk of collision with hand-built or previously edited files.
 
+    Close the layout in XTrkCAD before editing it with a tool, or reload it after: XTrkCAD doesn't lock files, so whichever saves last wins.
+
     Args:
         path: Path to the .xtc layout file (absolute or relative to
               XTRKCAD_PLANS_DIR).
@@ -1441,6 +1455,8 @@ def rename_layers(path: str, mapping: dict) -> dict:
     updated. After renaming to standard Fugate names (e.g. 'L1-Staging'),
     get_operation_density will auto-categorize them without needing an
     explicit layer_categories argument.
+
+    Close the layout in XTrkCAD before editing it with a tool, or reload it after: XTrkCAD doesn't lock files, so whichever saves last wins.
 
     Args:
         path: Path to the .xtc layout file (absolute or relative to
@@ -2215,7 +2231,9 @@ def write_gaps_report(
     near misses (should likely be connected).
 
     Turntable stall endpoints are intentionally open and are reported
-    separately — they do not appear in the gap analysis.
+    separately — they do not appear in the gap analysis. That includes a
+    sectional turntable drawn as a turnout (more than 4 ends, all pointing
+    out from one centre), whose unused positions are open ends.
 
     Args:
         path: Path to the source .xtc or .xtce file.
@@ -2235,7 +2253,7 @@ def write_gaps_report(
         for tid, ep in layout.unconnected_endpoints()
     ]
 
-    turntable_ids = {t.id for t in layout.tracks if t.kind == "TURNTABLE"}
+    turntable_ids = turntable_like_ids(layout)
     open_eps = [ep for ep in all_open if ep["track_id"] not in turntable_ids]
     tt_stalls = [ep for ep in all_open if ep["track_id"] in turntable_ids]
 
@@ -2595,8 +2613,9 @@ def _delete_track_block(lines: list[str], track_id: int) -> list[str]:
 def delete_track(path: str, track_id: int) -> str:
     """Delete a track object from a layout file by its numeric ID.
 
-    Rewrites the file in place. Use this to remove drawing errors or
-    phantom tracks that should not exist.
+    Use this to remove drawing errors or phantom tracks that should not
+    exist. The layout is copied to <name>_vN.xtc first, then rewritten.
+    Close the layout in XTrkCAD before editing it with a tool, or reload it after: XTrkCAD doesn't lock files, so whichever saves last wins.
 
     Args:
         path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
@@ -2604,9 +2623,12 @@ def delete_track(path: str, track_id: int) -> str:
     """
     p = _resolve_plan(path)
     lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+    from xtrkcad_mcp.generator import _version_backup
+
     updated = _delete_track_block(lines, track_id)
+    backup = _version_backup(p)
     p.write_text("\n".join(updated) + "\n", encoding="utf-8")
-    return f"Track {track_id} deleted from {p}"
+    return f"Track {track_id} deleted from {p} (backup: {backup}). {CLOSE_IN_XTRKCAD}"
 
 
 @mcp.tool()
@@ -2643,10 +2665,13 @@ def _fix_dead_t_lines(lines: list[str], dead_ids: set[int]) -> tuple[list[str], 
     for line in lines:
         if line.startswith("\t"):
             parts = line.strip().split()
-            if parts and parts[0] == "T" and len(parts) >= 5:
+            # T id x y angle (old files) or T4 id x y angle ... (version 13+):
+            # the open end is E / E4 with the same fields, less the id.
+            if parts and parts[0] in ("T", "T4") and len(parts) >= 5:
                 try:
                     if int(parts[1]) in dead_ids:
-                        result.append(f"\tE {parts[2]} {parts[3]} {parts[4]}")
+                        kind = "E" if parts[0] == "T" else "E4"
+                        result.append("\t" + " ".join([kind] + parts[2:]))
                         count += 1
                         continue
                 except (ValueError, IndexError):
@@ -2661,7 +2686,9 @@ def fix_dead_connections(path: str) -> str:
 
     After deleting a track, any track that was connected to it retains a T
     record pointing to the now-missing ID. This tool finds those records and
-    rewrites them as open E endpoints so the gaps show up correctly.
+    rewrites them as open E endpoints so the gaps show up correctly. The
+    layout is copied to <name>_vN.xtc first.
+    Close the layout in XTrkCAD before editing it with a tool, or reload it after: XTrkCAD doesn't lock files, so whichever saves last wins.
 
     Args:
         path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
@@ -2677,9 +2704,13 @@ def fix_dead_connections(path: str) -> str:
     if not dead_ids:
         return "No dead connections found"
     lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+    from xtrkcad_mcp.generator import _version_backup
+
     updated, count = _fix_dead_t_lines(lines, dead_ids)
+    backup = _version_backup(p)
     p.write_text("\n".join(updated) + "\n", encoding="utf-8")
-    return f"Fixed {count} dead endpoint(s) referencing deleted track ID(s): {sorted(dead_ids)}"
+    return (f"Fixed {count} dead endpoint(s) referencing deleted track ID(s): "
+            f"{sorted(dead_ids)} (backup: {backup}). {CLOSE_IN_XTRKCAD}")
 
 
 # ---------------------------------------------------------------------------
@@ -2693,11 +2724,15 @@ def get_stations(
     layers: list[str] | None = None,
     groups: list[str] | None = None,
 ) -> list[dict]:
-    """List all stations identified by STATION: NOTE objects in the layout.
+    """List the layout's stations.
 
-    Stations are marked by placing a text NOTE in XTrkCAD whose text begins
-    with 'STATION:' (case-insensitive), e.g. 'STATION: Springfield'.
-    Each station is snapped to its nearest track endpoint for graph routing.
+    A layout with Operating Data Conventions notes (a railroad note and
+    station notes with MPs) lists one entry per station note: its id
+    ("name"), "station_name", where the note is, and the station's MP from
+    the milepost model, as the export has it ("source": "conventions").
+    Otherwise stations are text NOTEs beginning 'STATION:' (the older
+    annotations), each snapped to its nearest track endpoint
+    ("source": "text notes").
 
     Args:
         path: Path to the .xtc layout file (absolute or relative to XTRKCAD_PLANS_DIR).
@@ -2708,9 +2743,29 @@ def get_stations(
     """
     p = _resolve_plan(path)
     layout = _load_layout(path, layers, groups)
+    from xtrkcad_mcp.conventions import read_convention_notes
+    notes, _ = read_convention_notes(layout)
+    station_notes = [n for n in notes if n.kind == "station"]
+    export = (build_export_v2(layout, issues=[])
+              if station_notes and any(n.kind == "railroad" for n in notes) else None)
+    if export and any(st["mp"] is not None for st in export["stations"]):
+        by_key = {(st["id"], st["railroad"], st["subdivision"]): st for st in export["stations"]}
+        out = []
+        for n in station_notes:
+            st = by_key.get((n.id, n.railroad, n.subdivision)) or next(
+                (x for x in export["stations"] if x["id"] == n.id), {})
+            out.append({
+                "name": n.id, "station_name": n.fields.get("name") or st.get("name"),
+                "note_id": n.note_id, "x": round(n.x, 4), "y": round(n.y, 4),
+                "mp": st.get("mp"), "railroad": st.get("railroad"),
+                "subdivision": st.get("subdivision"), "terminus": st.get("terminus"),
+                "source": "conventions",
+            })
+        return out
     stations = extract_stations(layout)
     return [
         {
+            "source": "text notes",
             "name": s.name,
             "note_id": s.note_id,
             "x": round(s.x, 4),
@@ -2732,10 +2787,18 @@ def get_station_distances(
     layers: list[str] | None = None,
     groups: list[str] | None = None,
 ) -> list[dict]:
-    """Compute track-graph distances between all STATION: notes in the layout.
+    """Distances between the layout's stations.
 
-    Distances are the shortest path along connected track, weighted by track
-    length.  Results are returned in both model inches and prototypical feet.
+    A layout with Operating Data Conventions notes (a railroad note and
+    stations with MPs) gets the distance along the main between each pair's
+    MPs, per subdivision: the same figures as write_station_distance_report
+    and the export's segments ("source": "mileposts", with "mp_distance").
+    The layer and turnout options below don't apply to it.
+
+    Otherwise (STATION: text notes, the older annotations) distances are the
+    shortest path along connected track between the notes' nearest tracks,
+    weighted by track length ("source": "track path"). Results are in model
+    inches and prototype feet either way.
 
     Layer filtering (optional):
       Provide layer_categories (e.g. {"0": "mainline", "1": "connecting"}) and
@@ -2759,6 +2822,17 @@ def get_station_distances(
     """
     p = _resolve_plan(path)
     layout = _load_layout(path, layers, groups)
+    v2 = _sd.station_distances_v2(layout)
+    if v2 is not None:
+        return [
+            {"from": pr["from"], "to": pr["to"],
+             "distance_model_in": pr["distance_model_in"],
+             "distance_proto_ft": pr["distance_proto_ft"],
+             "reachable": True, "mp_distance": pr["mp_distance"],
+             "railroad": sub["railroad"], "subdivision": sub["subdivision"],
+             "source": "mileposts"}
+            for sub in v2["subdivisions"] for pr in sub["pairs"]
+        ]
     results = compute_distances(
         layout,
         layer_categories=layer_categories,
@@ -2772,6 +2846,7 @@ def get_station_distances(
             "distance_model_in": round(r.distance_model_in, 2),
             "distance_proto_ft": round(r.distance_proto_ft, 1),
             "reachable": r.reachable,
+            "source": "track path",
         }
         for r in results
     ]
@@ -3087,7 +3162,9 @@ def list_labeled_segments(
     and returned with annotation type, source, layer info, and snap distance.
 
     Use this to audit what is labelled before running validate_layout or
-    export_layout_data.
+    the v1 export. It belongs to the older text annotations: JSON Notes are
+    shown rewritten as text. For a layout using the Operating Data
+    Conventions, check_conventions lists every note with what's wrong.
 
     Args:
         path: Path to the .xtc layout file.
@@ -3152,9 +3229,12 @@ def check_conventions(path: str) -> dict:
 
 @mcp.tool()
 def validate_layout(path: str, stations_yaml: str = "") -> dict:
-    """Check layout NOTE annotations for completeness.
+    """Check layout NOTE annotations for completeness (the older check).
 
-    Reports errors and warnings for:
+    For a layout using the Operating Data Conventions (JSON Notes and Layer
+    Groups) use check_conventions: it checks every rule. This is the check
+    behind export_layout_data(format="v1"), for STATION:/REFERENCE: text
+    notes. Reports errors and warnings for:
       - Missing REFERENCE: MP_ZERO note
       - Station entries without STATION: notes (milepost will be null)
       - Notes placed far from any track endpoint
@@ -3273,7 +3353,7 @@ def make_timetable(path: str, operations: str, output_path: str = "") -> dict:
     ``operations`` (YAML or JSON, schema_version 1) gives the fast clock, the
     track speeds, how long a stop takes and the trains: see
     xtrkcad_mcp/timetable.py. Like export_layout_data, nothing is made while
-    the convention check finds errors.
+    the convention check finds errors; warnings and info don't stop it.
 
     Returns each train's stops (arrive, depart; a pass has only the passing
     time), its running time in fast-clock and real minutes, the scale speed
