@@ -156,6 +156,40 @@ def test_quoted_export_refusal(base, tmp_path):
         "Not written: fix the errors (check_conventions lists them all), or pass force=True."]
 
 
+def test_quoted_timetable(base, tmp_path):
+    """Chapter 13: the Hillside Local, out to Cedar and back."""
+    from xtrkcad_mcp.server import make_timetable
+    _state(base, tmp_path, CHAPTERS[-1])
+    out = tmp_path / "timetable.md"
+    r = make_timetable(str(tmp_path / f"ch{CHAPTERS[-1]}.xtc"),
+                       str(FIXTURES_DIR / "tutorial" / "hillside_operations.yaml"), str(out))
+    assert r["made"] is True
+    assert r["table"].splitlines() == [
+        "| Station | MP | 1 out | 1 back |",
+        "|---|---|---|---|",
+        "| HY Hillside | 0.0 | 07:00 | 10:15 |",
+        "| AL Alder | 3.375 | 07:12 – 07:42 | 10:03 |",
+        "| BI Birch | 13.643 | 08:12 – 08:37 | 09:33 |",
+        "| CE Cedar | 21.521 | 09:00 | 09:10 |"]
+    assert r["table"] in TUTORIAL.read_text(encoding="utf-8")
+    t = r["trains"][0]
+    assert (t["fast_minutes"], t["real_minutes"]) == (195, 65.0)
+    assert t["model_mph"] == {"max": 1.5, "yard_limit": 0.7}
+    assert out.read_text(encoding="utf-8") == r["table"] + "\n"
+    # The MP that would make 30 mph look like 30 mph on the 3:1 clock: about 20 ft.
+    assert round(30 * 5280 * 12 / 87.1 / (30 * 3) / 12, 1) == 20.2
+
+
+def test_timetable_waits_for_a_clean_check(base, tmp_path):
+    from xtrkcad_mcp.server import make_timetable
+    _state(base, tmp_path, CHAPTERS[-1], add={
+        "layer": "L1-Passing", "at": [14.0, 109.5],
+        "note": {"kind": "yard_limit", "id": "AL"}})
+    r = make_timetable(str(tmp_path / f"ch{CHAPTERS[-1]}.xtc"),
+                       str(FIXTURES_DIR / "tutorial" / "hillside_operations.yaml"))
+    assert r["made"] is False and [e["rule"] for e in r["errors"]] == ["YARD_LIMIT_NOT_ON_MAIN"]
+
+
 TUTORIAL = Path(__file__).parents[1] / "docs" / "operating-conventions-tutorial.md"
 _FINDING = re.compile(r"^(error|warning|info) ([A-Z_]+)$")
 

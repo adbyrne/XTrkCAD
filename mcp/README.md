@@ -199,6 +199,7 @@ layout step by step.
 | `list_labeled_segments` | Audit all annotated tracks before running validate/export |
 | `validate_layout` | Check the annotations for completeness |
 | `export_layout_data` | Write `layout_data.json` v2 (schema: [docs/layout_data_v2.md](docs/layout_data_v2.md)); refuses while `check_conventions` finds errors unless `force=True`; `format="v1"` writes the previous format |
+| `make_timetable` | A simple timetable from the layout's stations, MPs, yard limits and car spots plus an operations file (fast clock, speeds, stop times, trains; tutorial chapter 13), with the model speed it implies |
 
 ### Edit
 
@@ -285,6 +286,7 @@ src/xtrkcad_mcp/
   stations.py    — note annotations (JSON and text), station routing, capacities, export
   conventions.py — check_conventions: Operating Data Conventions rules
   export_v2.py   — export_layout_data v2 (layout_data.json schema 2)
+  timetable.py   — make_timetable: the tutorial's simple timetable
   od_views.py    — Op Density views from the notes: industries and yards, service
   trackgeom.py   — track pieces in memory (turnouts from .xtp files), .xtc records
   track_plan.py  — generate_track_plan: the route along the shelves, yard, stations

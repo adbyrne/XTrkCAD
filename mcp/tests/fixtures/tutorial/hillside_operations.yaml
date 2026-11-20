@@ -1,0 +1,12 @@
+# The operations file of the operating-conventions tutorial, chapter 13:
+# what a timetable needs that the layout can't tell. Tutorial-level only.
+schema_version: 1
+clock: {ratio: 3}                          # fast clock, 3:1
+speed: {max_mph: 30, yard_limit_mph: 15}   # MPs per fast-clock hour
+dwell: {station_min: 10, per_car_spot: 5}  # minutes a stop; switching time per car spot
+trains:
+  - id: "1"
+    name: Hillside Local
+    departs: "07:00"
+    route: [HY, CE, HY]                    # out to Cedar and back
+    work: [AL, BI]                         # switches Alder and Birch on the way out

@@ -581,6 +581,78 @@ Warnings and info never stop the export; they're in `issues` too.
 `format="v1"` writes the previous format, for operations programs that don't read v2 yet
 (IOTtrains, until it's updated) [9].
 
+## 13. A timetable
+
+Everything so far records what the layout *is*. A timetable is the first thing it's *for*: when
+a train leaves, where it stops, how long it takes. The layout already knows the stations, their
+MPs, the yard limits and the car spots; a timetable needs a few things it can't know, so they go
+in a small **operations file**, `hillside_operations.yaml`:
+
+```yaml
+schema_version: 1
+clock: {ratio: 3}                          # fast clock, 3:1
+speed: {max_mph: 30, yard_limit_mph: 15}   # MPs per fast-clock hour
+dwell: {station_min: 10, per_car_spot: 5}  # minutes a stop; switching time per car spot
+trains:
+  - id: "1"
+    name: Hillside Local
+    departs: "07:00"
+    route: [HY, CE, HY]                    # out to Cedar and back
+    work: [AL, BI]                         # switches Alder and Birch on the way out
+```
+
+- **The clock** runs 3 times as fast as real time: an hour on the clock is 20 minutes for the
+  crew.
+- **Speeds** are in MPs per clock hour: the MP is the timetable's mile. Inside a yard-limit zone
+  (chapter 6) the train runs at the lower speed.
+- **A stop** takes `station_min`, plus `per_car_spot` for each car spot of the industries and
+  team tracks the train switches there (chapter 7). Alder has 4 spots (feed mill 2, team track
+  2): 10 + 4 × 5 = 30 minutes. Birch has 3: 25 minutes. Where the route turns, at Cedar, the
+  train stops for the minimum, 10 minutes, to run around its train.
+- **The train** runs its `route` along the main and stops where it turns and at the stations it
+  works, the first time it reaches them. Everywhere else it passes without stopping.
+
+This file is for the tutorial: an operations program has far more to go on (cars, waybills,
+crews, several trains meeting). It shows what the layout's data is good for.
+
+> *Make a timetable for the Hillside Local from hillside_operations.yaml.*
+
+```
+make_timetable("hillside_division.xtc", "hillside_operations.yaml")
+```
+
+| Station | MP | 1 out | 1 back |
+|---|---|---|---|
+| HY Hillside | 0.0 | 07:00 | 10:15 |
+| AL Alder | 3.375 | 07:12 – 07:42 | 10:03 |
+| BI Birch | 13.643 | 08:12 – 08:37 | 09:33 |
+| CE Cedar | 21.521 | 09:00 | 09:10 |
+
+Read "1 out" down and "1 back" up. Two times are arrival and departure; one time is a departure,
+an arrival at the end of a run, or a pass. The Local leaves Hillside at 07:00, works Alder and
+Birch, turns at Cedar at 09:10 and is back at 10:15: 3 hours 15 minutes on the clock, 65 real
+minutes.
+
+Each figure comes from the layout. Hillside to Alder is 3.375 MP, most of it inside Alder's
+yard limits, which start at MP 0.963 (its entry switch): 0.963 MP at 30 mph and 2.412 at 15 make
+12 minutes. Move a station note or a YL board, add a car spot, and the next timetable follows.
+
+**Clock and layout speed.** The tool also reports the speed a model must really run at to keep
+this timetable:
+
+```
+"model_mph": {"max": 1.5, "yard_limit": 0.7}
+```
+
+Scale miles per hour, as the crew would see it. At 3:1, 30 MPs an hour is 90 an hour real time,
+and one MP is only 12 in of layout, so the Local need only creep along at 1.5 scale mph. Run it
+at a speed that looks like 30 mph and it covers 21.5 MP in under a minute. That's normal for
+model railroads: a timetable mile is far shorter than a scale mile (an HO scale mile is about
+61 ft), and the fast clock doesn't make up the difference. To make 30 mph on the timetable
+look like 30 mph on the layout at 3:1, one MP would have to be about 20 ft. In practice,
+crews run at a speed that looks right, and the switching and the station work take up the
+time. The timetable is the railroad's time, not the model's.
+
 That's the Hillside Division, operable: every place on it has an id and an MP, every track that
 holds cars says what for, and an operations program can read it all from one file. Upgrading
 an existing layout's older text notes to these conventions is the job of `apply_conventions`,
