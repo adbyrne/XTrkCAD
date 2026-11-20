@@ -466,6 +466,47 @@ def clearance_tail(defn: TurnoutDef, clearance: float, spacing: float,
     return _clearance_run(defn, clearance, spacing, radius)[1]
 
 
+def straight_clearance_point(defn: TurnoutDef, clearance: float, spacing: float,
+                             radius: float) -> float:
+    """How far from a turnout's points the *straight* track is clear of the
+    diverging one: where the nearest distance from it to the diverging track
+    reaches ``clearance``. The diverging track curves back toward it, so this
+    is a little beyond clearance_point() (the diverging track's own offset
+    there), which is what the export measures a straight track by."""
+    xs = clearance_point(defn, clearance, spacing, radius)
+    pts = _diverging_path(defn, spacing, radius)
+    segs = list(zip(pts, pts[1:]))
+
+    def nearest(x: float) -> float:
+        best = math.inf
+        for (x0, y0), (x1, y1) in segs:
+            dx, dy = x1 - x0, y1 - y0
+            sq = dx * dx + dy * dy
+            t = 0.0 if sq < 1e-12 else max(0.0, min(1.0, ((x - x0) * dx - y0 * dy) / sq))
+            best = min(best, math.hypot(x - (x0 + t * dx), -(y0 + t * dy)))
+        return best
+
+    while nearest(xs) < clearance - 1e-9 and xs < pts[-1][0] + 1.0:
+        xs += 0.002
+    return xs
+
+
+def _diverging_path(defn: TurnoutDef, spacing: float, radius: float):
+    """The diverging track as points (along the straight route, offset from
+    it): through the turnout, the run out at the frog angle, the curve back
+    to parallel at ``spacing``."""
+    _along, straight, r = _offset_run(defn, spacing, radius)
+    th = math.radians(defn.frog_angle)
+    xd, yd = defn.diverge_length, abs(defn.diverge_offset)
+    pts = _diverging_samples(defn)
+    pts += [(xd + t * math.cos(th), yd + t * math.sin(th))
+            for t in [straight * k / 200 for k in range(201)]]
+    x2 = xd + straight * math.cos(th) + r * math.sin(th)
+    pts += [(x2 - r * math.sin(phi), spacing - r * (1.0 - math.cos(phi)))
+            for phi in [th * (1 - k / 200) for k in range(201)]]
+    return pts
+
+
 def _clearance_run(defn: TurnoutDef, clearance: float, spacing: float,
                    radius: float) -> tuple[float, float]:
     along, straight, r = _offset_run(defn, spacing, radius)
@@ -534,6 +575,10 @@ class _Builder:
         self.tail = clearance_tail(turnouts.left, spec.clearance_in, spec.track_spacing_in,
                                    spec.curve_radius_in)
         self.xc = self.fp - self.tail
+        # Where the straight track beside a diverging one is clear of it
+        # (nearest distance), along the main: the yard's straight tracks.
+        self.xs = straight_clearance_point(turnouts.left, spec.clearance_in,
+                                           spec.track_spacing_in, spec.curve_radius_in)
         self.main_turnouts: list[tuple[float, float]] = []   # [a, b] main intervals
         self.errors: list[str] = []
 
@@ -667,8 +712,10 @@ def build_track_plan(spec: TrackPlanSpec, config: LayoutConfig,
         # Track k's points are (k-1) offset runs out from the throat; each
         # track holds cars from its clearance point with the next track out,
         # so the last two tracks are the shortest.
+        # The last two tracks are the shortest: the straight one is clear a
+        # little later (xs) than the diverging one (xc).
         s_y = run.s0 + y.track_length_in + (
-            (y.tracks - 2) * b.fp + b.xc if y.tracks > 1 else 0.0)
+            (y.tracks - 2) * b.fp + max(b.xc, b.xs) if y.tracks > 1 else 0.0)
         if s_y > run.s1:
             b.errors.append(f"yard {y.id}: needs {s_y - run.s0:.1f} in on shelf {run.shelf}, "
                             f"which has {run.s1 - run.s0:.1f} in")
@@ -686,7 +733,7 @@ def build_track_plan(spec: TrackPlanSpec, config: LayoutConfig,
                                                   b.layer["Storage"])
                     b.model.add(Straight(0, b.layer["Storage"], t.ends()[1][:2],
                                          route.at(run, run.s0, v_k)))
-                    usable = s_y - (k - 1) * b.fp - b.xc - run.s0
+                    usable = s_y - (k - 1) * b.fp - b.xs - run.s0
                     s_k, v_k = s_next, v_next
                 else:
                     if y.tracks > 1:

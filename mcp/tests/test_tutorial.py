@@ -100,27 +100,27 @@ def _station(export, ident):
 def test_quoted_station_mileposts(export):
     """Chapter 5's table."""
     assert [(s["id"], s["mp"]) for s in export["stations"]] == [
-        ("HY", 0.0), ("AL", 3.395), ("BI", 13.643), ("CE", 21.521)]
+        ("HY", 0.0), ("AL", 3.385), ("BI", 13.626), ("CE", 21.505)]
     assert (_station(export, "AL")["mp_entry"], _station(export, "AL")["mp_exit"]) == (
-        0.984, 5.807)
+        0.973, 5.796)
     assert _station(export, "AL")["siding_cars"] == 5
     assert _station(export, "CE")["terminus"] is True
 
 
 def test_quoted_yard_limits(export):
-    """Chapter 6: Cedar's board moves its zone's start out to MP 20.261."""
+    """Chapter 6: Cedar's board moves its zone's start out to MP 20.244."""
     ce = next(z for z in export["yard_limits"] if z["id"] == "CE")
-    assert (ce["mp_start"], ce["mp_end"], ce["source"]) == (20.261, 21.521, "board")
+    assert (ce["mp_start"], ce["mp_end"], ce["source"]) == (20.244, 21.505, "board")
 
 
 def test_quoted_capacities(export):
-    """Chapters 7-9 (chapter 8: Track 2 falls just short of six cars)."""
+    """Chapters 7-9 (chapter 8: the plan's 6-car yard tracks hold 6)."""
     spots = {i["id"]: (i["car_spots"], i["spur_capacity_cars"])
              for i in export["industries"] + export["team_tracks"]}
     assert spots == {"AL_FEED": (2, 3), "AL_TEAM": (2, 2), "BI_LUMBER": (3, 4)}
     hy = next(y for y in export["yards"] if y["id"] == "HY")
     assert [(t["label"], t["capacity_cars"]) for t in hy["tracks"]] == [
-        ("Track 1", 8), ("Track 2", 5), ("Track 3", 6)]
+        ("Track 1", 8), ("Track 2", 6), ("Track 3", 6)]
     coal = export["facilities"][0]
     assert (coal["id"], coal["car_spots"], coal["capacity_cars"]) == ("CE_COAL", 3, 3)
 
@@ -137,7 +137,7 @@ def test_quoted_segments(export):
     """Chapter 12's table."""
     assert [(s["from_station"], s["to_station"], s["length_ft"])
             for s in export["segments"]] == [
-        ("HY", "AL", 295.746), ("AL", "BI", 892.553), ("BI", "CE", 686.211)]
+        ("HY", "AL", 294.817), ("AL", "BI", 892.03), ("BI", "CE", 686.211)]
 
 
 def test_quoted_export_refusal(base, tmp_path):
@@ -168,9 +168,9 @@ def test_quoted_timetable(base, tmp_path):
         "| Station | MP | 1 out | 1 back |",
         "|---|---|---|---|",
         "| HY Hillside | 0.0 | 07:00 | 10:15 |",
-        "| AL Alder | 3.395 | 07:12 – 07:42 | 10:03 |",
-        "| BI Birch | 13.643 | 08:12 – 08:37 | 09:33 |",
-        "| CE Cedar | 21.521 | 09:00 | 09:10 |"]
+        "| AL Alder | 3.385 | 07:12 – 07:42 | 10:03 |",
+        "| BI Birch | 13.626 | 08:12 – 08:37 | 09:33 |",
+        "| CE Cedar | 21.505 | 09:00 | 09:10 |"]
     assert r["table"] in TUTORIAL.read_text(encoding="utf-8")
     t = r["trains"][0]
     assert (t["fast_minutes"], t["real_minutes"]) == (195, 65.0)
@@ -270,3 +270,22 @@ def test_every_note_is_on_its_track(base, tmp_path, chapter):
             continue                              # position not used
         track, dist = snap_note(layout, note)
         assert track is not None and dist <= 0.5, (note.kind, note.id, dist)
+
+
+def test_plan_and_export_agree_on_the_yard(tmp_path):
+    """What generate_track_plan says each yard track holds is what the export
+    measures on it: both count from the clearance point by the nearest
+    distance between the tracks (a straight track beside a diverging one is
+    clear a little later than the diverging track's own offset says)."""
+    from xtrkcad_mcp.server import generate_layout, generate_track_plan
+    out = tmp_path / "plan" / "hillside.xtc"
+    out.parent.mkdir()
+    generate_layout(str(HILLSIDE), str(out))
+    plan = generate_track_plan(str(HILLSIDE), str(out))
+    yard = next(f for f in plan["features"] if f["id"] == "HY")
+    planned = [(t["label"], t["capacity_cars"]) for t in yard["tracks"]]
+    export = build_export_v2(_state(out, tmp_path, 8))
+    measured = [(t["label"], t["capacity_cars"])
+                for y in export["yards"] if y["id"] == "HY" for t in y["tracks"]]
+    assert planned == measured
+    assert min(c for _, c in planned) >= 6          # the plan asks for 6-car tracks

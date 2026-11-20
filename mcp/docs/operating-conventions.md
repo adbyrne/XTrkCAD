@@ -148,8 +148,8 @@ Valley line's main (upper level); its interchange tracks are where the two meet.
   a station without one is not reported.
 - **Default zone:** every station's yard limits are its own limits, entry to exit switch
   (5.2). A physical board (this note) with the station's id moves the zone's end out to the
-  board: Hillside's CE is a terminus at its switch, MP 21.521, with a board out on the line at
-  MP 20.261, so its zone is MP 20.261-21.521. Boards
+  board: Hillside's CE is a terminus at its switch, MP 21.505, with a board out on the line at
+  MP 20.244, so its zone is MP 20.244-21.505. Boards
   whose id is no station make a zone of their own.
 - One note per board, placed on main track.
 - Boards with the same `id` bound one yard-limit zone: main track only, with special operating

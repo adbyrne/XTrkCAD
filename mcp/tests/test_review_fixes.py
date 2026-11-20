@@ -102,7 +102,7 @@ def test_station_distances_agree_with_the_export(hillside):
     pairs = {(d["from"], d["to"]): d for d in server.get_station_distances(str(hillside))}
     hy_al = pairs[("HY", "AL")]
     assert (hy_al["mp_distance"], hy_al["distance_proto_ft"], hy_al["source"]) == (
-        3.395, 295.7, "mileposts")
+        3.385, 294.8, "mileposts")
     export = T.build_export_v2(parse_file(hillside))
     seg = {(s["from_station"], s["to_station"]): s["length_ft"] for s in export["segments"]}
     for (a, b), ft in seg.items():
@@ -114,7 +114,7 @@ def test_stations_from_the_convention_notes(hillside):
     st = {s["name"]: s for s in server.get_stations(str(hillside))}
     assert sorted(st) == ["AL", "BI", "CE", "HY"]
     assert (st["AL"]["mp"], st["AL"]["station_name"], st["AL"]["source"]) == (
-        3.395, "Alder", "conventions")
+        3.385, "Alder", "conventions")
     assert (st["AL"]["x"], st["AL"]["y"]) == (12.0, 109.5)
 
 

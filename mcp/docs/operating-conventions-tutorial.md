@@ -193,7 +193,7 @@ throat, the first switch the main meets, and counts one MP per foot:
 {"kind": "reference", "id": "MP_ZERO", "mp": 0, "mp_scale": 12, "mp_unit": "in"}
 ```
 
-Place it on `L1-Main` at the yard throat switch, at its points (x 12, y 67.7).
+Place it on `L1-Main` at the yard throat switch, at its points (x 12, y 67.9).
 
 ![The MP_ZERO note on the yard throat switch](images/tutorial/mp-zero.png)
 
@@ -283,9 +283,9 @@ export_layout_data("hillside_division.xtc")
 | Station | MP | Limits (MP) | Siding | Main between the switches |
 |---|---|---|---|---|
 | HY Hillside | 0.0 | terminus | | |
-| AL Alder | 3.395 | 0.984 – 5.807 | 5 cars | 4 cars |
-| BI Birch | 13.643 | 11.232 – 16.054 | 5 cars | 4 cars |
-| CE Cedar | 21.521 | terminus | 4 cars | 3 cars |
+| AL Alder | 3.385 | 0.973 – 5.796 | 5 cars | 4 cars |
+| BI Birch | 13.626 | 11.215 – 16.038 | 5 cars | 4 cars |
+| CE Cedar | 21.505 | terminus | 4 cars | 3 cars |
 
 The track plan asked for 5-car sidings at Alder and Birch, and the export gives 5: both count
 what a track holds between its **clearance points**, where a car stops fouling the other leg of
@@ -298,11 +298,11 @@ needs to clear it, doesn't count.
 **Yard limits** are a stretch of main where trains may move without a clearance, at restricted
 speed, so a switcher can work the station. A layout needs no yard-limit notes: every station's
 zone defaults to its own limits, from entry switch to exit switch [4.4]. At Alder that's MP
-0.984 – 5.807, the siding's switches.
+0.973 – 5.796, the siding's switches.
 
 A **YL board** is a `yard_limit` note with the station's id, on the main where the board stands.
 It moves that end of the zone out to the board. Cedar is a terminus, so its default zone is only
-the terminus switch (MP 21.521); a board out on the line gives its switcher room to run around
+the terminus switch (MP 21.505); a board out on the line gives its switcher room to run around
 the train:
 
 ```json
@@ -315,7 +315,7 @@ The export's `yard_limits` then has Cedar's zone from the board to the end of th
 
 | Zone | From MP | To MP | Source |
 |---|---|---|---|
-| CE | 20.261 | 21.521 | board |
+| CE | 20.244 | 21.505 | board |
 
 The other stations keep their default zones (`source: station`).
 
@@ -381,9 +381,9 @@ The export lists each with its spots and what its track holds:
 
 | Industry | Station | Branch MP | Car spots | Track holds |
 |---|---|---|---|---|
-| AL_FEED Alder Feed Mill | AL | 1.75 | 2 | 3 cars |
-| AL_TEAM Alder team track | AL | 6.755 | 2 | 2 cars |
-| BI_LUMBER Birch Lumber | BI | 15.288 | 3 | 4 cars |
+| AL_FEED Alder Feed Mill | AL | 1.739 | 2 | 3 cars |
+| AL_TEAM Alder team track | AL | 6.744 | 2 | 2 cars |
+| BI_LUMBER Birch Lumber | BI | 15.272 | 3 | 4 cars |
 
 The branch MP is where the spur leaves the main. The track is measured between clearance points
 like a siding [2], so the feed mill's spur holds 3 cars although only 2 are spotted.
@@ -438,11 +438,11 @@ The export's `yards` gives each track's capacity:
 | Track | Function | Holds |
 |---|---|---|
 | Track 1 | arrival_departure | 8 cars |
-| Track 2 | classification | 5 cars |
+| Track 2 | classification | 6 cars |
 | Track 3 | classification | 6 cars |
 
-Tracks 2 and 3 are within a fraction of an inch of each other, about 36 in between clearance
-points, but Track 2 falls just short of six cars, and capacity counts whole cars.
+The track plan asked for tracks that hold 6 cars, and the two shortest, Tracks 2 and 3, hold
+just that: 36 in between their clearance points. Track 1, straight off the main, is longer.
 
 - **Functions** for a station's yard: `arrival`, `departure`, `arrival_departure`,
   `classification`, `runaround`, `lead`, `interchange`, `caboose`, `rip` (repair in place),
@@ -596,8 +596,8 @@ segments, in prototype feet along the main:
 
 | From | To | Length |
 |---|---|---|
-| HY | AL | 295.746 ft |
-| AL | BI | 892.553 ft |
+| HY | AL | 294.817 ft |
+| AL | BI | 892.03 ft |
 | BI | CE | 686.211 ft |
 
 While the check finds an **error**, nothing is written; the result says why:
@@ -661,17 +661,17 @@ make_timetable("hillside_division.xtc", "hillside_operations.yaml")
 | Station | MP | 1 out | 1 back |
 |---|---|---|---|
 | HY Hillside | 0.0 | 07:00 | 10:15 |
-| AL Alder | 3.395 | 07:12 – 07:42 | 10:03 |
-| BI Birch | 13.643 | 08:12 – 08:37 | 09:33 |
-| CE Cedar | 21.521 | 09:00 | 09:10 |
+| AL Alder | 3.385 | 07:12 – 07:42 | 10:03 |
+| BI Birch | 13.626 | 08:12 – 08:37 | 09:33 |
+| CE Cedar | 21.505 | 09:00 | 09:10 |
 
 Read "1 out" down and "1 back" up. Two times are arrival and departure; one time is a departure,
 an arrival at the end of a run, or a pass. The Local leaves Hillside at 07:00, works Alder and
 Birch, turns at Cedar at 09:10 and is back at 10:15: 3 hours 15 minutes on the clock, 65 real
 minutes.
 
-Each figure comes from the layout. Hillside to Alder is 3.395 MP, most of it inside Alder's
-yard limits, which start at MP 0.984 (its entry switch): 0.984 MP at 30 mph and 2.411 at 15 make
+Each figure comes from the layout. Hillside to Alder is 3.385 MP, most of it inside Alder's
+yard limits, which start at MP 0.973 (its entry switch): 0.973 MP at 30 mph and 2.412 at 15 make
 12 minutes. Move a station note or a YL board, add a car spot, and the next timetable follows.
 
 **Clock and layout speed.** The tool also reports the speed a model must really run at to keep
