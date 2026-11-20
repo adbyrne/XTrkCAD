@@ -717,10 +717,10 @@ to choose), **Kinked Joints** (tracks that meet at an angle), **Short Tracks**
 (filler pieces too short to be useful) and **Track Clearance** (tracks drawn
 closer than they can run). The MCP has a simpler
 `write_gaps_report` and `find_unconnected_endpoints`; the app's reports are the
-fuller check, and they show each place on the layout. On the generated
-Hillside plan, Short Tracks lists two 0.62 in straights between turnouts that
-stand back to back (the main at Alder and at Cedar): short, but deliberate, so
-leave them. A plan you drew or changed by hand is worth checking every time.
+fuller check, and they show each place on the layout. A plan from
+`generate_track_plan` passes them (turnouts that stand back to back are butted,
+with no filler between them); one you drew or changed by hand is worth checking
+every time.
 
 ---
 

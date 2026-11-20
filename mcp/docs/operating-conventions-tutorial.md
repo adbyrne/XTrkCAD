@@ -111,7 +111,7 @@ note on an `L1-Main` layer, on the main. A note that lands beside its track is r
 
 ```
 warning NOTE_FAR_FROM_TRACK
-  station BI: 5.0 in from the nearest track (44)
+  station BI: 5.0 in from the nearest track (65)
   hint: It is on track 43 of layer L1-Passing: move the note to that layer.
 ```
 
@@ -283,8 +283,8 @@ export_layout_data("hillside_division.xtc")
 | Station | MP | Limits (MP) | Siding | Main between the switches |
 |---|---|---|---|---|
 | HY Hillside | 0.0 | terminus | | |
-| AL Alder | 3.375 | 0.963 – 5.786 | 5 cars | 4 cars |
-| BI Birch | 13.643 | 11.232 – 16.054 | 5 cars | 3 cars |
+| AL Alder | 3.395 | 0.984 – 5.807 | 5 cars | 4 cars |
+| BI Birch | 13.643 | 11.232 – 16.054 | 5 cars | 4 cars |
 | CE Cedar | 21.521 | terminus | 4 cars | 3 cars |
 
 The track plan asked for 5-car sidings at Alder and Birch, and the export gives 5: both count
@@ -298,7 +298,7 @@ needs to clear it, doesn't count.
 **Yard limits** are a stretch of main where trains may move without a clearance, at restricted
 speed, so a switcher can work the station. A layout needs no yard-limit notes: every station's
 zone defaults to its own limits, from entry switch to exit switch [4.4]. At Alder that's MP
-0.963 – 5.786, the siding's switches.
+0.984 – 5.807, the siding's switches.
 
 A **YL board** is a `yard_limit` note with the station's id, on the main where the board stands.
 It moves that end of the zone out to the board. Cedar is a terminus, so its default zone is only
@@ -352,7 +352,7 @@ switches it, how many cars it takes and what it ships and receives [4.5]:
 ```
 
 Place the feed mill's on `L1-Storage` on the spur west of Alder's main (x 10, y 115), and the
-lumber yard's on the spur north of Birch's main (x 52, y 182).
+lumber yard's on the spur north of Birch's main (x 64, y 182).
 
 - `station`: where the switcher comes from. Leave it out for an industry out on the line with no
   station of its own.
@@ -381,9 +381,9 @@ The export lists each with its spots and what its track holds:
 
 | Industry | Station | Branch MP | Car spots | Track holds |
 |---|---|---|---|---|
-| AL_FEED Alder Feed Mill | AL | 1.781 | 2 | 3 cars |
-| AL_TEAM Alder team track | AL | 6.776 | 2 | 2 cars |
-| BI_LUMBER Birch Lumber | BI | 14.398 | 3 | 4 cars |
+| AL_FEED Alder Feed Mill | AL | 1.75 | 2 | 3 cars |
+| AL_TEAM Alder team track | AL | 6.755 | 2 | 2 cars |
+| BI_LUMBER Birch Lumber | BI | 15.288 | 3 | 4 cars |
 
 The branch MP is where the spur leaves the main. The track is measured between clearance points
 like a siding [2], so the feed mill's spur holds 3 cars although only 2 are spotted.
@@ -527,7 +527,7 @@ Hillside has none, so these two are examples: a mine reached by a switchback, an
 
   ```
   error SWITCHBACK_TAIL_ON_MAIN
-    Switchback CE_SWB: its tail track (72) is on a Mainline layer
+    Switchback CE_SWB: its tail track (69) is on a Mainline layer
     hint: The tail track is never main track; put it on its own layer.
   ```
 
@@ -596,8 +596,8 @@ segments, in prototype feet along the main:
 
 | From | To | Length |
 |---|---|---|
-| HY | AL | 293.932 ft |
-| AL | BI | 894.367 ft |
+| HY | AL | 295.746 ft |
+| AL | BI | 892.553 ft |
 | BI | CE | 686.211 ft |
 
 While the check finds an **error**, nothing is written; the result says why:
@@ -661,7 +661,7 @@ make_timetable("hillside_division.xtc", "hillside_operations.yaml")
 | Station | MP | 1 out | 1 back |
 |---|---|---|---|
 | HY Hillside | 0.0 | 07:00 | 10:15 |
-| AL Alder | 3.375 | 07:12 – 07:42 | 10:03 |
+| AL Alder | 3.395 | 07:12 – 07:42 | 10:03 |
 | BI Birch | 13.643 | 08:12 – 08:37 | 09:33 |
 | CE Cedar | 21.521 | 09:00 | 09:10 |
 
@@ -670,8 +670,8 @@ an arrival at the end of a run, or a pass. The Local leaves Hillside at 07:00, w
 Birch, turns at Cedar at 09:10 and is back at 10:15: 3 hours 15 minutes on the clock, 65 real
 minutes.
 
-Each figure comes from the layout. Hillside to Alder is 3.375 MP, most of it inside Alder's
-yard limits, which start at MP 0.963 (its entry switch): 0.963 MP at 30 mph and 2.412 at 15 make
+Each figure comes from the layout. Hillside to Alder is 3.395 MP, most of it inside Alder's
+yard limits, which start at MP 0.984 (its entry switch): 0.984 MP at 30 mph and 2.411 at 15 make
 12 minutes. Move a station note or a YL board, add a car spot, and the next timetable follows.
 
 **Clock and layout speed.** The tool also reports the speed a model must really run at to keep

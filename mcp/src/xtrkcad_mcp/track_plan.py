@@ -610,19 +610,28 @@ def _pack_station(st: StationSpec, fp: float, L: float,
     for sp in st.spurs:
         span = xc + sp.length_in
         best = None
-        u = lo - span - 2 * end_gap
+        # Where the spur's turnout butts against a turnout already on the
+        # main, first: a tie goes to them, so no short filler straight is
+        # left between two turnouts (XTrkCAD's Short Tracks report lists
+        # those). Then every 0.25 in.
+        start = sp.points_toward == "start"
+        butts = [(e if start else e - span + L) for _a, e in main] + \
+                [(a - L if start else a - span) for a, _e in main]
+        grid, u = [], lo - span - 2 * end_gap
         while u <= hi + 2 * end_gap:
+            grid.append(u)
+            u += 0.25
+        for u in butts + grid:
             side_iv = (u, u + span)
-            main_iv = (u, u + L) if sp.points_toward == "start" else (u + span - L, u + span)
+            main_iv = (u, u + L) if start else (u + span - L, u + span)
             if st.terminus and side_iv[1] > hi:
-                break
+                continue
             key = sp.side
             taken_side = sides.get(key, []) + (sides["siding"] if key == st.siding_side else [])
-            if free(main_iv, main) and free(side_iv, taken_side, end_gap):
+            if free(main_iv, main, 0.0) and free(side_iv, taken_side, end_gap):
                 ext = max(hi, side_iv[1]) - min(lo, side_iv[0])
                 if best is None or ext < best[0] - 1e-9:
                     best = (ext, u, main_iv, side_iv)
-            u += 0.25
         if best is None:
             raise PlanError(f"spur {sp.id}: no room beside station {st.id}")
         _ext, u, main_iv, side_iv = best

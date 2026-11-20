@@ -100,9 +100,9 @@ def _station(export, ident):
 def test_quoted_station_mileposts(export):
     """Chapter 5's table."""
     assert [(s["id"], s["mp"]) for s in export["stations"]] == [
-        ("HY", 0.0), ("AL", 3.375), ("BI", 13.643), ("CE", 21.521)]
+        ("HY", 0.0), ("AL", 3.395), ("BI", 13.643), ("CE", 21.521)]
     assert (_station(export, "AL")["mp_entry"], _station(export, "AL")["mp_exit"]) == (
-        0.963, 5.786)
+        0.984, 5.807)
     assert _station(export, "AL")["siding_cars"] == 5
     assert _station(export, "CE")["terminus"] is True
 
@@ -137,7 +137,7 @@ def test_quoted_segments(export):
     """Chapter 12's table."""
     assert [(s["from_station"], s["to_station"], s["length_ft"])
             for s in export["segments"]] == [
-        ("HY", "AL", 293.932), ("AL", "BI", 894.367), ("BI", "CE", 686.211)]
+        ("HY", "AL", 295.746), ("AL", "BI", 892.553), ("BI", "CE", 686.211)]
 
 
 def test_quoted_export_refusal(base, tmp_path):
@@ -168,7 +168,7 @@ def test_quoted_timetable(base, tmp_path):
         "| Station | MP | 1 out | 1 back |",
         "|---|---|---|---|",
         "| HY Hillside | 0.0 | 07:00 | 10:15 |",
-        "| AL Alder | 3.375 | 07:12 – 07:42 | 10:03 |",
+        "| AL Alder | 3.395 | 07:12 – 07:42 | 10:03 |",
         "| BI Birch | 13.643 | 08:12 – 08:37 | 09:33 |",
         "| CE Cedar | 21.521 | 09:00 | 09:10 |"]
     assert r["table"] in TUTORIAL.read_text(encoding="utf-8")
@@ -255,3 +255,18 @@ def test_appendix_your_own_layout(tmp_path):
     added = add_track_layers(str(dvrr), levels=1)["added"]
     assert added == ["L1-Main", "L1-Passing", "L1-Storage", "L1-Staging",
                      "L1-Connecting", "L1-Service"]
+
+
+@pytest.mark.parametrize("chapter", CHAPTERS)
+def test_every_note_is_on_its_track(base, tmp_path, chapter):
+    """The places the tutorial gives are on the track, not beside it: the
+    check tolerates a little, but the tutorial shouldn't teach that. A track
+    plan change that moves track away from a note fails here."""
+    from xtrkcad_mcp.conventions import read_convention_notes, snap_note
+    layout = _state(base, tmp_path, chapter)
+    notes, _ = read_convention_notes(layout)
+    for note in notes:
+        if note.kind in ("railroad", "subdivision"):
+            continue                              # position not used
+        track, dist = snap_note(layout, note)
+        assert track is not None and dist <= 0.5, (note.kind, note.id, dist)
