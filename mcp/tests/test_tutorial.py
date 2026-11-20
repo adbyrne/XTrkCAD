@@ -100,29 +100,29 @@ def _station(export, ident):
 def test_quoted_station_mileposts(export):
     """Chapter 5's table."""
     assert [(s["id"], s["mp"]) for s in export["stations"]] == [
-        ("HY", 0.0), ("AL", 3.24), ("BI", 13.396), ("CE", 20.792)]
+        ("HY", 0.0), ("AL", 3.375), ("BI", 13.643), ("CE", 21.521)]
     assert (_station(export, "AL")["mp_entry"], _station(export, "AL")["mp_exit"]) == (
-        0.587, 5.892)
-    assert _station(export, "AL")["siding_cars"] == 7
+        0.963, 5.786)
+    assert _station(export, "AL")["siding_cars"] == 5
     assert _station(export, "CE")["terminus"] is True
 
 
 def test_quoted_yard_limits(export):
-    """Chapter 6: Cedar's board moves its zone's end out to MP 20.014."""
+    """Chapter 6: Cedar's board moves its zone's start out to MP 20.261."""
     ce = next(z for z in export["yard_limits"] if z["id"] == "CE")
-    assert (ce["mp_start"], ce["mp_end"], ce["source"]) == (20.014, 20.792, "board")
+    assert (ce["mp_start"], ce["mp_end"], ce["source"]) == (20.261, 21.521, "board")
 
 
 def test_quoted_capacities(export):
     """Chapters 7-9."""
     spots = {i["id"]: (i["car_spots"], i["spur_capacity_cars"])
              for i in export["industries"] + export["team_tracks"]}
-    assert spots == {"AL_FEED": (2, 4), "AL_TEAM": (2, 3), "BI_LUMBER": (3, 5)}
+    assert spots == {"AL_FEED": (2, 3), "AL_TEAM": (2, 2), "BI_LUMBER": (3, 4)}
     hy = next(y for y in export["yards"] if y["id"] == "HY")
     assert [(t["label"], t["capacity_cars"]) for t in hy["tracks"]] == [
-        ("Track 1", 10), ("Track 2", 7), ("Track 3", 7)]
+        ("Track 1", 8), ("Track 2", 5), ("Track 3", 6)]
     coal = export["facilities"][0]
-    assert (coal["id"], coal["car_spots"], coal["capacity_cars"]) == ("CE_COAL", 3, 4)
+    assert (coal["id"], coal["car_spots"], coal["capacity_cars"]) == ("CE_COAL", 3, 3)
 
 
 TUTORIAL = Path(__file__).parents[1] / "docs" / "operating-conventions-tutorial.md"

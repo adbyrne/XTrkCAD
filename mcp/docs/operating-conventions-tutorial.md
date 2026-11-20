@@ -31,7 +31,7 @@ You can also call the tools yourself; the prompt is just the plain-language vers
 
 A layout drawing says where the track goes. Operating it needs more: that this siding belongs to
 Alder, that the spur behind it is a feed mill taking two cars, that Cedar is the end of the line
-20.8 miles out. The conventions record those facts **in the layout file itself**, so they move
+21.5 miles out. The conventions record those facts **in the layout file itself**, so they move
 with the drawing and are never typed twice.
 
 They record the railroad **as built**. Trains, schedules, waybills and crews are the operations
@@ -165,7 +165,7 @@ throat, the first switch the main meets, and counts one MP per foot:
 {"kind": "reference", "id": "MP_ZERO", "mp": 0, "mp_scale": 12, "mp_unit": "in"}
 ```
 
-Place it on `L1-Main` at the yard throat switch (x 12, y 70.7).
+Place it on `L1-Main` at the yard throat switch, at its points (x 12, y 67.7).
 
 *[Screenshot: the MP_ZERO note on the yard throat switch.]*
 
@@ -221,7 +221,7 @@ switch of its runaround:
 ```
 
 Place the station note on the main between Cedar's switches (x 132, y 114) and the terminus note
-on the runaround's north switch (x 132, y 139). Leave the terminus note out and the check asks:
+on the runaround's north switch (x 132, y 134). Leave the terminus note out and the check asks:
 
 ```
 warning TERMINUS_NO_START
@@ -255,13 +255,15 @@ export_layout_data("hillside_division.xtc")
 | Station | MP | Limits (MP) | Siding | Main between the switches |
 |---|---|---|---|---|
 | HY Hillside | 0.0 | terminus | | |
-| AL Alder | 3.24 | 0.587 – 5.892 | 7 cars | 6 cars |
-| BI Birch | 13.396 | 10.744 – 16.049 | 7 cars | 6 cars |
-| CE Cedar | 20.792 | terminus | 6 cars | 5 cars |
+| AL Alder | 3.375 | 0.963 – 5.786 | 5 cars | 4 cars |
+| BI Birch | 13.643 | 11.232 – 16.054 | 5 cars | 3 cars |
+| CE Cedar | 21.521 | terminus | 4 cars | 3 cars |
 
-The track plan asked for 5-car sidings at Alder and Birch: that's the straight part, clear of
-the curves. The export counts the whole passing track from switch to switch, curves included,
-so it gives 7. Both are right; they measure different things.
+The track plan asked for 5-car sidings at Alder and Birch, and the export gives 5: both count
+what a track holds between its **clearance points**, where a car stops fouling the other leg of
+the switch [2]. The main between the switches holds fewer: an industry's spur leaves it there
+(Alder's feed mill, Birch's lumber spur, chapter 7), and that switch, with the length a car
+needs to clear it, doesn't count.
 
 *(Chapters 6–12 follow: yard limits, industries, yards, facilities, switchbacks, more than one
 railroad, and exporting.)*

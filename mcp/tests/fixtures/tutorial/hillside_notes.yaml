@@ -11,7 +11,7 @@
 chapters:
   4:   # Mileposts
     notes:
-      - {layer: L1-Main, at: [12.0, 70.66],
+      - {layer: L1-Main, at: [12.0, 67.7],
          note: {kind: reference, id: MP_ZERO, mp: 0, mp_scale: 12, mp_unit: in}}
 
   5:   # Stations
@@ -24,7 +24,7 @@ chapters:
          note: {kind: station, id: BI, name: Birch}}
       - {layer: L1-Main, at: [132.0, 114.0],
          note: {kind: station, id: CE, name: Cedar, terminus: true}}
-      - {layer: L1-Main, at: [132.0, 139.0],
+      - {layer: L1-Main, at: [132.0, 134.0],
          note: {kind: terminus, id: CE}}
 
   6:   # Yard limits
