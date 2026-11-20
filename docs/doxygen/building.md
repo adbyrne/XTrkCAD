@@ -461,6 +461,9 @@ bug:
   `empty_text_check` use a small layout of their own, with empty text segments, and also compare the
   saved texts with the source. `objects` and `objects_check` do the same for the object types no
   example contains: Bezier, sensor, control, switch motor, block and signal.
+  `switchmotor_noturnout` (`regression-critical`) loads a switch motor whose turnout doesn't exist:
+  the load says so, and drawing and saving it must not follow the missing turnout (a switch motor's
+  turnout is also missing while a layout is being read, and a redraw then crashed).
 - **Properties without an edit (`RegressionDescribe.*`)** — one test per example layout:
   `-Tdescribe:<layout>` loads it, saves and reloads it, then opens Properties on every object except
   notes and presses Done, as a click with the Describe command does (`LayoutDescribeTest()`,
