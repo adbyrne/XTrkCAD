@@ -205,7 +205,8 @@ jobs:
       - name: Regression tests, German locale
         env:
           LANG: de_DE.UTF-8
-        run: ctest --test-dir build -L regression-ci --output-on-failure
+        # tools/ctest-with-backtraces.sh: a crashing test leaves a gdb backtrace in the log.
+        run: tools/ctest-with-backtraces.sh ctest --test-dir build -L regression-ci --output-on-failure
 
   c-tests-debian:
     # Debian 12/13 containers on amd64 and arm64 -- the arm64 entries are

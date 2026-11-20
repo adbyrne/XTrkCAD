@@ -241,7 +241,16 @@ function(xtrkcad_add_regression_test _name _home)
         set(_work_dir_setup "mkdir -p '${_work_dir}' && printf '[workdir]\\npath=%s\\n' '${_work_dir}' > '${_work_dir_ini}'; ")
         set(_log_dump " if [ $code -ne 0 ]; then echo \"--- exit code $code ---\"; if [ -f '${_work_dir}/xtclog.txt' ]; then echo '--- xtclog.txt ---'; tail -n 100 '${_work_dir}/xtclog.txt'; fi; fi;")
     endif()
-    _xtrkcad_shell_quote_list(_args_sh ${ARGN})
+    # -d init=1: the startup steps go to the log (misc.c's "init" category),
+    # so a test that crashes during startup shows which step it got to. Not
+    # on Windows: there the log is a file in the work directory, and the
+    # first "init" line comes before InitCustom() has set that up, so every
+    # test hung (PR #413's regression-windows).
+    if(WIN32)
+        _xtrkcad_shell_quote_list(_args_sh ${ARGN})
+    else()
+        _xtrkcad_shell_quote_list(_args_sh -dinit=1 ${ARGN})
+    endif()
     add_test(NAME "${_name}"
         COMMAND sh -c "${_xtrkcad_wayland_guard}${_work_dir_setup}${_xtrkcad_wrapper_sh} '${_xtrkcad_regression_exe}'${_args_sh}; code=$?; if [ $code -ne 0 ] && [ -f '${_regress_file}' ]; then echo '--- xtrkcad.regress (actual vs expected tracks) ---'; cat '${_regress_file}'; fi;${_log_dump} exit $code"
     )

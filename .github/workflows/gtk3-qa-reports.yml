@@ -77,7 +77,8 @@ jobs:
         # (RegressionTests.cmake bakes that into every regression test's
         # COMMAND unconditionally) -- nesting is harmless, each xvfb-run
         # picks its own free display number.
-        run: xvfb-run ctest --test-dir build --output-on-failure
+        # tools/ctest-with-backtraces.sh: a crashing test leaves a gdb backtrace in the log.
+        run: tools/ctest-with-backtraces.sh xvfb-run ctest --test-dir build --output-on-failure
       - name: Collect coverage
         run: |
           lcov --capture --directory build \

@@ -205,6 +205,13 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
   red below 65%, yellow from 65% and green from 90% (`genhtml_med_limit=65`; lcov's default is
   75).
 
+**Crashes in the Linux regression jobs.** `regression-gtk3`, `regression-locale-de` and
+`coverage` run `ctest` through `tools/ctest-with-backtraces.sh`: it turns core dumps on (core
+size limit, and `kernel.core_pattern` into `$RUNNER_TEMP/cores` with `sudo`), runs the tests,
+and prints a gdb backtrace of every core left behind, installing gdb only then. An intermittent
+crash then shows where it happened in the job's log, without a rerun. The sanitizer and
+valgrind jobs report crashes their own way and aren't wrapped.
+
 ## Toolchain preview (advisory)
 
 `ci-gtk3.yml` pins its runner images and compilers (see \ref building "Building and Testing"'s
