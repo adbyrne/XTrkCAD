@@ -14,11 +14,11 @@ industry on main or passing track (4.5), a warning for more car spots than the t
 ## 1. Scope and principles
 
 These conventions say how a layout file (`.xtc`/`.xtce`) records its railroad **as built** in a
-form an operating plan can use, and how tools check it. They are general; the NYE layout is the
-first test case.
+form an operating plan can use, and how tools check it. They are general; the Hillside Division
+of the [tutorial](operating-conventions-tutorial.md) is their worked example.
 
 Out of scope, **plan data**: trains, schedules, TO and R designations, equipment, waybills, crews,
-rules. It belongs to the operations system (IOTtrains for NYE), which refers to layout objects by
+rules. It belongs to the operations system (an operations program), which refers to layout objects by
 `id`.
 
 1. A fact tied to a place on the layout is a JSON Note placed at that place.
@@ -42,7 +42,7 @@ rules. It belongs to the operations system (IOTtrains for NYE), which refers to 
 | House track | the track at the railroad's freight house, where its staff handle less-than-carload freight (4.8) |
 | Milepost (MP) | a position along main track, in MP units, counted from MP anchors (5) |
 | MP scale | layout length per MP unit, with its unit (`12 in`, `1 ft`, `0.3 m`) |
-| Railroad | an owning company (NYE, C&O on the NYE layout) |
+| Railroad | an owning company (HD, the Hillside Division) |
 | Subdivision | one MP line of a railroad; a railroad has one or more |
 | Entry switch | a station's main-track switch closest to MP zero (lowest MP) |
 | Tail track | the reversing track of a switchback (4.9) |
@@ -56,7 +56,7 @@ rules. It belongs to the operations system (IOTtrains for NYE), which refers to 
   wrong layer (XTrkCAD puts a new track on the current layer), and the station's siding can't be
   found.
 - warning: a layer holding track in no category group. Its category then comes from the
-  `L<n>-Suffix` layer name (`L1-CO-Staging` -> Staging), else Mainline.
+  `L<n>-Suffix` layer name (`L2-VL-Staging` -> Staging), else Mainline.
 
 ### 3.2 Railroad and subdivision groups
 A `railroad` or `subdivision` note (4.1) names the Layer Group holding its layers; any group name
@@ -86,23 +86,23 @@ The `L<n>-` layer-name prefix, as today.
 
 ### 4.1 `railroad`, `subdivision`
 ```json
-{"kind": "railroad", "id": "NYE", "name": "New York & Eastern", "reporting_marks": "NYE",
- "group": "NYE"}
-{"kind": "subdivision", "id": "NLS", "name": "Northern Lights Subdivision", "railroad": "NYE",
- "group": "NYE-NLS"}
+{"kind": "railroad", "id": "HD", "name": "Hillside Division", "reporting_marks": "HD",
+ "group": "HD"}
+{"kind": "subdivision", "id": "WEST", "name": "West Subdivision", "railroad": "HD",
+ "group": "HD-WEST"}
 ```
 - Position not used.
 - Both optional for a layout with one railroad with one subdivision.
 - `group` is optional on a subdivision: one railroad's subdivisions may share layers.
 - `group` names one Layer Group. Other groups may hold the same layers for other purposes
-  (NYE's `NYE-L1`/`NYE-L2` per-level groups, for printing), so a railroad spread over levels
-  gets one group of its own (`NYE`) beside them.
+  (per-level groups like `Level 1`/`Level 2`, for printing), so a railroad spread over levels
+  gets one group of its own (`HD`) beside them.
 
 ### 4.2 `reference`: MP anchor or named point
 ```json
 {"kind": "reference", "id": "MP_ZERO", "mp": 0, "mp_scale": 12, "mp_unit": "in"}
-{"kind": "reference", "id": "CO_START", "mp": 412.3, "railroad": "CO"}
-{"kind": "reference", "id": "MC_EXIT"}
+{"kind": "reference", "id": "VL_START", "mp": 412.3, "railroad": "VL"}
+{"kind": "reference", "id": "BI_EAST"}
 ```
 - With `mp`: an **MP anchor**: the track at the note *is* that milepost (5).
 - `mp_scale` and `mp_unit` (`in`, `ft`, `cm`, `m`; default `in`) go on one anchor per subdivision,
@@ -116,15 +116,15 @@ The `L<n>-` layer-name prefix, as today.
 
 ### 4.3 `station`
 ```json
-{"kind": "station", "id": "XP", "name": "Xina Pass"}
-{"kind": "station", "id": "WP", "name": "Williamsport", "terminus": true, "ref_tag": "MP_ZERO"}
-{"kind": "station", "id": "SK", "name": "Stans Knob", "mp_at_note": true}
+{"kind": "station", "id": "AL", "name": "Alder"}
+{"kind": "station", "id": "HY", "name": "Hillside", "terminus": true, "ref_tag": "MP_ZERO"}
+{"kind": "station", "id": "DL", "name": "Dale", "mp_at_note": true}
 ```
 - Placed on main track at the station.
 - `terminus`: a line end, so there's no exit.
 - `ref_tag`: route from that named point when the note sits on an isolated track. Such a note
-  may sit off the main, on the station's own track (NYE's WP: its track is yard, the main ends
-  at the MP_ZERO switch).
+  may sit off the main, on the station's own track (Hillside's HY: its note is on a yard track,
+  and the main ends at the MP_ZERO switch, the yard throat).
 - `mp_at_note`: see 5.2.
 
 **Joint station**: one station served by more than one railroad or subdivision. It is one
@@ -132,23 +132,24 @@ location (one `id`) with one `station` note per subdivision, each placed on that
 main track. Each note gets its own MP, limits, `terminus` and `ref_tag` from its own main; yards,
 industries, house tracks and facilities name the station by its one `id`.
 ```json
-{"kind": "station", "id": "WP", "name": "Williamsport", "terminus": true, "ref_tag": "MP_ZERO"}
-{"kind": "station", "id": "WP", "railroad": "CO"}
+{"kind": "station", "id": "CE", "name": "Cedar", "terminus": true}
+{"kind": "station", "id": "CE", "railroad": "VL"}
 ```
-NYE: Williamsport is on the NYE branch (lower level, where the NYE's MP zero is) and on the C&O
-main (upper level); its interchange tracks are where the two meet.
+For example, Cedar as a terminus of the Hillside Division (lower level) and a station on the
+Valley line's main (upper level); its interchange tracks are where the two meet.
 - error: two `station` notes with one `id` in the same subdivision.
 - warning: notes of one station with different `name`s (give it on one note, or the same on all).
 
 ### 4.4 `yard_limit`: a YL board (optional)
 ```json
-{"kind": "yard_limit", "id": "WP"}
+{"kind": "yard_limit", "id": "CE"}
 ```
 - Yard limits are timetable and rules data: a layout needs no YL notes, and
   a station without one is not reported.
 - **Default zone:** every station's yard limits are its own limits, entry to exit switch
   (5.2). A physical board (this note) with the station's id moves the zone's end out to the
-  board: NYE's WP is a terminus at MP 0 with a board at MP 3, so its zone is MP 0-3. Boards
+  board: Hillside's CE is a terminus at its switch, MP 21.521, with a board out on the line at
+  MP 20.261, so its zone is MP 20.261-21.521. Boards
   whose id is no station make a zone of their own.
 - One note per board, placed on main track.
 - Boards with the same `id` bound one yard-limit zone: main track only, with special operating
@@ -162,7 +163,7 @@ main (upper level); its interchange tracks are where the two meet.
 
 ### 4.5 `industry`
 ```json
-{"kind": "industry", "id": "QM1", "name": "Quilly Mine #1", "station": "XP",
+{"kind": "industry", "id": "MINE", "name": "Ridge Mine", "station": "BI",
  "car_spots": 2, "car_types": ["HM"], "loads_in": ["empties"], "loads_out": ["coal"]}
 ```
 - Placed on its spur.
@@ -180,7 +181,7 @@ main (upper level); its interchange tracks are where the two meet.
 
 ### 4.5a `team_track`: a public delivery track
 ```json
-{"kind": "team_track", "id": "XP_TEAM", "name": "Xina Pass team track", "station": "XP",
+{"kind": "team_track", "id": "AL_TEAM", "name": "Alder team track", "station": "AL",
  "car_spots": 3}
 {"kind": "team_track", "id": "MILLER_TEAM", "name": "Miller", "car_spots": 2}
 ```
@@ -200,7 +201,7 @@ main (upper level); its interchange tracks are where the two meet.
 
 ### 4.6 `staging`: a staging yard
 ```json
-{"kind": "staging", "id": "CO_EAST", "name": "East Staging", "railroad": "CO"}
+{"kind": "staging", "id": "VL_EAST", "name": "East Staging", "railroad": "VL"}
 ```
 - Placed on the staging yard's lead.
 - Its tracks are `yard_track` notes with this `id`. Staging is laid out like a yard: it has
@@ -209,13 +210,13 @@ main (upper level); its interchange tracks are where the two meet.
 
 ### 4.7 `yard_track`
 ```json
-{"kind": "yard_track", "id": "WP", "label": "Track 2", "function": "classification"}
-{"kind": "yard_track", "id": "WP", "label": "Interchange East", "function": "interchange",
- "railroads": ["NYE", "CO"]}
-{"kind": "yard_track", "id": "QM1", "label": "Loading 1", "function": "loading"}
+{"kind": "yard_track", "id": "HY", "label": "Track 2", "function": "classification"}
+{"kind": "yard_track", "id": "CE", "label": "Interchange", "function": "interchange",
+ "railroads": ["HD", "VL"]}
+{"kind": "yard_track", "id": "MINE", "label": "Loading 1", "function": "loading"}
 ```
 - One note per track, placed on it.
-- `id`: the yard's location id: a station (WP), an industry (the mine tracks at QM1 and QM2) or a
+- `id`: the yard's location id: a station (HY), an industry (a mine's own tracks) or a
   staging yard.
 - `label`: unique within the yard.
 - `function`, one of:
@@ -232,10 +233,10 @@ main (upper level); its interchange tracks are where the two meet.
 
 ### 4.8 `house_track`, `storage`, `facility`
 ```json
-{"kind": "house_track", "id": "BB"}
-{"kind": "house_track", "id": "WP", "label": "Freight house"}
+{"kind": "house_track", "id": "BI"}
+{"kind": "house_track", "id": "CE", "label": "Freight house"}
 {"kind": "storage", "id": "CAR_BARN", "name": "Car barn"}
-{"kind": "facility", "id": "WP_COAL", "name": "Coal trestle", "type": "coal", "location": "WP",
+{"kind": "facility", "id": "CE_COAL", "name": "Cedar coal trestle", "type": "coal", "location": "CE",
  "car_spots": 3}
 ```
 - `house_track`: the freight-house track (LCL freight, handled by the railroad), one note per
@@ -254,15 +255,15 @@ main (upper level); its interchange tracks are where the two meet.
 
 ### 4.9 `switchback`: a track configuration
 ```json
-{"kind": "switchback", "id": "BB_SWB", "serves": "BB"}
-{"kind": "switchback", "id": "MC_SWB", "serves": "MC", "switches": [412, 418]}
+{"kind": "switchback", "id": "MINE_SWB", "serves": "MINE"}
+{"kind": "switchback", "id": "SUMMIT_SWB", "serves": "SUMMIT", "switches": [412, 418]}
 ```
 - Placed on the tail track. A switchback is a track configuration, not an attribute of a station
   or industry.
 - `serves`: the location that uses it.
 - `switches`: the main-track switch(es) that together act as the switchback switch.
   - Default: the switch the tail track leaves.
-  - Usually one. NYE has a case with two: the passing track rejoins the main beyond the first
+  - Usually one. Two when, for example, the passing track rejoins the main beyond the first
     switch.
 - The tail track may end the main, or continue into another subdivision, an industry or yard
   tracks. It is never main track.
@@ -271,7 +272,7 @@ main (upper level); its interchange tracks are where the two meet.
 
 ### 4.10 `terminus`: where a terminus starts
 ```json
-{"kind": "terminus", "id": "HC"}
+{"kind": "terminus", "id": "CE"}
 ```
 - `id`: the terminus station's id (the station has `terminus: true`).
 - Placed on the main-track switch where the terminus starts. The track beyond the switch's
@@ -279,8 +280,8 @@ main (upper level); its interchange tracks are where the two meet.
   but it is not running line. MPs stop at the switch: anything on that track has the switch's
   MP.
 - **Default:** a terminus station without a terminus note starts at the MP zero anchor when its
-  `ref_tag` names that anchor (NYE's WP: MP_ZERO at its switch). Other termini need the note
-  (NYE's HC: at the switch where its passing track starts).
+  `ref_tag` names that anchor (Hillside's HY: MP_ZERO at its yard throat). Other termini need
+  the note (Hillside's CE: on the switch where its runaround starts).
 - error: `id` names no station; the note isn't on a main-track switch.
 - warning: the station isn't marked `terminus`; a terminus station with neither a terminus
   note nor a `ref_tag` to the zero anchor.
@@ -293,7 +294,7 @@ main (upper level); its interchange tracks are where the two meet.
   MP scale.
 - A hard anchor **resets** the count: a calculated 10 can meet an anchor that says 40, and the
   count goes on from 40.
-- A subdivision **without a zero** (C&O on NYE: staging -> visible trackage -> staging) has a
+- A subdivision **without a zero** (a line from staging to staging, like the Valley line) has a
   start anchor where its visible trackage begins and an end anchor. MPs increase from start
   toward end: the count starts at its lowest anchor.
 - Distances follow the subdivision's main track (its Mainline layers) only. A switch's MP is
