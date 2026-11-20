@@ -672,6 +672,76 @@ static void ReportsBuildText(DynString *out)
 	}
 }
 
+/**
+ * Whether \a trk is a turntable, whose unused positions are open by
+ * design: XTrkCAD's own turntable (QueryTrack(trk, Q_CAN_ADD_ENDPOINTS)),
+ * or a sectional turntable from a parameter file, which is a turnout with
+ * more than 4 ends that all point straight out from one centre, at one
+ * radius (Development Issues #88: a Walthers 90' turntable, 933-2840, in
+ * the DVRR example). The centre is where the ends' direction lines meet
+ * (least squares), so positions round part of the circle count too.
+ * Ordinary turnouts (2-4 ends: three-way, wye, slips) never do. The MCP's
+ * gaps report uses the same test.
+ *
+ * \param trk IN the track
+ * \return TRUE for a turntable
+ */
+static BOOL_T ReportsIsTurntable( track_p trk )
+{
+	if ( QueryTrack( trk, Q_CAN_ADD_ENDPOINTS ) ) {
+		return TRUE;
+	}
+	if ( GetTrkType( trk ) != T_TURNOUT ) {
+		return FALSE;
+	}
+	EPINX_T cnt = GetTrkEndPtCnt( trk );
+	if ( cnt <= 4 ) {
+		return FALSE;
+	}
+	double a11 = 0.0, a12 = 0.0, a22 = 0.0, b1 = 0.0, b2 = 0.0;
+	for ( EPINX_T ep = 0; ep < cnt; ep++ ) {
+		coOrd pos = GetTrkEndPos( trk, ep );
+		double dx = sin( D2R( GetTrkEndAngle( trk, ep ) ) );
+		double dy = cos( D2R( GetTrkEndAngle( trk, ep ) ) );
+		double m11 = 1.0 - dx * dx, m12 = -dx * dy, m22 = 1.0 - dy * dy;
+		a11 += m11;
+		a12 += m12;
+		a22 += m22;
+		b1 += m11 * pos.x + m12 * pos.y;
+		b2 += m12 * pos.x + m22 * pos.y;
+	}
+	double det = a11 * a22 - a12 * a12;
+	if ( fabs( det ) < 1e-9 ) {
+		return FALSE;   // all parallel
+	}
+	double cx = ( b1 * a22 - b2 * a12 ) / det;
+	double cy = ( a11 * b2 - a12 * b1 ) / det;
+	double sum = 0.0;
+	for ( EPINX_T ep = 0; ep < cnt; ep++ ) {
+		coOrd pos = GetTrkEndPos( trk, ep );
+		double dx = sin( D2R( GetTrkEndAngle( trk, ep ) ) );
+		double dy = cos( D2R( GetTrkEndAngle( trk, ep ) ) );
+		double vx = pos.x - cx, vy = pos.y - cy;
+		double r = sqrt( vx * vx + vy * vy );
+		if ( r < 0.5 || vx * dx + vy * dy <= 0.0 ) {
+			return FALSE;   // at the centre, or pointing inward
+		}
+		if ( fabs( vx * dy - vy * dx ) > 0.02 * r + 0.02 ) {
+			return FALSE;   // not along its own direction line
+		}
+		sum += r;
+	}
+	double mean = sum / cnt;
+	for ( EPINX_T ep = 0; ep < cnt; ep++ ) {
+		coOrd pos = GetTrkEndPos( trk, ep );
+		double vx = pos.x - cx, vy = pos.y - cy;
+		if ( fabs( sqrt( vx * vx + vy * vy ) - mean ) > 0.02 * mean ) {
+			return FALSE;   // not one radius
+		}
+	}
+	return TRUE;
+}
+
 void ReportsUnconnectedEndpoints( void * unused )
 {
 	track_p trk;
@@ -714,12 +784,12 @@ void ReportsUnconnectedEndpoints( void * unused )
 			continue;
 		}
 		EPINX_T epCnt = GetTrkEndPtCnt(trk);
-		/* Turntable stalls are open by design (QueryTrack(trk,
-		 * Q_CAN_ADD_ENDPOINTS) -- same test the Gaps report uses to
-		 * exclude them from its own pairing analysis), so they're
+		/* Turntable stalls are open by design (ReportsIsTurntable() --
+		 * same test the Gaps report uses to exclude them from its own
+		 * pairing analysis), so they're
 		 * never flagged `isolated` below even though every stall is
 		 * typically open. */
-		BOOL_T isTurntable = QueryTrack( trk, Q_CAN_ADD_ENDPOINTS );
+		BOOL_T isTurntable = ReportsIsTurntable( trk );
 		BOOL_T isIsolated = TRUE;
 
 		for ( ep = 0; ep < epCnt; ep++ ) {
@@ -1743,7 +1813,7 @@ static dynArr_t reportsGapsList_da;
 static int reportsGapsIsolatedCnt = 0;
 
 /** Count of open endpoints excluded from the pairing analysis because
- * they belong to a turntable (QueryTrack(trk, Q_CAN_ADD_ENDPOINTS)) --
+ * they belong to a turntable (ReportsIsTurntable()) --
  * turntable stalls are open by design, not a missed connection. Matches
  * the external MCP project's own write_gaps_report() design (reports
  * turntable stalls as a count, never pairs them). */
@@ -1963,7 +2033,7 @@ void ReportsGaps( void * unused )
 		 * open endpoint including turntable stalls), this is a
 		 * deliberate divergence between the two reports, not a bug to
 		 * reconcile. */
-		BOOL_T isTurntable = QueryTrack( trk, Q_CAN_ADD_ENDPOINTS );
+		BOOL_T isTurntable = ReportsIsTurntable( trk );
 
 		for ( ep = 0; ep < GetTrkEndPtCnt(trk); ep++ ) {
 			if ( GetTrkEndTrk(trk, ep) != NULL ) {

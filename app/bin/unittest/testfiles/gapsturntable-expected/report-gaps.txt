@@ -1,0 +1,11 @@
+XTrackCAD Gaps Report
+XTrackCAD
+Demo
+
+
+Maximum gap: 0.1000 in (Connection distance)
+Near-miss pairs: 0
+Isolated open endpoints: 4
+Turntable stalls excluded: 6
+
+No near-miss pairs found.
