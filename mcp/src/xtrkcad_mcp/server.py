@@ -41,8 +41,7 @@ logger = logging.getLogger(__name__)
 
 mcp = FastMCP("xtrkcad")
 
-_PLANS_DIR = Path(os.environ.get("XTRKCAD_PLANS_DIR", "."))
-_XTRKCAD_BINARY = os.environ.get("XTRKCAD_BINARY", "")
+_PLANS_DIR = Path(os.environ.get("XTRKCAD_PLANS_DIR", ".")).expanduser()
 
 
 def _resolve_plans_dir(directory: str | None) -> Path:
@@ -152,7 +151,7 @@ def load_layout_config(config_path: str) -> dict:
           warnings — list of validation warnings
           config   — parsed config values (name, scale, room, benchwork, ...)
     """
-    result = load_config(config_path)
+    result = load_config(_resolve_plan(config_path))
     cfg = result.config
     fp = cfg.floor_plan
     return {
@@ -219,7 +218,7 @@ def generate_layout(config_path: str, output_path: str = "") -> dict:
     from xtrkcad_mcp.generator import default_output_path, generate
     from pathlib import Path
 
-    cfg_result = load_config(config_path)
+    cfg_result = load_config(_resolve_plan(config_path))
 
     if not cfg_result.ready:
         return {
@@ -230,8 +229,8 @@ def generate_layout(config_path: str, output_path: str = "") -> dict:
         }
 
     config = cfg_result.config
-    cfg_path = Path(config_path).expanduser()
-    out = Path(output_path).expanduser() if output_path else default_output_path(config, cfg_path)
+    cfg_path = _resolve_plan(config_path)
+    out = _resolve_plan(output_path) if output_path else default_output_path(config, cfg_path)
 
     result = generate(config, out)
 
@@ -301,7 +300,7 @@ def generate_track_plan(config_path: str, layout_path: str, output_path: str = "
     def refused(*errors: str) -> dict:
         return {"written": False, "errors": list(errors)}
 
-    cfg_result = load_config(config_path)
+    cfg_result = load_config(_resolve_plan(config_path))
     config = cfg_result.config
     if config.track_plan is None:
         return refused("the config has no track_plan_file or track_plan"
@@ -335,7 +334,7 @@ def generate_track_plan(config_path: str, layout_path: str, output_path: str = "
     tail = []
     if lines and lines[-1].strip() == "END$TRACKS":
         tail = [lines.pop()]
-    out = Path(output_path).expanduser() if output_path else src
+    out = _resolve_plan(output_path) if output_path else src
     backup = _version_backup(out)
     out.write_text("\n".join(lines + records + tail) + "\n", encoding="utf-8")
 
@@ -384,7 +383,7 @@ def merge_benchwork(
     """
     from xtrkcad_mcp.generator import MergeResult, merge_benchwork_into
 
-    cfg_result = load_config(config_path)
+    cfg_result = load_config(_resolve_plan(config_path))
     if not cfg_result.ready:
         return {
             "ready": False,
@@ -394,7 +393,7 @@ def merge_benchwork(
         }
 
     p = _resolve_plan(layout_path)
-    out = Path(output_path).expanduser() if output_path else p
+    out = _resolve_plan(output_path) if output_path else p
     try:
         result = merge_benchwork_into(p, cfg_result.config, out)
     except ValueError as e:
@@ -457,7 +456,7 @@ def write_benchwork_report(
     Returns:
         Confirmation message with the absolute path written.
     """
-    cfg_result = load_config(config_path)
+    cfg_result = load_config(_resolve_plan(config_path))
     cfg = cfg_result.config
     sections = cfg.benchwork_sections
 
@@ -487,7 +486,7 @@ def write_benchwork_report(
 
     rows = [_section_row(bw) for bw in sections]
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     fmt = _resolve_format(output_path, format)
 
     if fmt == "txt":
@@ -1217,7 +1216,7 @@ def write_operation_density_report(
         f"Note: {data['note']}",
     ]
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -1655,7 +1654,7 @@ def write_layout_report(
         Confirmation message with the absolute path written.
     """
     layout = _load_layout(path, layers, groups)
-    _val_config = load_stations_config(stations_yaml) if stations_yaml else None
+    _val_config = load_stations_config(_resolve_plan(stations_yaml)) if stations_yaml else None
     validation_issues = validate_layout_annotations(layout, _val_config)
     scale = layout.scale
     cpf = cars_per_real_ft(scale)
@@ -1777,7 +1776,7 @@ def write_layout_report(
             for issue in warnings:
                 lines.append(f"    [{issue.code}] {issue.message}")
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -1983,7 +1982,7 @@ def write_equipment_report(
             "MARGINAL = within 2\" (scaled) of minimum; test with your specific models.",
         ]
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -2133,7 +2132,7 @@ def write_turnout_report(
     if has_heavy:
         lines += ["", "*** Layers with density > 10/100 ft are switching-heavy (possible staging yard)."]
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -2290,7 +2289,7 @@ def write_gaps_report(
                 f"  {ep['angle']:8.2f}  {note}"
             )
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -2558,7 +2557,7 @@ def write_radius_map(
         f' font-family="sans-serif">{title} — Curve Radius Map</text>',
     ] + elements + legend + ["</svg>"]
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     out.write_text("\n".join(svg_lines) + "\n", encoding="utf-8")
     return f"SVG radius map written to {out}"
 
@@ -2833,7 +2832,7 @@ def write_station_distance_report(
     fmt = _resolve_format(output_path, format)
     v2 = _sd.station_distances_v2(layout)
     if v2 is not None:
-        out = Path(output_path)
+        out = _resolve_plan(output_path)
         n_st, n_pairs = _sd.counts(v2)
         unused = [name for name, given in (("route_layer_names", route_layer_names),
                                            ("exclude_turnouts", exclude_turnouts),
@@ -2858,13 +2857,13 @@ def write_station_distance_report(
         route_layer_names=route_layer_names,
         exclude_turnouts=exclude_turnouts,
     )
-    out = Path(output_path)
+    out = _resolve_plan(output_path)
 
     # Load mp_scale: explicit arg > auto-discover > default 12
     mp_scale = 12.0
     sy_path: Path | None = None
     if stations_yaml:
-        sy_path = Path(stations_yaml)
+        sy_path = _resolve_plan(stations_yaml)
     else:
         # Auto-discover: look for *_stations.yaml or stations.yaml alongside the XTC
         for candidate in p.parent.glob("*_stations.yaml"):
@@ -3027,7 +3026,8 @@ def write_plan_view(
         Absolute path of the written SVG file.
     """
     resolved_xtc = str(_resolve_plan(xtc_path)) if xtc_path else None
-    return generate_plan_view(config_path, output_path, level=level, xtc_path=resolved_xtc)
+    return generate_plan_view(str(_resolve_plan(config_path)), str(_resolve_plan(output_path)),
+                              level=level, xtc_path=resolved_xtc)
 
 
 @mcp.tool()
@@ -3052,7 +3052,8 @@ def write_elevation_view(
     Returns:
         Absolute path of the written SVG file.
     """
-    return generate_elevation_view(config_path, output_path, wall=wall, levels=levels)
+    return generate_elevation_view(str(_resolve_plan(config_path)),
+                                   str(_resolve_plan(output_path)), wall=wall, levels=levels)
 
 
 # ---------------------------------------------------------------------------
@@ -3169,7 +3170,7 @@ def validate_layout(path: str, stations_yaml: str = "") -> dict:
     """
     p = _resolve_plan(path)
     layout = parse_file(p)
-    config = load_stations_config(stations_yaml) if stations_yaml else None
+    config = load_stations_config(_resolve_plan(stations_yaml)) if stations_yaml else None
     issues = validate_layout_annotations(layout, config)
     errors = [i for i in issues if i.severity == "error"]
     warnings = [i for i in issues if i.severity == "warning"]
@@ -3228,10 +3229,10 @@ def export_layout_data(
         raise ValueError(f"format must be 'v1' or 'v2', not {format!r}")
     p = _resolve_plan(path)
     layout = parse_file(p)
-    out = Path(output_path) if output_path else p.with_name("layout_data.json")
+    out = _resolve_plan(output_path) if output_path else p.with_name("layout_data.json")
 
     if format == "v1":
-        config = load_stations_config(stations_yaml) if stations_yaml else None
+        config = load_stations_config(_resolve_plan(stations_yaml)) if stations_yaml else None
         data = build_layout_export(layout, config)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(data, indent=2), encoding="utf-8")
@@ -3293,7 +3294,7 @@ def make_timetable(path: str, operations: str, output_path: str = "") -> dict:
 
     p = _resolve_plan(path)
     layout = parse_file(p)
-    text = Path(operations).read_text(encoding="utf-8")
+    text = _resolve_plan(operations).read_text(encoding="utf-8")
     ops = json.loads(text) if operations.endswith(".json") else yaml.safe_load(text)
     issues = _check_conventions(layout)
     errors = [i.as_dict() for i in issues if i.severity == "error"]
@@ -3305,7 +3306,7 @@ def make_timetable(path: str, operations: str, output_path: str = "") -> dict:
     except TimetableError as exc:
         return {"made": False, "errors": [], "notices": [str(exc)]}
     if output_path:
-        out = Path(output_path)
+        out = _resolve_plan(output_path)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(result["table"] + "\n", encoding="utf-8")
         result["output"] = str(out)
