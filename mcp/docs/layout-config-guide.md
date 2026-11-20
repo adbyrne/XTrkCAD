@@ -653,8 +653,9 @@ mileposts and which layers are main track.  That's the job of the
 [Operating Data Conventions](operating-conventions.md): JSON Notes placed on the
 track and Layer Groups, which `check_conventions` checks and
 `export_layout_data` writes out as `layout_data.json`
-([schema](layout_data_v2.md)).  Part 2, the operating-conventions tutorial,
-picks up the Hillside layout where this guide leaves it.
+([schema](layout_data_v2.md)).  [Part 2, the operating-conventions
+tutorial](operating-conventions-tutorial.md), picks up the Hillside layout where
+this guide leaves it.
 
 ### Reporting on part of a layout
 

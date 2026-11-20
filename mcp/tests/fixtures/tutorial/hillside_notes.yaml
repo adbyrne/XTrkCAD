@@ -1,0 +1,145 @@
+# The JSON Notes the operating-conventions tutorial (mcp/docs/
+# operating-conventions-tutorial.md) adds to the Hillside layout, chapter by
+# chapter. The layout itself comes from generate_layout and generate_track_plan
+# (hillside_division.yaml). tests/test_tutorial.py builds the layout as it
+# stands after each chapter and checks what the tutorial says the tools report.
+#
+# Each note: the layer it goes on, where (x, y in layout inches, on its track),
+# and its JSON. "expect" is the convention check's result after the chapter:
+# counts by severity and the rule ids, in the check's order.
+
+chapters:
+  4:   # Mileposts
+    notes:
+      - {layer: L1-Main, at: [12.0, 67.7],
+         note: {kind: reference, id: MP_ZERO, mp: 0, mp_scale: 12, mp_unit: in}}
+
+  5:   # Stations
+    notes:
+      - {layer: L1-Storage, at: [12.0, 30.0],
+         note: {kind: station, id: HY, name: Hillside, terminus: true, ref_tag: MP_ZERO}}
+      - {layer: L1-Main, at: [12.0, 109.5],
+         note: {kind: station, id: AL, name: Alder}}
+      - {layer: L1-Main, at: [72.0, 180.0],
+         note: {kind: station, id: BI, name: Birch}}
+      - {layer: L1-Main, at: [132.0, 114.0],
+         note: {kind: station, id: CE, name: Cedar, terminus: true}}
+      - {layer: L1-Main, at: [132.0, 134.0],
+         note: {kind: terminus, id: CE}}
+
+  6:   # Yard limits
+    notes:
+      - {layer: L1-Main, at: [132.0, 152.0],
+         note: {kind: yard_limit, id: CE}}
+
+  7:   # Industries and team tracks
+    notes:
+      - {layer: L1-Storage, at: [10.0, 115.0],
+         note: {kind: industry, id: AL_FEED, name: Alder Feed Mill, station: AL,
+                car_spots: 2, car_types: [XM, LO], loads_in: [grain], loads_out: [feed]}}
+      - {layer: L1-Storage, at: [10.0, 130.0],
+         note: {kind: team_track, id: AL_TEAM, name: Alder team track, station: AL,
+                car_spots: 2}}
+      - {layer: L1-Storage, at: [52.0, 182.0],
+         note: {kind: industry, id: BI_LUMBER, name: Birch Lumber, station: BI,
+                car_spots: 3, car_types: [FM], loads_in: [lumber]}}
+
+  8:   # Yards
+    notes:
+      - {layer: L1-Storage, at: [12.0, 20.0],
+         note: {kind: yard_track, id: HY, label: Track 1, function: arrival_departure}}
+      - {layer: L1-Storage, at: [14.0, 20.0],
+         note: {kind: yard_track, id: HY, label: Track 2, function: classification}}
+      - {layer: L1-Storage, at: [16.0, 20.0],
+         note: {kind: yard_track, id: HY, label: Track 3, function: classification}}
+
+  9:   # Facilities
+    notes:
+      - {layer: L1-Service, at: [134.0, 106.0],
+         note: {kind: facility, id: CE_COAL, name: Cedar coal trestle, type: coal,
+                location: CE, car_spots: 3}}
+
+  11:  # The railroad
+    notes:
+      - {layer: L1-Main, at: [12.0, 74.0],
+         note: {kind: railroad, id: HD, name: Hillside Division, reporting_marks: HD}}
+
+# Mistakes the tutorial shows, each on the layout as it stands after
+# "chapter" (the first chapter where the mistake shows on its own; the text
+# may show it earlier): add a note, drop the notes of one kind or id, or set a Layer
+# Group's layers. "expect" is the rule ids the check reports, in its order.
+examples:
+  - {chapter: 5, name: a note beside its track,
+     add: {layer: L1-Main, at: [72.0, 175.0], note: {kind: station, id: BI}},
+     drop: {id: BI}, expect: [NOTE_FAR_FROM_TRACK]}
+  - {chapter: 4, name: a layer in two category groups,
+     groups: {Passing: [L1-Main, L1-Passing, L2-Passing]}, expect: [CATEGORY_LAYER_IN_TWO]}
+  - {chapter: 4, name: a track layer in no category group,
+     groups: {Mainline: [L2-Main]}, expect: [CATEGORY_LAYER_NONE]}
+  - {chapter: 4, name: no MP anchor,
+     drop: {id: MP_ZERO}, expect: [MP_NO_ANCHOR]}
+  - {chapter: 5, name: a station note off the main,
+     add: {layer: L1-Passing, at: [14.0, 109.5], note: {kind: station, id: AL2}},
+     expect: [MP_UNREACHABLE, STATION_NOT_ON_MAIN]}
+  - {chapter: 5, name: a terminus without its terminus note,
+     drop: {kind: terminus}, expect: [TERMINUS_NO_START]}
+  - {chapter: 7, name: car_spots left out,
+     add: {layer: L1-Storage, at: [52.0, 182.0],
+           note: {kind: industry, id: BI_X, station: BI}},
+     expect: [CAR_SPOTS_DEFAULT]}
+  - {chapter: 7, name: an unknown car type,
+     add: {layer: L1-Storage, at: [52.0, 182.0],
+           note: {kind: industry, id: BI_X, station: BI, car_spots: 1, car_types: [BOXCAR]}},
+     expect: [UNKNOWN_CAR_TYPE]}
+  - {chapter: 7, name: more car spots than the track holds,
+     add: {layer: L1-Storage, at: [10.0, 130.0],
+           note: {kind: team_track, id: AL_T2, station: AL, car_spots: 4}},
+     expect: [CAR_SPOTS_EXCEED_TRACK]}
+  - {chapter: 7, name: an industry on the main,
+     add: {layer: L1-Main, at: [12.0, 110.0],
+           note: {kind: industry, id: AL_X, station: AL, car_spots: 1}},
+     expect: [INDUSTRY_ON_MAIN]}
+  - {chapter: 6, name: a yard-limit board off the main,
+     add: {layer: L1-Passing, at: [14.0, 109.5], note: {kind: yard_limit, id: AL}},
+     expect: [YARD_LIMIT_NOT_ON_MAIN]}
+  - {chapter: 8, name: two yard tracks with one label,
+     drop: {label: Track 3},
+     add: {layer: L1-Storage, at: [16.0, 20.0],
+           note: {kind: yard_track, id: HY, label: Track 2, function: classification}},
+     expect: [YARD_TRACK_DUPLICATE_LABEL]}
+  - {chapter: 8, name: a function that isn't one,
+     drop: {label: Track 3},
+     add: {layer: L1-Storage, at: [16.0, 20.0],
+           note: {kind: yard_track, id: HY, label: Track 3, function: sorting}},
+     expect: [YARD_TRACK_BAD_FUNCTION]}
+  - {chapter: 8, name: a yard track without a function,
+     drop: {label: Track 3},
+     add: {layer: L1-Storage, at: [16.0, 20.0],
+           note: {kind: yard_track, id: HY, label: Track 3}},
+     expect: [YARD_TRACK_NO_FUNCTION]}
+  - {chapter: 9, name: more facility spots than the track holds,
+     drop: {id: CE_COAL},
+     add: {layer: L1-Service, at: [134.0, 106.0],
+           note: {kind: facility, id: CE_COAL, type: coal, location: CE, car_spots: 5}},
+     expect: [CAR_SPOTS_EXCEED_TRACK]}
+  - {chapter: 9, name: a facility type that isn't one,
+     drop: {id: CE_COAL},
+     add: {layer: L1-Service, at: [134.0, 106.0],
+           note: {kind: facility, id: CE_X, type: coaling}},
+     expect: [FACILITY_BAD_TYPE]}
+  - {chapter: 9, name: a switchback note on the main,
+     add: {layer: L1-Main, at: [132.0, 110.0],
+           note: {kind: switchback, id: CE_SWB, serves: CE}},
+     expect: [SWITCHBACK_TAIL_ON_MAIN]}
+  - {chapter: 11, name: one id for a station and an industry,
+     add: {layer: L1-Storage, at: [52.0, 182.0],
+           note: {kind: industry, id: AL, station: BI, car_spots: 1}},
+     expect: [ID_DUPLICATE_LOCATION]}
+  - {chapter: 11, name: a railroad group that doesn't exist,
+     drop: {kind: railroad},
+     add: {layer: L1-Main, at: [12.0, 74.0],
+           note: {kind: railroad, id: HD, name: Hillside Division, group: HD}},
+     expect: [GROUP_UNKNOWN]}
+  - {chapter: 6, name: one board at a pass-through station,
+     add: {layer: L1-Main, at: [12.0, 155.0], note: {kind: yard_limit, id: AL}},
+     expect: [YARD_LIMIT_ONE_BOARD]}

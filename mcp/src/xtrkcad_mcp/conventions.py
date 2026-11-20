@@ -343,6 +343,12 @@ def resolve_ownership(layout: Layout, notes: list[ConventionNote]) -> None:
             note.railroad = sub_railroad.get(sub)
 
 
+def _a_kind(kind: str) -> str:
+    """A note kind as a reader says it, with its article: "an industry"."""
+    words = kind.replace("_", " ")
+    return ("an " if words[0] in "aeiou" else "a ") + words
+
+
 def _check_ids(notes: list[ConventionNote], issues: list[Issue]) -> dict[str, str]:
     """Duplicate-id rules. Returns location id -> its kind."""
     locations: dict[str, list[ConventionNote]] = {}
@@ -360,7 +366,8 @@ def _check_ids(notes: list[ConventionNote], issues: list[Issue]) -> dict[str, st
         for extra in group[1:]:
             issues.append(_note_issue(
                 "error", "ID_DUPLICATE_LOCATION",
-                f"Location id {loc_id!r} is used by a {first.kind} and a {extra.kind}"
+                f"Location id {loc_id!r} is used by {_a_kind(first.kind)} and "
+                f"{_a_kind(extra.kind)}"
                 if extra.kind != first.kind else
                 f"Two {extra.kind} notes with id {loc_id!r}",
                 extra, hint="Stations, industries, team tracks and staging yards share one id namespace."))
@@ -766,27 +773,6 @@ def _placed_issue(severity: str, rule: str, message: str, note: ConventionNote,
     return issue
 
 
-def _main_component_has_end(layout: Layout, start: TrackObject, main: set[int]) -> bool:
-    """Whether the main track connected to start has an open end.
-
-    Connections are followed only between main-layer tracks; an endpoint
-    joined to a track on another layer is not an end of the main.
-    """
-    by_id = {t.id: t for t in layout.tracks}
-    seen = {start.id}
-    queue = deque([start])
-    while queue:
-        track = queue.popleft()
-        for ep in track.endpoints:
-            if ep.connected_to is None:
-                return True
-            nxt = by_id.get(ep.connected_to)
-            if nxt is not None and nxt.layer in main and nxt.id not in seen:
-                seen.add(nxt.id)
-                queue.append(nxt)
-    return False
-
-
 def main_turnouts_from(layout: Layout, start: TrackObject, main: set[int]) -> list[TrackObject]:
     """The main-layer turnouts reached from a track off the main without
     crossing main track, nearest first: where a spur, a switchback's tail
@@ -887,14 +873,16 @@ def _check_placement(layout: Layout, notes: list[ConventionNote],
                     extra, snapped[extra.note_id]))
         elif len(group) == 1:
             note = group[0]
-            if yl_id in stations_terminus or _main_component_has_end(
-                    layout, snapped[note.note_id], main):
+            # Only a terminus's zone runs to the end of the line: trains meet
+            # its board from one side only (spec 4.4).
+            if yl_id in stations_terminus:
                 continue
             issues.append(_placed_issue(
                 "warning", "YARD_LIMIT_ONE_BOARD",
-                f"Yard limit {yl_id} has one board and its main has no end",
+                f"Yard limit {yl_id} has one board, and isn't a terminus",
                 note, snapped[note.note_id],
-                hint="Add the second board, at the other end of the zone."))
+                hint="Add the second board, at the other end of the zone; one board is "
+                     "enough only for a terminus station."))
     return snapped
 
 

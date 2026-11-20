@@ -3263,6 +3263,54 @@ def export_layout_data(
             "errors": errors, "notices": notices}
 
 
+
+@mcp.tool()
+def make_timetable(path: str, operations: str, output_path: str = "") -> dict:
+    """A simple timetable for the layout, from an operations file.
+
+    Tutorial-level (operating-conventions tutorial, chapter 13). The layout
+    gives the stations, their MPs, the yard-limit zones and the car spots;
+    ``operations`` (YAML or JSON, schema_version 1) gives the fast clock, the
+    track speeds, how long a stop takes and the trains: see
+    xtrkcad_mcp/timetable.py. Like export_layout_data, nothing is made while
+    the convention check finds errors.
+
+    Returns each train's stops (arrive, depart; a pass has only the passing
+    time), its running time in fast-clock and real minutes, the scale speed
+    a model must run at to keep the timetable (model_mph), and the timetable
+    as a Markdown table, also written to ``output_path`` when given.
+
+    Args:
+        path: Path to the .xtc layout file.
+        operations: Path to the operations file (.yaml, .yml or .json).
+        output_path: Optional path for the Markdown timetable.
+    """
+    import json
+
+    import yaml
+
+    from xtrkcad_mcp.timetable import TimetableError, build_timetable
+
+    p = _resolve_plan(path)
+    layout = parse_file(p)
+    text = Path(operations).read_text(encoding="utf-8")
+    ops = json.loads(text) if operations.endswith(".json") else yaml.safe_load(text)
+    issues = _check_conventions(layout)
+    errors = [i.as_dict() for i in issues if i.severity == "error"]
+    if errors:
+        return {"made": False, "errors": errors, "notices": [
+            "No timetable: fix the errors (check_conventions lists them all)."]}
+    try:
+        result = build_timetable(build_export_v2(layout, issues), ops or {})
+    except TimetableError as exc:
+        return {"made": False, "errors": [], "notices": [str(exc)]}
+    if output_path:
+        out = Path(output_path)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(result["table"] + "\n", encoding="utf-8")
+        result["output"] = str(out)
+    return {"made": True, **result}
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------

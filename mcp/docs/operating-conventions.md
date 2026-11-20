@@ -156,7 +156,9 @@ main (upper level); its interchange tracks are where the two meet.
   switches, so local moves can work.
 - Board order comes from their MPs.
 - error: a board not on main track; more than 2 boards with one `id`.
-- warning: 1 board, unless the zone runs to the end of the main (a terminus, for one).
+- warning: 1 board, unless its id is a terminus station: only a terminus's zone runs to the end
+  of the line, so trains meet its board from one side only. A pass-through or switchback station,
+  where trains come from both ends, has a board at each end, or none.
 
 ### 4.5 `industry`
 ```json

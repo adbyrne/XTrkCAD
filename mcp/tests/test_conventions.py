@@ -179,6 +179,14 @@ def test_location_ids_share_one_namespace(tmp_path):
     assert "ID_DUPLICATE_LOCATION" in _rules(issues)
 
 
+def test_duplicate_location_message_reads_well(tmp_path):
+    issues = _check(tmp_path, [ST_WP, (2, {"kind": "industry", "id": "WP"}),
+                               (2, {"kind": "team_track", "id": "WP", "car_spots": 1})])
+    assert [i.message for i in issues if i.rule == "ID_DUPLICATE_LOCATION"] == [
+        "Location id 'WP' is used by a station and an industry",
+        "Location id 'WP' is used by a station and a team track"]
+
+
 def test_staging_shares_location_namespace(tmp_path):
     issues = _check(tmp_path, [(2, {"kind": "industry", "id": "E"}),
                                (2, {"kind": "staging", "id": "E"})])
@@ -788,7 +796,20 @@ def test_three_yard_limit_boards(tmp_path):
 
 
 def test_one_board_on_main_with_an_end(tmp_path):
-    assert _placed(tmp_path, [_yl(100)]) == []
+    """An end somewhere on the main isn't enough (spec 4.4): only a terminus's
+    zone runs to the end of the line, so trains meet a board from one side only."""
+    assert _rules(_placed(tmp_path, [_yl(100)])) == ["YARD_LIMIT_ONE_BOARD"]
+
+
+def test_one_board_at_a_pass_through_station(tmp_path):
+    issues = _placed(tmp_path, [_yl(100), (0, {"kind": "station", "id": "WP"}, None, 20, 0)])
+    assert _rules(issues) == ["YARD_LIMIT_ONE_BOARD"]
+
+
+def test_one_board_at_terminus_on_main_with_an_end(tmp_path):
+    issues = _placed(tmp_path, [_yl(100), (0, {"kind": "station", "id": "WP", "terminus": True},
+                                           None, 20, 0)])
+    assert issues == []
 
 
 def test_one_board_on_a_loop(tmp_path):
