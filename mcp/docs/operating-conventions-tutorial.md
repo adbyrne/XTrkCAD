@@ -45,6 +45,18 @@ The flow:
 4. `export_layout_data` writes `layout_data.json` for an operations program
    ([schema](layout_data_v2.md)).
 
+Who does what:
+
+| Step | In XTrkCAD | Ask the MCP |
+|---|---|---|
+| Track | draw it, or open what Part 1 generated; check it with the **Reports** menu | `generate_layout`, `generate_track_plan` (Part 1) |
+| Categories | **Manage > Layer Groups**; move tracks with **Edit > Move To Current Layer** | `get_layer_groups` lists them; the check checks them |
+| Notes | **Draw > Notes > JSON Note**, then **File > Save** | `check_conventions` |
+| Results | | `export_layout_data`, `make_timetable`, the reports |
+
+Once Part 1 has generated it, you edit the layout in XTrkCAD; the MCP reads the saved file
+and writes its results beside it.
+
 Three rules of thumb run through all of it:
 
 - **A fact sits where it is on the layout.** A station's note goes on the station's main track;
@@ -55,6 +67,11 @@ Three rules of thumb run through all of it:
   notes never hold them.
 
 ## 2. Before you start
+
+**Set up first.** If the MCP server isn't installed and connected yet, Part 1's
+[Before you begin](layout-config-guide.md#before-you-begin) takes you through it: installing
+the server, connecting it to your assistant, the folder your layouts live in, and the Hillside
+files.
 
 **The layout.** Start from Part 1's result: the Hillside layout with its track.
 
@@ -77,6 +94,17 @@ type the object into the box at the top of the dialog (it starts with a template
 the other fields depend on the kind [4.0].
 
 ![The JSON Note dialog with Alder's station note, validated](images/tutorial/json-note-dialog.png)
+
+**Placing a note where this tutorial says.** Each note in the chapters below comes with its
+place, like "on `L1-Main` (x 12, y 109.5)": layout inches, from the room's south-west corner.
+XTrkCAD's status bar shows the pointer's X and Y as you move it, so click near the spot; then
+the dialog's **Pos. X** and **Pos. Y** can be typed exactly. Its **Layer** list (it starts at
+the current layer) is the note's layer, and that decides which track it belongs to: pick the
+one the step names. **Done** places the note.
+
+**Save, then check.** The tools read the layout file on disk, not what XTrkCAD has open, so
+**File > Save** before you ask for a check. The rhythm of every chapter is the same: place the
+notes in XTrkCAD, save, ask for the check, fix what it reports, save again.
 
 **Position is data.** A note belongs to the nearest track **on its own layer**: put a station's
 note on an `L1-Main` layer, on the main. A note that lands beside its track is reported:
@@ -483,15 +511,15 @@ track, then backs out the other way. It's a track configuration, so it gets its 
 tail track [4.9]:
 
 ```json
-{"kind": "switchback", "id": "BB_SWB", "serves": "BB"}
-{"kind": "switchback", "id": "MC_SWB", "serves": "MC", "switches": [412, 418]}
+{"kind": "switchback", "id": "MINE_SWB", "serves": "MINE"}
+{"kind": "switchback", "id": "SUMMIT_SWB", "serves": "SUMMIT", "switches": [412, 418]}
 ```
 
-Hillside has none; these are from the New York & Eastern layout.
+Hillside has none, so these two are examples: a mine reached by a switchback, and a station, Summit, where trains reverse to go on.
 
 - `serves`: the station or industry the switchback reaches.
 - `switches`: the main-track switch where trains reverse. Left out, it's the switch the tail
-  track leaves. NYE's MC lists two, which together act as the switchback switch: its passing
+  track leaves. Summit lists two, which together act as the switchback switch: its passing
   track rejoins the main beyond the first one.
 - The tail is never main track: it may end in a bumper, or go on to an industry, a yard or
   another subdivision, but its layer isn't in `Mainline`. A switchback note on the main is an
@@ -536,8 +564,9 @@ A layout with **more than one railroad**, or one railroad with several MP lines,
   ```
 
 - A **joint station**, where two railroads meet, is the exception: one id, with a `station` note
-  on each railroad's main. NYE's Williamsport (WP) is the C&O main upstairs and the NYE branch
-  downstairs; each note has its own MP, and the export lists WP once per subdivision [4.3].
+  on each railroad's main. Say Cedar were also on a second railroad, the Valley line, whose
+  main runs on the upper deck: Cedar keeps its id CE, with one station note on each main; each
+  note has its own MP, and the export lists CE once per subdivision [4.3].
   Interchange tracks between them are `yard_track` notes with `function: "interchange"` and both
   `railroads`.
 
@@ -665,3 +694,55 @@ That's the Hillside Division, operable: every place on it has an id and an MP, e
 holds cars says what for, and an operations program can read it all from one file. Upgrading
 an existing layout's older text notes to these conventions is the job of `apply_conventions`,
 still to come.
+
+## Appendix: your own layout
+
+Hillside was built for this tutorial, so its layers already sort the track by kind. A layout
+you drew yourself usually doesn't: its layers are by area, by deck or by what's on them. The
+steps are the same as chapters 3 to 13, with one job before them, and the MCP can't do that job
+for you yet, so it happens in XTrkCAD.
+
+An example that ships with XTrkCAD shows it: **DVRR v3.0 E Stroudsburg - Pt Jervis.xtc**, in
+the `examples` folder of your XTrkCAD install (Linux: `share/xtrkcad…/examples`). It is HO,
+point to point with staging at both ends (and a connection for continuous running), and its
+layers are named by line section:
+`Matamoras - Milford`, `Milford - Dingmans Ferry`, and so on, main, sidings and spurs together.
+
+1. **Copy it** into your layouts folder as `dvrr.xtc`, open it in XTrkCAD and **File > Save**
+   (an older file is saved in the current format). Check the track with the **Reports** menu, as in Part 1.
+
+2. **Ask for the check.** It finds what you'd expect: no MP anchor (an error), and every
+   track layer in no category group, so all of it counts as main line for now (warnings):
+
+   ```
+   check_conventions("dvrr.xtc")
+   ```
+
+3. **Make the category layers**, so the main, the sidings and the spurs can be told apart:
+
+   > *Add the standard track layers to dvrr.xtc for one level.*
+
+   ```
+   add_track_layers("dvrr.xtc", levels=1)
+   ```
+
+   That adds `L1-Main`, `L1-Passing`, `L1-Storage`, `L1-Staging`, `L1-Connecting` and
+   `L1-Service` (the file is backed up first; close it in XTrkCAD before, or reload it after).
+
+4. **Move the track onto them, in XTrkCAD.** Make `L1-Main` the current layer, select the main
+   line's tracks section by section, and use **Edit > Move To Current Layer**. Then the same
+   with `L1-Passing` for the passing sidings, `L1-Storage` for spurs and yard tracks,
+   `L1-Staging` for both staging yards, `L1-Service` for the engine terminal. The old layers
+   keep the scenery and structures. This is the long part on a big layout; the MCP can't move
+   tracks between layers (yet).
+
+5. **Make the category Layer Groups** (**Manage > Layer Groups**): `Mainline` holding
+   `L1-Main`, `Passing` holding `L1-Passing`, and so on, as in chapter 3. Save.
+
+6. **Then chapters 4 to 13 as written**: MP zero (a line from staging to staging has no zero
+   on the layout: give it a start and an end anchor instead [5.1]), the stations (DVRR's layer
+   names give them: Matamoras, Milford, Dingmans Ferry, Bushkill, Gravel Place), industries,
+   yards, the railroad, the export, and a timetable with an operations file of your own.
+
+Every note is placed by hand in XTrkCAD for now, as in the chapters. Tools that suggest the
+categories and the notes from the track, and write them for you, are planned.

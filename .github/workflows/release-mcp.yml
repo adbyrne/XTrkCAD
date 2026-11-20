@@ -69,6 +69,22 @@ jobs:
       - name: Build sdist and wheel
         working-directory: mcp
         run: uv build --out-dir dist
+      - name: The Hillside tutorial's files, for users of the wheel
+        # The tutorial (mcp/docs) starts from these; the wheel has no test
+        # fixtures, so they're attached to the release as one zip.
+        working-directory: mcp/tests/fixtures
+        run: |
+          uv run --no-project python - <<'EOF'
+          import zipfile
+          files = ["hillside_division.yaml", "hillside_floor_plan.yaml",
+                   "hillside_benchwork.yaml", "hillside_track_plan.yaml",
+                   "tutorial/hillside_operations.yaml"]
+          with zipfile.ZipFile("../../dist/hillside-tutorial-files.zip", "w",
+                               zipfile.ZIP_DEFLATED) as z:
+              for f in files:
+                  z.write(f, f.split("/")[-1])
+          print("hillside-tutorial-files.zip:", ", ".join(files))
+          EOF
       - uses: actions/upload-artifact@v7
         with:
           name: xtrkcad-mcp-${{ steps.version.outputs.version }}

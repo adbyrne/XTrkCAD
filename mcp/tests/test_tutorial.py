@@ -236,3 +236,22 @@ def test_tutorial_quotes_real_findings(base, tmp_path):
         assert hits, f"quoted {sev} {rule} {message!r} is not what the check says"
         if hint is not None:
             assert any(a[3] == hint for a in hits), f"{rule}: hint {hint!r} differs"
+
+
+DVRR = Path(__file__).parents[2] / "app" / "lib" / "examples" / \
+    "DVRR v3.0 E Stroudsburg - Pt Jervis.xtc"
+
+
+@pytest.mark.skipif(not DVRR.exists(), reason="XTrkCAD's example layouts aren't here")
+def test_appendix_your_own_layout(tmp_path):
+    """The appendix's DVRR steps 2 and 3: what the check finds on a layout
+    with no conventions, and the layers add_track_layers makes."""
+    from xtrkcad_mcp.server import add_track_layers
+    dvrr = tmp_path / "dvrr.xtc"
+    dvrr.write_bytes(DVRR.read_bytes())
+    issues = check_conventions(parse_file(dvrr))
+    assert {(i.severity, i.rule) for i in issues} == {
+        ("error", "MP_NO_ANCHOR"), ("warning", "CATEGORY_LAYER_NONE")}
+    added = add_track_layers(str(dvrr), levels=1)["added"]
+    assert added == ["L1-Main", "L1-Passing", "L1-Storage", "L1-Staging",
+                     "L1-Connecting", "L1-Service"]

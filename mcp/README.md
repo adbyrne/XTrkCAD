@@ -9,6 +9,14 @@ MCP server for reading, analysing, and generating [XTrkCAD](https://xtrkcad-fork
 
 ## Install
 
+From a release: download `xtrkcad_mcp-<version>-py3-none-any.whl` from the GitHub
+Releases page (a tagged MCP release, or the rolling **latest-mcp** prerelease) and
+install it with `uv tool install <file>.whl`; that gives the commands `xtrkcad-mcp`
+and `xtrkcad-report`. The [layout config guide](docs/layout-config-guide.md)'s
+"Before you begin" walks through it, connecting the server too.
+
+From a source checkout:
+
 ```sh
 uv sync            # installs dependencies from uv.lock
 uv sync --extra dev   # also installs pytest
@@ -25,21 +33,32 @@ some layers or Layer Groups only:
 
 ```sh
 uv run xtrkcad-report layout.xtc -f html -o report.html
-uv run xtrkcad-report layout.xtc -g NYE -f md      # one Layer Group; repeat -g / -l for more
+uv run xtrkcad-report layout.xtc -g Mainline -f md   # one Layer Group; repeat -g / -l for more
 ```
 
-Configure in `~/.claude/settings.json` (Claude Code) or `claude_desktop_config.json`:
+Connect it to Claude Code with `claude mcp add` (or a project `.mcp.json`), or to Claude
+Desktop in its `claude_desktop_config.json`. From a source checkout:
+
+```sh
+claude mcp add xtrkcad -s user -e XTRKCAD_PLANS_DIR=$HOME/Layouts -- \
+    uv --directory /path/to/XTrkCAD/mcp run xtrkcad-mcp
+```
 
 ```json
 {
   "mcpServers": {
     "xtrkcad": {
       "command": "uv",
-      "args": ["--directory", "/path/to/xtrkcad-git/mcp", "run", "xtrkcad-mcp"]
+      "args": ["--directory", "/path/to/XTrkCAD/mcp", "run", "xtrkcad-mcp"],
+      "env": {"XTRKCAD_PLANS_DIR": "/path/to/your/layouts"}
     }
   }
 }
 ```
+
+`XTRKCAD_PLANS_DIR` is the folder a relative file name means: `hillside_division.xtc`
+in a tool call is that folder's file (absolute paths work too). Without it, it's the
+server's working directory, which a desktop app doesn't make obvious, so set it.
 
 `generate_track_plan` reads turnouts from XTrkCAD's parameter files (`.xtp`). Run from the
 source tree it finds them in `app/lib/params`; an installed package looks in
@@ -158,7 +177,7 @@ either, only tracks and notes on the selected layers are used, so a file holding
 two railroads can be reported on one railroad at a time:
 
 ```
-write_layout_report("layout.xtc", "nye.md", format="md", groups=["NYE"])
+write_layout_report("layout.xtc", "east.md", format="md", groups=["Eastern"])
 ```
 
 `get_operation_density` classifies layers by explicit `layer_categories` first,
@@ -186,15 +205,16 @@ on the layout.  Annotations are XTrkCAD JSON Notes with a `kind` and an `id`:
 
 | JSON Note | Purpose |
 |---|---|
-| `{"kind": "station", "id": "WP"}` | Station; optional `terminus`, `switchback` (true/false) and `ref_tag` |
-| `{"kind": "reference", "id": "MP_ZERO"}` | Named reference point; `MP_ZERO` is the milepost origin, optional `mp_scale` |
-| `{"kind": "industry", "id": "KIEL", "name": "Kiel Co", "station": "WP"}` | Industry spur; `name` and `station` optional |
-| `{"kind": "storage", "id": "Car Barn"}` | Standalone freight spur (not a station house track) |
-| `{"kind": "house_track", "id": "WP"}` | Station freight-house / team track; coexists with passing siding |
-| `{"kind": "yard_track", "id": "WP", "label": "Track 2"}` | One yard track's capacity |
+| `{"kind": "reference", "id": "MP_ZERO", "mp": 0, "mp_scale": 12, "mp_unit": "in"}` | MP zero, an anchor: mileposts count from it |
+| `{"kind": "station", "id": "AL", "name": "Alder"}` | A station, on the main; optional `terminus`, `ref_tag` |
+| `{"kind": "industry", "id": "AL_FEED", "station": "AL", "car_spots": 2}` | An industry, on its spur; `car_types`, `loads_in`, `loads_out` |
+| `{"kind": "team_track", "id": "AL_TEAM", "station": "AL", "car_spots": 2}` | A public delivery track |
+| `{"kind": "yard_track", "id": "HY", "label": "Track 1", "function": "arrival_departure"}` | One yard track |
+| `{"kind": "facility", "id": "CE_COAL", "type": "coal", "car_spots": 3}` | A servicing point; also `house_track`, `storage` |
 
-Text notes with the older prefixes (`STATION: WP !TERM`, `INDUSTRY: KIEL Kiel Co @WP`,
-`YARD_TRACK: WP Track 2`, ...) are read the same way.  Passing siding capacity is
+These are the Hillside tutorial's notes; every kind and field is in the
+conventions. Text notes with the older prefixes (`STATION: AL`,
+`INDUSTRY: AL_FEED Alder Feed Mill @AL`, `YARD_TRACK: HY Track 1`, ...) are read the same way.  Passing siding capacity is
 inferred automatically from `L{n}-Passing` layers — no note is required on the
 passing track itself.  The [Operating Data Conventions](docs/operating-conventions.md) describe every
 kind and field; the [tutorial](docs/operating-conventions-tutorial.md) adds them to the Hillside
