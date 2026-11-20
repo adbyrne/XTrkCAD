@@ -9,7 +9,8 @@ conventions are taught on.
 
 Version 1.1 added `car_spots` on `facility` and `storage` notes (4.8), an info notice for an
 industry on main or passing track (4.5), a warning for more car spots than the track holds
-(4.5, 4.8), `storage[]` in the export (8) and the Op Density views (9.1).
+(4.5, 4.8), `storage[]` in the export (8) and the Op Density views (9.1). Track capacity is
+counted between clearance points (2).
 
 ## 1. Scope and principles
 
@@ -46,6 +47,8 @@ rules. It belongs to the operations system (IOTtrains for NYE), which refers to 
 | Subdivision | one MP line of a railroad; a railroad has one or more |
 | Entry switch | a station's main-track switch closest to MP zero (lowest MP) |
 | Tail track | the reversing track of a switchback (4.9) |
+| Clearance point | where a car on one leg of a turnout stops fouling the other: where the two tracks are 13 ft apart, between centres (prototype, scaled to the layout) |
+| Capacity | what a track holds: its length between the clearance points at its ends, in whole cars of the scale's cars per model foot (HO: 2). Track past a turnout's points, shared by both routes, isn't reduced; switch throats don't count ([schema](layout_data_v2.md), units) |
 
 ## 3. Layer Groups
 
@@ -165,15 +168,15 @@ main (upper level); its interchange tracks are where the two meet.
 ```
 - Placed on its spur.
 - `station`: the station whose limits it is switched from. Leave it out for an on-line industry.
-- `car_spots`: the number of spots, chosen for operations (default 2). The computed spur capacity
-  is exported separately.
+- `car_spots`: the number of spots, chosen for operations (default 2). The spur's capacity (2),
+  computed from the track, is exported separately.
 - `car_types`: car type codes (7).
 - `loads_in`, `loads_out`: load types (7).
 - error: `station` names no station.
 - info: `car_spots` defaulted.
 - info: the industry is on main or passing track (allowed: an industry on the main is usually a
   timetable station; IOTtrains uses it).
-- warning: more `car_spots` (given or defaulted) than its track holds.
+- warning: more `car_spots` (given or defaulted) than its track's capacity (2).
 - warning: an unknown car type code.
 
 ### 4.5a `team_track`: a public delivery track
@@ -248,7 +251,7 @@ main (upper level); its interchange tracks are where the two meet.
 - `car_spots` (optional, `facility` and `storage`): cars parked there on purpose. **No default**,
   for any `type`: only a note that gives it counts, and those spots count as storage in Op
   Density (9.1). A facility without it holds no cars (engines only, or not used for cars).
-  - warning: more `car_spots` than its track holds.
+  - warning: more `car_spots` than its track's capacity (2).
 
 ### 4.9 `switchback`: a track configuration
 ```json
@@ -338,7 +341,8 @@ main (upper level); its interchange tracks are where the two meet.
 ## 8. Export: `layout_data.json` v2
 
 General, versioned; IOTtrains is the first consumer. Units: lengths in prototype feet unless the
-field says `_in` (layout inches); MPs in MP units.
+field says `_in` (layout inches); MPs in MP units. Track lengths (`_ft`) and capacities (`_cars`)
+are measured between clearance points (2), so a siding or spur counts less than its whole length.
 
 ```text
 schema_version: 2, conventions_version: 1, generated, layout, scale, layout_units
