@@ -329,6 +329,28 @@ void ReportsFormatShortList(DynString *out, const reportsShortTrack_t *list,
 	}
 }
 
+void ReportsFormatClearanceList(DynString *out,
+                                const reportsClearanceRun_t *list,
+                                int count)
+{
+	char line[160];
+	int i;
+
+	for (i = 0; i < count; i++) {
+		const reportsClearanceRun_t *row = &list[i];
+
+		snprintf(line, sizeof line,
+		         "%5d | %-7s | %6d | %5u | %-14s | %6d | %5u | %-14s | %7.3f | %7.2f\n",
+		         row->place,
+		         row->change == REPORTS_CLEARANCE_NEW ? "new" :
+		         row->change == REPORTS_CLEARANCE_CHANGED ? "changed" : "",
+		         row->trackA, row->layerA, row->layerNameA ? row->layerNameA : "",
+		         row->trackB, row->layerB, row->layerNameB ? row->layerNameB : "",
+		         row->spacingIn, row->lengthIn);
+		DynStringCatCStr(out, line);
+	}
+}
+
 void ReportsFormatKinkedList(DynString *out, const reportsKinkedJoint_t *list,
                              int count)
 {

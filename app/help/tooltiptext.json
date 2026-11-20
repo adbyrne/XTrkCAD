@@ -873,6 +873,7 @@
 		{"line": "cmdReportsKinked", "contents": "Connected joints whose alignment has drifted" },
 		{"line": "cmdReportsNotes", "contents": "List every note on the layout" },
 		{"line": "cmdReportsShort", "contents": "Short track pieces, and those on an unexpected layer" },
+		{"line": "cmdReportsClearance", "contents": "Tracks running side by side closer than the clearance between track centres" },
 		{"line": "cmdReportsTrackLen", "contents": "Track length, turnouts and car capacity for each layer" },
 		{"line": "cmdReportsTurnout", "contents": "Turnouts per 100 ft of track for each layer" },
 		{"line": "cmdReportsUnconnected", "contents": "List every track end that isn't connected" },

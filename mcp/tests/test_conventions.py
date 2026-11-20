@@ -1420,3 +1420,41 @@ def test_car_spots_on_a_long_track(tmp_path):
     assert _spots_issues(tmp_path, {"kind": "industry", "id": "QM2", "car_spots": 16}) == []
     assert len(_spots_issues(tmp_path, {"kind": "industry", "id": "QM2",
                                         "car_spots": 17})) == 1
+
+
+# -- a passing track joins the main without a turnout ---------------------------
+
+MAIN_INTO_PASSING = """
+STRAIGHT 1 0 0 0 0 HO 0
+\tE 0.000000 0.000000 270.000000
+\tT 2 50.000000 0.000000 90.000000
+\tEND$SEGS
+
+STRAIGHT 2 1 0 0 0 HO 0
+\tT 1 50.000000 0.000000 270.000000
+\tE 100.000000 0.000000 90.000000
+\tEND$SEGS
+"""
+
+
+def test_passing_track_joined_to_main_is_a_warning(tmp_path):
+    """A piece drawn on the wrong layer: the passing track runs straight into
+    main track instead of leaving it at a turnout, so the station's siding
+    can't be found."""
+    issues = [i for i in _check(tmp_path, [], tracks=MAIN_INTO_PASSING)
+              if i.rule == "PASSING_JOINS_MAIN"]
+    assert len(issues) == 1
+    i = issues[0]
+    assert i.severity == "warning" and i.track_id == 2
+    assert (i.x, i.y) == (50.0, 0.0)
+    assert "1" in i.message and "2" in i.message
+
+
+def test_passing_track_leaving_the_main_at_a_turnout_is_fine(tmp_path):
+    spur_on_passing = MAIN_AND_SPUR.replace("STRAIGHT 4 2 0 0 0 HO 0", "STRAIGHT 4 1 0 0 0 HO 0")
+    assert "PASSING_JOINS_MAIN" not in _rules(_check(tmp_path, [], tracks=spur_on_passing))
+
+
+def test_passing_tracks_joined_to_each_other_are_fine(tmp_path):
+    both_passing = MAIN_INTO_PASSING.replace("STRAIGHT 1 0 0 0 0 HO 0", "STRAIGHT 1 1 0 0 0 HO 0")
+    assert "PASSING_JOINS_MAIN" not in _rules(_check(tmp_path, [], tracks=both_passing))
