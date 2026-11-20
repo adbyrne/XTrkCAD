@@ -140,3 +140,6 @@ examples:
      add: {layer: L1-Main, at: [12.0, 74.0],
            note: {kind: railroad, id: HD, name: Hillside Division, group: HD}},
      expect: [GROUP_UNKNOWN]}
+  - {chapter: 6, name: one board at a pass-through station,
+     add: {layer: L1-Main, at: [12.0, 155.0], note: {kind: yard_limit, id: AL}},
+     expect: [YARD_LIMIT_ONE_BOARD]}

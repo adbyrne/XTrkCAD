@@ -293,8 +293,16 @@ The other stations keep their default zones (`source: station`).
 
 *[Screenshot: the CE yard-limit note on the main below Cedar.]*
 
-- One board is enough where the zone runs to the end of the main, as at a terminus. Elsewhere a
-  zone has a board at each end; the check warns about a single board on a main with no end.
+- One board is enough only at a terminus, where trains come from one side. Anywhere else trains
+  come from both ends, so a zone has a board at each end, or none. A single board for Alder,
+  beyond its north switch:
+
+  ```
+  warning YARD_LIMIT_ONE_BOARD
+    Yard limit AL has one board, and isn't a terminus
+    hint: Add the second board, at the other end of the zone; one board is enough only for a
+    terminus station.
+  ```
 - A board whose id is no station makes a zone of its own, for yard limits away from a station.
 - Boards stand on the main. One put on the passing siding instead is an error:
 
