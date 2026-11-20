@@ -114,7 +114,7 @@ def test_quoted_yard_limits(export):
 
 
 def test_quoted_capacities(export):
-    """Chapters 7-9."""
+    """Chapters 7-9 (chapter 8: Track 2 falls just short of six cars)."""
     spots = {i["id"]: (i["car_spots"], i["spur_capacity_cars"])
              for i in export["industries"] + export["team_tracks"]}
     assert spots == {"AL_FEED": (2, 3), "AL_TEAM": (2, 2), "BI_LUMBER": (3, 4)}
@@ -123,6 +123,37 @@ def test_quoted_capacities(export):
         ("Track 1", 8), ("Track 2", 5), ("Track 3", 6)]
     coal = export["facilities"][0]
     assert (coal["id"], coal["car_spots"], coal["capacity_cars"]) == ("CE_COAL", 3, 3)
+
+
+def test_quoted_railroad(base, tmp_path, export):
+    """Chapter 11: no railroad until its note, then HD everywhere."""
+    before = build_export_v2(_state(base, tmp_path, 9))
+    assert before["railroads"] == [] and _station(before, "AL")["railroad"] is None
+    assert [r["id"] for r in export["railroads"]] == ["HD"]
+    assert {s["railroad"] for s in export["stations"] + export["yard_limits"]} == {"HD"}
+
+
+def test_quoted_segments(export):
+    """Chapter 12's table."""
+    assert [(s["from_station"], s["to_station"], s["length_ft"])
+            for s in export["segments"]] == [
+        ("HY", "AL", 293.932), ("AL", "BI", 894.367), ("BI", "CE", 686.211)]
+
+
+def test_quoted_export_refusal(base, tmp_path):
+    """Chapter 12: an error stops the export, and the result says why."""
+    from xtrkcad_mcp.server import export_layout_data
+    _state(base, tmp_path, CHAPTERS[-1], add={
+        "layer": "L1-Passing", "at": [14.0, 109.5],
+        "note": {"kind": "yard_limit", "id": "AL"}})
+    out = tmp_path / "layout_data.json"
+    result = export_layout_data(str(tmp_path / f"ch{CHAPTERS[-1]}.xtc"), str(out))
+    assert result["written"] is False and not out.exists()
+    assert result["counts"] == {"error": 1, "warning": 0, "info": 0}
+    assert [(e["rule"], e["message"]) for e in result["errors"]] == [
+        ("YARD_LIMIT_NOT_ON_MAIN", "Yard-limit board AL is not on main track")]
+    assert result["notices"] == [
+        "Not written: fix the errors (check_conventions lists them all), or pass force=True."]
 
 
 TUTORIAL = Path(__file__).parents[1] / "docs" / "operating-conventions-tutorial.md"

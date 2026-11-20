@@ -265,5 +265,323 @@ the switch [2]. The main between the switches holds fewer: an industry's spur le
 (Alder's feed mill, Birch's lumber spur, chapter 7), and that switch, with the length a car
 needs to clear it, doesn't count.
 
-*(Chapters 6–12 follow: yard limits, industries, yards, facilities, switchbacks, more than one
-railroad, and exporting.)*
+## 6. Yard limits
+
+**Yard limits** are a stretch of main where trains may move without a clearance, at restricted
+speed, so a switcher can work the station. A layout needs no yard-limit notes: every station's
+zone defaults to its own limits, from entry switch to exit switch [4.4]. At Alder that's MP
+0.963 – 5.786, the siding's switches.
+
+A **YL board** is a `yard_limit` note with the station's id, on the main where the board stands.
+It moves that end of the zone out to the board. Cedar is a terminus, so its default zone is only
+the terminus switch (MP 21.521); a board out on the line gives its switcher room to run around
+the train:
+
+```json
+{"kind": "yard_limit", "id": "CE"}
+```
+
+Place it on `L1-Main` on the way into Cedar, between the curve and the runaround's north switch
+(x 132, y 152).
+The export's `yard_limits` then has Cedar's zone from the board to the end of the line:
+
+| Zone | From MP | To MP | Source |
+|---|---|---|---|
+| CE | 20.261 | 21.521 | board |
+
+The other stations keep their default zones (`source: station`).
+
+*[Screenshot: the CE yard-limit note on the main below Cedar.]*
+
+- One board is enough where the zone runs to the end of the main, as at a terminus. Elsewhere a
+  zone has a board at each end; the check warns about a single board on a main with no end.
+- A board whose id is no station makes a zone of its own, for yard limits away from a station.
+- Boards stand on the main. One put on the passing siding instead is an error:
+
+  ```
+  error YARD_LIMIT_NOT_ON_MAIN
+    Yard-limit board AL is not on main track
+  ```
+
+## 7. Industries and team tracks
+
+An **industry** is a shipper with its own spur. Its note goes on the spur and says which station
+switches it, how many cars it takes and what it ships and receives [4.5]:
+
+```json
+{"kind": "industry", "id": "AL_FEED", "name": "Alder Feed Mill", "station": "AL",
+ "car_spots": 2, "car_types": ["XM", "LO"], "loads_in": ["grain"], "loads_out": ["feed"]}
+{"kind": "industry", "id": "BI_LUMBER", "name": "Birch Lumber", "station": "BI",
+ "car_spots": 3, "car_types": ["FM"], "loads_in": ["lumber"]}
+```
+
+Place the feed mill's on `L1-Storage` on the spur west of Alder's main (x 10, y 115), and the
+lumber yard's on the spur north of Birch's main (x 52, y 182).
+
+- `station`: where the switcher comes from. Leave it out for an industry out on the line with no
+  station of its own.
+- `car_spots`: how many cars the industry takes, an operating choice. The track's capacity is
+  computed, and exported beside it.
+- `car_types`: AAR mechanical designations: `XM` boxcar, `LO` covered hopper, `FM` flatcar,
+  `HM` hopper, `TM` tank car [7].
+- `loads_in`, `loads_out`: what arrives and what leaves, in plain words.
+
+A **team track** is a public siding: anyone without a spur of their own loads and unloads cars
+there [4.5a]. It takes the same fields, but car types and loads are usually left out, since it
+takes anything. Alder has one, on the short spur beyond the station's north switch:
+
+```json
+{"kind": "team_track", "id": "AL_TEAM", "name": "Alder team track", "station": "AL",
+ "car_spots": 2}
+```
+
+Place it on `L1-Storage` (x 10, y 130). A team track without `station` stands alone, away from
+any station, and is a timetable stop itself. One track that is both a team track and a house
+track (chapter 9) carries both notes.
+
+*[Screenshot: the Alder feed mill and team track notes.]*
+
+The export lists each with its spots and what its track holds:
+
+| Industry | Station | Branch MP | Car spots | Track holds |
+|---|---|---|---|---|
+| AL_FEED Alder Feed Mill | AL | 1.781 | 2 | 3 cars |
+| AL_TEAM Alder team track | AL | 6.776 | 2 | 2 cars |
+| BI_LUMBER Birch Lumber | BI | 14.398 | 3 | 4 cars |
+
+The branch MP is where the spur leaves the main. The track is measured between clearance points
+like a siding [2], so the feed mill's spur holds 3 cars although only 2 are spotted.
+
+What the check says about industries:
+
+- `car_spots` left out takes 2, with a notice:
+
+  ```
+  info CAR_SPOTS_DEFAULT
+    industry BI_X: car_spots not given, 2 used
+  ```
+
+- A car type that isn't a known code is probably a typo:
+
+  ```
+  warning UNKNOWN_CAR_TYPE
+    industry BI_X: unknown car type(s) BOXCAR
+    hint: Use AAR mechanical designations (XM, HM, TM, ...).
+  ```
+
+- More spots than the track holds:
+
+  ```
+  warning CAR_SPOTS_EXCEED_TRACK
+    team_track AL_T2: 4 car spots, its track holds 2
+    hint: Give "car_spots": 2 or less, or lengthen the track.
+  ```
+
+- An industry on the main or a passing track is allowed (it is usually a timetable stop of its
+  own), with an `INDUSTRY_ON_MAIN` notice.
+
+## 8. Yards and staging
+
+A yard is a set of tracks with jobs. Each track gets a `yard_track` note: the yard's location id,
+a `label` unique within the yard, and its `function` [4.7]. Hillside's yard has three:
+
+```json
+{"kind": "yard_track", "id": "HY", "label": "Track 1", "function": "arrival_departure"}
+{"kind": "yard_track", "id": "HY", "label": "Track 2", "function": "classification"}
+{"kind": "yard_track", "id": "HY", "label": "Track 3", "function": "classification"}
+```
+
+Place them on `L1-Storage`, one on each yard track toward its south end (x 12, 14 and 16,
+y 20). Track 1, straight off the main, is where trains arrive and leave; the other two are for
+sorting cars.
+
+*[Screenshot: the three yard-track notes at the south end of the yard.]*
+
+The export's `yards` gives each track's capacity:
+
+| Track | Function | Holds |
+|---|---|---|
+| Track 1 | arrival_departure | 8 cars |
+| Track 2 | classification | 5 cars |
+| Track 3 | classification | 6 cars |
+
+Tracks 2 and 3 are within a fraction of an inch of each other, about 36 in between clearance
+points, but Track 2 falls just short of six cars, and capacity counts whole cars.
+
+- **Functions** for a station's yard: `arrival`, `departure`, `arrival_departure`,
+  `classification`, `runaround`, `lead`, `interchange`, `caboose`, `rip` (repair in place),
+  `storage`, `engine`. An industry's own tracks (a mine, a mill) use `loading`, `empties`,
+  `loads`, `service` and `lead`, with the industry's id.
+- **Staging** is the rest of the world, off the visible layout. A `staging` note on its lead
+  names it; its tracks are `yard_track` notes with function `staging`, or any yard function,
+  as staging can set tracks aside too [4.6]. Hillside has no staging.
+- **Interchange** with another railroad is a track function: `interchange`, with `railroads`
+  naming both. Chapter 11 has more than one railroad.
+
+The check's yard rules:
+
+```
+error YARD_TRACK_DUPLICATE_LABEL
+  Two tracks labelled 'Track 2' in 'HY'
+error YARD_TRACK_BAD_FUNCTION
+  Yard track HY Track 3: function 'sorting' is not one for a station
+  hint: Functions: arrival, arrival_departure, caboose, classification, departure, engine, interchange, lead, rip, runaround, storage
+info YARD_TRACK_NO_FUNCTION
+  Yard track HY Track 3 has no function
+```
+
+## 9. House tracks, storage and facilities
+
+Three more kinds record the railroad's own tracks [4.8]:
+
+- **`house_track`**: the track at the freight house, where the railroad's staff handle small
+  shipments (less than carload). Its `id` is the station's (or an industry's); a location with
+  several gives each a `label`.
+- **`storage`**: a stand-alone spur for parking cars.
+- **`facility`**: a servicing point, the railroad's own industry: coal, water, sand, fuel, ice,
+  ash, a turntable, engine service, a scale, a repair track.
+
+Cedar has a coal trestle on the spur east of its main, where engines take coal and hoppers of it
+are spotted:
+
+```json
+{"kind": "facility", "id": "CE_COAL", "name": "Cedar coal trestle", "type": "coal",
+ "location": "CE", "car_spots": 3}
+```
+
+Place it on `L1-Service` (x 134, y 106). Its track holds 3 cars, and the export has
+`capacity_cars: 3`, `car_spots: 3`.
+
+*[Screenshot: the Cedar coal trestle note.]*
+
+`car_spots` on a facility or storage track has **no default**. Only spots a note gives count as
+car storage in Op Density (9.1 in the spec): a turntable or water tank holds no cars, and isn't
+counted. The check holds the spots to the track as for an industry, and knows the facility
+types:
+
+```
+warning CAR_SPOTS_EXCEED_TRACK
+  facility CE_COAL: 5 car spots, its track holds 3
+  hint: Give "car_spots": 3 or less, or lengthen the track.
+error FACILITY_BAD_TYPE
+  Facility CE_X: type 'coaling' is not a facility type
+  hint: Types: ice, engine_service, turntable, fuel, water, sand, coal, ash, scale, car_repair
+```
+
+## 10. Switchbacks
+
+A **switchback** is where a train has to reverse to go on: it pulls past a switch onto a tail
+track, then backs out the other way. It's a track configuration, so it gets its own note, on the
+tail track [4.9]:
+
+```json
+{"kind": "switchback", "id": "BB_SWB", "serves": "BB"}
+{"kind": "switchback", "id": "MC_SWB", "serves": "MC", "switches": [412, 418]}
+```
+
+Hillside has none; these are from the New York & Eastern layout.
+
+- `serves`: the station or industry the switchback reaches.
+- `switches`: the main-track switch where trains reverse. Left out, it's the switch the tail
+  track leaves. NYE's MC lists two, which together act as the switchback switch: its passing
+  track rejoins the main beyond the first one.
+- The tail is never main track: it may end in a bumper, or go on to an industry, a yard or
+  another subdivision, but its layer isn't in `Mainline`. A switchback note on the main is an
+  error:
+
+  ```
+  error SWITCHBACK_TAIL_ON_MAIN
+    Switchback CE_SWB: its tail track (72) is on a Mainline layer
+    hint: The tail track is never main track; put it on its own layer.
+  ```
+
+The export lists each switchback with the switches and the tail's length, and marks the
+stations and industries it serves with `switchback: true`.
+
+## 11. More than one railroad
+
+Everything so far belongs to the layout's one railroad, which has no name yet: the export's
+`railroads` list is empty and every station's `railroad` is `null`. A `railroad` note names it
+[4.1]; its position isn't used:
+
+```json
+{"kind": "railroad", "id": "HD", "name": "Hillside Division", "reporting_marks": "HD"}
+```
+
+Place it on `L1-Main` near MP zero (x 12, y 74). The export then has the railroad, its MP scale
+and its anchor, and each station and yard-limit zone has `"railroad": "HD"`.
+
+A layout with **more than one railroad**, or one railroad with several MP lines, needs more:
+
+- Each railroad and **subdivision** (one MP line) gets a note, and a Layer Group holding its
+  layers, named by the note's `group` [3.2]. A layer belongs to the railroad whose group holds
+  it, so each subdivision counts its own mileposts from its own anchors.
+- A subdivision with no MP zero on the layout, running from staging to staging, uses a start
+  and an end anchor [5.1].
+- All location ids share one namespace, across railroads: a station, an industry, a team track
+  and a staging yard can't have the same id.
+
+  ```
+  error ID_DUPLICATE_LOCATION
+    Location id 'AL' is used by a station and an industry
+    hint: Stations, industries, team tracks and staging yards share one id namespace.
+  ```
+
+- A **joint station**, where two railroads meet, is the exception: one id, with a `station` note
+  on each railroad's main. NYE's Williamsport (WP) is the C&O main upstairs and the NYE branch
+  downstairs; each note has its own MP, and the export lists WP once per subdivision [4.3].
+  Interchange tracks between them are `yard_track` notes with `function: "interchange"` and both
+  `railroads`.
+
+A `group` that names no Layer Group is an error:
+
+```
+error GROUP_UNKNOWN
+  railroad HD: Layer Group 'HD' doesn't exist
+  hint: Groups: Mainline, Passing, Storage, Staging, Connecting, Service, Level 1, Level 2
+```
+
+## 12. Exporting
+
+With the railroad named, Hillside's operating data is complete and the check is clean:
+
+> *Check my layout's operating data, then export it.*
+
+```
+check_conventions("hillside_division.xtc")
+export_layout_data("hillside_division.xtc")
+```
+
+The export writes `layout_data.json` beside the layout ([schema](layout_data_v2.md)): the
+railroad, stations, yard limits, industries and team tracks, yards, storage, switchbacks,
+facilities, the distances between stations, and the check's findings in `issues` [8]. The
+segments, in prototype feet along the main:
+
+| From | To | Length |
+|---|---|---|
+| HY | AL | 293.932 ft |
+| AL | BI | 894.367 ft |
+| BI | CE | 686.211 ft |
+
+While the check finds an **error**, nothing is written; the result says why:
+
+```
+{
+  "written": false,
+  "counts": {"error": 1, "warning": 0, "info": 0},
+  "errors": [{"severity": "error", "rule": "YARD_LIMIT_NOT_ON_MAIN",
+              "message": "Yard-limit board AL is not on main track", ...}],
+  "notices": ["Not written: fix the errors (check_conventions lists them all), or pass force=True."]
+}
+```
+
+Fix the errors, or pass `force=True` to write the file anyway, with the errors in its `issues`.
+Warnings and info never stop the export; they're in `issues` too.
+
+`format="v1"` writes the previous format, for operations programs that don't read v2 yet
+(IOTtrains, until it's updated) [9].
+
+That's the Hillside Division, operable: every place on it has an id and an MP, every track that
+holds cars says what for, and an operations program can read it all from one file. Upgrading
+an existing layout's older text notes to these conventions is the job of `apply_conventions`,
+still to come.

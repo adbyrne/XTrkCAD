@@ -95,3 +95,48 @@ examples:
      add: {layer: L1-Storage, at: [10.0, 130.0],
            note: {kind: team_track, id: AL_T2, station: AL, car_spots: 4}},
      expect: [CAR_SPOTS_EXCEED_TRACK]}
+  - {chapter: 7, name: an industry on the main,
+     add: {layer: L1-Main, at: [12.0, 110.0],
+           note: {kind: industry, id: AL_X, station: AL, car_spots: 1}},
+     expect: [INDUSTRY_ON_MAIN]}
+  - {chapter: 6, name: a yard-limit board off the main,
+     add: {layer: L1-Passing, at: [14.0, 109.5], note: {kind: yard_limit, id: AL}},
+     expect: [YARD_LIMIT_NOT_ON_MAIN]}
+  - {chapter: 8, name: two yard tracks with one label,
+     drop: {label: Track 3},
+     add: {layer: L1-Storage, at: [16.0, 20.0],
+           note: {kind: yard_track, id: HY, label: Track 2, function: classification}},
+     expect: [YARD_TRACK_DUPLICATE_LABEL]}
+  - {chapter: 8, name: a function that isn't one,
+     drop: {label: Track 3},
+     add: {layer: L1-Storage, at: [16.0, 20.0],
+           note: {kind: yard_track, id: HY, label: Track 3, function: sorting}},
+     expect: [YARD_TRACK_BAD_FUNCTION]}
+  - {chapter: 8, name: a yard track without a function,
+     drop: {label: Track 3},
+     add: {layer: L1-Storage, at: [16.0, 20.0],
+           note: {kind: yard_track, id: HY, label: Track 3}},
+     expect: [YARD_TRACK_NO_FUNCTION]}
+  - {chapter: 9, name: more facility spots than the track holds,
+     drop: {id: CE_COAL},
+     add: {layer: L1-Service, at: [134.0, 106.0],
+           note: {kind: facility, id: CE_COAL, type: coal, location: CE, car_spots: 5}},
+     expect: [CAR_SPOTS_EXCEED_TRACK]}
+  - {chapter: 9, name: a facility type that isn't one,
+     drop: {id: CE_COAL},
+     add: {layer: L1-Service, at: [134.0, 106.0],
+           note: {kind: facility, id: CE_X, type: coaling}},
+     expect: [FACILITY_BAD_TYPE]}
+  - {chapter: 9, name: a switchback note on the main,
+     add: {layer: L1-Main, at: [132.0, 110.0],
+           note: {kind: switchback, id: CE_SWB, serves: CE}},
+     expect: [SWITCHBACK_TAIL_ON_MAIN]}
+  - {chapter: 11, name: one id for a station and an industry,
+     add: {layer: L1-Storage, at: [52.0, 182.0],
+           note: {kind: industry, id: AL, station: BI, car_spots: 1}},
+     expect: [ID_DUPLICATE_LOCATION]}
+  - {chapter: 11, name: a railroad group that doesn't exist,
+     drop: {kind: railroad},
+     add: {layer: L1-Main, at: [12.0, 74.0],
+           note: {kind: railroad, id: HD, name: Hillside Division, group: HD}},
+     expect: [GROUP_UNKNOWN]}
