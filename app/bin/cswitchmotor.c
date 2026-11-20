@@ -238,6 +238,13 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
 {
 	coOrd p[switchmotorPoly_CNT];
 	switchmotorData_p data_p = GetswitchmotorData(t);
+	/* No turnout: its turnout is missing (ResolveSwitchmotorTurnout() said
+	 * so), or the layout is still being read and it isn't resolved yet. A
+	 * redraw then (a resize while ReadTrackFile()'s wFlush() runs) followed
+	 * the NULL turnout and crashed. There is nothing to draw. */
+	if (data_p->turnout == NULL) {
+		return;
+	}
 	const struct extraDataCompound_t *xx = GET_EXTRA_DATA(data_p->turnout,
 	                                       T_TURNOUT,
 	                                       extraDataCompound_t);
@@ -481,11 +488,12 @@ static BOOL_T WriteSwitchMotor ( track_p t, FILE * f )
 	switchMotorName = Convert2UTF8(switchMotorName);
 #endif // UTFCONVERT
 
-	if (xx->turnout == NULL) {
-		return FALSE;
-	}
+	/* A motor whose turnout is missing (ResolveSwitchmotorTurnout() said so
+	 * on load) keeps the turnout number it was read with: refusing to write
+	 * it failed the whole save, so the layout could never be saved again. */
+	TRKINX_T turnoutIndex = xx->turnout ? GetTrkIndex(xx->turnout) : xx->turnindx;
 	rc &= fprintf(f, "SWITCHMOTOR %d %d \"%s\" \"%s\" \"%s\" \"%s\"\n",
-	              GetTrkIndex(t), GetTrkIndex(xx->turnout), switchMotorName,
+	              GetTrkIndex(t), turnoutIndex, switchMotorName,
 	              xx->normal, xx->reverse, xx->pointsense)>0;
 
 	MyFree(switchMotorName);

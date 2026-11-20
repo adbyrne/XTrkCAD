@@ -66,6 +66,7 @@ foreach(_xtrkcad_example ${_xtrkcad_example_layouts})
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/describe-${_xtrkcad_example_id}")
 endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-empty-text")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-switchmotor-noturnout")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-objects")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-badline")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-newer")
@@ -620,6 +621,23 @@ add_test(NAME RegressionRoundTrip.objects_check
 set_tests_properties(RegressionRoundTrip.objects_check PROPERTIES
     FIXTURES_REQUIRED regression_objects
     LABELS "regression;regression-ci"
+)
+
+# A switch motor whose turnout is missing: loading says so, and drawing the
+# motor must not follow the missing turnout. The same NULL turnout is what a
+# switch motor has while a layout is still being read, until
+# ResolveSwitchmotorTurnout() runs, and a redraw then (a resize during the
+# load's wFlush()) crashed CI intermittently (RegressionCheckpoint.objects,
+# RegressionClipboard.objects, RegressionRoundTrip.badmanifest).
+set(_xtrkcad_smnoturnout_home "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-switchmotor-noturnout")
+xtrkcad_add_regression_test(RegressionRoundTrip.switchmotor_noturnout "${_xtrkcad_smnoturnout_home}"
+    "${_xtrkcad_test_option}${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-switchmotor-noturnout.xtc")
+set_tests_properties(RegressionRoundTrip.switchmotor_noturnout PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    LABELS "regression;regression-ci;regression-critical"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_smnoturnout_home}"
+    RUN_SERIAL TRUE
 )
 
 # What the user is told when a layout has bad lines, and what survives
