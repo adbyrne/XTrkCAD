@@ -45,6 +45,18 @@ The flow:
 4. `export_layout_data` writes `layout_data.json` for an operations program
    ([schema](layout_data_v2.md)).
 
+Who does what:
+
+| Step | In XTrkCAD | Ask the MCP |
+|---|---|---|
+| Track | draw it, or open what Part 1 generated; check it with the **Reports** menu | `generate_layout`, `generate_track_plan` (Part 1) |
+| Categories | **Manage > Layer Groups**; move tracks with **Edit > Move To Current Layer** | `get_layer_groups` lists them; the check checks them |
+| Notes | **Draw > Notes > JSON Note**, then **File > Save** | `check_conventions` |
+| Results | | `export_layout_data`, `make_timetable`, the reports |
+
+Once Part 1 has generated it, you edit the layout in XTrkCAD; the MCP reads the saved file
+and writes its results beside it.
+
 Three rules of thumb run through all of it:
 
 - **A fact sits where it is on the layout.** A station's note goes on the station's main track;
@@ -55,6 +67,11 @@ Three rules of thumb run through all of it:
   notes never hold them.
 
 ## 2. Before you start
+
+**Set up first.** If the MCP server isn't installed and connected yet, Part 1's
+[Before you begin](layout-config-guide.md#before-you-begin) takes you through it: installing
+the server, connecting it to your assistant, the folder your layouts live in, and the Hillside
+files.
 
 **The layout.** Start from Part 1's result: the Hillside layout with its track.
 
@@ -78,12 +95,23 @@ the other fields depend on the kind [4.0].
 
 ![The JSON Note dialog with Alder's station note, validated](images/tutorial/json-note-dialog.png)
 
+**Placing a note where this tutorial says.** Each note in the chapters below comes with its
+place, like "on `L1-Main` (x 12, y 109.5)": layout inches, from the room's south-west corner.
+XTrkCAD's status bar shows the pointer's X and Y as you move it, so click near the spot; then
+the dialog's **Pos. X** and **Pos. Y** can be typed exactly. Its **Layer** list (it starts at
+the current layer) is the note's layer, and that decides which track it belongs to: pick the
+one the step names. **Done** places the note.
+
+**Save, then check.** The tools read the layout file on disk, not what XTrkCAD has open, so
+**File > Save** before you ask for a check. The rhythm of every chapter is the same: place the
+notes in XTrkCAD, save, ask for the check, fix what it reports, save again.
+
 **Position is data.** A note belongs to the nearest track **on its own layer**: put a station's
 note on an `L1-Main` layer, on the main. A note that lands beside its track is reported:
 
 ```
 warning NOTE_FAR_FROM_TRACK
-  station BI: 5.0 in from the nearest track (44)
+  station BI: 5.0 in from the nearest track (65)
   hint: It is on track 43 of layer L1-Passing: move the note to that layer.
 ```
 
@@ -165,7 +193,7 @@ throat, the first switch the main meets, and counts one MP per foot:
 {"kind": "reference", "id": "MP_ZERO", "mp": 0, "mp_scale": 12, "mp_unit": "in"}
 ```
 
-Place it on `L1-Main` at the yard throat switch, at its points (x 12, y 67.7).
+Place it on `L1-Main` at the yard throat switch, at its points (x 12, y 67.9).
 
 ![The MP_ZERO note on the yard throat switch](images/tutorial/mp-zero.png)
 
@@ -255,9 +283,9 @@ export_layout_data("hillside_division.xtc")
 | Station | MP | Limits (MP) | Siding | Main between the switches |
 |---|---|---|---|---|
 | HY Hillside | 0.0 | terminus | | |
-| AL Alder | 3.375 | 0.963 – 5.786 | 5 cars | 4 cars |
-| BI Birch | 13.643 | 11.232 – 16.054 | 5 cars | 3 cars |
-| CE Cedar | 21.521 | terminus | 4 cars | 3 cars |
+| AL Alder | 3.385 | 0.973 – 5.796 | 5 cars | 4 cars |
+| BI Birch | 13.626 | 11.215 – 16.038 | 5 cars | 4 cars |
+| CE Cedar | 21.505 | terminus | 4 cars | 3 cars |
 
 The track plan asked for 5-car sidings at Alder and Birch, and the export gives 5: both count
 what a track holds between its **clearance points**, where a car stops fouling the other leg of
@@ -270,11 +298,11 @@ needs to clear it, doesn't count.
 **Yard limits** are a stretch of main where trains may move without a clearance, at restricted
 speed, so a switcher can work the station. A layout needs no yard-limit notes: every station's
 zone defaults to its own limits, from entry switch to exit switch [4.4]. At Alder that's MP
-0.963 – 5.786, the siding's switches.
+0.973 – 5.796, the siding's switches.
 
 A **YL board** is a `yard_limit` note with the station's id, on the main where the board stands.
 It moves that end of the zone out to the board. Cedar is a terminus, so its default zone is only
-the terminus switch (MP 21.521); a board out on the line gives its switcher room to run around
+the terminus switch (MP 21.505); a board out on the line gives its switcher room to run around
 the train:
 
 ```json
@@ -287,7 +315,7 @@ The export's `yard_limits` then has Cedar's zone from the board to the end of th
 
 | Zone | From MP | To MP | Source |
 |---|---|---|---|
-| CE | 20.261 | 21.521 | board |
+| CE | 20.244 | 21.505 | board |
 
 The other stations keep their default zones (`source: station`).
 
@@ -324,7 +352,7 @@ switches it, how many cars it takes and what it ships and receives [4.5]:
 ```
 
 Place the feed mill's on `L1-Storage` on the spur west of Alder's main (x 10, y 115), and the
-lumber yard's on the spur north of Birch's main (x 52, y 182).
+lumber yard's on the spur north of Birch's main (x 64, y 182).
 
 - `station`: where the switcher comes from. Leave it out for an industry out on the line with no
   station of its own.
@@ -353,9 +381,9 @@ The export lists each with its spots and what its track holds:
 
 | Industry | Station | Branch MP | Car spots | Track holds |
 |---|---|---|---|---|
-| AL_FEED Alder Feed Mill | AL | 1.781 | 2 | 3 cars |
-| AL_TEAM Alder team track | AL | 6.776 | 2 | 2 cars |
-| BI_LUMBER Birch Lumber | BI | 14.398 | 3 | 4 cars |
+| AL_FEED Alder Feed Mill | AL | 1.739 | 2 | 3 cars |
+| AL_TEAM Alder team track | AL | 6.744 | 2 | 2 cars |
+| BI_LUMBER Birch Lumber | BI | 15.272 | 3 | 4 cars |
 
 The branch MP is where the spur leaves the main. The track is measured between clearance points
 like a siding [2], so the feed mill's spur holds 3 cars although only 2 are spotted.
@@ -410,11 +438,11 @@ The export's `yards` gives each track's capacity:
 | Track | Function | Holds |
 |---|---|---|
 | Track 1 | arrival_departure | 8 cars |
-| Track 2 | classification | 5 cars |
+| Track 2 | classification | 6 cars |
 | Track 3 | classification | 6 cars |
 
-Tracks 2 and 3 are within a fraction of an inch of each other, about 36 in between clearance
-points, but Track 2 falls just short of six cars, and capacity counts whole cars.
+The track plan asked for tracks that hold 6 cars, and the two shortest, Tracks 2 and 3, hold
+just that: 36 in between their clearance points. Track 1, straight off the main, is longer.
 
 - **Functions** for a station's yard: `arrival`, `departure`, `arrival_departure`,
   `classification`, `runaround`, `lead`, `interchange`, `caboose`, `rip` (repair in place),
@@ -483,15 +511,15 @@ track, then backs out the other way. It's a track configuration, so it gets its 
 tail track [4.9]:
 
 ```json
-{"kind": "switchback", "id": "BB_SWB", "serves": "BB"}
-{"kind": "switchback", "id": "MC_SWB", "serves": "MC", "switches": [412, 418]}
+{"kind": "switchback", "id": "MINE_SWB", "serves": "MINE"}
+{"kind": "switchback", "id": "SUMMIT_SWB", "serves": "SUMMIT", "switches": [412, 418]}
 ```
 
-Hillside has none; these are from the New York & Eastern layout.
+Hillside has none, so these two are examples: a mine reached by a switchback, and a station, Summit, where trains reverse to go on.
 
 - `serves`: the station or industry the switchback reaches.
 - `switches`: the main-track switch where trains reverse. Left out, it's the switch the tail
-  track leaves. NYE's MC lists two, which together act as the switchback switch: its passing
+  track leaves. Summit lists two, which together act as the switchback switch: its passing
   track rejoins the main beyond the first one.
 - The tail is never main track: it may end in a bumper, or go on to an industry, a yard or
   another subdivision, but its layer isn't in `Mainline`. A switchback note on the main is an
@@ -499,7 +527,7 @@ Hillside has none; these are from the New York & Eastern layout.
 
   ```
   error SWITCHBACK_TAIL_ON_MAIN
-    Switchback CE_SWB: its tail track (72) is on a Mainline layer
+    Switchback CE_SWB: its tail track (69) is on a Mainline layer
     hint: The tail track is never main track; put it on its own layer.
   ```
 
@@ -536,8 +564,9 @@ A layout with **more than one railroad**, or one railroad with several MP lines,
   ```
 
 - A **joint station**, where two railroads meet, is the exception: one id, with a `station` note
-  on each railroad's main. NYE's Williamsport (WP) is the C&O main upstairs and the NYE branch
-  downstairs; each note has its own MP, and the export lists WP once per subdivision [4.3].
+  on each railroad's main. Say Cedar were also on a second railroad, the Valley line, whose
+  main runs on the upper deck: Cedar keeps its id CE, with one station note on each main; each
+  note has its own MP, and the export lists CE once per subdivision [4.3].
   Interchange tracks between them are `yard_track` notes with `function: "interchange"` and both
   `railroads`.
 
@@ -567,8 +596,8 @@ segments, in prototype feet along the main:
 
 | From | To | Length |
 |---|---|---|
-| HY | AL | 293.932 ft |
-| AL | BI | 894.367 ft |
+| HY | AL | 294.817 ft |
+| AL | BI | 892.03 ft |
 | BI | CE | 686.211 ft |
 
 While the check finds an **error**, nothing is written; the result says why:
@@ -632,17 +661,17 @@ make_timetable("hillside_division.xtc", "hillside_operations.yaml")
 | Station | MP | 1 out | 1 back |
 |---|---|---|---|
 | HY Hillside | 0.0 | 07:00 | 10:15 |
-| AL Alder | 3.375 | 07:12 – 07:42 | 10:03 |
-| BI Birch | 13.643 | 08:12 – 08:37 | 09:33 |
-| CE Cedar | 21.521 | 09:00 | 09:10 |
+| AL Alder | 3.385 | 07:12 – 07:42 | 10:03 |
+| BI Birch | 13.626 | 08:12 – 08:37 | 09:33 |
+| CE Cedar | 21.505 | 09:00 | 09:10 |
 
 Read "1 out" down and "1 back" up. Two times are arrival and departure; one time is a departure,
 an arrival at the end of a run, or a pass. The Local leaves Hillside at 07:00, works Alder and
 Birch, turns at Cedar at 09:10 and is back at 10:15: 3 hours 15 minutes on the clock, 65 real
 minutes.
 
-Each figure comes from the layout. Hillside to Alder is 3.375 MP, most of it inside Alder's
-yard limits, which start at MP 0.963 (its entry switch): 0.963 MP at 30 mph and 2.412 at 15 make
+Each figure comes from the layout. Hillside to Alder is 3.385 MP, most of it inside Alder's
+yard limits, which start at MP 0.973 (its entry switch): 0.973 MP at 30 mph and 2.412 at 15 make
 12 minutes. Move a station note or a YL board, add a car spot, and the next timetable follows.
 
 **Clock and layout speed.** The tool also reports the speed a model must really run at to keep
@@ -665,3 +694,60 @@ That's the Hillside Division, operable: every place on it has an id and an MP, e
 holds cars says what for, and an operations program can read it all from one file. Upgrading
 an existing layout's older text notes to these conventions is the job of `apply_conventions`,
 still to come.
+
+## Appendix: your own layout
+
+Hillside was built for this tutorial, so its layers already sort the track by kind. A layout
+you drew yourself usually doesn't: its layers are by area, by deck or by what's on them. The
+steps are the same as chapters 3 to 13, with one job before them, and the MCP can't do that job
+for you yet, so it happens in XTrkCAD.
+
+An example that ships with XTrkCAD shows it: **DVRR v3.0 E Stroudsburg - Pt Jervis.xtc**, in
+the `examples` folder of your XTrkCAD install (Linux: `share/xtrkcad…/examples`). It is HO,
+point to point with staging at both ends (and a connection for continuous running), and its
+layers are named by line section:
+`Matamoras - Milford`, `Milford - Dingmans Ferry`, and so on, main, sidings and spurs together.
+
+1. **Copy it** into your layouts folder as `dvrr.xtc`, open it in XTrkCAD and **File > Save**
+   (an older file is saved in the current format). Check the track with the **Reports** menu, as in Part 1.
+
+2. **Ask for the check.** It finds what you'd expect: no MP anchor (an error), and every
+   track layer in no category group, so all of it counts as main line for now (warnings):
+
+   ```
+   check_conventions("dvrr.xtc")
+   ```
+
+3. **Make the category layers**, so the main, the sidings and the spurs can be told apart:
+
+   > *Add the standard track layers to dvrr.xtc for one level.*
+
+   ```
+   add_track_layers("dvrr.xtc", levels=1)
+   ```
+
+   That adds `L1-Main`, `L1-Passing`, `L1-Storage`, `L1-Staging`, `L1-Connecting` and
+   `L1-Service`, and the category Layer Groups holding them (`Mainline`, `Passing`, ...; a
+   group you already have is left alone). The file is backed up first; close it in XTrkCAD
+   before, or reload it after.
+
+4. **Move the track onto them, in XTrkCAD.** Make `L1-Main` the current layer, select the main
+   line's tracks section by section, and use **Edit > Move To Current Layer**. Then the same
+   with `L1-Passing` for the passing sidings, `L1-Storage` for spurs and yard tracks,
+   `L1-Staging` for both staging yards, `L1-Service` for the engine terminal. The old layers
+   keep the scenery and structures. This is the long part on a big layout; the MCP can't move
+   tracks between layers (yet).
+
+5. **Look at the category Layer Groups** (**Manage > Layer Groups**): step 3 made them,
+   `Mainline` holding `L1-Main` and so on, as in chapter 3. If you keep some track on other
+   layers (a staging layer of your own, say), add those layers to the right group. Save, and
+   ask for the check again: once no track is left on a layer outside the groups, the
+   category warnings are gone.
+
+6. **Then chapters 4 to 13 as written**: MP zero (a line from staging to staging has no zero
+   on the layout: give it a start and an end anchor instead [5.1]), the stations (DVRR's layer
+   names give them: Matamoras, Milford, Dingmans Ferry, Bushkill, Gravel Place), industries,
+   yards, the railroad, the export, and a timetable with an operations file of your own.
+
+Every note is placed by hand in XTrkCAD for now, as in the chapters. Tools that suggest the
+categories and the notes from the track, and write them for you, are planned.

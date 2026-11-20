@@ -11,7 +11,7 @@
 chapters:
   4:   # Mileposts
     notes:
-      - {layer: L1-Main, at: [12.0, 67.7],
+      - {layer: L1-Main, at: [12.0, 67.9],
          note: {kind: reference, id: MP_ZERO, mp: 0, mp_scale: 12, mp_unit: in}}
 
   5:   # Stations
@@ -40,7 +40,7 @@ chapters:
       - {layer: L1-Storage, at: [10.0, 130.0],
          note: {kind: team_track, id: AL_TEAM, name: Alder team track, station: AL,
                 car_spots: 2}}
-      - {layer: L1-Storage, at: [52.0, 182.0],
+      - {layer: L1-Storage, at: [64.0, 182.0],
          note: {kind: industry, id: BI_LUMBER, name: Birch Lumber, station: BI,
                 car_spots: 3, car_types: [FM], loads_in: [lumber]}}
 
@@ -84,11 +84,11 @@ examples:
   - {chapter: 5, name: a terminus without its terminus note,
      drop: {kind: terminus}, expect: [TERMINUS_NO_START]}
   - {chapter: 7, name: car_spots left out,
-     add: {layer: L1-Storage, at: [52.0, 182.0],
+     add: {layer: L1-Storage, at: [64.0, 182.0],
            note: {kind: industry, id: BI_X, station: BI}},
      expect: [CAR_SPOTS_DEFAULT]}
   - {chapter: 7, name: an unknown car type,
-     add: {layer: L1-Storage, at: [52.0, 182.0],
+     add: {layer: L1-Storage, at: [64.0, 182.0],
            note: {kind: industry, id: BI_X, station: BI, car_spots: 1, car_types: [BOXCAR]}},
      expect: [UNKNOWN_CAR_TYPE]}
   - {chapter: 7, name: more car spots than the track holds,
@@ -132,7 +132,7 @@ examples:
            note: {kind: switchback, id: CE_SWB, serves: CE}},
      expect: [SWITCHBACK_TAIL_ON_MAIN]}
   - {chapter: 11, name: one id for a station and an industry,
-     add: {layer: L1-Storage, at: [52.0, 182.0],
+     add: {layer: L1-Storage, at: [64.0, 182.0],
            note: {kind: industry, id: AL, station: BI, car_spots: 1}},
      expect: [ID_DUPLICATE_LOCATION]}
   - {chapter: 11, name: a railroad group that doesn't exist,

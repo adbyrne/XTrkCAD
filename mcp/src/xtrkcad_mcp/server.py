@@ -42,8 +42,7 @@ logger = logging.getLogger(__name__)
 
 mcp = FastMCP("xtrkcad")
 
-_PLANS_DIR = Path(os.environ.get("XTRKCAD_PLANS_DIR", "."))
-_XTRKCAD_BINARY = os.environ.get("XTRKCAD_BINARY", "")
+_PLANS_DIR = Path(os.environ.get("XTRKCAD_PLANS_DIR", ".")).expanduser()
 
 
 # Every tool that rewrites a layout says this (MCP review 2026-11-20, finding 2).
@@ -158,7 +157,7 @@ def load_layout_config(config_path: str) -> dict:
           warnings — list of validation warnings
           config   — parsed config values (name, scale, room, benchwork, ...)
     """
-    result = load_config(config_path)
+    result = load_config(_resolve_plan(config_path))
     cfg = result.config
     fp = cfg.floor_plan
     return {
@@ -227,7 +226,7 @@ def generate_layout(config_path: str, output_path: str = "") -> dict:
     from xtrkcad_mcp.generator import default_output_path, generate
     from pathlib import Path
 
-    cfg_result = load_config(config_path)
+    cfg_result = load_config(_resolve_plan(config_path))
 
     if not cfg_result.ready:
         return {
@@ -238,8 +237,8 @@ def generate_layout(config_path: str, output_path: str = "") -> dict:
         }
 
     config = cfg_result.config
-    cfg_path = Path(config_path).expanduser()
-    out = Path(output_path).expanduser() if output_path else default_output_path(config, cfg_path)
+    cfg_path = _resolve_plan(config_path)
+    out = _resolve_plan(output_path) if output_path else default_output_path(config, cfg_path)
 
     result = generate(config, out)
 
@@ -311,7 +310,7 @@ def generate_track_plan(config_path: str, layout_path: str, output_path: str = "
     def refused(*errors: str) -> dict:
         return {"written": False, "errors": list(errors)}
 
-    cfg_result = load_config(config_path)
+    cfg_result = load_config(_resolve_plan(config_path))
     config = cfg_result.config
     if config.track_plan is None:
         return refused("the config has no track_plan_file or track_plan"
@@ -345,7 +344,7 @@ def generate_track_plan(config_path: str, layout_path: str, output_path: str = "
     tail = []
     if lines and lines[-1].strip() == "END$TRACKS":
         tail = [lines.pop()]
-    out = Path(output_path).expanduser() if output_path else src
+    out = _resolve_plan(output_path) if output_path else src
     backup = _version_backup(out)
     out.write_text("\n".join(lines + records + tail) + "\n", encoding="utf-8")
 
@@ -396,7 +395,7 @@ def merge_benchwork(
     """
     from xtrkcad_mcp.generator import MergeResult, merge_benchwork_into
 
-    cfg_result = load_config(config_path)
+    cfg_result = load_config(_resolve_plan(config_path))
     if not cfg_result.ready:
         return {
             "ready": False,
@@ -406,7 +405,7 @@ def merge_benchwork(
         }
 
     p = _resolve_plan(layout_path)
-    out = Path(output_path).expanduser() if output_path else p
+    out = _resolve_plan(output_path) if output_path else p
     try:
         result = merge_benchwork_into(p, cfg_result.config, out)
     except ValueError as e:
@@ -469,7 +468,7 @@ def write_benchwork_report(
     Returns:
         Confirmation message with the absolute path written.
     """
-    cfg_result = load_config(config_path)
+    cfg_result = load_config(_resolve_plan(config_path))
     cfg = cfg_result.config
     sections = cfg.benchwork_sections
 
@@ -499,7 +498,7 @@ def write_benchwork_report(
 
     rows = [_section_row(bw) for bw in sections]
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     fmt = _resolve_format(output_path, format)
 
     if fmt == "txt":
@@ -1229,7 +1228,7 @@ def write_operation_density_report(
         f"Note: {data['note']}",
     ]
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -1355,6 +1354,13 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
     New layer IDs are assigned starting from max_existing_id + 1, so there
     is no risk of collision with hand-built or previously edited files.
 
+    Also adds the category Layer Groups the convention check and the reports
+    read (Mainline, Passing, Storage, Staging, Connecting, Service), each
+    holding its L<n>- layers, as generate_layout does; a group the layout
+    already has is left alone. A file older than version 13 gets no groups
+    (XTrkCAD writes them from 5.x on): save it in XTrkCAD first. The result
+    lists groups_added, and a notice when none could be added.
+
     Close the layout in XTrkCAD before editing it with a tool, or reload it after: XTrkCAD doesn't lock files, so whichever saves last wins.
 
     Args:
@@ -1369,7 +1375,8 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
         and already_present (layer names that were already there).
     """
     import re
-    from xtrkcad_mcp.generator import _TRACK_COLORS, _TRACK_TYPES, _version_backup
+    from xtrkcad_mcp.generator import (_TRACK_COLORS, _TRACK_TYPES, _TYPE_GROUP_NAMES,
+                                       _version_backup)
 
     p = _resolve_plan(path)
     layout = parse_file(p)
@@ -1397,14 +1404,6 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
             else:
                 to_add.append((lv, name))
 
-    if not to_add:
-        return {
-            "output_path": str(p),
-            "backup_path": None,
-            "added": [],
-            "already_present": already_present,
-        }
-
     # Build new LAYERS lines; IDs are strictly additive
     def _lv_color(lv: int) -> int:
         return _TRACK_COLORS[lv - 1] if lv <= len(_TRACK_COLORS) else 0
@@ -1419,6 +1418,43 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
         )
         added_names.append(name)
         next_id += 1
+
+    # The category Layer Groups (Mainline, Passing, ...) the check and the
+    # reports read, as generate_layout makes them: one per track type, its
+    # L<n>- layers as members. A group the layout already has is left alone.
+    # XTrkCAD reads LAYERGROUP records from file version 13 on.
+    name_to_id = {layer.name: idx for idx, layer in layout.layers.items()}
+    for i, (_lv, name) in enumerate(to_add):
+        name_to_id[name] = max_id + 1 + i
+    existing_groups = {g.name for g in layout.layer_groups}
+    next_group = max((g.index for g in layout.layer_groups), default=-1) + 1
+    group_lines: list[str] = []
+    groups_added: list[str] = []
+    notice = ""
+    if layout.param_version and layout.param_version < 13:
+        notice = ("No Layer Groups added: this file's version is older than 13. Save it in "
+                  "XTrkCAD 5.4 first, then run add_track_layers again for the groups.")
+    else:
+        for t_name in _TRACK_TYPES:
+            group = _TYPE_GROUP_NAMES.get(t_name, t_name)
+            if group in existing_groups:
+                continue
+            members = [name_to_id[f"L{lv}-{t_name}"] for lv in range(1, levels + 1)]
+            group_lines.append(f'LAYERGROUP DEFINE {next_group} "{group}"')
+            group_lines.append(f'LAYERGROUP MEMBERS {next_group} '
+                               f'"{";".join(str(m + 1) for m in members)}"')
+            groups_added.append(group)
+            next_group += 1
+
+    if not to_add and not group_lines:
+        return {
+            "output_path": str(p),
+            "backup_path": None,
+            "added": [],
+            "already_present": already_present,
+            "groups_added": [],
+            "notice": notice,
+        }
 
     # Insert new LAYERS lines just before LAYERS CURRENT
     file_lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -1435,6 +1471,15 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
         )
 
     updated = file_lines[:insert_at] + new_layer_lines + file_lines[insert_at:]
+    if group_lines:
+        # After the last LAYERGROUP record, else after LAYERS CURRENT, where
+        # XTrkCAD writes them.
+        at = next((i + 1 for i in range(len(updated) - 1, -1, -1)
+                   if updated[i].startswith("LAYERGROUP")), None)
+        if at is None:
+            at = next((i + 1 for i, ln in enumerate(updated)
+                       if ln.strip().startswith("LAYERS CURRENT")), insert_at + len(new_layer_lines))
+        updated = updated[:at] + group_lines + updated[at:]
     backup = _version_backup(p)
     p.write_text("\n".join(updated) + "\n", encoding="utf-8")
 
@@ -1443,6 +1488,8 @@ def add_track_layers(path: str, levels: int | None = None) -> dict:
         "backup_path": str(backup) if backup else None,
         "added": added_names,
         "already_present": already_present,
+        "groups_added": groups_added,
+        "notice": notice,
     }
 
 
@@ -1671,7 +1718,7 @@ def write_layout_report(
         Confirmation message with the absolute path written.
     """
     layout = _load_layout(path, layers, groups)
-    _val_config = load_stations_config(stations_yaml) if stations_yaml else None
+    _val_config = load_stations_config(_resolve_plan(stations_yaml)) if stations_yaml else None
     validation_issues = validate_layout_annotations(layout, _val_config)
     scale = layout.scale
     cpf = cars_per_real_ft(scale)
@@ -1793,7 +1840,7 @@ def write_layout_report(
             for issue in warnings:
                 lines.append(f"    [{issue.code}] {issue.message}")
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -1999,7 +2046,7 @@ def write_equipment_report(
             "MARGINAL = within 2\" (scaled) of minimum; test with your specific models.",
         ]
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -2149,7 +2196,7 @@ def write_turnout_report(
     if has_heavy:
         lines += ["", "*** Layers with density > 10/100 ft are switching-heavy (possible staging yard)."]
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -2308,7 +2355,7 @@ def write_gaps_report(
                 f"  {ep['angle']:8.2f}  {note}"
             )
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     format = _resolve_format(output_path, format)
     if format == "txt":
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -2576,7 +2623,7 @@ def write_radius_map(
         f' font-family="sans-serif">{title} — Curve Radius Map</text>',
     ] + elements + legend + ["</svg>"]
 
-    out = Path(output_path).expanduser()
+    out = _resolve_plan(output_path)
     out.write_text("\n".join(svg_lines) + "\n", encoding="utf-8")
     return f"SVG radius map written to {out}"
 
@@ -2908,7 +2955,7 @@ def write_station_distance_report(
     fmt = _resolve_format(output_path, format)
     v2 = _sd.station_distances_v2(layout)
     if v2 is not None:
-        out = Path(output_path)
+        out = _resolve_plan(output_path)
         n_st, n_pairs = _sd.counts(v2)
         unused = [name for name, given in (("route_layer_names", route_layer_names),
                                            ("exclude_turnouts", exclude_turnouts),
@@ -2933,13 +2980,13 @@ def write_station_distance_report(
         route_layer_names=route_layer_names,
         exclude_turnouts=exclude_turnouts,
     )
-    out = Path(output_path)
+    out = _resolve_plan(output_path)
 
     # Load mp_scale: explicit arg > auto-discover > default 12
     mp_scale = 12.0
     sy_path: Path | None = None
     if stations_yaml:
-        sy_path = Path(stations_yaml)
+        sy_path = _resolve_plan(stations_yaml)
     else:
         # Auto-discover: look for *_stations.yaml or stations.yaml alongside the XTC
         for candidate in p.parent.glob("*_stations.yaml"):
@@ -3102,7 +3149,8 @@ def write_plan_view(
         Absolute path of the written SVG file.
     """
     resolved_xtc = str(_resolve_plan(xtc_path)) if xtc_path else None
-    return generate_plan_view(config_path, output_path, level=level, xtc_path=resolved_xtc)
+    return generate_plan_view(str(_resolve_plan(config_path)), str(_resolve_plan(output_path)),
+                              level=level, xtc_path=resolved_xtc)
 
 
 @mcp.tool()
@@ -3127,7 +3175,8 @@ def write_elevation_view(
     Returns:
         Absolute path of the written SVG file.
     """
-    return generate_elevation_view(config_path, output_path, wall=wall, levels=levels)
+    return generate_elevation_view(str(_resolve_plan(config_path)),
+                                   str(_resolve_plan(output_path)), wall=wall, levels=levels)
 
 
 # ---------------------------------------------------------------------------
@@ -3249,7 +3298,7 @@ def validate_layout(path: str, stations_yaml: str = "") -> dict:
     """
     p = _resolve_plan(path)
     layout = parse_file(p)
-    config = load_stations_config(stations_yaml) if stations_yaml else None
+    config = load_stations_config(_resolve_plan(stations_yaml)) if stations_yaml else None
     issues = validate_layout_annotations(layout, config)
     errors = [i for i in issues if i.severity == "error"]
     warnings = [i for i in issues if i.severity == "warning"]
@@ -3308,10 +3357,10 @@ def export_layout_data(
         raise ValueError(f"format must be 'v1' or 'v2', not {format!r}")
     p = _resolve_plan(path)
     layout = parse_file(p)
-    out = Path(output_path) if output_path else p.with_name("layout_data.json")
+    out = _resolve_plan(output_path) if output_path else p.with_name("layout_data.json")
 
     if format == "v1":
-        config = load_stations_config(stations_yaml) if stations_yaml else None
+        config = load_stations_config(_resolve_plan(stations_yaml)) if stations_yaml else None
         data = build_layout_export(layout, config)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(data, indent=2), encoding="utf-8")
@@ -3373,7 +3422,7 @@ def make_timetable(path: str, operations: str, output_path: str = "") -> dict:
 
     p = _resolve_plan(path)
     layout = parse_file(p)
-    text = Path(operations).read_text(encoding="utf-8")
+    text = _resolve_plan(operations).read_text(encoding="utf-8")
     ops = json.loads(text) if operations.endswith(".json") else yaml.safe_load(text)
     issues = _check_conventions(layout)
     errors = [i.as_dict() for i in issues if i.severity == "error"]
@@ -3385,7 +3434,7 @@ def make_timetable(path: str, operations: str, output_path: str = "") -> dict:
     except TimetableError as exc:
         return {"made": False, "errors": [], "notices": [str(exc)]}
     if output_path:
-        out = Path(output_path)
+        out = _resolve_plan(output_path)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(result["table"] + "\n", encoding="utf-8")
         result["output"] = str(out)

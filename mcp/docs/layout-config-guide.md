@@ -21,6 +21,74 @@ of the room, X increases east, Y increases north, dimensions in model inches**
 
 ---
 
+## Before you begin
+
+You need XTrkCAD 5.4 (to open the layouts; its parameter files also supply the
+turnouts), an AI assistant that can use MCP servers (Claude Code or Claude
+Desktop), and [uv](https://docs.astral.sh/uv/), which installs the server.
+
+1. **Get the server.** On the project's GitHub Releases page, the
+   **latest-mcp** prerelease (or a tagged MCP release) has the package,
+   `xtrkcad_mcp-<version>-py3-none-any.whl`. Download it and install it:
+
+   ```sh
+   uv tool install ~/Downloads/xtrkcad_mcp-<version>-py3-none-any.whl
+   ```
+
+   That gives you the command `xtrkcad-mcp` (`uv tool dir --bin` shows where
+   it is). To run it from a source checkout instead, see the
+   [README](../README.md).
+
+2. **Make a folder for your layouts**, say `~/Layouts`. The tools read and
+   write files there: in this guide a file name like `hillside_division.xtc`
+   means that folder. A full path works too.
+
+3. **Connect the server to your assistant**, telling it where the folder is
+   (`XTRKCAD_PLANS_DIR`). Claude Code:
+
+   ```sh
+   claude mcp add xtrkcad -s user -e XTRKCAD_PLANS_DIR=$HOME/Layouts -- xtrkcad-mcp
+   ```
+
+   Claude Desktop: in its `claude_desktop_config.json` (Settings > Developer >
+   Edit Config), with the full path of `xtrkcad-mcp`, since the app doesn't
+   see your shell's PATH:
+
+   ```json
+   {
+     "mcpServers": {
+       "xtrkcad": {
+         "command": "/Users/you/.local/bin/xtrkcad-mcp",
+         "env": {"XTRKCAD_PLANS_DIR": "/Users/you/Layouts"}
+       }
+     }
+   }
+   ```
+
+   (macOS paths; on Windows the command is
+   `C:\\Users\\you\\.local\\bin\\xtrkcad-mcp.exe`, with each backslash doubled in JSON.)
+
+   Restart the assistant (or run `/mcp` in Claude Code) after a change.
+
+4. **Get the Hillside files.** The same release page has
+   `hillside-tutorial-files.zip`: the four YAML files below and the
+   operations file Part 2 uses. Unzip it into your layouts folder.
+
+5. **Check the connection.** Ask your assistant:
+
+   > *List the layouts in my folder.*
+
+   It calls `list_track_plans()`; an empty list is fine before you've
+   generated anything. If it says it has no such tool, the server isn't
+   connected: check step 3.
+
+**XTrkCAD and the tools share the files, not a live connection.** The tools
+read what is saved on disk, so save in XTrkCAD before you ask for a check.
+When a tool changes a layout, close it in XTrkCAD first, or reload it after:
+XTrkCAD doesn't lock files, so whichever saves last wins.
+
+---
+
 ## 1. Top-level config
 
 `hillside_division.yaml` is the entry point.  Open it and you will see:
@@ -643,6 +711,17 @@ generate the layout again to start over.  Version 1 of the tool takes straight
 (rectangular) shelves along the walls, meeting at right angles, with one
 station per shelf.
 
+**Check the track.** Open the `.xtc` in XTrkCAD and look at it, then use its
+**Reports** menu: **Gaps** (ends that should meet but don't, with a maximum gap
+to choose), **Kinked Joints** (tracks that meet at an angle), **Short Tracks**
+(filler pieces too short to be useful) and **Track Clearance** (tracks drawn
+closer than they can run). The MCP has a simpler
+`write_gaps_report` and `find_unconnected_endpoints`; the app's reports are the
+fuller check, and they show each place on the layout. A plan from
+`generate_track_plan` passes them (turnouts that stand back to back are butted,
+with no filler between them); one you drew or changed by hand is worth checking
+every time.
+
 ---
 
 ## 6. Next: operating data
@@ -662,13 +741,14 @@ this guide leaves it.
 Most read and report tools take two optional arguments that limit them to part
 of the layout: `layers` (layer names or index numbers) and `groups` (Layer
 Group names).  Only tracks and notes on the selected layers are used.  This is
-how one file holding two railroads gets a separate report for each:
+how one file holding two railroads (here with Layer Groups `Eastern` and `Western`)
+gets a separate report for each:
 
 ```
 get_layer_groups("my_layout.xtc")
-write_layout_report("my_layout.xtc", "nye_report.html", format="html",
-                    groups=["NYE"])
-get_station_distances("my_layout.xtc", groups=["C&O"])
+write_layout_report("my_layout.xtc", "eastern_report.html", format="html",
+                    groups=["Eastern"])
+get_station_distances("my_layout.xtc", groups=["Western"])
 ```
 
 `get_operation_density` classifies each layer, in this order: an explicit
@@ -681,7 +761,7 @@ mainline.
 
 ## Quick-start checklist
 
-1. Copy the three Hillside files to a new folder and rename them for your layout.
+1. Copy the four Hillside YAML files (from `hillside-tutorial-files.zip`, see "Before you begin") to a new folder and rename them for your layout.
 2. Edit the floor plan: adjust room size, door position, any partitions or restricted areas.
 3. Sketch your benchwork plan on paper, then translate it to benchwork sections in the YAML — one entry per physical shelf module.
 4. Set `elevation:` and `thickness:` on every section.

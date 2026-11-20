@@ -315,7 +315,10 @@ def test_generate_track_plan_writes_connected_track(tmp_path):
     assert result["backup_path"]                  # the benchwork-only file is kept
     parsed = parse_file(layout)
     tracks = [t for t in parsed.tracks if t.kind in ("STRAIGHT", "CURVE", "TURNOUT")]
-    assert len(tracks) == result["pieces"] == 61
+    assert len(tracks) == result["pieces"] == 58
+    # Turnouts that stand back to back are butted: no filler straight shorter
+    # than XTrkCAD's Short Tracks report flags (1 in) is left between them.
+    assert not [t.id for t in tracks if t.kind == "STRAIGHT" and t.length_model_inches() < 1.0]
     open_ends = [ep for t in tracks for ep in t.endpoints if ep.connected_to is None]
     assert len(open_ends) == result["open_ends"] == 8
     by_id = {t.id: t for t in parsed.tracks}
