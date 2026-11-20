@@ -1,8 +1,9 @@
 name: CI (MCP)
 on:
   push:
+    # Not main: a push to main runs release-mcp.yml, which calls this
+    # workflow and then publishes the rolling latest-mcp prerelease.
     branches:
-      - main
       - test/**
     paths:
       - 'mcp/**'
@@ -15,7 +16,7 @@ on:
       - 'mcp/**'
       - '.github/workflows/ci-mcp.yml'
       - '.github/workflows/release-mcp.yml'
-  # release-mcp.yml runs these tests before it builds anything.
+  # release-mcp.yml runs these jobs before it builds anything.
   workflow_call:
 
 # MCP (mcp/) has its own workflow rather than a job in ci-gtk3.yml, so it
@@ -41,3 +42,39 @@ jobs:
       - name: Run MCP tests
         working-directory: mcp
         run: uv run --extra dev pytest -q
+
+  # The Hillside tutorial as one PDF (Part 1, Part 2, the conventions spec
+  # as an appendix), built from the Markdown on every run so a change that
+  # breaks it shows up on its PR. release-mcp.yml attaches it to the
+  # releases; it's never committed.
+  tutorial-pdf:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          python-version: "3.14"
+      - name: Install the libraries and fonts weasyprint uses
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends \
+            libpango-1.0-0 libpangoft2-1.0-0 fonts-dejavu-core
+      - name: Build the PDF
+        env:
+          LINK_BASE: ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/mcp/docs
+        run: |
+          version=$(uv run --no-project python -c \
+            "import tomllib; print(tomllib.load(open('mcp/pyproject.toml', 'rb'))['project']['version'])")
+          case "$GITHUB_REF" in
+            refs/tags/mcp-v*) ;;
+            *) version="$version, development build ${GITHUB_SHA::8}" ;;
+          esac
+          uv run --no-project --with pypandoc_binary --with weasyprint \
+            python mcp/docs/build_tutorial_pdf.py xtrkcad-mcp-hillside-tutorial.pdf \
+            --link-base "$LINK_BASE" --version "$version"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: xtrkcad-mcp-tutorial-pdf
+          path: xtrkcad-mcp-hillside-tutorial.pdf
+          if-no-files-found: error

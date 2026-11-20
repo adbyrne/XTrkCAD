@@ -1,21 +1,31 @@
 name: Release (MCP)
 
-# Builds the MCP server package (mcp/: sdist and wheel) and, for an
-# mcp-v<version> tag, drafts a GitHub Release with both attached. Git-only,
-# like the rest of mcp/; the app's release.yml never publishes it.
+# Builds the MCP server package (mcp/: sdist and wheel) and the Hillside
+# tutorial PDF. For an mcp-v<version> tag it drafts a GitHub Release with all
+# three attached; for a push to main (an MCP change merged) it replaces the
+# rolling "latest-mcp" prerelease with them. Git-only, like the rest of mcp/;
+# the app's release.yml never publishes it.
 #
 #   git tag mcp-v0.1.0 && git push origin mcp-v0.1.0
 #
 # The tag must match mcp/pyproject.toml's version (check-version). A trial
 # tag, mcp-v<version>-test<N>, does the whole run and drafts a prerelease:
-# delete that draft and the tag afterwards. A dispatch (once this file is on
-# main) runs the tests and builds the package as an artifact, without
-# releasing. A draft is published by hand once it has been looked at.
+# delete that draft and the tag afterwards. A dispatch runs the tests and
+# builds the package and PDF as artifacts, without releasing. A draft is
+# published by hand once it has been looked at.
 
 on:
   push:
     tags:
       - 'mcp-v*'
+    # An MCP change merged: the same paths as ci-mcp.yml, which leaves main
+    # to this workflow and runs from here (tests and the PDF).
+    branches:
+      - main
+    paths:
+      - 'mcp/**'
+      - '.github/workflows/ci-mcp.yml'
+      - '.github/workflows/release-mcp.yml'
   workflow_dispatch:
 
 jobs:
@@ -39,6 +49,12 @@ jobs:
         run: |
           version=$(uv run --no-project python -c \
             "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          # A build from main isn't the release: a .dev<run> version sorts
+          # before it, and each latest-mcp wheel has its own name.
+          if [ "$GITHUB_REF" = refs/heads/main ]; then
+            version="$version.dev$GITHUB_RUN_NUMBER"
+            sed -i "s/^version = \".*\"/version = \"$version\"/" pyproject.toml
+          fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "MCP package version: $version"
       - name: check-version (tag matches pyproject.toml)
@@ -71,6 +87,10 @@ jobs:
         with:
           name: xtrkcad-mcp-${{ needs.build.outputs.version }}
           path: dist
+      - uses: actions/download-artifact@v8
+        with:
+          name: xtrkcad-mcp-tutorial-pdf
+          path: dist
       - name: Draft the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -81,4 +101,44 @@ jobs:
           case "$TAG" in *-test*) trial="--prerelease" ;; esac
           gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --draft $trial \
             --title "XTrkCAD MCP server $VERSION${trial:+ (trial $TAG)}" \
-            --notes "The MCP server for XTrkCAD layouts, version $VERSION. Install the wheel with pip or uv; see mcp/README.md."
+            --notes "The MCP server for XTrkCAD layouts, version $VERSION. Install the wheel with pip or uv; see mcp/README.md. xtrkcad-mcp-hillside-tutorial.pdf is the Hillside tutorial (both parts, with the conventions spec as an appendix)."
+
+  # Rolling prerelease of the newest MCP on main: one permanent URL,
+  #   <server>/<owner>/<repo>/releases/tag/latest-mcp
+  # deleted and recreated on each merge, like the app's latest-main. Never
+  # marked "Latest", so the app's own releases keep that place.
+  latest-mcp:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: latest-mcp-release
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: xtrkcad-mcp-${{ needs.build.outputs.version }}
+          path: dist
+      - uses: actions/download-artifact@v8
+        with:
+          name: xtrkcad-mcp-tutorial-pdf
+          path: dist
+      - name: Replace the rolling latest-mcp prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          ls -l dist
+          gh release delete latest-mcp --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
+          gh release create latest-mcp dist/* --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" --prerelease --latest=false \
+            --title "XTrkCAD MCP server: latest development build" \
+            --notes "$(printf '%s\n' \
+              '**Updated on every MCP change merged into main.** A development build, not a release.' \
+              '' \
+              "MCP server $VERSION, built from commit $GITHUB_SHA. Install the wheel with pip or uv; see mcp/README.md." \
+              '' \
+              'xtrkcad-mcp-hillside-tutorial.pdf: the Hillside tutorial, both parts, with the conventions spec as an appendix.')"

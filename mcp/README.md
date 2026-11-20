@@ -55,8 +55,11 @@ uv run --extra dev pytest
 ## CI
 
 `.github/workflows/ci-mcp.yml` runs the tests on Linux (Ubuntu 24.04 and 26.04), macOS and
-Windows on pushes to `main` or `test/**` and PRs into `main` that change `mcp/` or one of the
-two MCP workflows. It's separate from the C application's CI, and the other way round: the
+Windows on pushes to `test/**` and PRs into `main` that change `mcp/` or one of the two MCP
+workflows (on `main`, `release-mcp.yml` runs it). Its `tutorial-pdf` job builds the Hillside
+tutorial as one PDF with `docs/build_tutorial_pdf.py` (pandoc and weasyprint): Part 1, Part 2
+and the conventions spec as an appendix, with the screenshots. The PDF is an artifact, never
+committed; the Markdown stays the source. It's separate from the C application's CI, and the other way round: the
 app's workflows (`ci-gtk3.yml`, `release.yml`, ...) only run for the app's paths, so a change
 only under `mcp/` runs just this one. Python is pinned to 3.14: unpinned, `uv` picked macOS's
 3.15, which `rpds-py`'s PyO3 build can't target yet.
@@ -70,12 +73,18 @@ only under `mcp/` runs just this one. Python is pinned to 3.14: unpinned, `uv` p
 git tag mcp-v0.1.0 && git push origin mcp-v0.1.0
 ```
 
-It runs the tests (it calls `ci-mcp.yml`), checks the tag matches `pyproject.toml`, builds the
-sdist and wheel with `uv build`, and drafts a GitHub Release named "XTrkCAD MCP server
-<version>" with both attached; publish the draft by hand after a look. A trial tag,
+It runs the tests and builds the PDF (it calls `ci-mcp.yml`), checks the tag matches
+`pyproject.toml`, builds the sdist and wheel with `uv build`, and drafts a GitHub Release named
+"XTrkCAD MCP server <version>" with the wheel, the sdist and the tutorial PDF attached; publish
+the draft by hand after a look.
+
+Each merge into `main` that changes `mcp/` also replaces the rolling **`latest-mcp`**
+prerelease (`releases/tag/latest-mcp`) with the same three files, built from that commit. Its
+package version is `<version>.dev<run number>`, which sorts before the release. It's never
+marked "Latest", so the app's releases keep that place. A trial tag,
 `mcp-v0.1.0-test1`, does the whole run and drafts a prerelease; delete the draft and the tag
 afterwards. A dispatch (`gh workflow run release-mcp.yml`) runs the tests and builds the
-package as an artifact without releasing. The app's `release.yml` never publishes the MCP, and its `v*.*.*` tags
+package and PDF as artifacts without releasing. The app's `release.yml` never publishes the MCP, and its `v*.*.*` tags
 don't start this workflow.
 
 `.github/dependabot.yml` has Dependabot open one grouped pull request a week that updates
