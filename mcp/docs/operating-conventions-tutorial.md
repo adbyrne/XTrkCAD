@@ -65,18 +65,18 @@ generate_layout("hillside_division.yaml", "hillside_division.xtc")
 generate_track_plan("hillside_division.yaml", "hillside_division.xtc")
 ```
 
-*[Screenshot: the Hillside layout in XTrkCAD, Level 1.]*
+![The Hillside layout in XTrkCAD: the yard and Alder on the west wall, Birch on the north, Cedar on the east](images/tutorial/hillside-level1.png)
 
 **Layer names.** Hillside's layers are named `L1-Main`, `L1-Passing`, `L1-Storage` and so on:
 the `L1-` prefix is the level (deck), the rest says what kind of track the layer holds [3.3].
 
 **JSON Notes.** A JSON Note is an XTrkCAD note whose text is one JSON object, like
-`{"kind": "station", "id": "AL"}`. Place one with **Draw > Note > JSON Note** (or the Notes
-button on the toolbar): click where it goes, then type the object into the dialog's **JSON**
-field. Every note the conventions read has a `kind` (what it is) and an `id` (its short name);
+`{"kind": "station", "id": "AL"}`. Place one with **Draw > Notes > JSON Note**: click where it goes, then
+type the object into the box at the top of the dialog (it starts with a template) and press
+**Validate**. Every note the conventions read has a `kind` (what it is) and an `id` (its short name);
 the other fields depend on the kind [4.0].
 
-*[Screenshot: the JSON Note dialog with a station note.]*
+![The JSON Note dialog with Alder's station note, validated](images/tutorial/json-note-dialog.png)
 
 **Position is data.** A note belongs to the nearest track **on its own layer**: put a station's
 note on an `L1-Main` layer, on the main. A note that lands beside its track is reported:
@@ -115,7 +115,7 @@ layer on each level (**Manage > Layer Groups…** shows them):
 | `Connecting` | L1-Connecting, L2-Connecting |
 | `Service` | L1-Service, L2-Service |
 
-*[Screenshot: the Layer Groups dialog.]*
+![The Layer Groups dialog: the Mainline group holds L1-Main and L2-Main](images/tutorial/layer-groups-dialog.png)
 
 (The `Level 1` and `Level 2` groups are for showing and printing one deck; they aren't
 categories.)
@@ -167,7 +167,7 @@ throat, the first switch the main meets, and counts one MP per foot:
 
 Place it on `L1-Main` at the yard throat switch, at its points (x 12, y 67.7).
 
-*[Screenshot: the MP_ZERO note on the yard throat switch.]*
+![The MP_ZERO note on the yard throat switch](images/tutorial/mp-zero.png)
 
 - `mp_scale` and `mp_unit` (`in`, `ft`, `cm` or `m`) say how long one MP is: 12 in here. Pick
   whatever makes your timetable read well; a big layout might use 24 in.
@@ -291,7 +291,7 @@ The export's `yard_limits` then has Cedar's zone from the board to the end of th
 
 The other stations keep their default zones (`source: station`).
 
-*[Screenshot: the CE yard-limit note on the main below Cedar.]*
+![Cedar: the yard-limit board on the way in, the terminus note on the runaround's north switch, the station note between the switches](images/tutorial/ce-yard-limit.png)
 
 - One board is enough only at a terminus, where trains come from one side. Anywhere else trains
   come from both ends, so a zone has a board at each end, or none. A single board for Alder,
@@ -347,7 +347,7 @@ Place it on `L1-Storage` (x 10, y 130). A team track without `station` stands al
 any station, and is a timetable stop itself. One track that is both a team track and a house
 track (chapter 9) carries both notes.
 
-*[Screenshot: the Alder feed mill and team track notes.]*
+![Alder: the feed mill and team track notes on their spurs, the station note on the main](images/tutorial/al-feed-team.png)
 
 The export lists each with its spots and what its track holds:
 
@@ -403,7 +403,7 @@ Place them on `L1-Storage`, one on each yard track toward its south end (x 12, 1
 y 20). Track 1, straight off the main, is where trains arrive and leave; the other two are for
 sorting cars.
 
-*[Screenshot: the three yard-track notes at the south end of the yard.]*
+![Hillside yard: a note on each yard track, and the station note on Track 1](images/tutorial/hy-yard-tracks.png)
 
 The export's `yards` gives each track's capacity:
 
@@ -460,7 +460,7 @@ are spotted:
 Place it on `L1-Service` (x 134, y 106). Its track holds 3 cars, and the export has
 `capacity_cars: 3`, `car_spots: 3`.
 
-*[Screenshot: the Cedar coal trestle note.]*
+![Cedar: the coal trestle note on its spur east of the main](images/tutorial/ce-coal.png)
 
 `car_spots` on a facility or storage track has **no default**. Only spots a note gives count as
 car storage in Op Density (9.1 in the spec): a turntable or water tank holds no cars, and isn't
