@@ -146,7 +146,7 @@ All write-report tools accept a `format` parameter: `"txt"` (default), `"md"`, `
 | `write_operation_density_report` | Operational density by layer category |
 | `write_equipment_report` | Equipment suitability (PASS/MARGINAL/FAIL) vs. minimum curve radius |
 | `write_turnout_report` | Turnout count and density per 100 ft, by layer |
-| `write_gaps_report` | Open endpoints, near-miss pairs, turntable stall summary |
+| `write_gaps_report` | Open endpoints, near-miss pairs, turntable stall summary (a sectional turntable drawn as a turnout counts as a turntable). XTrkCAD's own Reports menu (Gaps with a maximum gap, Short Tracks, Track Clearance) is the fuller track check |
 | `write_radius_map` | SVG colour-coded curve radius map |
 | `write_station_distance_report` | Station-to-station distances. With convention notes: per railroad and subdivision, from each station's MP and the subdivision's `mp_scale` (a joint station once on each); otherwise track-graph distances between `STATION:` notes |
 
@@ -202,21 +202,24 @@ layout step by step.
 
 | Tool | Description |
 |---|---|
-| `get_stations` | Station notes and the track each one snaps to |
+| `get_stations` | The stations: with convention notes, each station note and its MP; with older `STATION:` text notes, the track each snaps to |
 | `get_siding_capacities` | Usable track length and car capacity for all annotated segments |
-| `get_station_distances` | Milepost and inter-station distances |
-| `list_labeled_segments` | Audit all annotated tracks before running validate/export |
-| `validate_layout` | Check the annotations for completeness |
+| `get_station_distances` | Distances between stations: along the main between their MPs with convention notes (the export's figures), else the track path between `STATION:` notes |
+| `list_labeled_segments` | Audit the older text annotations before `validate_layout` or the v1 export |
+| `validate_layout` | The older check, for `STATION:`/`REFERENCE:` text notes and the v1 export; with convention notes use `check_conventions` |
 | `export_layout_data` | Write `layout_data.json` v2 (schema: [docs/layout_data_v2.md](docs/layout_data_v2.md)); refuses while `check_conventions` finds errors unless `force=True`; `format="v1"` writes the previous format |
 | `make_timetable` | A simple timetable from the layout's stations, MPs, yard limits and car spots plus an operations file (fast clock, speeds, stop times, trains; tutorial chapter 13), with the model speed it implies |
 
 ### Edit
 
+Close the layout in XTrkCAD before editing it with a tool, or reload it after: XTrkCAD doesn't lock
+files, so whichever saves last wins. Every editing tool copies the layout to `<name>_vN.xtc` first.
+
 | Tool | Description |
 |---|---|
-| `delete_track` | Remove a single track object by ID |
+| `delete_track` | Remove a single track object by ID (backs the layout up first) |
 | `find_dead_connections` | Find T-endpoint references to non-existent tracks |
-| `fix_dead_connections` | Convert dead T-endpoints to open E-endpoints |
+| `fix_dead_connections` | Convert dead T-endpoints to open E-endpoints (backs the layout up first) |
 
 ## Layout config YAML
 
