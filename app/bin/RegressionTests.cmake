@@ -93,7 +93,7 @@ endforeach()
 # The paramcheck test cases (RegressionParamCheck.<case>, script
 # regress-paramcheck-<case>.xtr). Set once: the home dirs, the tests and the
 # INPUT ERROR pattern below all use it.
-set(_xtrkcad_paramcheck_cases block wrong undo props gapsmax longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends splitops trimmerge blockmove switchmotor easement shorttracks trackclearance)
+set(_xtrkcad_paramcheck_cases block wrong undo props gapsmax longname longkeep drawlen longsignal manage carnew carfind carsedit carsdelete carscsv carsproto jsonnote todesign layers modify reports movebelow blockends splitops trimmerge blockmove switchmotor easement shorttracks trackclearance gapsturntable)
 foreach(_xtrkcad_paramcheck_case IN LISTS _xtrkcad_paramcheck_cases)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-${_xtrkcad_paramcheck_case}")
 endforeach()
@@ -398,6 +398,21 @@ add_test(NAME RegressionParamCheck.shorttracks_check
 )
 set_tests_properties(RegressionParamCheck.shorttracks_check PROPERTIES
     FIXTURES_REQUIRED regression_shorttracks
+    LABELS "regression;regression-ci"
+)
+# The Gaps report with a sectional turntable drawn as a turnout (Development
+# Issues #88): its unused positions are turntable stalls, not open ends.
+# Against gapsturntable-expected/.
+set_tests_properties(RegressionParamCheck.gapsturntable PROPERTIES
+    FIXTURES_SETUP regression_gapsturntable
+    FAIL_REGULAR_EXPRESSION "NOTICE ID: MSG_PLAYBACK_LISTENTRY")
+add_test(NAME RegressionParamCheck.gapsturntable_check
+    COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-reports-test.sh"
+        "${_xtrkcad_compare_dir}/gapsturntable-expected"
+        "${XTRKCAD_REGRESSION_HOME_ROOT}/paramcheck-gapsturntable/.${XTRKCAD_BIN}"
+)
+set_tests_properties(RegressionParamCheck.gapsturntable_check PROPERTIES
+    FIXTURES_REQUIRED regression_gapsturntable
     LABELS "regression;regression-ci"
 )
 # The Track Clearance report saved by its own test (Development Issues #87),

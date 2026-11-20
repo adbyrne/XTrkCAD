@@ -317,7 +317,11 @@ whenever the report is generated or refreshed.
 
 Turntable stall endpoints are always open by design and are excluded from
 this report's pairing analysis entirely -- they're counted in the summary
-line but never listed as a gap. This is a deliberate difference from the
+line but never listed as a gap. That includes a sectional turntable from a
+parameter file, which XTrkCAD keeps as a turnout with many positions (for
+example Walthers' 90' turntable): a turnout with more than four ends that
+all point straight out from one centre counts as a turntable, so its unused
+positions aren't gaps. This is a deliberate difference from the
 Unconnected Endpoints Report (\ref cmdReports), which lists every open
 endpoint including turntable stalls.
 

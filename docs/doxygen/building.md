@@ -546,6 +546,10 @@ bug:
   facing open ends, 0.2 in and 0.6 in apart, give 0, 1 and 2 near-miss rows at Connection
   distance, 0.25 in and 1.0 in (`PARAMCHECK reportsgaps list count`), and reopening the report
   keeps the choice.
+  `gapsturntable` covers a sectional turntable drawn as a turnout (Development Issues #88): 8
+  positions on a circle, 2 with stall tracks; the saved Gaps report (`gapsturntable_check`,
+  against `gapsturntable-expected/`) counts its 6 unused positions as turntable stalls, not open
+  ends.
   `shorttracks` covers the Short Tracks report (Development Issues #86): four short straights give
   1, 2, 3 and 4 rows at a Maximum length of 0.5, 1, 2 and 4 in, reopening the report keeps the
   choice, and the report saved at 1 in, with one track flagged as on neither connected track's
