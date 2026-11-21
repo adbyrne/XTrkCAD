@@ -56,7 +56,7 @@ For verification purposes, a token was provided and file created in the xtrkcad_
 
 Some leniency in local builds allows the app id to change and include the version so that different builds of a flatpak can be run side-by-side for comparison if desired. This won't be allowed in offical flatpak releases on flathub; the app id stays the same, and only the metainfo changes per version.
 
-When run for the first time, `~/.xtrkcad-version_hash-fp` directories are created to contain the initialization file and options chosen. It will also contain the files created for regression tests if run. The _version_ portion uses underscores instead of periods.
+When run for the first time, `~/.xtrkcadVersion_hash-fp` directories are created to contain the initialization file and options chosen. It will also contain the files created for regression tests if run. The _Version_ portion uses underscores instead of periods.
 
 ## buildFlatpak.sh
 
@@ -68,13 +68,13 @@ This script saves you from manually entering all the commands to build the flatp
 # show help
 # ./distribution/flatpak/buildFlatpak.sh -h
 #
-# build flatpak using workdir with version (~/.xtrkcad-ver-fp)
+# build flatpak using workdir with version (~/.xtrkcadVer-fp)
 # ./distribution/flatpak/buildFlatpak.sh
 #
 # build flatpak with debug, modified About, using workdir with version
 # ./distribution/flatpak/buildFlatpak.sh -d
 #
-# build flatpak with debug, modified About, using workdir with hash (~/.xtrkcad-ver_hash-fp)
+# build flatpak with debug, modified About, using workdir with hash (~/.xtrkcadVer_hash-fp)
 # ./distribution/flatpak/buildFlatpak.sh -d --hash
 
 ./distribution/flatpak/buildFlatpak.sh -d
