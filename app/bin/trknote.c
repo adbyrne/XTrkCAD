@@ -411,9 +411,6 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 {
 	struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
 	BOOL_T rc = TRUE;
-#ifdef UTFCONVERT
-	unsigned strings2convert = 1;
-#endif
 
 	rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d", GetTrkIndex(t),
 	              GetTrkLayer(t),
@@ -428,29 +425,19 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 	case OP_NOTELINK:
 		s[0]=ConvertToEscapedText( xx->noteData.linkData.url );
 		s[1]=ConvertToEscapedText( xx->noteData.linkData.title );
-#ifdef UTFCONVERT
-		strings2convert = 2;
-#endif
 		break;
 	case OP_NOTEFILE:
 		s[0]=ConvertToEscapedText( xx->noteData.fileData.path );
-		s[1]=ConvertToEscapedText( xx->noteData.fileData.title );
 #ifdef UTFCONVERT
-		strings2convert = 2;
+		// Text is UTF-8 everywhere, but a file name is in the system code
+		// page on Windows, as fopen() needs it; the file is UTF-8
+		s[0] = Convert2UTF8( s[0] );
 #endif
+		s[1]=ConvertToEscapedText( xx->noteData.fileData.title );
 		break;
 	default:
 		CHECKMSG( FALSE, ( "WriteNote: %d", xx->op ) );
 	}
-#ifdef UTFCONVERT
-	for ( unsigned int inx = 0; inx < strings2convert; inx++ ) {
-		if ( RequiresConvToUTF8( s[inx] ) ) {
-			wSystemToUTF8 ( s[inx], message, sizeof message );
-			MyFree( s[inx] );
-			s[inx] = MyStrdup( message );
-		}
-	}
-#endif
 	rc &= fprintf( f, " \"%s\"", s[0] )>0;
 	MyFree(s[0]);
 	if ( s[1] ) {
@@ -501,25 +488,16 @@ ReadTrackNote(char *line)
 			if ( !GetArgs( cp, "qc", &sText, &cp ) ) {
 				return FALSE;
 			}
-#ifdef UTFCONVERT
-			ConvertUTF8ToSystem( sText );
-#endif
 			xx->noteData.text = sText;
 			break;
 		case OP_NOTELINK:
 			if ( !GetArgs( cp, "qc", &sText, &cp ) ) {
 				return FALSE;
 			}
-#ifdef UTFCONVERT
-			ConvertUTF8ToSystem( sText );
-#endif
 			xx->noteData.linkData.url = sText;
 			if ( !GetArgs( cp, "qc", &sText, &cp ) ) {
 				return FALSE;
 			}
-#ifdef UTFCONVERT
-			ConvertUTF8ToSystem( sText );
-#endif
 			xx->noteData.linkData.title = sText;
 			break;
 		case OP_NOTEFILE:
@@ -533,9 +511,6 @@ ReadTrackNote(char *line)
 			if ( !GetArgs( cp, "qc", &sText, &cp ) ) {
 				return FALSE;
 			}
-#ifdef UTFCONVERT
-			ConvertUTF8ToSystem( sText );
-#endif
 			xx->noteData.fileData.title = sText;
 			xx->noteData.fileData.inArchive = FALSE;
 			break;

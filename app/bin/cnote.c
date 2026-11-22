@@ -93,25 +93,11 @@ BOOL_T WriteMainNote(FILE* f)
 	const char *noteText = mainText;
 
 	if (noteText && *noteText) {
-#ifdef UTFCONVERT
-		char *out = NULL;
-		if (RequiresConvToUTF8(mainText)) {
-			size_t cnt = strlen(mainText) * 2 + 1;
-			out = MyMalloc(cnt);
-			wSystemToUTF8(mainText, out, (unsigned int)cnt);
-			noteText = out;
-		}
-#endif // UTFCONVERT
 
 		char * sText = ConvertToEscapedText( noteText );
 		rc &= fprintf(f, "NOTE MAIN 0 0 0 0 0 \"%s\"\n", sText )>0;
 		MyFree( sText );
 
-#ifdef UTFCONVERT
-		if (out) {
-			MyFree(out);
-		}
-#endif // UTFCONVERT
 	}
 	return rc;
 }

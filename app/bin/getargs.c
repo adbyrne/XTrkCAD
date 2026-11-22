@@ -35,9 +35,6 @@
 #include "fileio.h"
 #include "misc.h"
 
-#ifdef UTFCONVERT
-#include "include/utf8convert.h"
-#endif // UTFCONVERT
 
 /**
  * Show an error message if problems occur during loading of a param or layout file.
@@ -327,9 +324,6 @@ EXPORT BOOL_T GetArgs(
 			} else {
 				message[0] = '\0';
 			}
-#ifdef UTFCONVERT
-			ConvertUTF8ToSystem(message);
-#endif
 			*qp = (char*)ConvertFromEscapedText(message);
 			break;
 		case 'c':

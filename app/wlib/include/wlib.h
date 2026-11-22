@@ -30,6 +30,7 @@ bool wSystemToUTF8(const char *inString, char *outString,
 bool wUTF8ToSystem(const char *inString, char *outString,
                    unsigned outStringLength);
 bool wIsUTF8(const char *string);
+bool wTextToUTF8(char *text, size_t size);
 
 /*
  * Interface types

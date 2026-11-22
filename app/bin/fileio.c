@@ -49,9 +49,6 @@
 #include "ctrain.h"
 #include "form.h"
 
-#ifdef UTFCONVERT
-#include "include/utf8convert.h"
-#endif // UTFCONVERT
 
 #define COPYBLOCKSIZE	1024
 
@@ -262,14 +259,6 @@ EXPORT char * PutTitle( char * cp )
 	}
 	*tp = '\0';
 
-#ifdef UTFCONVERT
-	if (RequiresConvToUTF8(title)) {
-		char *out = MyMalloc(cnt);
-		wSystemToUTF8(title, out, (unsigned int)cnt);
-		strcpy(title, out);
-		MyFree(out);
-	}
-#endif // UTFCONVERT
 
 	return title;
 }
@@ -394,6 +383,8 @@ BOOL_T ReadTrackFile(
 			}
 		}
 		Stripcr( paramLine );
+		// Old layouts hold their non-ASCII text in cp1252 (wTextToUTF8())
+		wTextToUTF8( paramLine, sizeof paramLine );
 		if (paramLine[0] == '#' ||
 		    paramLine[0] == '\n' ||
 		    paramLine[0] == '\0' ) {
@@ -434,14 +425,8 @@ BOOL_T ReadTrackFile(
 				break;
 			}
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
-#ifdef UTFCONVERT
-			ConvertUTF8ToSystem(paramLine + 7);
-#endif // UTFCONVERT
 			SetLayoutTitle(paramLine + 7);
 		} else if (strncmp( paramLine, "TITLE2 ", 7 ) == 0) {
-#ifdef UTFCONVERT
-			ConvertUTF8ToSystem(paramLine + 7);
-#endif // UTFCONVERT
 			SetLayoutSubtitle(paramLine + 7);
 		} else if (strncmp( paramLine, "ROOMSIZE", 8 ) == 0) {
 			if ( ParseRoomSize( paramLine+8, &roomSize ) ) {

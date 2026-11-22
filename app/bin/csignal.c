@@ -57,9 +57,6 @@
 #include "form.h"
 #include "track.h"
 #include "common-ui.h"
-#ifdef UTFCONVERT
-#include "include/utf8convert.h"
-#endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_SIGNAL = -1;
 
@@ -335,9 +332,6 @@ static BOOL_T WriteSignal ( track_p t, FILE * f )
 	signalData_p xx = GetsignalData(t);
 	char *signalName = MyStrdup(xx->name);
 
-#ifdef UTFCONVERT
-	signalName = Convert2UTF8(signalName);
-#endif // UTFCONVERT
 
 	rc &= fprintf(f, "SIGNAL %d %u %s %d %0.6f %0.6f %0.6f %d \"%s\"\n",
 	              GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t),
@@ -375,9 +369,6 @@ static BOOL_T ReadSignal ( char * line )
 		return FALSE;
 	}
 
-#ifdef UTFCONVERT
-	ConvertUTF8ToSystem(name);
-#endif // UTFCONVERT
 
 	DYNARR_RESET( signalAspect_p, signalAspect_da );
 	while ( (cp = GetNextLine()) != NULL ) {

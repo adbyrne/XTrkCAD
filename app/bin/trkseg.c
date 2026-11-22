@@ -1541,9 +1541,6 @@ EXPORT BOOL_T WriteSegsEnd(
 	long option;
 	char * escaped_text;
 	const char* trackText;
-#ifdef UTFCONVERT
-	char* out = NULL;
-#endif
 
 	for ( i=0; i<segCnt; i++ ) {
 		switch ( segs[i].type ) {
@@ -1637,14 +1634,6 @@ EXPORT BOOL_T WriteSegsEnd(
 			break;
 		case SEG_TEXT: /* 0pf0fq */
 			trackText = segs[i].u.t.string;
-#ifdef UTFCONVERT
-			if (RequiresConvToUTF8(segs[i].u.t.string)) {
-				size_t cnt = strlen(segs[i].u.t.string) * 2 + 1;
-				out = MyMalloc(cnt);
-				wSystemToUTF8(segs[i].u.t.string, out, (unsigned int)cnt);
-				trackText = out;
-			}
-#endif // UTFCONVERT
 			escaped_text = ConvertToEscapedText(trackText);
 			rc &= fprintf( f, "\t%c %lu %0.6f %0.6f %0.6f %d %0.6f \"%s\" %d %lu\n",
 			               segs[i].type, segs[i].color,
@@ -1652,10 +1641,6 @@ EXPORT BOOL_T WriteSegsEnd(
 			               segs[i].u.t.boxed, segs[i].u.t.fontSize,
 			               escaped_text, segs[i].u.t.filled, segs[i].bg_color ) > 0;
 			MyFree(escaped_text);
-#ifdef UTFCONVERT
-			MyFree(out);
-			out = NULL;
-#endif
 			break;
 		default:
 			if ( log_trkseg < 0 ) { log_trkseg = LogFindIndex( "trkseg" ); }

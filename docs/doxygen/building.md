@@ -475,10 +475,15 @@ bug:
   `日本`). `roundtrip` and `roundtrip_check` save it as `RegressionRoundTrip.*` does, and
   `tools/check-roundtrip-utf8.sh` compares every non-ASCII line with the source byte for byte.
   `describe` opens Properties on every object as `RegressionDescribe.*` does, and fails on a Pango
-  "Invalid UTF-8" warning. They're a group of their own because they check something that differs
-  by platform: on Windows `UTFCONVERT` (`common.h`) converts text read from a file to the system
-  code page and back when it's written, so `regression-windows` runs them, unlike
-  `RegressionDescribe.*` (Development Issues #83).
+  "Invalid UTF-8" warning. `cp1252`, `cp1252_check` and `cp1252_describe` do the same with
+  `roundtrip-cp1252.xtc`, the same objects with their text in cp1252, as layouts made from the
+  parameter files before 2017 and layouts saved on Windows before 5.4.0 have it: the save has to
+  match `roundtrip-cp1252-expected.xtc`, in UTF-8. Every line read from a layout or parameter file
+  that isn't valid UTF-8 is converted from cp1252 (`wTextToUTF8()`). They're a group of their own
+  because Windows used to differ: `UTFCONVERT` (`common.h`) converted text to the system code page
+  when it was read, which lost every character the code page doesn't have. Now it only converts
+  file names, so `regression-windows` runs them, unlike `RegressionDescribe.*` (Development Issues
+  #83).
 - **Properties without an edit (`RegressionDescribe.*`)** — one test per example layout:
   `-Tdescribe:<layout>` loads it, saves and reloads it, then opens Properties on every object except
   notes and presses Done, as a click with the Describe command does (`LayoutDescribeTest()`,

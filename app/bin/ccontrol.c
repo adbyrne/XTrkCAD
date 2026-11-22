@@ -56,9 +56,6 @@
 #include "form.h"
 #include "track.h"
 #include "common-ui.h"
-#ifdef UTFCONVERT
-#include "utf8convert.h"
-#endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_CONTROL = -1;
 
@@ -292,9 +289,6 @@ static BOOL_T WriteControl ( track_p t, FILE * f )
 	controlData_p xx = GetcontrolData(t);
 	char *controlName = MyStrdup(xx->name);
 
-#ifdef UTFCONVERT
-	controlName = Convert2UTF8(controlName);
-#endif // UTFCONVERT
 
 	rc &= fprintf(f, "CONTROL %d %u %s %d %0.6f %0.6f \"%s\" \"%s\" \"%s\"\n",
 	              GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t),
@@ -323,9 +317,6 @@ static BOOL_T ReadControl ( char * line )
 		return FALSE;
 	}
 
-#ifdef UTFCONVERT
-	ConvertUTF8ToSystem(name);
-#endif // UTFCONVERT
 
 	trk = NewTrack(index, T_CONTROL, 0, sizeof(controlData_t));
 	SetTrkVisible(trk, visible);

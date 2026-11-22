@@ -38,9 +38,6 @@
 #include "track.h"
 #include "version.h"
 
-#ifdef UTFCONVERT
-#include "include/utf8convert.h"
-#endif // UTFCONVERT
 
 EXPORT long adjTimer;
 static void DemoInitValues(void);
@@ -1440,9 +1437,6 @@ static void Playback(void)
 			demoWinOnTop = TRUE;
 			while ((fgets(paramLine, STR_LONG_SIZE, paramFile)) != NULL) {
 				paramLineNum++;
-#ifdef UTFCONVERT
-				ConvertUTF8ToSystem(paramLine);
-#endif
 				if (IsEND(END_MESSAGE)) {
 					break;
 				}
@@ -1623,9 +1617,6 @@ static void Playback(void)
 			if (strncmp(paramLine, "MAP ", 4) == 0) {
 				thisCmd = mouseCmd;
 			}
-#ifdef UTFCONVERT
-			ConvertUTF8ToSystem(paramLine);
-#endif
 			for (inx = 0; inx < playbackProc_da.cnt; inx++) {
 				len = strlen(playbackProc(inx).label);
 				if (strncmp(paramLine, playbackProc(inx).label, len) == 0) {

@@ -29,6 +29,7 @@
 #include "include/stringxtc.h"
 #include "include/utf8convert.h"
 #include "include/utlist.h"
+#include "wlib.h"
 
 #define PUNCTUATION "+-*/.,&%=#"
 #define SEARCHDELIMITER " \t\n\r/"
@@ -988,15 +989,14 @@ GetParameterFileContent(const char *file)
 		while (!found) {
 			char buffer[512];
 			if (fgets(buffer, sizeof(buffer), fh)) {
+				// Old parameter files hold their non-ASCII text in cp1252
+				wTextToUTF8(buffer, sizeof(buffer));
 				char *ptr = strtok(buffer, " \t");
 				if (!XtcStricmp(ptr, CONTENTSCOMMAND)) {
 					/* if found, store the rest of the line and the filename	*/
 					ptr = ptr+strlen(CONTENTSCOMMAND)+1;
 					ptr = strtok(ptr, "\r\n");
 					result = MyStrdup(ptr);
-#ifdef UTFCONVERT
-					ConvertUTF8ToSystem(result);
-#endif // UTFCONVERT
 					found = true;
 				}
 			} else {
