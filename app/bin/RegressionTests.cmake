@@ -647,6 +647,47 @@ set_tests_properties(RegressionRoundTrip.objects_check PROPERTIES
     LABELS "regression;regression-ci"
 )
 
+# Non-ASCII text in every kind of object that has a name or a text: layout
+# titles, a layer, the main note, a note, a text, a turnout title, a sensor,
+# control, switch motor, block and signal. Some of the characters are in the
+# Windows code page (cp1252: u-umlaut, sharp s, degree, euro), some aren't
+# (Polish letters, Japanese). Saving has to keep them all byte for byte, and
+# Properties has to show them as UTF-8, which GTK needs. On Windows,
+# UTFCONVERT converts text to the system code page when it's read
+# (Development Issues #83 phase 3).
+set(_xtrkcad_utf8_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-utf8.xtc")
+set(_xtrkcad_utf8_home "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-utf8")
+xtrkcad_add_regression_test(RegressionUtf8.roundtrip "${_xtrkcad_utf8_home}"
+    "${_xtrkcad_test_option}${_xtrkcad_utf8_source}")
+set_tests_properties(RegressionUtf8.roundtrip PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    FIXTURES_SETUP regression_utf8
+    LABELS "regression;regression-ci"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_utf8_home}"
+    RUN_SERIAL TRUE
+)
+add_test(NAME RegressionUtf8.roundtrip_check
+    COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-roundtrip-utf8.sh"
+        "${_xtrkcad_utf8_source}"
+        "${_xtrkcad_utf8_home}/.${XTRKCAD_BIN}/roundtrip/roundtrip1.xtc"
+)
+set_tests_properties(RegressionUtf8.roundtrip_check PROPERTIES
+    FIXTURES_REQUIRED regression_utf8
+    LABELS "regression;regression-ci"
+)
+set(_xtrkcad_utf8_describe_home "${XTRKCAD_REGRESSION_HOME_ROOT}/describe-utf8")
+xtrkcad_add_regression_test(RegressionUtf8.describe "${_xtrkcad_utf8_describe_home}"
+    "${_xtrkcad_test_option}describe:${_xtrkcad_utf8_source}")
+set_tests_properties(RegressionUtf8.describe PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    FAIL_REGULAR_EXPRESSION "Invalid UTF-8"
+    LABELS "regression;regression-ci"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_utf8_describe_home}"
+    RUN_SERIAL TRUE
+)
+
 # A switch motor whose turnout is missing: loading says so, and drawing the
 # motor must not follow the missing turnout. The same NULL turnout is what a
 # switch motor has while a layout is still being read, until
@@ -970,6 +1011,7 @@ set(_xtrkcad_critical_tests
     "^RegressionCompare\\."
     "^RegressionParams\\."
     "^RegressionHints\\."
+    "^RegressionUtf8\\."
     "^RegressionRoundTrip\\.(objects|objects_check|empty_text|empty_text_check|badmanifest)$"
     "^Regression(RoundTrip|Describe)\\.(timesavr|Control_Panels|pmi)$"
 )

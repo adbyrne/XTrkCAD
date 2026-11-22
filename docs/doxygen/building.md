@@ -468,6 +468,17 @@ bug:
   `switchmotor_noturnout` (`regression-critical`) loads a switch motor whose turnout doesn't exist:
   the load says so, and drawing and saving it must not follow the missing turnout (a switch motor's
   turnout is also missing while a layout is being read, and a redraw then crashed).
+- **Non-ASCII text (`RegressionUtf8.*`, `regression-critical`)** — `roundtrip-utf8.xtc` has UTF-8
+  text in every kind of object with a name or a text: the layout titles, a layer, the main note, a
+  note, a text, a turnout title, a sensor, control, switch motor, block and signal. Some of the
+  characters are in the Windows code page cp1252 (`ü`, `ß`, `°`, `€`) and some aren't (`ą`, `Ł`,
+  `日本`). `roundtrip` and `roundtrip_check` save it as `RegressionRoundTrip.*` does, and
+  `tools/check-roundtrip-utf8.sh` compares every non-ASCII line with the source byte for byte.
+  `describe` opens Properties on every object as `RegressionDescribe.*` does, and fails on a Pango
+  "Invalid UTF-8" warning. They're a group of their own because they check something that differs
+  by platform: on Windows `UTFCONVERT` (`common.h`) converts text read from a file to the system
+  code page and back when it's written, so `regression-windows` runs them, unlike
+  `RegressionDescribe.*` (Development Issues #83).
 - **Properties without an edit (`RegressionDescribe.*`)** — one test per example layout:
   `-Tdescribe:<layout>` loads it, saves and reloads it, then opens Properties on every object except
   notes and presses Done, as a click with the Describe command does (`LayoutDescribeTest()`,
