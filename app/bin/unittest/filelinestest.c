@@ -43,15 +43,11 @@ void ParamCheckSumLine(char *line)
 	(void)line;
 }
 
-bool wIsUTF8(const char *string)
+bool wTextToUTF8(char *text, size_t size)
 {
-	(void)string;
-	return false;
-}
-
-void ConvertUTF8ToSystem(char *in)
-{
-	(void)in;
+	(void)text;
+	(void)size;
+	return true;
 }
 
 char *MyStrdup(const char *s)

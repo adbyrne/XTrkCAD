@@ -57,9 +57,6 @@
 #include "trkendpt.h"
 #include "common-ui.h"
 
-#ifdef UTFCONVERT
-#include "utf8convert.h"
-#endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_BLOCK = -1;
 
@@ -397,9 +394,6 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 	blockData_p xx = GetblockData(t);
 	char *blockNameCopy = MyStrdup(xx->name);
 
-#ifdef UTFCONVERT
-	blockNameCopy = Convert2UTF8(blockNameCopy);
-#endif // UTFCONVERT
 
 	rc &= fprintf(f, "BLOCK %d \"%s\" \"%s\"\n",
 	              GetTrkIndex(t), blockNameCopy, xx->script)>0;
@@ -428,9 +422,6 @@ static BOOL_T ReadBlock ( char * line )
 		return FALSE;
 	}
 
-#ifdef UTFCONVERT
-	ConvertUTF8ToSystem(name);
-#endif // UTFCONVERT
 
 
 	DYNARR_RESET( btrackinfo_t, blockTrk_da );

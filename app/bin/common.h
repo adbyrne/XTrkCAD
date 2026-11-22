@@ -66,6 +66,10 @@
 #include "getopt.h"
 
 // DEFINES
+// File names are in the system code page on Windows, as fopen() needs them
+// (the file selector converts them, fileselector.c), and they are converted
+// to UTF-8 where they go into a file or an archive. Text is UTF-8 on every
+// platform, as GTK needs it (Development Issues #83).
 #define UTFCONVERT
 #define M_PI 3.14159265358979323846
 

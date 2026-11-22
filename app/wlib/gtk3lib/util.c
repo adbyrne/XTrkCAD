@@ -264,6 +264,40 @@ void wGetDisplaySize(wWinPix_t * w, wWinPix_t * h)
 }
 
 
+/**
+ * Make text read from a file UTF-8, in place. Text that isn't valid UTF-8 is
+ * taken to be cp1252, the Windows code page for western languages: layouts
+ * made from the parameter files before 2017, and layouts saved on Windows
+ * before 5.4.0, hold their non-ASCII text that way. A byte cp1252 doesn't
+ * define is read as Latin-1, so every text converts. If the result doesn't
+ * fit, the text is left as it was.
+ *
+ * \param text IN/OUT the text, NUL-terminated
+ * \param size IN size of the buffer that holds it
+ * \returns true if the text is UTF-8 now
+ */
+
+bool wTextToUTF8(char *text, size_t size)
+{
+	gchar *utf8;
+	gsize len = 0;
+
+	if (g_utf8_validate(text, -1, NULL)) {
+		return true;
+	}
+	utf8 = g_convert(text, -1, "UTF-8", "CP1252", NULL, &len, NULL);
+	if (utf8 == NULL) {
+		utf8 = g_convert(text, -1, "UTF-8", "ISO-8859-1", NULL, &len, NULL);
+	}
+	if (utf8 == NULL || len >= size) {
+		g_free(utf8);
+		return false;
+	}
+	memcpy(text, utf8, len + 1);
+	g_free(utf8);
+	return true;
+}
+
 static dynArr_t conversionBuffer_da;
 
 /**

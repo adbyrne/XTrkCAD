@@ -83,7 +83,7 @@ bool
 RequiresConvToUTF8(char *string)
 {
 	while (*string) {
-		if (*string++ & 0x7F) {
+		if (*string++ & 0x80) {
 			return(true);
 		}
 	}

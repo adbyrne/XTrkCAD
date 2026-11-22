@@ -29,9 +29,6 @@
 #include "include/paramfilelist.h"
 #include "common-ui.h"
 #include "ctrain.h"
-#ifdef UTFCONVERT
-#include "include/utf8convert.h"
-#endif
 
 static int log_dcustmgm = -1;
 
@@ -287,14 +284,7 @@ static int CustomDoExport(
 	SetCLocale();
 
 	if ( needContents ) {
-#ifdef UTFCONVERT
-		char *contents = MyStrdup(custMgmContentsStr);
-		contents = Convert2UTF8(contents);
-		fprintf(customMgmF, "CONTENTS %s\n", contents);
-		MyFree(contents);
-#else
 		fprintf(customMgmF, "CONTENTS %s\n", custMgmContentsStr);
-#endif // UTFCONVERT
 	}
 
 	/*

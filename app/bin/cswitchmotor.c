@@ -58,9 +58,6 @@
 #include "form.h"
 #include "track.h"
 #include "common-ui.h"
-#ifdef UTFCONVERT
-#include "include/utf8convert.h"
-#endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_SWITCHMOTOR = -1;
 
@@ -484,9 +481,6 @@ static BOOL_T WriteSwitchMotor ( track_p t, FILE * f )
 	switchmotorData_p xx = GetswitchmotorData(t);
 	char *switchMotorName = MyStrdup(xx->name);
 
-#ifdef UTFCONVERT
-	switchMotorName = Convert2UTF8(switchMotorName);
-#endif // UTFCONVERT
 
 	/* A motor whose turnout is missing (ResolveSwitchmotorTurnout() said so
 	 * on load) keeps the turnout number it was read with: refusing to write
@@ -513,9 +507,6 @@ static BOOL_T ReadSwitchMotor ( char * line )
 	             &pointsense)) {
 		return FALSE;
 	}
-#ifdef UTFCONVERT
-	ConvertUTF8ToSystem(name);
-#endif // UTFCONVERT
 	trk = NewTrack(index, T_SWITCHMOTOR, 0, sizeof(switchmotorData_t)+1);
 	xx = GetswitchmotorData( trk );
 	xx->name = name;

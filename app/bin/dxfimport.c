@@ -46,9 +46,6 @@
 // #include "ctrain.h"
 #include "form.h"
 
-#ifdef UTFCONVERT
-#include "include/utf8convert.h"
-#endif // UTFCONVERT
 
 // int wFilSelect(struct wFilSel_t* fs, const char* dirName);
 

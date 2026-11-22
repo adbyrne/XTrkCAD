@@ -289,8 +289,8 @@ Useful CMake options:
 ## Tests
 
 Unit tests use [CMocka](https://cmocka.org/). Test sources: `app/bin/unittest/` and
-`app/dynstring/unittest/`. Hg `default` has 295 tests at the `full` level, 33 of them outside the
-`regression` label and 54 labelled `regression-critical` (PR #383, `ctest -N`, with `poppler-utils`
+`app/dynstring/unittest/`. Hg `default` has 307 tests at the `full` level, 29 of them outside the
+`regression` label and 68 labelled `regression-critical` (#83 Windows UTF-8 test, `ctest -N`, with `poppler-utils`
 installed; the 2 `RegressionExport.*` tests need it).
 Regression tests have levels (`-DXTRKCAD_REGRESSION_LEVEL=critical|ci|full`, `RegressionTests.cmake`):
 a local build defaults to `critical` (~4 min with the unit tests), CI to `full` (~23 min; run it in
@@ -331,6 +331,7 @@ up (Development Issues #67). Regression tests besides the demos:
   `NOTICE ID: MSG_...` first: tests match the ID, never translated text.
 - Regression tests run with `LC_MESSAGES=C` but keep the numeric locale. Run new tests once with
   `LANG=de_DE.UTF-8` (decimal comma; dev ML #4641); CI's `regression-locale-de` does the same.
+- `RegressionUtf8.*`: `roundtrip-utf8.xtc`, non-ASCII text in every named object, in and outside cp1252; saved byte for byte, Properties without "Invalid UTF-8". `cp1252*`: the same in cp1252, saved as UTF-8 (`wTextToUTF8()` on every line read). Runs on Windows, unlike `RegressionDescribe.*`; `UTFCONVERT` now only converts file names (#83).
 - `RegressionNotice.*`: what the user is told when a load or save goes wrong, and what survives.
 - `RegressionHints.main`: every menu item and button has a hover hint in `app/help/tooltiptext.json`
   (`-d missinghints=1` lists the ones without).

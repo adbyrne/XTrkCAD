@@ -198,9 +198,6 @@ static void SvgDrawString(
 {
 	char *text = MyStrdup(s);
 
-#ifdef UTFCONVERT
-	text = Convert2UTF8(text);
-#endif // UTFCONVERT
 
 	SvgTextCommand((SVGParent *)(d->d),
 	               p.x,
@@ -404,9 +401,6 @@ static void SvgSetTitle(drawCmd_p d)
 
 	if (tmp) {
 		title = MyStrdup(tmp);
-#ifdef UTFCONVERT
-		title = Convert2UTF8(title);
-#endif
 		SvgAddTitle((SVGParent *)(d->d), title);
 		MyFree(title);
 	}

@@ -31,9 +31,6 @@
 #include "include/paramfile.h"
 #include "include/stringxtc.h"
 
-#ifdef UTFCONVERT
-#include "include/utf8convert.h"
-#endif // UTFCONVERT
 
 EXPORT char * GetNextLine( void )
 {
@@ -51,6 +48,8 @@ EXPORT char * GetNextLine( void )
 	}
 	Stripcr( paramLine );
 	ParamCheckSumLine( paramLine );
+	// Old files hold their non-ASCII text in cp1252 (wTextToUTF8())
+	wTextToUTF8( paramLine, sizeof paramLine );
 	paramLineNum++;
 	return paramLine;
 }
@@ -106,11 +105,6 @@ ReadMultilineText()
 		string[strlen(string) - 1] = '\0';
 	}
 
-#ifdef UTFCONVERT
-	if (wIsUTF8(string)) {
-		ConvertUTF8ToSystem(string);
-	}
-#endif // UTFCONVERT
 
 	DynStringFree(&noteText);
 	return (string);

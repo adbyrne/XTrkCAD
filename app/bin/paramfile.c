@@ -276,6 +276,9 @@ bool ReadParams(
 			goto nextLine;
 		}
 		ParamCheckSumLine(paramLine);
+		// Checksummed as written; old parameter files hold their non-ASCII
+		// text in cp1252 (wTextToUTF8())
+		wTextToUTF8(paramLine, sizeof paramLine);
 		if (paramLine[0] == '#' || paramLine[0] == 0) {
 			/* comment or empty paramLine */
 		} else if (strncmp(paramLine, "INCLUDE ", 8) == 0) {
@@ -311,9 +314,6 @@ bool ReadParams(
 			}
 			skip = FALSE;
 		} else if (strncmp(paramLine, "CONTENTS ", 9) == 0) {
-#ifdef UTFCONVERT
-			ConvertUTF8ToSystem(paramLine + 9);
-#endif
 			if ( bFoundContents == FALSE ) {
 				// Only use the first CONTENTS
 				curContents = MyStrdup(paramLine + 9);
@@ -322,9 +322,6 @@ bool ReadParams(
 			}
 			skip = FALSE;
 		} else if (strncmp(paramLine, "SUBCONTENTS ", 12) == 0) {
-#ifdef UTFCONVERT
-			ConvertUTF8ToSystem(paramLine + 12);
-#endif // UTFCONVERT
 			curSubContents = MyStrdup(paramLine + 12);
 			skip = FALSE;
 		} else if (strncmp(paramLine, "PARAM ", 6) == 0) {
