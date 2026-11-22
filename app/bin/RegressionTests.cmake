@@ -68,6 +68,8 @@ endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-empty-text")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-switchmotor-noturnout")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-objects")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-utf8")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/describe-utf8")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-badline")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-newer")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/archive-badmanifest")
@@ -659,9 +661,12 @@ set(_xtrkcad_utf8_source "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip
 set(_xtrkcad_utf8_home "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-utf8")
 xtrkcad_add_regression_test(RegressionUtf8.roundtrip "${_xtrkcad_utf8_home}"
     "${_xtrkcad_test_option}${_xtrkcad_utf8_source}")
+# A notice fails them: the fixture loads without one, and a work directory
+# that can't be created is answered Exit, which ends with exit code 0.
 set_tests_properties(RegressionUtf8.roundtrip PROPERTIES
     FIXTURES_REQUIRED "regression_install;regression_clean_homes"
     FIXTURES_SETUP regression_utf8
+    FAIL_REGULAR_EXPRESSION "NOTICE:"
     LABELS "regression;regression-ci"
     TIMEOUT 120
     ENVIRONMENT "HOME=${_xtrkcad_utf8_home}"
@@ -681,7 +686,7 @@ xtrkcad_add_regression_test(RegressionUtf8.describe "${_xtrkcad_utf8_describe_ho
     "${_xtrkcad_test_option}describe:${_xtrkcad_utf8_source}")
 set_tests_properties(RegressionUtf8.describe PROPERTIES
     FIXTURES_REQUIRED "regression_install;regression_clean_homes"
-    FAIL_REGULAR_EXPRESSION "Invalid UTF-8"
+    FAIL_REGULAR_EXPRESSION "Invalid UTF-8|NOTICE:"
     LABELS "regression;regression-ci"
     TIMEOUT 120
     ENVIRONMENT "HOME=${_xtrkcad_utf8_describe_home}"
