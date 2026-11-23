@@ -23,6 +23,7 @@
  */
 
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <Windows.h>
@@ -30,93 +31,97 @@
 #include <wlib.h>
 
 /**
- * Convert system codepage to UTF 8
+ * Convert a string from one code page to another, through UTF-16. The
+ * output has to fit with its terminator; otherwise, or if the input isn't
+ * valid in its code page, the conversion fails and the output is an empty
+ * string. Converting to a code page other than UTF-8 fails too if a
+ * character doesn't exist there: no best-fit mapping (L-stroke to L) and no
+ * default character ('?').
  *
- * \param 		   inString		   The input string.
- * \param [in,out] outString	   The output string buffer.
- * \param 		   outStringLength Length of the output buffer
+ * \param from code page of the input
+ * \param to code page of the output
+ * \param inString the input
+ * \param outString the output buffer
+ * \param outStringLength size of the output buffer in bytes
+ * \returns true if the whole string was converted
+ */
+
+static bool
+ConvertCodePage(UINT from, UINT to, const char *inString, char *outString,
+                unsigned outStringLength)
+{
+	DWORD toFlags = (to == CP_UTF8) ? 0 : WC_NO_BEST_FIT_CHARS;
+	BOOL usedDefault = FALSE;
+	// UTF-8 doesn't take a default character
+	LPBOOL pUsedDefault = (to == CP_UTF8) ? NULL : &usedDefault;
+	WCHAR *wide;
+	int wideLength;
+	int length;
+
+	if (outStringLength == 0) {
+		return false;
+	}
+	outString[0] = '\0';
+
+	// Number of UTF-16 units, terminator included
+	wideLength = MultiByteToWideChar(from, MB_ERR_INVALID_CHARS, inString, -1,
+	                                 NULL, 0);
+	if (wideLength <= 0) {
+		return false;
+	}
+	wide = malloc(wideLength * sizeof(WCHAR));
+	if (wide == NULL) {
+		return false;
+	}
+	MultiByteToWideChar(from, MB_ERR_INVALID_CHARS, inString, -1, wide,
+	                    wideLength);
+
+	// Number of output bytes, terminator included
+	length = WideCharToMultiByte(to, toFlags, wide, -1, NULL, 0, NULL,
+	                             pUsedDefault);
+	if (length <= 0 || (unsigned)length > outStringLength || usedDefault) {
+		free(wide);
+		return false;
+	}
+	WideCharToMultiByte(to, toFlags, wide, -1, outString, outStringLength,
+	                    NULL, NULL);
+	free(wide);
+	return true;
+}
+
+/**
+ * Convert a string from the system code page to UTF-8.
  *
- * \returns FALSE if it fails.
+ * \param inString the input
+ * \param outString the output buffer; an empty string if the conversion fails
+ * \param outStringLength size of the output buffer in bytes, terminator
+ *        included: three times the input's length is always enough
+ * \returns true if the whole string was converted
  */
 
 bool
 wSystemToUTF8(const char *inString, char *outString, unsigned outStringLength)
 {
-	unsigned int cnt = 2 * (unsigned int)(strlen(inString) + 1);
-	char *tempBuffer = malloc(cnt);
-
-	// convert to wide character (UTF16)
-	MultiByteToWideChar(CP_ACP,
-	                    0,
-	                    inString,
-	                    -1,
-	                    (LPWSTR)tempBuffer,
-	                    cnt);
-
-	// convert from wide char to UTF-8
-	WideCharToMultiByte(CP_UTF8,
-	                    0,
-	                    (LPCWCH)tempBuffer,
-	                    -1,
-	                    (LPSTR)outString,
-	                    outStringLength,
-	                    NULL,
-	                    NULL);
-
-	free(tempBuffer);
-	return true;
+	return ConvertCodePage(GetACP(), CP_UTF8, inString, outString,
+	                       outStringLength);
 }
 
 /**
- * Convert from UTF-8 to system codepage
+ * Convert a string from UTF-8 to the system code page. Fails if the input
+ * isn't UTF-8 or has a character the code page doesn't.
  *
- * \param 		   inString		   The input string.
- * \param [in,out] outString	   the output string.
- * \param 		   outStringLength Length of the output buffer.
- *
- * \returns True if it succeeds, false if it fails.
+ * \param inString the input
+ * \param outString the output buffer; an empty string if the conversion fails
+ * \param outStringLength size of the output buffer in bytes, terminator
+ *        included
+ * \returns true if the whole string was converted
  */
 
 bool
 wUTF8ToSystem(const char *inString, char *outString, unsigned outStringLength)
 {
-	unsigned int cnt = 2 * (int)(strlen(inString) + 1);
-	char *tempBuffer = malloc(cnt);
-
-	// convert to wide character (UTF16)
-	MultiByteToWideChar(CP_UTF8,
-	                    0,
-	                    inString,
-	                    -1,
-	                    (LPWSTR)tempBuffer,
-	                    cnt);
-
-
-	cnt = WideCharToMultiByte(CP_ACP,
-	                          0,
-	                          (LPCWCH)tempBuffer,
-	                          -1,
-	                          (LPSTR)outString,
-	                          0L,
-	                          NULL,
-	                          NULL);
-
-	if (outStringLength <= cnt) {
-		return (false);
-	}
-
-	// convert from wide char to system codepage
-	WideCharToMultiByte(CP_ACP,
-	                    0,
-	                    (LPCWCH)tempBuffer,
-	                    -1,
-	                    (LPSTR)outString,
-	                    outStringLength,
-	                    NULL,
-	                    NULL);
-
-	free(tempBuffer);
-	return true;
+	return ConvertCodePage(CP_UTF8, GetACP(), inString, outString,
+	                       outStringLength);
 }
 
 /**
@@ -136,14 +141,8 @@ bool wIsUTF8(const char * string)
 
 	const unsigned char * bytes = (const unsigned char *)string;
 	while (*bytes) {
-		if ((// ASCII
-		            // use bytes[0] <= 0x7F to allow ASCII control characters
-		            bytes[0] == 0x09 ||
-		            bytes[0] == 0x0A ||
-		            bytes[0] == 0x0D ||
-		            (0x20 <= bytes[0] && bytes[0] <= 0x7E)
-		    )
-		   ) {
+		// ASCII, control characters and DEL included
+		if (bytes[0] <= 0x7F) {
 			bytes += 1;
 			continue;
 		}
