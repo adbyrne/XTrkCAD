@@ -2173,6 +2173,9 @@ EXPORT int RegressionTestAll(const char *target)
 	if (target != NULL && strncmp(target, "background:", 11) == 0) {
 		return LayoutBackgroundTest(target + 11);
 	}
+	if (target != NULL && strncmp(target, "backgroundutf8:", 15) == 0) {
+		return LayoutBackgroundUTF8Test(target + 15);
+	}
 	if (target != NULL && strncmp(target, "ops:", 4) == 0) {
 		return LayoutOpsTest(target + 4);
 	}

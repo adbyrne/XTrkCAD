@@ -14,4 +14,5 @@ BOOL_T AddDirectoryToArchive(struct zip * za, const char * dir_path,
 BOOL_T CreateArchive(const char * dir_path, const char * fileName);
 BOOL_T UnpackArchiveFor(const char * pathName, const char * fileName,
                         const char * tempDir, BOOL_T file_only);
+BOOL_T ArchiveHasUTF8Entry(const char * pathName, const char * entryUtf8);
 #endif

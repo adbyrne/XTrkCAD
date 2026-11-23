@@ -42,6 +42,7 @@
 #include "paths.h"
 #include "scale.h"
 #include "include/stringxtc.h"
+#include "include/utf8convert.h"
 #include "track.h"
 #include "version.h"
 #include "dynstring.h"
@@ -1906,8 +1907,9 @@ static const unsigned char backgroundTestPng[] = {
 };
 
 /**
- * Regression test for -Tbackground:&lt;layout&gt;: a background image goes into
- * a .xtce archive and comes back from it. Load the layout, give it an image as
+ * Regression tests for -Tbackground:&lt;layout&gt; and
+ * -Tbackgroundutf8:&lt;layout&gt;: a background image goes into a .xtce
+ * archive and comes back from it. Load the layout, give it an image as
  * background as the Layout dialog does (LoadImageFile()), save it as .xtce,
  * which copies the image into the archive (CopyDependency()) and names it in
  * the manifest, clear the background, and load the archive again. The layout
@@ -1915,10 +1917,21 @@ static const unsigned char backgroundTestPng[] = {
  * bytes. The test writes the image itself, a 4 x 4 PNG in the working
  * directory, so no file it reads is named on the command line.
  *
+ * The utf8 variant names the archive and the image with letters outside
+ * ASCII, some outside cp1252 too. libzip takes file names as UTF-8 on every
+ * platform, so on Windows the names, held in the system code page, have to be
+ * converted where they go into the archive and the manifest (archive.c,
+ * manifest.c). It also checks the archive holds the image under its UTF-8
+ * name, and that every name in it is UTF-8 (ArchiveHasUTF8Entry()).
+ *
  * \param pathName IN the layout
+ * \param archiveName IN the archive's file name, UTF-8
+ * \param imageName IN the image's file name, UTF-8
+ * \param checkEntries IN check the names stored in the archive
  * \return number of failed checks
  */
-EXPORT int LayoutBackgroundTest( const char * pathName )
+static int BackgroundTestNamed( const char * pathName, const char * archiveName,
+                                const char * imageName, BOOL_T checkEntries )
 {
 	char * source = MyStrdup( pathName );
 	char * dir = NULL, * archive = NULL, * image = NULL;
@@ -1933,8 +1946,13 @@ EXPORT int LayoutBackgroundTest( const char * pathName )
 	}
 	MakeFullpath( &dir, workingDir, "background", NULL );
 	SafeCreateDir( dir );
-	MakeFullpath( &archive, dir, "background.xtce", NULL );
-	MakeFullpath( &image, dir, "background-test.png", NULL );
+	MakeFullpath( &archive, dir, archiveName, NULL );
+	MakeFullpath( &image, dir, imageName, NULL );
+#ifdef UTFCONVERT
+	// File names are in the system code page on Windows (common.h)
+	ConvertUTF8ToSystem( archive );
+	ConvertUTF8ToSystem( image );
+#endif
 	// Binary: in text mode Windows writes the PNG's 0x0A bytes as 0x0D 0x0A
 	FILE * f = FOpenWriteRestrictedBinary( image );
 	if ( f == NULL
@@ -1983,6 +2001,21 @@ EXPORT int LayoutBackgroundTest( const char * pathName )
 		lprintf( "  FAIL: background: %s isn't a copy of %s\n", loaded, image );
 		nFail++;
 	}
+	if ( checkEntries ) {
+		char * entry = NULL;
+		MakeFullpath( &entry, "includes", imageName, NULL );
+		for ( char * c = entry; *c; c++ ) {
+			if ( *c == '\\' ) {
+				*c = '/';       // Names in a zip archive use '/'
+			}
+		}
+		if ( !ArchiveHasUTF8Entry( archive, entry ) ) {
+			lprintf( "  FAIL: background: %s doesn't hold %s by its UTF-8 name,"
+			         " or has a name that isn't UTF-8\n", archive, entry );
+			nFail++;
+		}
+		free( entry );
+	}
 	lprintf( "background: %s: %d failed checks\n", source, nFail );
 
 done:
@@ -1991,6 +2024,34 @@ done:
 	free( image );
 	MyFree( source );
 	return nFail;
+}
+
+/**
+ * -Tbackground:&lt;layout&gt;, see BackgroundTestNamed()
+ *
+ * \param pathName IN the layout
+ * \return number of failed checks
+ */
+EXPORT int LayoutBackgroundTest( const char * pathName )
+{
+	return BackgroundTestNamed( pathName, "background.xtce",
+	                            "background-test.png", FALSE );
+}
+
+/**
+ * -Tbackgroundutf8:&lt;layout&gt;, see BackgroundTestNamed(). The archive is
+ * named Mueller-Strasse with u-umlaut and sharp s (in cp1252), the image Lodz
+ * with Polish letters (not in cp1252). The names are written as UTF-8 bytes,
+ * so this file stays ASCII.
+ *
+ * \param pathName IN the layout
+ * \return number of failed checks
+ */
+EXPORT int LayoutBackgroundUTF8Test( const char * pathName )
+{
+	return BackgroundTestNamed( pathName,
+	                            "M\xC3\xBCller-Stra\xC3\x9F" "e.xtce",
+	                            "\xC5\x81\xC3\xB3" "d\xC5\xBA.png", TRUE );
 }
 
 

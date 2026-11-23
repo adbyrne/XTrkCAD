@@ -694,6 +694,13 @@ bug:
   it in the manifest, but the layout file doesn't. The test writes the image itself, a 4 x 4 PNG in
   its working directory, so no file it reads is named on the command line (CodeQL path-injection).
   Level `ci`.
+- **Background image, non-ASCII names (`RegressionBackground.utf8`)** — `-Tbackgroundutf8:<layout>`
+  does the same with an archive named Müller-Straße and an image named Łódź, the second outside
+  cp1252 (`LayoutBackgroundUTF8Test()`). libzip takes file names as UTF-8 on every platform, so on
+  Windows the names, held in the system code page, are converted where they go into the archive and
+  its manifest (`archive.c`, `manifest.c`). The test also checks that the archive holds the image
+  under its UTF-8 name and that every name stored in it is UTF-8 (`ArchiveHasUTF8Entry()`). Level
+  `ci`, so Windows runs it on `main`.
 - **Rotate, Flip, Rescale and Move (`RegressionOps.*`)** — `-Tops:<layout>` runs each operation on
   every object but the cars, then the one that undoes it: Rotate 90 and back, Flip twice, Rescale
   to 50 % and back, Move and back (`LayoutOpsTest()`, `fileio.c`). The operations are called as the
