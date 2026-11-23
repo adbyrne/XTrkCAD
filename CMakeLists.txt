@@ -27,6 +27,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Additional libraries
 
 find_package(Inkscape)
+# The toolbar icons are converted from SVG during the build. Without a
+# converter the build used to fail halfway with an unclear error.
+if(NOT Inkscape_FOUND)
+	message(FATAL_ERROR
+		"No SVG converter found: the toolbar icons are converted from SVG "
+		"during the build. Install rsvg-convert (part of librsvg: MSYS2 "
+		"mingw-w64-<arch>-librsvg, Debian/Ubuntu librsvg2-bin, Fedora "
+		"librsvg2-tools, Homebrew librsvg; gvsbuild's GTK3 bundle has it) "
+		"or Inkscape, or set RsvgConvert_EXECUTABLE or Inkscape_EXECUTABLE "
+		"to its full path.")
+endif()
 find_package(Libzip)
 
 # Optionally enable SVG export
