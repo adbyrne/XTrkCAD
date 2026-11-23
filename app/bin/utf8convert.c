@@ -80,7 +80,7 @@ ConvertUTF8ToSystem(char *in)
  * Requires convert to UTF-8 If at least one character is >127 the string
  * has to be converted.
  *
- * \param [in] string the string.
+ * \param [in] string the string, or NULL (a missing manifest entry).
  *
  * \returns True if conversion is required, false if not.
  */
@@ -88,6 +88,9 @@ ConvertUTF8ToSystem(char *in)
 bool
 RequiresConvToUTF8(char *string)
 {
+	if (string == NULL) {
+		return(false);
+	}
 	while (*string) {
 		if (*string++ & 0x80) {
 			return(true);
