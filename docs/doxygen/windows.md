@@ -3,8 +3,8 @@
 
 # Overview {#windows-overview}
 
-XTrackCAD on Windows is the same GTK+ 3 program as on Linux and macOS, built with the MSYS2
-MINGW64 toolchain. The old native Win32 backend (`app/wlib/mswlib/`) is gone. A few things still
+XTrackCAD on Windows is the same GTK+ 3 program as on Linux and macOS, built with MSYS2's
+GCC, in its UCRT64 or MINGW64 environment (\ref building). The old native Win32 backend (`app/wlib/mswlib/`) is gone. A few things still
 differ on Windows at run time, and several bugs found in 2026-10 came from code that assumed
 Linux behavior. This page collects those differences, describes how the Windows package is put
 together, and lists the pitfalls to watch for.
