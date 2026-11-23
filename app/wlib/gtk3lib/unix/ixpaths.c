@@ -302,7 +302,7 @@ const char * wGetAppWorkDir(
 			tmp = g_strdup_printf(  _("Cannot create %s"), appWorkDir );
 			wNoticeWithIcon( NT_ERROR, tmp, _("Exit"), NULL );
 			g_free(tmp);
-			wExit(0);
+			wExit(1);
 		} else {
 			CopyDefaultConfig();
 		}

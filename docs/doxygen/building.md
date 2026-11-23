@@ -625,7 +625,9 @@ bug:
   `newer` opens a file from a newer version, which must not become the current layout (the
   round-trip harness logs `current layout "..."` after loading); `diskfull` (Linux) saves onto
   `/dev/full` and needs the write-failure message; `frozen` checks that Properties doesn't open on a
-  frozen layer unless Shift is held. `RegressionRoundTrip.badmanifest` opens an archive whose
+  frozen layer unless Shift is held; `noworkdir` (not Windows) starts with a work directory that
+  can't be created and needs exit code 1, checked by the shell, as a pass regex ignores the exit
+  code. `RegressionRoundTrip.badmanifest` opens an archive whose
   manifest can't be read, `RegressionParamCheck.longname` enters a name longer than its field, and
   `longsignal` one exactly a character too long.
 - **Undo (`RegressionParamCheck.undo`)** — playback suspends undo, so no demo tests it. A script turns

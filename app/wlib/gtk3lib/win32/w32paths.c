@@ -129,7 +129,7 @@ const char* wGetAppWorkDir(void)
 	if(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT,
 	                   tempDir) != S_OK) {
 		wNoticeWithIcon(NT_ERROR, "Cannot get user's profile directory", "Exit", NULL);
-		wExit(0);
+		wExit(1);
 	} else {
 		g_snprintf(tempDir, MAX_PATH, "%s\\%s", tempDir,	wlibGetAppName());
 		appWorkDir = tempDir;
@@ -138,7 +138,7 @@ const char* wGetAppWorkDir(void)
 			if (g_mkdir(appWorkDir, 0x666)) {
 				wNoticeWithIcon(NT_ERROR, "Cannot create user's profile directory", "Exit",
 				                NULL);
-				wExit(0);
+				wExit(1);
 			}
 		}
 	}

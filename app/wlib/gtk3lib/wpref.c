@@ -68,7 +68,8 @@ static void readPrefs( char * name, wBool_t update )
 	const char * workDir;
 	GError *error = NULL;
 
-	prefInitted = TRUE;
+	// wGetAppWorkDir() may end the program, and wExit() saves the
+	// preferences if they are marked as read
 	workDir = wGetAppWorkDir();
 
 	if (name && name[0]) {
@@ -78,6 +79,7 @@ static void readPrefs( char * name, wBool_t update )
 	}
 
 	prefs = g_key_file_new();
+	prefInitted = TRUE;
 
 	g_key_file_load_from_file(prefs,
 	                          tmp,
