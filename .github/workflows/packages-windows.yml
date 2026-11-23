@@ -81,18 +81,15 @@ jobs:
           git config --global --add safe.directory '*'
           git describe --tags --always
 
-      # MSYS2's doxygen package is rolling: 1.18.0-3 (landed between the
-      # 2026-09-19 and 2026-10-05 runs) aborts on the User Guide build with
-      # "terminate called after throwing an instance of 'std::system_error'
-      # what(): Invalid argument". Pin the last version that built cleanly
-      # here, the same way the Linux doxygen jobs pin theirs
-      # (.github/actions/setup-doxygen).
-      - name: Pin MSYS2 Doxygen package
-        env:
-          MSYS2_DOXYGEN_PKG_VERSION: 1.16.1-4
-        run: |
-          pacman -U --noconfirm "https://repo.msys2.org/mingw/${MSYSTEM,,}/${MINGW_PACKAGE_PREFIX}-doxygen-${MSYS2_DOXYGEN_PKG_VERSION}-any.pkg.tar.zst"
-          doxygen --version
+      # MSYS2's doxygen package is rolling and is not pinned. 1.18.0-3
+      # aborted on the User Guide build (std::system_error, 2026-10-05), so
+      # 1.16.1-4 was pinned with pacman -U. That pin broke on 2026-11-22:
+      # 1.16.1-4 links libLLVM-22.dll, MSYS2 moved clang-libs to LLVM 23,
+      # and doxygen could no longer start (exit 127). A pinned MSYS2 doxygen
+      # breaks on every LLVM soname bump, so take the current package
+      # (1.18.0-5 builds the User Guide again) and log its version.
+      - name: Show Doxygen version
+        run: doxygen --version
 
       # ntldd collects the DLLs for the ZIP (below). Installed from its URL
       # rather than through setup-msys2: on 2026-10-25 MSYS2 changed the
