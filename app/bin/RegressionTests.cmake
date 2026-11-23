@@ -814,6 +814,26 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         PASS_REGULAR_EXPRESSION "NOTICE: Error \"No space left on device\" occurred while writing"
     )
 endif()
+# A work directory that can't be created ends the program: it has to exit with
+# 1, not 0, so scripts and ctest see it (Development Issues #93), and without a
+# GLib-CRITICAL from saving preferences that were never read. HOME is below
+# a regular file, so the directory can't be made. The shell checks the exit
+# code itself, as a PASS_REGULAR_EXPRESSION would ignore it and WILL_FAIL would
+# pass a crash too. Not on Windows: there the tests set the work directory in
+# xtrkcad0.ini, and the program only creates the one in AppData.
+if(NOT WIN32)
+    set(_xtrkcad_noworkdir_out "${CMAKE_CURRENT_BINARY_DIR}/notice-noworkdir.out")
+    add_test(NAME RegressionNotice.noworkdir
+        COMMAND sh -c "${_xtrkcad_wayland_guard}${_xtrkcad_wrapper_sh} '${_xtrkcad_regression_exe}' '${_xtrkcad_test_option}${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc' > '${_xtrkcad_noworkdir_out}' 2>&1; code=$?; cat '${_xtrkcad_noworkdir_out}'; echo \"--- exit code $code ---\"; [ $code -eq 1 ] && grep -q 'NOTICE: Cannot create' '${_xtrkcad_noworkdir_out}' && ! grep -q 'CRITICAL' '${_xtrkcad_noworkdir_out}'"
+    )
+    set_tests_properties(RegressionNotice.noworkdir PROPERTIES
+        FIXTURES_REQUIRED regression_install
+        LABELS "regression;regression-ci"
+        TIMEOUT 60
+        ENVIRONMENT "HOME=${CMAKE_CURRENT_LIST_FILE}/nohome"
+        RUN_SERIAL TRUE
+    )
+endif()
 # An archive whose manifest can't be read: the layout inside, named like the
 # archive, still has to open (Development Issues #75).
 set(_xtrkcad_badmanifest_home "${XTRKCAD_REGRESSION_HOME_ROOT}/archive-badmanifest")
