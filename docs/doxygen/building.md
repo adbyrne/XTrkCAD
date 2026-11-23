@@ -1,7 +1,7 @@
 \page building Building and Testing
 
 Not sure what's already installed? Run `tools/check-build-deps.sh` first (Linux, macOS, and
-Windows via an MSYS2 MINGW64 shell all work — it detects which platform it's on). It's read-only
+Windows via an MSYS2 UCRT64 or MINGW64 shell all work — it detects which platform it's on). It's read-only
 — it reports what's missing and the exact command to install it, without installing or changing
 anything itself.
 
@@ -60,24 +60,33 @@ Help opens in the default browser (`XTRKCAD_USE_BROWSER`, ON). The older Apple H
 is `-DXTRKCAD_USE_APPLEHELP=ON`; it only works in an installed `.app` bundle with a registered
 Help Book, so it is OFF by default (Development Issues #64).
 
-# Windows (MSYS2/MinGW64)
+# Windows (MSYS2)
 
 For how Windows differs at run time (options start with `/`, file locations, the ZIP's
 contents, pitfalls), see \subpage windows.
 
-Run from an MSYS2 MINGW64 shell. This is the supported Windows path — the older
+Run from an MSYS2 UCRT64 or MINGW64 shell. This is the supported Windows path — the older
 MSVC/`mswlib` build was removed (SF r6508) and `app/wlib/mswlib/` is gone from the source tree.
 An experimental MSVC build on the GTK3 backend is described further down.
 
+Both environments build XTrkCAD with the same GCC. They differ in the C runtime the program
+links against: UCRT64 uses Windows 10's Universal C Runtime, MINGW64 the older `msvcrt.dll`.
+MSYS2 has deprecated MINGW64, so for a new setup use UCRT64. The packages are built in both, and
+MINGW64 stays the standard package until after 5.4.0 (\ref windows-package). Neither runs
+on Windows before 10: librsvg, which draws the SVG icons, needs Windows 10 in both.
+
+Each shell sets `MINGW_PACKAGE_PREFIX` (`mingw-w64-ucrt-x86_64` in UCRT64,
+`mingw-w64-x86_64` in MINGW64), so one command installs the right packages in either:
+
 ```sh
-pacman -S --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja \
-    mingw-w64-x86_64-pkg-config mingw-w64-x86_64-gtk3 mingw-w64-x86_64-zlib \
-    mingw-w64-x86_64-libzip mingw-w64-x86_64-mxml mingw-w64-x86_64-librsvg \
-    mingw-w64-x86_64-gettext mingw-w64-x86_64-cmocka
+pacman -S --needed $MINGW_PACKAGE_PREFIX-{gcc,cmake,ninja,pkg-config,gtk3,zlib,libzip,mxml,librsvg,gettext,cmocka}
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
+
+Keep a build directory to one environment: libraries and programs built against one C runtime
+don't mix with the other's. Make a new build directory when you change shells.
 
 ## Experimental: MSVC with gvsbuild {#windows-msvc-gvsbuild}
 
@@ -150,7 +159,7 @@ clear error, and plain `cmake -B build ...` keeps working without them. Each pre
 | `linux-release` | Linux | Release, tests on |
 | `linux-clang-debug` | Linux | Debug with `clang`, tests on |
 | `macos-debug` | macOS | Debug with the Homebrew paths and help options from the macOS section |
-| `windows-debug` | MSYS2 MINGW64 | Debug with gettext off, as in the Windows section |
+| `windows-debug` | MSYS2 UCRT64 or MINGW64 | Debug with gettext off, as in the Windows section |
 | `windows-gvsbuild-release` | Windows, MSVC | Experimental: Release against gvsbuild, tests off (see \ref windows-msvc-gvsbuild) |
 | `windows-gvsbuild-relwithdebinfo` | Windows, MSVC | The same with debug information |
 | `windows-gvsbuild-vs` | Windows, MSVC | A Visual Studio solution with Release and RelWithDebInfo |

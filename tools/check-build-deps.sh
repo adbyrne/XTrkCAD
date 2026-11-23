@@ -20,7 +20,7 @@ case "$(uname -s)" in
     MINGW*|MSYS*) OS=windows ;;
     *)
         echo "Unrecognized OS: $(uname -s)" >&2
-        echo "This script supports Linux, macOS, and Windows (via an MSYS2 MINGW64 shell)." >&2
+        echo "This script supports Linux, macOS, and Windows (via an MSYS2 UCRT64 or MINGW64 shell)." >&2
         exit 1
         ;;
 esac
@@ -120,17 +120,20 @@ case "$OS" in
         echo "  find it -- see devguide.md's macOS build section for the exact export."
         ;;
     windows)
-        check_cmd cmake         "build system generator (need >= 3.20)" "pacman -S mingw-w64-x86_64-cmake"
-        check_cmd ninja         "build tool"                            "pacman -S mingw-w64-x86_64-ninja"
-        check_cmd "$(find_compiler || echo gcc)" "C compiler"           "pacman -S mingw-w64-x86_64-gcc"
-        check_pkg gtk+-3.0      "GTK+ 3 (UI toolkit)"                   "pacman -S mingw-w64-x86_64-gtk3"
-        check_pkg libzip        "zip archive library"                  "pacman -S mingw-w64-x86_64-libzip"
-        check_header mxml.h     "MiniXML (needed for SVG export)"       "pacman -S mingw-w64-x86_64-mxml"
-        check_cmd rsvg-convert  "SVG -> PNG conversion"                 "pacman -S mingw-w64-x86_64-librsvg"
-        check_pkg cmocka        "unit test framework (optional)"       "pacman -S mingw-w64-x86_64-cmocka"
+        # The shell's package prefix: mingw-w64-ucrt-x86_64 in UCRT64,
+        # mingw-w64-x86_64 in MINGW64
+        pfx="${MINGW_PACKAGE_PREFIX:-mingw-w64-ucrt-x86_64}"
+        check_cmd cmake         "build system generator (need >= 3.20)" "pacman -S $pfx-cmake"
+        check_cmd ninja         "build tool"                            "pacman -S $pfx-ninja"
+        check_cmd "$(find_compiler || echo gcc)" "C compiler"           "pacman -S $pfx-gcc"
+        check_pkg gtk+-3.0      "GTK+ 3 (UI toolkit)"                   "pacman -S $pfx-gtk3"
+        check_pkg libzip        "zip archive library"                  "pacman -S $pfx-libzip"
+        check_header mxml.h     "MiniXML (needed for SVG export)"       "pacman -S $pfx-mxml"
+        check_cmd rsvg-convert  "SVG -> PNG conversion"                 "pacman -S $pfx-librsvg"
+        check_pkg cmocka        "unit test framework (optional)"       "pacman -S $pfx-cmocka"
         echo
-        echo "  Note: this script (and the actual build) must be run from an MSYS2 MINGW64"
-        echo "  shell, not plain cmd.exe or PowerShell."
+        echo "  Note: this script (and the actual build) must be run from an MSYS2 UCRT64"
+        echo "  or MINGW64 shell, not plain cmd.exe, PowerShell or the MSYS shell."
         ;;
 esac
 

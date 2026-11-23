@@ -78,7 +78,7 @@
     },
     {
       "name": "windows-debug",
-      "displayName": "Windows Debug (MSYS2 MINGW64)",
+      "displayName": "Windows Debug (MSYS2 UCRT64 or MINGW64)",
       "inherits": "base",
       "condition": {
         "type": "equals",
