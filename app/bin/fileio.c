@@ -948,6 +948,8 @@ static int SaveTracks(
 		if (success) {
 			if (CreateArchive(zip_output, fileName[0]) != TRUE) {
 				NoticeMessage(MSG_ARCHIVE_FAIL, _("Continue"), NULL, fileName[0], zip_output);
+				// Not saved: keep the changed flag and the checkpoint
+				success = FALSE;
 			}
 		}
 
@@ -1721,7 +1723,7 @@ EXPORT int LayoutCheckpointTest( const char * pathName )
 {
 	char * source = MyStrdup( pathName );
 	char * dir = NULL, * reference = NULL, * restored = NULL;
-	char * backup = NULL, * missing = NULL;
+	char * backup = NULL, * missing = NULL, * missingArchive = NULL;
 	char backupName[STR_LONG_SIZE];
 	long savedInterval = checkPtInterval;
 	long savedAutosave = autosaveChkPoints;
@@ -1738,6 +1740,7 @@ EXPORT int LayoutCheckpointTest( const char * pathName )
 	MakeFullpath( &reference, dir, "reference.xtc", NULL );
 	MakeFullpath( &restored, dir, "restored.xtc", NULL );
 	MakeFullpath( &missing, dir, "missing", "reference.xtc", NULL );
+	MakeFullpath( &missingArchive, dir, "missing", "reference.xtce", NULL );
 	if ( !SaveTracks( 1, &reference, NULL ) ) {
 		lprintf( "  FAIL: can't save %s\n", reference );
 		nFail++;
@@ -1828,6 +1831,26 @@ EXPORT int LayoutCheckpointTest( const char * pathName )
 		nFail++;
 	}
 
+	// The same for a .xtce archive. Its layout file is written in the
+	// working directory and works; only moving the archive into place fails
+	// (CreateArchive()). That has to count as a failed save too.
+	SetLayoutFullPath( missingArchive );
+	bReadOnly = FALSE;
+	DoSave( NULL );
+	if ( !ExistsCheckpoint() ) {
+		lprintf( "  FAIL: a failed .xtce save removed the checkpoint\n" );
+		nFail++;
+	}
+	if ( changed <= 0 ) {
+		lprintf( "  FAIL: after a failed .xtce save the layout doesn't count"
+		         " as changed\n" );
+		nFail++;
+	}
+	if ( SaveTracks( 1, &missingArchive, NULL ) ) {
+		lprintf( "  FAIL: saving %s reported success\n", missingArchive );
+		nFail++;
+	}
+
 	// So does Cancel in the Save dialog of a layout with no name
 	SetLayoutFullPath( "" );
 	wFilSelSetPlayback( "" );
@@ -1867,6 +1890,7 @@ done:
 	free( restored );
 	free( backup );
 	free( missing );
+	free( missingArchive );
 	MyFree( source );
 	return nFail;
 }

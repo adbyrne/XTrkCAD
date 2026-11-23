@@ -671,7 +671,9 @@ bug:
   the Preferences' checkpoint interval of changes has been made and not before, matches the layout,
   and keeps the previous one as `<layout>01.bkp`. `LoadCheckpoint()` restores it under the old name
   (Resume) or none (Resume with New Name). A failed save, or Cancel in the Save or Open dialog, has
-  to leave it in place, and a save that works removes it. `wFilSelSetPlayback("")` makes the next
+  to leave it in place, and a save that works removes it. That includes a `.xtce` save whose layout
+  file is written but whose archive can't be moved into place (`CreateArchive()`): it has to report
+  failure and leave the layout counted as changed. `wFilSelSetPlayback("")` makes the next
   file dialog act as if Cancel was pressed. `objects` (`roundtrip-objects.xtc`) is `regression-ci`,
   `timesavr` only `regression`.
 - **Clipboard (`RegressionClipboard.*`)** — `-Tclipboard:<layout>` selects every object but the

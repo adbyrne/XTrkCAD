@@ -200,6 +200,7 @@ BOOL_T AddDirectoryToArchive(
 			if (AddDirectoryToArchive(za, full_path, arch_path) != TRUE) {
 				free(full_path);
 				free(arch_path);
+				closedir(dir);
 				return FALSE;
 			}
 			free(arch_path);
@@ -222,6 +223,7 @@ BOOL_T AddDirectoryToArchive(
 				free(arch_path);
 				MyFree(fullPathUtf8);
 				MyFree(archPathUtf8);
+				closedir(dir);
 				return FALSE;
 			}
 			MyFree(fullPathUtf8);
@@ -289,7 +291,14 @@ BOOL_T CreateArchive(
 	printf("Started Archive %s", archive_path);
 #endif
 
-	AddDirectoryToArchive(za, dir_path, "");
+	if (AddDirectoryToArchive(za, dir_path, "") != TRUE) {
+		// It told the user what failed; don't write a partial archive
+		zip_discard(za);
+		unlink(archive_path);
+		free(archive_path);
+		MyFree(archiveUtf8);
+		return FALSE;
+	}
 
 	if (zip_close(za) == -1) {
 		zip_error_init_with_code(&error, err);
