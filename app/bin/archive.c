@@ -455,3 +455,79 @@ BOOL_T UnpackArchiveFor(
 	return TRUE;
 }
 
+/**
+ * Is a string well-formed UTF-8? wIsUTF8() is only built on Windows.
+ *
+ * \param[in] s the string
+ *
+ * \returns TRUE if it is
+ */
+static BOOL_T ArchiveNameIsUTF8(const char * s)
+{
+	const unsigned char *p = (const unsigned char *)s;
+	while (*p) {
+		int n;
+		unsigned int c = *p;
+		if (c < 0x80) {
+			p++;
+			continue;
+		} else if (c >= 0xC2 && c <= 0xDF) {
+			n = 1;
+		} else if (c >= 0xE0 && c <= 0xEF) {
+			n = 2;
+		} else if (c >= 0xF0 && c <= 0xF4) {
+			n = 3;
+		} else {
+			return FALSE;
+		}
+		p++;
+		for (int i = 0; i < n; i++, p++) {
+			if ((*p & 0xC0) != 0x80) {
+				return FALSE;
+			}
+		}
+	}
+	return TRUE;
+}
+
+/**************************************************************************
+ * Check that an archive holds an entry by its UTF-8 name, and that every
+ * entry's name is UTF-8. libzip takes file names as UTF-8, on Windows too, so
+ * names in the system code page have to be converted before they go into an
+ * archive. Used by the background regression test (LayoutBackgroundTest()).
+ *
+ * \param[in] pathName the archive, a file name in the system code page
+ * \param[in] entryUtf8 the entry to find, in UTF-8, '/' between directories
+ *
+ * \returns TRUE if the entry is there and every name is UTF-8
+ */
+BOOL_T ArchiveHasUTF8Entry(
+        const char * pathName,
+        const char * entryUtf8)
+{
+	struct zip *za;
+	int err;
+	BOOL_T ok = TRUE;
+	char *archiveUtf8 = MyStrdup(pathName);
+#ifdef UTFCONVERT
+	archiveUtf8 = Convert2UTF8(archiveUtf8);
+#endif // UTFCONVERT
+
+	za = zip_open(archiveUtf8, ZIP_RDONLY, &err);
+	MyFree(archiveUtf8);
+	if (za == NULL) {
+		return FALSE;
+	}
+	for (zip_int64_t i = 0; i < zip_get_num_entries(za, 0); i++) {
+		// The name as stored, not converted from what libzip guesses it is
+		const char *name = zip_get_name(za, (zip_uint64_t)i, ZIP_FL_ENC_RAW);
+		if (name == NULL || !ArchiveNameIsUTF8(name)) {
+			ok = FALSE;
+		}
+	}
+	if (zip_name_locate(za, entryUtf8, ZIP_FL_ENC_RAW) < 0) {
+		ok = FALSE;
+	}
+	zip_discard(za);
+	return ok;
+}

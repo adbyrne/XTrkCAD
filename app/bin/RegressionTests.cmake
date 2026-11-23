@@ -89,6 +89,7 @@ foreach(_xtrkcad_clipboard_case objects timesavr)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/clipboard-${_xtrkcad_clipboard_case}")
 endforeach()
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/background-objects")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/background-utf8")
 foreach(_xtrkcad_ops_case objects timesavr)
     list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/ops-${_xtrkcad_ops_case}")
 endforeach()
@@ -975,6 +976,21 @@ set_tests_properties("RegressionBackground.objects" PROPERTIES
     LABELS "regression;regression-ci"
     TIMEOUT 120
     ENVIRONMENT "HOME=${_xtrkcad_background_home}"
+    RUN_SERIAL TRUE
+)
+
+# The same with an archive and an image named with letters outside ASCII, the
+# image's outside cp1252 too. libzip takes file names as UTF-8, on Windows too
+# (dev ML #4713), so the names have to be converted where they go into the
+# archive and its manifest. Also checks the names stored in the archive.
+set(_xtrkcad_background_utf8_home "${XTRKCAD_REGRESSION_HOME_ROOT}/background-utf8")
+xtrkcad_add_regression_test("RegressionBackground.utf8" "${_xtrkcad_background_utf8_home}"
+    "${_xtrkcad_test_option}backgroundutf8:${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc")
+set_tests_properties("RegressionBackground.utf8" PROPERTIES
+    FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+    LABELS "regression;regression-ci"
+    TIMEOUT 120
+    ENVIRONMENT "HOME=${_xtrkcad_background_utf8_home}"
     RUN_SERIAL TRUE
 )
 
