@@ -40,20 +40,24 @@ char *
 Convert2UTF8( char *string )
 {
 	if (RequiresConvToUTF8(string)) {
-		size_t cnt = strlen(string) * 2 + 2;
+		// A code page's byte is at most three bytes of UTF-8
+		size_t cnt = strlen(string) * 3 + 1;
 		char *out = MyMalloc(cnt);
-		wSystemToUTF8(string, out, (unsigned int)cnt);
-		MyFree(string);
-		return(out);
-	} else {
-		return(string);
+		if (wSystemToUTF8(string, out, (unsigned int)cnt)) {
+			MyFree(string);
+			return(out);
+		}
+		// Not in the system code page: leave it as it was
+		MyFree(out);
 	}
+	return(string);
 }
 
 /**
- * Convert a string from UTF-8 to system codepage in place. As the length of
- * the result most be equal or smaller than the input this is a safe
- * approach.
+ * Convert a string from UTF-8 to the system code page in place. The string
+ * is left as it was if it's ASCII or not UTF-8, if a character isn't in the
+ * code page, or if the result would be longer than the string (possible in
+ * some multi-byte code pages).
  *
  * \param [in,out] in the string to be converted
  */
@@ -61,11 +65,13 @@ Convert2UTF8( char *string )
 void
 ConvertUTF8ToSystem(char *in)
 {
-	if (wIsUTF8(in)) {
-		size_t cnt = strlen(in) * 2 + 2;
+	if (RequiresConvToUTF8(in) && wIsUTF8(in)) {
+		size_t len = strlen(in);
+		size_t cnt = len * 2 + 1;
 		char *out = MyMalloc(cnt);
-		wUTF8ToSystem(in, out, (unsigned int)cnt);
-		strcpy(in, out);
+		if (wUTF8ToSystem(in, out, (unsigned int)cnt) && strlen(out) <= len) {
+			strcpy(in, out);
+		}
 		MyFree(out);
 	}
 }
@@ -74,7 +80,7 @@ ConvertUTF8ToSystem(char *in)
  * Requires convert to UTF-8 If at least one character is >127 the string
  * has to be converted.
  *
- * \param [in] string the string.
+ * \param [in] string the string, or NULL (a missing manifest entry).
  *
  * \returns True if conversion is required, false if not.
  */
@@ -82,6 +88,9 @@ ConvertUTF8ToSystem(char *in)
 bool
 RequiresConvToUTF8(char *string)
 {
+	if (string == NULL) {
+		return(false);
+	}
 	while (*string) {
 		if (*string++ & 0x80) {
 			return(true);

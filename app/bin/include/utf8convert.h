@@ -17,6 +17,7 @@
  */
 
 #ifndef HAVE_UTF8CONVERT_H
+#define HAVE_UTF8CONVERT_H
 #include <stdbool.h>
 char *Convert2UTF8(char *string);
 bool RequiresConvToUTF8(char *string);

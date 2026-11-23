@@ -32,6 +32,20 @@ xtrkcad_add_unit_test(getopttest GetoptTest
 	FOLDER UnitTestsWLib
 	INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
 
+# the Windows code page conversions (Development Issues #92)
+# win32/utf8conv.c is included by the test; it calls the Windows API
+if(WIN32)
+	xtrkcad_add_unit_test(utf8convtest UTF8ConvTest
+		FOLDER UnitTestsWLib
+		INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
+endif()
+
+# text converted to UTF-8 for GTK (Development Issues #92)
+xtrkcad_add_unit_test(convertinputtest ConvertInputTest
+	FOLDER UnitTestsWLib
+	INCLUDES ${_xtrkcad_wlib_ut_includes}
+	LIBS xtrkcad-wlib PkgConfig::GTK3)
+
 # positioning in multiline text controls
 xtrkcad_add_unit_test(textpositiontest TextPositionTest MATH
 	FOLDER UnitTestsWLib
@@ -50,5 +64,6 @@ xtrkcad_add_unit_test(entrytest EntryTest
 # allocations show up as leaks, leave them out with -LE gtk-display. Label any
 # new test here that calls into GTK.
 set_tests_properties(PreferenceTest MRUListTest TextPositionTest EntryTest
+	ConvertInputTest
 	PROPERTIES LABELS gtk-display
 )

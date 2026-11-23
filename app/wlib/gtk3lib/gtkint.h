@@ -473,7 +473,6 @@ typedef struct accelData_t {
 void wlibAddLabel(wControl_p b, wWinPix_t x, wWinPix_t y, const char *labelStr);
 void wlibControlGetSize(wControl_p b);
 char *wlibConvertInput(const char *inString);
-char *wlibConvertOutput(const char *inString);
 struct accelData_t *wlibFindAccelKey(GdkEventKey *event);
 wBool_t wlibHandleAccelKey(GdkEventKey *event);
 

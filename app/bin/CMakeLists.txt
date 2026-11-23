@@ -351,11 +351,16 @@ if(XTRKCAD_CREATE_SVG)
     )
 endif()
 
+# The application manifest makes UTF-8 the process code page on Windows
+# (Development Issues #92): MinGW embeds it with a resource script, MSVC's
+# linker takes the .manifest file and merges it with its own.
 target_sources(${XTRKCAD_BIN}
     PRIVATE
     misc.c
     ${messagefile_BINARY_DIR}/tooltiptext.c
     xtrkcad.rc
+    "$<$<AND:${XTRKCAD_IF_WINDOWS},$<NOT:${XTRKCAD_IF_MSVC}>>:${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-manifest.rc>"
+    "$<${XTRKCAD_IF_MSVC}:${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad.manifest>"
 )
 add_dependencies(${XTRKCAD_BIN}
     tooltips
