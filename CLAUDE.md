@@ -152,7 +152,9 @@ authors, not just presence of a diff) rather than assuming every FAIL entry need
   prerelease packages and redeploys GitHub Pages. PR CI never runs `release.yml`, so check that
   the post-merge Release run finishes green. Its packaging jobs use rolling OS packages that can
   break with no change on our side (2026-10-05: MSYS2 doxygen 1.18.0-3 crashed
-  `package-windows`, fixed by pinning 1.16.1-4). Since #294 `release.yml` only orchestrates:
+  `package-windows`, so 1.16.1-4 was pinned; 2026-11-22 that pin broke too, as it links
+  `libLLVM-22.dll` and MSYS2 moved to LLVM 23, so it's unpinned again: don't pin MSYS2
+  packages that link LLVM). Since #294 `release.yml` only orchestrates:
   the packaging is in `packages-linux.yml`, `packages-macos.yml` and `packages-windows.yml`, the
   install tests in `install-tests.yml` (called once per platform). When a PR changes any of
   them, validate it before merging with `gh workflow run release.yml --ref <branch>`, and with a
