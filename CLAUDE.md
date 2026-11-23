@@ -75,7 +75,7 @@ meantime, it opens a GitHub issue titled
 with `gh workflow run hg-sync-default.yml`; for testing, the inputs are `dry_run`, `promote`,
 `from_node`, `to_node`, and `target_branch` (a scratch branch instead of `main`).
 
-**The local `xtrkcad-sf-sync` timer is retired** (disabled 2026-10-20). It only handled
+**The local `xtrkcad-sf-sync` timer is retired** (disabled 2026-10-20; script and units removed 2026-11-23). It only handled
 `GTK3V2MAIN`, which no longer exists. `.claude/sf-sync-pending` is no longer written; ignore it.
 
 ### When the sync workflow opens an issue
@@ -297,7 +297,7 @@ installed; the 2 `RegressionExport.*` tests need it).
 Regression tests have levels (`-DXTRKCAD_REGRESSION_LEVEL=critical|ci|full`, `RegressionTests.cmake`):
 a local build defaults to `critical` (~4 min with the unit tests), CI to `full` (~23 min; run it in
 the background). Configure scratch builds with `full` before claiming a full pass. Windows and macOS
-run `critical` on PRs and `ci` on `main`.
+run `critical` on PRs and `ci` on `main`; `regression-windows` runs in both MSYS2 MINGW64 and UCRT64.
 
 Run new load, save or parse code under ASan too (`-DXTRKCAD_SANITIZE=ON`, clang; it builds the program
 too, so run regression tests with `ASAN_OPTIONS=detect_leaks=0`, GTK's allocations count as leaks). Its fill pattern
@@ -311,11 +311,12 @@ up (Development Issues #67). Regression tests besides the demos:
 - `RegressionUndo.*`: `-Tundo:<demo>` undoes and redoes each demo's last steps (at most 10) and compares
   the layout each time; tracks are compared renumbered, as Redo renumbers them.
 - `RegressionCheckpoint.*`: `-Tcheckpoint:<layout>` writes, backs up and restores a checkpoint; a failed
-  or cancelled save or Open must keep it.
+  or cancelled save or Open must keep it, a `.xtce` whose archive can't be moved into place included.
 - `RegressionClipboard.*`: `-Tclipboard:<layout>` Copy/Paste, Cut with Undo/Redo, Clone of a whole
   layout; each Undo gives back the saved layout.
 - `RegressionBackground.objects`: `-Tbackground:<layout>` a background image saved into a
-  `.xtce` archive and loaded back from it.
+  `.xtce` archive and loaded back from it. `.utf8` (`-Tbackgroundutf8:`) does it with non-ASCII
+  archive and image names, and checks every name stored in the archive is UTF-8 (libzip wants UTF-8).
 - `RegressionOps.*`: `-Tops:<layout>` Rotate, Flip, Rescale, Move of a whole layout, each and its
   reverse, with Undo/Redo.
 - `RegressionXti.*`: `-Txti:<layout>` File > Export to `.xti`, then Import into an empty layout, into
@@ -326,7 +327,7 @@ up (Development Issues #67). Regression tests besides the demos:
   `UNDOSTEP`, `REDOSTEP` test Undo, which playback otherwise suspends. `FILESELECT <file>` answers
   the next file dialog; `PARAMCHECK <dlg> <list> count <n>` and `PARAMETER <dlg> <list> <n>`
   count and pick list rows; `PARAMCHECK <dlg> ok active|inactive` checks a button (dev guide
-  `building.md` has the rest). `cars*` cover the car dialog (`carfind` checks Find with `VIEWCHECK <x> <y>`, the main window's centre), `jsonnote` the JSON Note dialog, `todesign` the Turnout Designer, `layers` the Layers dialog, `modify` Modify on Cornu and Bezier, `movebelow` Move Objects Below and Above with Undo and Redo, `blockends` a loaded block's ends, `splitops` Split and Parallel on Bezier, Cornu, easement, `trimmerge` Merge by Join and Trim under a turnout, `easement` a turnout placed on an easement, `blockmove` a block's ends following its tracks, `switchmotor` a switch motor following its turnout, `gapsmax` the Gaps report's Maximum gap choice, `shorttracks` the Short Tracks report (its saved output against `shorttracks-expected/`), `trackclearance` the Track Clearance report (against `trackclearance-expected/`), `reports` every report saved and compared with
+  `building.md` has the rest). `cars*` cover the car dialog (`carfind` checks Find with `VIEWCHECK <x> <y>`, the main window's centre), `jsonnote` the JSON Note dialog, `todesign` the Turnout Designer, `layers` the Layers dialog, `modify` Modify on Cornu and Bezier, `movebelow` Move Objects Below and Above with Undo and Redo, `blockends` a loaded block's ends, `splitops` Split and Parallel on Bezier, Cornu, easement, `trimmerge` Merge by Join and Trim under a turnout, `easement` a turnout placed on an easement, `blockmove` a block's ends following its tracks, `switchmotor` a switch motor following its turnout, `gapsmax` the Gaps report's Maximum gap choice, `gapsturntable` a sectional turntable drawn as a turnout (its unused positions are stalls, not gaps), `shorttracks` the Short Tracks report (its saved output against `shorttracks-expected/`), `trackclearance` the Track Clearance report (against `trackclearance-expected/`), `reports` every report saved and compared with
   `testfiles/reports-expected/`.
 - Under `-T`, notices and status-bar errors go to the log (`NOTICE:`, `NOTICE ANSWER:`, `ERROR:`)
   instead of opening; `NOTICEANSWER first|second|third` picks the button. A message with an ID logs
