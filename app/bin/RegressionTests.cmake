@@ -75,6 +75,8 @@ list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/round
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/describe-utf8")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/roundtrip-cp1252")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/describe-cp1252")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/utf8-filename-cp1252")
+list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/utf8-filename-polish")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-badline")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-newer")
 list(APPEND _xtrkcad_regression_home_dirs "${XTRKCAD_REGRESSION_HOME_ROOT}/archive-badmanifest")
@@ -685,6 +687,52 @@ set_tests_properties(RegressionRoundTrip.objects_check PROPERTIES
     FIXTURES_REQUIRED regression_objects
     LABELS "regression;regression-ci"
 )
+
+# Layouts with non-ASCII file names (Development Issues #92): one whose
+# characters are all in the Windows code page cp1252 (u-umlaut, sharp s), one
+# whose characters aren't (Polish L-stroke, z-acute). Each is opened under its
+# own name, round-tripped, and must never reach GTK as anything but UTF-8. On
+# Windows file names were in the system code page: the second couldn't be
+# opened at all, the first was shown wrongly. The names are built from their
+# UTF-8 bytes so this file stays ASCII. The log goes to a file with -l, so the
+# check can read it on Windows too.
+string(ASCII 77 195 188 108 108 101 114 45 83 116 114 97 195 159 101 _xtrkcad_fn_cp1252)
+string(ASCII 197 129 195 179 100 197 186 _xtrkcad_fn_polish)
+set(_xtrkcad_fn_dir "${CMAKE_CURRENT_BINARY_DIR}/utf8-filenames")
+foreach(_xtrkcad_fn_case cp1252 polish)
+    set(_xtrkcad_fn_name "${_xtrkcad_fn_${_xtrkcad_fn_case}}.xtc")
+    set(_xtrkcad_fn_home "${XTRKCAD_REGRESSION_HOME_ROOT}/utf8-filename-${_xtrkcad_fn_case}")
+    set(_xtrkcad_fn_log "${_xtrkcad_fn_dir}/${_xtrkcad_fn_case}.log")
+    add_test(NAME RegressionUtf8.filename_${_xtrkcad_fn_case}_setup
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc"
+            "${_xtrkcad_fn_dir}/${_xtrkcad_fn_name}")
+    add_test(NAME RegressionUtf8.filename_${_xtrkcad_fn_case}_clean
+        COMMAND ${CMAKE_COMMAND} -E rm -f "${_xtrkcad_fn_log}")
+    set_tests_properties(RegressionUtf8.filename_${_xtrkcad_fn_case}_setup
+        RegressionUtf8.filename_${_xtrkcad_fn_case}_clean PROPERTIES
+        FIXTURES_SETUP regression_fn_${_xtrkcad_fn_case}_files
+        LABELS "regression;regression-ci"
+    )
+    xtrkcad_add_regression_test(RegressionUtf8.filename_${_xtrkcad_fn_case} "${_xtrkcad_fn_home}"
+        "${_xtrkcad_option_char}l${_xtrkcad_fn_log}"
+        "${_xtrkcad_test_option}${_xtrkcad_fn_dir}/${_xtrkcad_fn_name}")
+    set_tests_properties(RegressionUtf8.filename_${_xtrkcad_fn_case} PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes;regression_fn_${_xtrkcad_fn_case}_files"
+        FIXTURES_SETUP regression_fn_${_xtrkcad_fn_case}
+        LABELS "regression;regression-ci"
+        TIMEOUT 120
+        ENVIRONMENT "HOME=${_xtrkcad_fn_home}"
+        RUN_SERIAL TRUE
+    )
+    add_test(NAME RegressionUtf8.filename_${_xtrkcad_fn_case}_check
+        COMMAND sh "${CMAKE_SOURCE_DIR}/tools/check-utf8-filename.sh"
+            "${_xtrkcad_fn_log}" "${_xtrkcad_fn_name}")
+    set_tests_properties(RegressionUtf8.filename_${_xtrkcad_fn_case}_check PROPERTIES
+        FIXTURES_REQUIRED regression_fn_${_xtrkcad_fn_case}
+        LABELS "regression;regression-ci"
+    )
+endforeach()
 
 # Non-ASCII text in every kind of object that has a name or a text: layout
 # titles, a layer, the main note, a note, a text, a turnout title, a sensor,
