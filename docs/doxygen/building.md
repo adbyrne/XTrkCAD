@@ -417,10 +417,12 @@ bug:
   full actual-vs-expected track dump `CheckRegressionResult()` (`track.c`) writes there — to stdout
   before exiting, so that detail is visible in `ctest --output-on-failure`/`-VV` output instead of
   sitting in a directory the next test's `RegressionCleanHomes` run is about to delete. Every
-  regression test also runs with `-d init=1` (not on Windows, where the log file opens before
-  the work directory is set up and the tests hung), which logs each startup step (`misc.c`'s `init`
-  category: `createMenus`, `paramFileInit`, ... `Initialization complete`): a test that crashes
-  during startup shows the last step it reached.
+  regression test also runs with `-d init=1` (`/d init=1` on Windows), which logs each startup
+  step (`misc.c`'s `init` category: `createMenus`, `paramFileInit`, ... `Initialization complete`):
+  a test that crashes during startup shows the last step it reached. On Windows the option
+  character is `/`: a `-` option there is taken as the file to open, and getopt stops at it, so
+  the `/T` after it was lost and every test waited in the GUI until its timeout (Development
+  Issues #90).
 - **`regression-gtk3-standalone` CI job** — runs the per-demo targets individually
   (`ctest --test-dir build -L "^regression$" -LE "regression-ci"`), separately from the
   `regression-gtk3` job's single-process `RegressionSuite` run. The two setups aren't
