@@ -320,8 +320,17 @@ jobs:
     # On a pull request only the critical regression tests run
     # (XTRKCAD_REGRESSION_LEVEL, RegressionTests.cmake); on main, the
     # regression-ci set. regression-macos does the same.
+    # In both MSYS2 environments the packages are built in (MINGW64, UCRT64:
+    # packages-windows.yml), as they link different C runtimes. Only
+    # c-tests-windows runs the unit tests in MINGW64, so this job runs them
+    # too, for UCRT64.
+    name: regression-windows (${{ matrix.msystem }})
     runs-on: windows-2025
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        msystem: [MINGW64, UCRT64]
     defaults:
       run:
         shell: msys2 {0}
@@ -329,7 +338,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: ${{ matrix.msystem }}
           suppress-deprecation-warnings: msystem-mingw64
           update: false
           pacboy: >-
@@ -344,6 +353,15 @@ jobs:
             librsvg:p
             gettext-tools:p
             cmocka:p
+      - name: The dev guide's pacman line installs
+        # building.md's Windows section gives one pacman line for either
+        # shell. Run it as written, so a renamed package shows up here; the
+        # packages are already installed above, --needed skips them.
+        run: |
+          line=$(grep -m1 '^pacman -S --needed \$MINGW_PACKAGE_PREFIX' docs/doxygen/building.md)
+          test -n "$line"
+          echo "$line"
+          eval "${line/pacman -S/pacman -S --noconfirm}"
       - uses: ./.github/actions/msys2-pin-gcc
       - name: Configure
         run: |
@@ -355,6 +373,8 @@ jobs:
             -DXTRKCAD_USE_GETTEXT=OFF
       - name: Build
         run: cmake --build build --parallel
+      - name: Unit tests
+        run: ctest --test-dir build -LE regression --output-on-failure
       - name: Regression suite
         # RegressionDescribe.* opens a dialog per object, which is over ten
         # times slower here than on Linux (2766 s, eight timeouts, PR #344).

@@ -724,7 +724,11 @@ bug:
   room bigger and moves the layout 10 in from its edges, as Rescale pushes a layout that grows past
   an edge back onto the room. Same two layouts and labels as above.
 - **`regression-windows` and `regression-macos` CI jobs** — run the `regression-ci` tests on those
-  platforms. Both gate like the Linux jobs. macOS runners can be scarce, so a `regression-macos`
+  platforms. Both gate like the Linux jobs. `regression-windows` runs in both MSYS2 environments
+  the packages are built in, MINGW64 and UCRT64, which link different C runtimes, and runs the
+  unit tests too (only `c-tests-windows` runs them otherwise, in MINGW64). It first runs the
+  Windows section's `pacman` line from this page as written, so a package renamed in MSYS2 shows
+  up there. macOS runners can be scarce, so a `regression-macos`
   job that never starts may need a rerun. Locally, pass
   `-DXTRKCAD_REGRESSION_TESTING=ON`, as the option only defaults on for Linux. Windows has no `RegressionSuite`: it didn't finish within its 900 s, and
   a timeout doesn't show which demo was running, so the per-demo tests are in `regression-ci` there.

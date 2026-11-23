@@ -126,8 +126,9 @@ Before Development Issues #49 the installer had no DLLs, wasn't built on tags, a
 menu shortcut pointed at `bin\xtrkcad.exe` even when the binary was versioned.
 
 **Toolchain:** CI builds with MSYS2 MINGW64 and pins MinGW GCC (`.github/actions/msys2-pin-gcc`,
-which works in either environment). The packages are built in MINGW64 and UCRT64 (see above);
-dropping MINGW64 is for after 5.4.0 (Development Issues #34).
+which works in either environment). The packages are built in MINGW64 and UCRT64 (see above), and
+`regression-windows` builds and tests in both; dropping MINGW64 is for after 5.4.0 (Development
+Issues #34).
 
 # Testing on Windows {#windows-testing}
 
