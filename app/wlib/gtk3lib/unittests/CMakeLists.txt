@@ -32,6 +32,14 @@ xtrkcad_add_unit_test(getopttest GetoptTest
 	FOLDER UnitTestsWLib
 	INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
 
+# the Windows code page conversions (Development Issues #92)
+# win32/utf8conv.c is included by the test; it calls the Windows API
+if(WIN32)
+	xtrkcad_add_unit_test(utf8convtest UTF8ConvTest
+		FOLDER UnitTestsWLib
+		INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
+endif()
+
 # positioning in multiline text controls
 xtrkcad_add_unit_test(textpositiontest TextPositionTest MATH
 	FOLDER UnitTestsWLib
