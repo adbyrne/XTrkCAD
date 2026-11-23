@@ -79,7 +79,7 @@ Each shell sets `MINGW_PACKAGE_PREFIX` (`mingw-w64-ucrt-x86_64` in UCRT64,
 `mingw-w64-x86_64` in MINGW64), so one command installs the right packages in either:
 
 ```sh
-pacman -S --needed $MINGW_PACKAGE_PREFIX-{gcc,cmake,ninja,pkg-config,gtk3,zlib,libzip,mxml,librsvg,gettext,cmocka}
+pacman -S --needed $MINGW_PACKAGE_PREFIX-{gcc,cmake,ninja,pkgconf,gtk3,zlib,libzip,mxml,librsvg,gettext-tools,cmocka}
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
