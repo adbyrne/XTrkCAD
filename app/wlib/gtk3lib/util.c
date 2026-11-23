@@ -298,92 +298,37 @@ bool wTextToUTF8(char *text, size_t size)
 	return true;
 }
 
-static dynArr_t conversionBuffer_da;
-
 /**
- * Convert a string to UTF-8
+ * Convert a string to UTF-8 for GTK. A string that isn't UTF-8 is read as
+ * cp1252, the Windows code page old files were written in, as
+ * wTextToUTF8() does; a byte cp1252 doesn't define as Latin-1. Before, every
+ * such byte was taken as Latin-1, which gave the wrong characters for
+ * cp1252's 0x80-0x9F (the euro sign, typographic quotes).
  *
  * \param inString IN string to convert
- * \returns pointer to converted string, valid until next call to conversion function
+ * \returns the string itself if it is UTF-8, otherwise the converted copy,
+ *          which stays valid until the next call (GTK runs in one thread)
  */
 
 char * wlibConvertInput(const char * inString)
 {
-	const char * cp;
-	char * cq;
-	int extCharCnt, inCharCnt;
+	static gchar *converted = NULL;
 
-	/* Already UTF-8 encoded? */
-	if (g_utf8_validate(inString, -1, NULL))
-		/* Yes, do not double-convert */ {
-		return (char*) inString;
+	if (g_utf8_validate(inString, -1, NULL)) {
+		return (char *)inString;
 	}
 
-	for (cp = inString, extCharCnt = 0; *cp; cp++) {
-		if (((*cp)&0x80) != '\0') {
-			extCharCnt++;
-		}
+	g_free(converted);
+	converted = g_convert(inString, -1, "UTF-8", "CP1252", NULL, NULL, NULL);
+	if (converted == NULL) {
+		converted = g_convert(inString, -1, "UTF-8", "ISO-8859-1", NULL, NULL,
+		                      NULL);
 	}
-
-	inCharCnt = (int)(cp - inString);
-
-	if (extCharCnt == '\0') {
-		return (char*) inString;
+	if (converted == NULL) {
+		// Never shows the bytes as they are: GTK only takes UTF-8
+		converted = g_utf8_make_valid(inString, -1);
 	}
-
-	DYNARR_SET(char, conversionBuffer_da, inCharCnt + extCharCnt + 1);
-
-	for (cp = inString, cq = (char*) conversionBuffer_da.ptr; *cp; cp++) {
-		if (((*cp)&0x80) != 0) {
-			*cq++ = 0xC0 + (((*cp)&0xC0) >> 6);
-			*cq++ = 0x80 + ((*cp)&0x3F);
-		} else {
-			*cq++ = *cp;
-		}
-	}
-
-	*cq = 0;
-	return (char*) conversionBuffer_da.ptr;
-}
-
-/**
- * Convert a string from UTF-8 to system codepage
- *
- * \param inString IN string to convert
- * \returns pointer to converted string, valid until next call to conversion function
- */
-
-char * wlibConvertOutput(const char * inString)
-{
-	const char * cp;
-	char * cq;
-	int extCharCnt, inCharCnt;
-
-	for (cp = inString, extCharCnt = 0; *cp; cp++) {
-		if (((*cp)&0xC0) == 0x80) {
-			extCharCnt++;
-		}
-	}
-
-	inCharCnt = (int)(cp - inString);
-
-	if (extCharCnt == '\0') {
-		return (char*) inString;
-	}
-
-	DYNARR_SET(char, conversionBuffer_da, inCharCnt + 1);
-
-	for (cp = inString, cq = (char*) conversionBuffer_da.ptr; *cp; cp++) {
-		if (((*cp)&0x80) != 0) {
-			*cq++ = 0xC0 + (((*cp)&0xC0) >> 6);
-			*cq++ = 0x80 + ((*cp)&0x3F);
-		} else {
-			*cq++ = *cp;
-		}
-	}
-
-	*cq = '\0';
-	return (char*) conversionBuffer_da.ptr;
+	return (char *)converted;
 }
 
 /*-----------------------------------------------------------------*/
