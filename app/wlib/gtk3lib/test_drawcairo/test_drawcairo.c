@@ -350,6 +350,66 @@ static void test_polygon_filled_triangle(void **state)
 	}
 }
 
+/* 7b: wDrawPolygon keeps its corners in GdkPoint (int) and used to do
+ * "x = round(x) + 0.5" on them. The .5 is lost on the way back to int, but
+ * not without effect: for a corner left of or above the canvas, -11 + 0.5
+ * truncates to -10, so the corner moved one pixel and the edges running into
+ * the canvas got a different slope. The polygon has to match the same path
+ * filled directly in cairo, with drawcairo's settings for a one-shot context,
+ * at the device corners (x, H-1-y). */
+static void assert_polygon_matches_cairo(struct control *c,
+                const wDrawPix_t p[][2], int cnt)
+{
+	struct draw *d = CONTROL_GET_ATTRIBUTES_PTR(c, draw);
+	cairo_surface_t *ref = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, W, H);
+	cairo_t *cr = cairo_create(ref);
+	size_t lenA, lenB;
+	unsigned char *a, *b;
+	int i;
+
+	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+	cairo_set_antialias(cr, CAIRO_ANTIALIAS_FAST);
+	cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
+	for (i = 0; i < cnt; i++) {
+		double x = p[i][0], y = (H - 1) - p[i][1];
+		if (i == 0) {
+			cairo_move_to(cr, x, y);
+		} else {
+			cairo_line_to(cr, x, y);
+		}
+	}
+	cairo_line_to(cr, p[0][0], (H - 1) - p[0][1]);
+	cairo_fill(cr);
+	cairo_destroy(cr);
+
+	wDrawPolygon(c, (wDrawPix_t (*)[2])p, NULL, cnt, COL_RED, 0,
+	             wDrawLineSolid, 0, 1, 0);
+
+	a = snapshot(d->surface, &lenA);
+	b = snapshot(ref, &lenB);
+	assert_int_equal(lenA, lenB);
+	assert_memory_equal(a, b, lenA);
+	free(a);
+	free(b);
+	cairo_surface_destroy(ref);
+}
+
+/* Control: all corners on the canvas. Matched before the 7b change too. */
+static void test_polygon_matches_cairo_on_canvas(void **state)
+{
+	CTX();
+	const wDrawPix_t p[3][2] = { { 20, 20 }, { 80, 30 }, { 40, 80 } };
+	assert_polygon_matches_cairo(c, p, 3);
+}
+
+/* A corner left of the canvas and one above it. */
+static void test_polygon_matches_cairo_off_canvas(void **state)
+{
+	CTX();
+	const wDrawPix_t p[3][2] = { { -11, 20 }, { 60, 50 }, { 30, 117 } };
+	assert_polygon_matches_cairo(c, p, 3);
+}
+
 /* Dirty-rect property: every changed pixel lies inside an invalidated region.
  *
  * What the legacy code invalidates (read from drawcairo.c):
@@ -976,6 +1036,8 @@ int main(int argc, char **argv)
 
 		/* keep last: under ASan this test aborts the whole process */
 		cmocka_unit_test_setup_teardown(test_polygon_zero_points, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_polygon_matches_cairo_on_canvas, setup_nowidget, teardown),
+		cmocka_unit_test_setup_teardown(test_polygon_matches_cairo_off_canvas, setup_nowidget, teardown),
 
 		/* known bugs */
 
