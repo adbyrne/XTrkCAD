@@ -350,26 +350,30 @@ wBasicDrawString (wControl_p bd, wDrawPix_t x, wDrawPix_t y, double a,
 /**
  * Print a filled rectangle
  *
+ * Takes a corner and the size, as wDrawFilledRectangle() does: both its
+ * DIRECTCAIRO path (printing) and BDrawRectangle() (bitmap export) pass them
+ * on unchanged. Taking the third and fourth arguments as the opposite corner
+ * filled a rectangle from each snap grid dot to the far side of an exported
+ * bitmap (Development Issues #82).
+ *
  * \param bd
- * \param x0, y0 IN top left corner
- * \param x1, y1 IN bottom right corner
+ * \param x, y IN the corner nearest the origin
+ * \param w, h IN width and height
  * \param color IN fill color
  * \param opts IN options
  */
 
 void
-wBasicDrawFillRectangle (wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
-                         wDrawPix_t x1, wDrawPix_t y1, wDrawColor color,
+wBasicDrawFillRectangle (wControl_p bd, wDrawPix_t x, wDrawPix_t y,
+                         wDrawPix_t w, wDrawPix_t h, wDrawColor color,
                          wDrawOpts opts)
 {
 	struct draw *draw = CONTROL_GET_ATTRIBUTES_PTR(bd, draw);
 	cairo_t *cr = draw->cr;
-	double width = x0 - x1;
-	double height = y0 - y1;
 
 	BasicDrawSetColor (cr, color);
 
-	cairo_rectangle (cr, x0, y0, width, height);
+	cairo_rectangle (cr, x, y, w, h);
 
 	cairo_fill (cr);
 }

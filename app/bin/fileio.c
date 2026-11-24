@@ -2815,7 +2815,8 @@ EXPORT int LayoutDescribeTest( const char * pathName )
 
 /**
  * Regression test for -Texport:&lt;layout&gt;: load a layout, then print it to
- * export.pdf and export it to export.svg, export.dxf and export.png, in the
+ * export.pdf and export it to export.svg, export.dxf and export.png, and with
+ * the snap grid shown to export-grid.png, in the
  * working directory, through the normal code, and import the DXF file back.
  * tools/check-export-test.sh checks the files. A bitmap export to export.bmp,
  * a name the bitmap export can't write, has to fail without writing a file;
@@ -2828,7 +2829,7 @@ EXPORT int LayoutExportTest( const char * pathName )
 {
 	char * source = MyStrdup( pathName );
 	char * pdf = NULL, * svg = NULL, * dxf = NULL, * png = NULL;
-	char * bmp = NULL;
+	char * bmp = NULL, * gridPng = NULL;
 	int nFail = 0;
 	int count = RoundTripLoad( source );
 
@@ -2841,12 +2842,21 @@ EXPORT int LayoutExportTest( const char * pathName )
 	MakeFullpath( &dxf, workingDir, "export.dxf", NULL );
 	MakeFullpath( &png, workingDir, "export.png", NULL );
 	MakeFullpath( &bmp, workingDir, "export.bmp", NULL );
+	MakeFullpath( &gridPng, workingDir, "export-grid.png", NULL );
 
 	PrintAllPagesToFile( pdf );
 	if ( !ExportBitmapToFile( png ) ) {
 		lprintf( "  FAIL: bitmap export\n" );
 		nFail++;
 	}
+	/* With the snap grid shown, each grid dot is a 2.5 pixel square; the
+	 * check compares this bitmap with export.png (Development Issues #82) */
+	SetSnapGridForTest( TRUE );
+	if ( !ExportBitmapToFile( gridPng ) ) {
+		lprintf( "  FAIL: bitmap export with the snap grid shown\n" );
+		nFail++;
+	}
+	SetSnapGridForTest( FALSE );
 	remove( bmp );
 	if ( ExportBitmapToFile( bmp ) ) {
 		lprintf( "  FAIL: bitmap export to a .bmp file reported success\n" );
@@ -2889,6 +2899,7 @@ EXPORT int LayoutExportTest( const char * pathName )
 	free( dxf );
 	free( png );
 	free( bmp );
+	free( gridPng );
 	MyFree( source );
 	return nFail;
 }

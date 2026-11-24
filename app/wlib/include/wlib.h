@@ -810,8 +810,8 @@ void wBasicDrawString(wControl_p bd, wDrawPix_t x, wDrawPix_t y, double a,
                       const char *s, wFont_p fp, double fs,
                       double width, double minWidth,
                       wDrawColor color, wDrawOpts opts);
-void wBasicDrawFillRectangle(wControl_p bd, wDrawPix_t x0, wDrawPix_t y0,
-                             wDrawPix_t x1, wDrawPix_t y1,
+void wBasicDrawFillRectangle(wControl_p bd, wDrawPix_t x, wDrawPix_t y,
+                             wDrawPix_t w, wDrawPix_t h,
                              wDrawColor color, wDrawOpts opts);
 void wBasicDrawFillPolygon(wControl_p bd, wDrawPix_t p[][2],
                            const wPolyLine_e type[], int cnt,
