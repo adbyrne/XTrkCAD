@@ -866,23 +866,17 @@ void wDrawPolygon(
 		mid3.y = (points[i].y-mid0.y)/2+mid0.y;
 		mid4.x = (mid1.x-points[i].x)/2+points[i].x;
 		mid4.y = (mid1.y-points[i].y)/2+points[i].y;
-		points[i].x = round(points[i].x)+0.5;
-		points[i].y = round(points[i].y)+0.5;
-		mid0.x = round(mid0.x)+0.5;
-		mid0.y = round(mid0.y)+0.5;
-		mid1.x = round(mid1.x)+0.5;
-		mid1.y = round(mid1.y)+0.5;
-		mid3.x = round(mid3.x)+0.5;
-		mid3.y = round(mid3.y)+0.5;
-		mid4.x = round(mid4.x)+0.5;
-		mid4.y = round(mid4.y)+0.5;
+		/* No "+0.5" here as in wDrawLine: GdkPoint holds ints, so the .5
+		 * was dropped again, and for a corner left of or above the canvas
+		 * the truncation moved it one pixel (-11 + 0.5 became -10).
+		 * Development Issues #29, 7b. */
 		if(i==0) {
 			if (!type || type[i] == wPolyLineStraight || open) {
 				cairo_move_to(cairo, points[i].x, points[i].y);
 				save = points[0];
 			} else {
 				cairo_move_to(cairo, mid0.x, mid0.y);
-				if (type[i] == 1) {
+				if (type[i] == wPolyLineSmooth) {
 					cairo_curve_to(cairo, points[i].x, points[i].y, points[i].x, points[i].y,
 					               mid1.x, mid1.y);
 				} else {
