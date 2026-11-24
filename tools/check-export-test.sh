@@ -69,5 +69,22 @@ HEIGHT=$(od -An -tu1 -j20 -N4 "$PNG" | awk '{print $1*16777216 + $2*65536 + $3*2
 echo "PNG is $WIDTH x $HEIGHT"
 [ "${WIDTH:-0}" -gt 0 ] && [ "${HEIGHT:-0}" -gt 0 ] || fail "PNG has no size"
 
+# PNG with the snap grid shown (12 in, 6 divisions: a line every foot, a dot
+# every 2 in): the grid adds a few lines and dots, so few pixels may differ
+# from export.png. Each dot used to fill a rectangle from the dot to the far
+# corner of the bitmap, which turned most of it green (Development Issues #82).
+GRIDPNG="$DIR/export-grid.png"
+if [ ! -s "$GRIDPNG" ]; then
+	fail "no PNG with the snap grid"
+elif ! command -v python3 >/dev/null 2>&1; then
+	echo "no python3, not comparing export-grid.png"
+else
+	PCT=$(python3 -I "$(dirname "$0")/png-diff-fraction.py" "$PNG" "$GRIDPNG")
+	echo "the snap grid changes ${PCT:-unknown}% of the PNG"
+	# awk compares the decimal number; an empty PCT fails too
+	awk -v p="$PCT" 'BEGIN { exit !(p != "" && p + 0 < 10) }' ||
+		fail "the snap grid changes ${PCT:-unknown}% of the PNG, not under 10%"
+fi
+
 [ $RC -eq 0 ] && echo "export files OK"
 exit $RC

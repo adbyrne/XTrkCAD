@@ -664,7 +664,11 @@ bug:
   (`pdfinfo`, `pdftohtml`), so the tests are only added if those are found. They're labelled
   `regression` but not `regression-ci`: `regression-gtk3-standalone` and the coverage job install
   `poppler-utils` and run them, so the package jobs don't have to. A bitmap export to
-  `export.bmp` has to fail with one `MSG_BITMAP_BAD_EXTENSION` notice and write no file.
+  `export.bmp` has to fail with one `MSG_BITMAP_BAD_EXTENSION` notice and write no file. A second
+  PNG, `export-grid.png`, is exported with the snap grid shown (`SetSnapGridForTest()`); the check
+  compares it with `export.png` (`tools/png-diff-fraction.py`, standard library only) and fails if
+  the grid changes 10% of the pixels or more, as each grid dot used to fill a rectangle to the far
+  side of the bitmap (Development Issues #82).
 - **Undo and Redo after each demo (`RegressionUndo.*`)** — `-Tundo:<demo>` runs a demo as usual,
   writing the layout to `undo-before-<slot>.expected` each time an Undo step opens
   (`UndoSetStartHook()`). When the demo ends, `UndoCheckRun()` (`macro.c`) undoes every step Undo

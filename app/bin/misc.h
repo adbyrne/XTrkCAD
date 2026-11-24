@@ -165,6 +165,7 @@ BOOL_T SnapPos( coOrd * );
 BOOL_T SnapPosAngle( coOrd *, ANGLE_T * );
 void DrawSnapGrid( drawCmd_p, coOrd, BOOL_T );
 BOOL_T GridIsVisible( void );
+void SetSnapGridForTest( BOOL_T show );
 void InitSnapGridButtons( void );
 void SnapGridEnable( void * unused );
 void SnapGridShow( void * unused );

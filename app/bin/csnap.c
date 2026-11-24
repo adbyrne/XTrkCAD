@@ -508,6 +508,31 @@ EXPORT void DrawSnapGrid( drawCmd_p d, coOrd size, BOOL_T drawDivisions )
 }
 
 
+/**
+ * Show a snap grid for a test, or put back the grid there was before.
+ * LayoutExportTest() uses it to export a bitmap with the grid shown
+ * (Development Issues #82). Not saved to the preferences.
+ *
+ * \param show IN TRUE: show a grid of 12 with 6 divisions, origin 0, angle 0;
+ *	FALSE: restore the grid saved by the last call with TRUE
+ */
+EXPORT void SetSnapGridForTest( BOOL_T show )
+{
+	static gridHVData savedGrid;
+
+	if ( show ) {
+		savedGrid = grid;
+		grid.Horz.Spacing = grid.Vert.Spacing = 12.0;
+		grid.Horz.Division = grid.Vert.Division = 6;
+		grid.Orig = zero;
+		grid.Angle = 0.0;
+		grid.Show = TRUE;
+	} else {
+		grid = savedGrid;
+	}
+}
+
+
 EXPORT BOOL_T GridIsVisible( void )
 {
 	return (BOOL_T)grid.Show;
