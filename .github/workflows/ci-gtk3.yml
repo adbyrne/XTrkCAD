@@ -213,12 +213,19 @@ jobs:
     # Raspberry Pi OS Bookworm/Trixie on a Pi 3/4/5. Catches older-toolchain
     # breakage (Bookworm: GCC 12, CMake 3.25, GTK 3.24.38) before merge
     # rather than in release.yml's package-linux-debian afterwards.
+    # Debian testing (forky, amd64 only) has the libraries the next Debian
+    # and Ubuntu releases will: Mini-XML 4 for the SVG export (Development
+    # Issues #99), where the others have 3. Testing changes all the time,
+    # so that job only reports (continue-on-error) for now.
     name: c-tests-debian (${{ matrix.debian }}, ${{ matrix.arch }})
     strategy:
       fail-fast: false
       matrix:
-        debian: [bookworm, trixie]
+        debian: [bookworm, trixie, forky]
         arch: [amd64, arm64]
+        exclude:
+          - debian: forky
+            arch: arm64
         include:
           - arch: amd64
             runner: ubuntu-24.04
@@ -226,6 +233,7 @@ jobs:
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     container: debian:${{ matrix.debian }}
+    continue-on-error: ${{ matrix.debian == 'forky' }}
     timeout-minutes: 20
     steps:
       - name: Install git (required by actions/checkout)
@@ -233,7 +241,9 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/apt-deps
       - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
+        # SVG export required, so a MiniXML that isn't found (or, on forky,
+        # an mxml 4 the find module misses) fails here
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_REQUIRE_SVG=ON
       - name: Build
         run: cmake --build build
       - name: Test

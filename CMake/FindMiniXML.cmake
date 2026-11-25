@@ -11,47 +11,63 @@
 # package's libmxml.a in the MSYS2 prefix; the static library is preferred, so
 # no extra DLL has to be shipped (Development Issues #96).
 
+# Mini-XML 4 installs beside 3, as libmxml4/mxml.h and libmxml4 (Debian
+# forky, Homebrew; Development Issues #99). The header comes first, below
+# include/ or include/libmxml4/ (mxml 3 first where both are installed),
+# and its MXML_MAJOR_VERSION picks the library names, so the two match.
 if (WIN32)
 	set(MXMLBASEDIR "$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/mxml" )
 	find_path( MINIXML_INCLUDE_PATH mxml.h
 		PATHS ${MXMLBASEDIR}
+		PATH_SUFFIXES libmxml4
 		DOC "The directory where mxml.h resides")
-	find_library( MINIXML_LIBRARY
-		NAMES mxmlstat.lib libmxml.a mxml
-		PATHS ${MXMLBASEDIR}
-		DOC "The Mini XML static library")
 else ()
 	find_path( MINIXML_INCLUDE_PATH mxml.h
+		PATHS
 		/usr/include
 		/usr/local/include
 		/sw/include
 		/opt/local/include
 		/app/include
-	DOC "The directory where mxml.h resides")
-	if(UNIX AND NOT APPLE)
-		find_library( MINIXML_LIBRARY
-			NAMES libmxml.a mxml1 mxml
-			PATHS
-			/usr/lib64
-			/usr/lib
-			/usr/local/lib64
-			/usr/local/lib
-			/sw/lib
-			/opt/local/lib
-			/app/lib
-		DOC "The Mini XML library")
-	else()
-		find_library( MINIXML_LIBRARY
-			NAMES mxml1 mxml
-			PATHS
-			/usr/lib64
-			/usr/lib
-			/usr/local/lib64
-			/usr/local/lib
-			/sw/lib
-			/opt/local/lib
-		DOC "The Mini XML library")
+		PATH_SUFFIXES libmxml4
+		DOC "The directory where mxml.h resides")
+endif ()
+
+set(_mxml_major 3)
+if(MINIXML_INCLUDE_PATH AND EXISTS "${MINIXML_INCLUDE_PATH}/mxml.h")
+	file(STRINGS "${MINIXML_INCLUDE_PATH}/mxml.h" _mxml_major_line
+		REGEX "#[ \t]*define[ \t]+MXML_MAJOR_VERSION[ \t]+[0-9]+")
+	if(_mxml_major_line MATCHES "([0-9]+)")
+		set(_mxml_major "${CMAKE_MATCH_1}")
 	endif()
+endif()
+
+# static libraries first, so no extra shared library has to be shipped
+if(_mxml_major GREATER_EQUAL 4)
+	set(_mxml_names libmxml4.a mxml4)
+elseif(WIN32)
+	set(_mxml_names mxmlstat.lib libmxml.a mxml)
+else()
+	set(_mxml_names libmxml.a mxml1 mxml)
+endif()
+
+if (WIN32)
+	find_library( MINIXML_LIBRARY
+		NAMES ${_mxml_names}
+		PATHS ${MXMLBASEDIR}
+		DOC "The Mini XML static library")
+else ()
+	find_library( MINIXML_LIBRARY
+		NAMES ${_mxml_names}
+		PATHS
+		/usr/lib64
+		/usr/lib
+		/usr/local/lib64
+		/usr/local/lib
+		/sw/lib
+		/opt/local/lib
+		/app/lib
+		DOC "The Mini XML library")
 endif (WIN32)
 
 include(FindPackageHandleStandardArgs)
