@@ -20,6 +20,10 @@ include(PlatformSettings.cmake)
 
 enable_testing()
 
+# The pre-release rules in ProgramVersion.cmake (Development Issues #94)
+add_test(NAME PrereleaseRules
+    COMMAND ${CMAKE_COMMAND} -P "${CMAKE_SOURCE_DIR}/CMake/tests/PrereleaseRulesTest.cmake")
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Find all dependencies

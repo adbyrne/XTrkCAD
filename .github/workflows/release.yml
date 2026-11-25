@@ -605,9 +605,12 @@ jobs:
         run: |
           TAG=${GITHUB_REF#refs/tags/}
           # A suffixed tag (v5.4.0-test1) is a trial run, checked by
-          # check-release-tag: mark it a prerelease.
+          # check-release-tag, and a version modifier (v5.4.0Beta1) is a
+          # pre-release (Development Issues #94): mark both a prerelease.
+          MODIFIER=$(awk -F'"' '/set\(XTRKCAD_VERSION_MODIFIER/{print $2; exit}' ProgramVersion.cmake)
           PRERELEASE=()
           case "$TAG" in *-*) PRERELEASE=(--prerelease --latest=false) ;; esac
+          if [ -n "$MODIFIER" ]; then PRERELEASE=(--prerelease --latest=false); fi
           # Flatten all artifact subdirectories into a single file list
           mapfile -t FILES < <(find release-packages -type f | sort)
           gh release create "$TAG" \

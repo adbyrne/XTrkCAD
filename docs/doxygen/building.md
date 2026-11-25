@@ -297,7 +297,7 @@ key.
 
 | Value | Install name |
 |-------|--------------|
-| `AUTO` (default) | `OFF` on the exact commit a `v<version>` tag points at, `ON` otherwise |
+| `AUTO` (default) | `OFF` on the exact commit a `v<version>` tag points at, unless the version has a modifier (a pre-release); `ON` otherwise |
 | `ON` | `xtrkcad-<version>`, `~/.xtrkcad-<version>`, `XTrkCAD <version>` |
 | `OFF` | `xtrkcad`, `~/.xtrkcad`, `XTrkCAD` |
 
@@ -312,6 +312,7 @@ With the defaults, the three kinds of build come out like this (`<version>` is `
 | Local, untagged commit | `5.4.0.<hash>` | `xtrkcad-setup-5.4.0-...` | `xtrkcad-5.4.0` |
 | CI (`latest-main`), untagged commit | `5.4.0.<hash>` | `xtrkcad-setup-5.4.0.<hash>-...` | `xtrkcad-5.4.0.<hash>` |
 | Tagged release `v5.4.0` | `5.4.0` | `xtrkcad-setup-5.4.0-...` | `xtrkcad` |
+| Tagged pre-release `v5.4.0Beta1` | `5.4.0Beta1` | `xtrkcad-setup-5.4.0Beta1-...` | `xtrkcad-5.4.0Beta1` |
 
 Package and archive *file* names always keep the version, so downloads of different releases
 can't be confused. Only the name the package installs under changes.
@@ -322,10 +323,32 @@ by hand gives the same result. On a tag, `release.yml` also:
 
 - checks that the tag names the version in `ProgramVersion.cmake` (`check-release-tag`): `v5.4.0`
   for 5.4.0, or `v5.4.0-<suffix>` for a trial run. Any other tag fails the run;
-- fails the Windows build unless configure reports the unversioned install name;
+- fails the Windows build unless configure reports the unversioned install name, or for a
+  pre-release the versioned one;
 - drafts the GitHub Release (`github-release`) only after every package built **and** passed its
-  install test on a clean system, the installer included. A suffixed tag's release is marked as
-  a prerelease.
+  install test on a clean system, the installer included. A suffixed tag's release, and a
+  pre-release's, is marked as a prerelease.
+
+## Pre-releases {#pre-releases}
+
+A version with a modifier (`XTRKCAD_VERSION_MODIFIER` in `ProgramVersion.cmake`: `Beta1`, `RC1`,
+...) is a pre-release (Development Issues #94). `ProgramVersion.cmake` sets `XTRKCAD_PRERELEASE`
+from it, and `xtrkcad-config.h` passes it on; nothing in the code looks for the word "Beta". A
+pre-release:
+
+- installs beside the release, under its version (`xtrkcad-5.4.0Beta1`), even when tagged;
+- keeps its settings apart from the release's, in one work directory and preferences file
+  that every pre-release shares (`XTRKCAD_PRERELEASE_NAME`: `~/.xtrkcad-prerelease`,
+  `%APPDATA%\xtrkcad-prerelease`), so a tester's setup carries over to the next one;
+- shows a notice (`MSG_PRERELEASE_NOTICE`) the first time a new version starts;
+- prefers `/usr/local/share` over `/usr/share` on Linux, and its Linux package installs under
+  `/usr/local`;
+- is marked a prerelease on GitHub when tagged.
+
+**Settings keep their meaning.** Builds that share a work directory read each other's
+settings: every pre-release, every development build of one version (`~/.xtrkcad-5.4.0`), and
+each release reading the one before it. So never change what an existing setting means; give a
+changed setting a new name and leave the old one alone (Martin, dev ML #4735).
 
 ## Cutting a release {#cutting-a-release}
 

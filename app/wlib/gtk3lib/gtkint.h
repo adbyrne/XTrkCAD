@@ -458,6 +458,10 @@ void wlibListStoreSetData(GtkListStore *store, GtkTreeIter *iter, int column,
                           const char *label);
 /* main.c */
 char *wlibGetAppName(void);
+
+/* prerelease.c: names that keep a pre-release apart from the release */
+gchar *wlibLibDirEnvVar(const char *appName);
+const char *wlibWorkDirName(const char *appName, const char *prereleaseName);
 GtkApplication *wlibGetApp(void);
 
 /* menu.c */

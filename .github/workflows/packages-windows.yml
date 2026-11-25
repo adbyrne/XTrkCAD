@@ -120,10 +120,18 @@ jobs:
             -DXTRKCAD_TESTING=ON \
             -DXTRKCAD_REQUIRE_SVG=ON \
             -DXTRKCAD_USE_GETTEXT=OFF | tee configure.log
-          # A release tag must give the unversioned install name.
+          # A release tag must give the unversioned install name, and a
+          # pre-release tag (a version modifier, v5.4.0Beta1) the versioned
+          # one, so it installs beside the release (Development Issues #94).
           if [ "${{ github.ref_type }}" = tag ]; then
-            grep -q 'install identity: xtrkcad (' configure.log ||
-              { echo "::error::tagged build did not configure an unversioned install"; exit 1; }
+            MODIFIER=$(awk -F'"' '/set\(XTRKCAD_VERSION_MODIFIER/{print $2; exit}' ProgramVersion.cmake)
+            if [ -z "$MODIFIER" ]; then
+              grep -q 'install identity: xtrkcad (' configure.log ||
+                { echo "::error::tagged release did not configure an unversioned install"; exit 1; }
+            else
+              grep -q 'install identity: xtrkcad-' configure.log ||
+                { echo "::error::tagged pre-release did not configure a versioned install"; exit 1; }
+            fi
           fi
 
       - name: Build

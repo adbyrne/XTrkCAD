@@ -32,6 +32,12 @@ xtrkcad_add_unit_test(getopttest GetoptTest
 	FOLDER UnitTestsWLib
 	INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
 
+# the names a pre-release uses (Development Issues #94);
+# prerelease.c is included by the test
+xtrkcad_add_unit_test(prereleasetest PrereleaseTest
+	FOLDER UnitTestsWLib
+	LIBS PkgConfig::GTK3)
+
 # the Windows code page conversions (Development Issues #92)
 # win32/utf8conv.c is included by the test; it calls the Windows API
 if(WIN32)
