@@ -23,11 +23,15 @@ executes off a `git` mirror, e.g. `github.com/$GITHUB_USER/XTrkCAD` (see
 
 ```sh
 sudo apt-get install -y cmake ninja-build libgtk-3-dev libcmocka-dev zlib1g-dev libzip-dev \
-    libmxml-dev librsvg2-bin gettext
+    libmxml-dev librsvg2-bin gettext doxygen
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
+
+Doxygen builds the User Guide, the help the program opens. Without it the build still works,
+but has no help: configure says "Doxygen not found -- the User Guide (help-html target) will not
+be built or installed". The same goes for macOS and Windows below.
 
 CI adds `xvfb` and runs tests under `xvfb-run` because its runners have no display; a normal
 desktop session doesn't need that wrapper. The ARM64 and Clang (`-DCMAKE_C_COMPILER=clang`)
@@ -46,7 +50,7 @@ For flatpak information, see \subpage flatpak.
 For the Homebrew-dependent package, file locations and debugging on macOS, see \subpage macos.
 
 ```sh
-brew install ninja gtk+3 cmocka libzip librsvg
+brew install ninja gtk+3 cmocka libzip librsvg doxygen
 GTK_PREFIX=$(brew --prefix gtk+3)
 export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
@@ -79,7 +83,7 @@ Each shell sets `MINGW_PACKAGE_PREFIX` (`mingw-w64-ucrt-x86_64` in UCRT64,
 `mingw-w64-x86_64` in MINGW64), so one command installs the right packages in either:
 
 ```sh
-pacman -S --needed $MINGW_PACKAGE_PREFIX-{gcc,cmake,ninja,pkgconf,gtk3,zlib,libzip,mxml,librsvg,gettext-tools,cmocka}
+pacman -S --needed $MINGW_PACKAGE_PREFIX-{gcc,cmake,ninja,pkgconf,gtk3,zlib,libzip,mxml,librsvg,gettext-tools,cmocka,doxygen}
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
