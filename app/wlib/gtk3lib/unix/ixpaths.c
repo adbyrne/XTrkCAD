@@ -158,22 +158,19 @@ const char * wGetAppLibDir( void )
 	}
 
 	// option 1: search environment
-	cp =wlibGetAppName();
-	// room for "BETA", "LIB" and the terminating NUL
-	envvar = g_malloc(strlen(cp)+8);
+	// the name is the app name, "BETA" for a Beta version, then "LIB";
+	// g_strconcat() sizes the buffer from the strings themselves
+	envvar = g_strconcat( wlibGetAppName(),
+	                      strstr( XTRKCAD_VERSION, "Beta" ) != NULL ? "BETA" : "",
+	                      "LIB", NULL );
 
-	for (ep=envvar; *cp; cp++,ep++) {
-		*ep = toupper(*cp);
-		if ( * ep == '-' || *ep == '.') {
+	for (cp = envvar; *cp; cp++) {
+		*cp = g_ascii_toupper(*cp);
+		if ( *cp == '-' || *cp == '.') {
 			// Env Var cannot contain '-' or '.'
-			*ep = '_';
+			*cp = '_';
 		}
 	}
-	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
-		strcpy( ep, "BETA" );
-		ep += 4;
-	}
-	strcpy( ep, "LIB" );
 	ep = getenv( envvar );
 	//printf("DEBUG: %s=%s\n", envvar, ep);
 	searchDirs[ option++ ] = g_strdup( ep );
