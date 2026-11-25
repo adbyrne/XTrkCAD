@@ -254,6 +254,7 @@ jobs:
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_REQUIRE_SVG=ON \
             -DXTRKCAD_USE_GETTEXT=OFF
       - name: Build
         run: cmake --build build --parallel

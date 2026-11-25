@@ -6,9 +6,10 @@
 # MINIXML_INCLUDE_PATH
 # MINIXML_LIBRARY
 #
-# There is no default installation for minixml on Windows so a
-# XTrackCAD specific directory tree is assumed
-# Windows build uses the static library for minixml
+# On Windows, MSVC builds look in an XTrackCAD specific directory tree
+# ($XTCEXTERNALROOT) for the static mxmlstat.lib. MSYS2 builds find the mxml
+# package's libmxml.a in the MSYS2 prefix; the static library is preferred, so
+# no extra DLL has to be shipped (Development Issues #96).
 
 if (WIN32)
 	set(MXMLBASEDIR "$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/mxml" )
@@ -16,7 +17,7 @@ if (WIN32)
 		PATHS ${MXMLBASEDIR}
 		DOC "The directory where mxml.h resides")
 	find_library( MINIXML_LIBRARY
-		NAMES mxmlstat.lib
+		NAMES mxmlstat.lib libmxml.a mxml
 		PATHS ${MXMLBASEDIR}
 		DOC "The Mini XML static library")
 else ()
@@ -74,6 +75,15 @@ if (MiniXML_FOUND AND NOT TARGET MiniXML::mxml)
   add_library(MiniXML::mxml UNKNOWN IMPORTED)
   set_property(TARGET MiniXML::mxml PROPERTY IMPORTED_LOCATION ${MINIXML_LIBRARY})
   target_include_directories(MiniXML::mxml INTERFACE ${MINIXML_INCLUDE_PATH})
+  # The static library uses pthreads but doesn't carry that dependency: the
+  # Clang linker on Windows ARM64 (CLANGARM64) can't find pthread_once etc.
+  # without it (Development Issues #96)
+  if(MINIXML_LIBRARY MATCHES "\\.a$")
+    find_package(Threads)
+    if(Threads_FOUND)
+      target_link_libraries(MiniXML::mxml INTERFACE Threads::Threads)
+    endif()
+  endif()
 
   set(MXML_VERSION_MAJOR)
   set(MXML_VERSION_MINOR)

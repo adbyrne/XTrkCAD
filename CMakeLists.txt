@@ -40,11 +40,16 @@ if(NOT Inkscape_FOUND)
 endif()
 find_package(Libzip)
 
-# Optionally enable SVG export
+# Optionally enable SVG export. Package and CI builds set XTRKCAD_REQUIRE_SVG,
+# so a MiniXML that isn't found fails the build instead of quietly leaving SVG
+# export out (Development Issues #96: the Windows builds had none).
+option(XTRKCAD_REQUIRE_SVG "Fail when MiniXML isn't found, instead of building without SVG export" OFF)
 find_package(MiniXML)
 if(MiniXML_FOUND)
     set(XTRKCAD_CREATE_SVG 1)
     message( STATUS "MiniXML found: SVG export is enabled")
+elseif(XTRKCAD_REQUIRE_SVG)
+    message( FATAL_ERROR "MiniXML not found, and XTRKCAD_REQUIRE_SVG is ON: install mxml, or set MINIXML_LIBRARY and MINIXML_INCLUDE_PATH")
 else()
     message( STATUS "MiniXML not found: no SVG export")
 endif()
