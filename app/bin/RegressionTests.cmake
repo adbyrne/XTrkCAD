@@ -912,8 +912,11 @@ endif()
 # directory up before /T is read, so the notice would wait for a click.
 if(WIN32 AND NOT XTRKCAD_USE_GETTEXT)
     set(_xtrkcad_nodatadir_out "${CMAKE_CURRENT_BINARY_DIR}/notice-nodatadir.out")
+    set(_xtrkcad_nodatadir_log "${CMAKE_CURRENT_BINARY_DIR}/notice-nodatadir.log")
+    # Its own timeout, below ctest's, so a hang still shows the output and
+    # the log (the notice is logged there, /l names the file)
     add_test(NAME RegressionNotice.nodatadir
-        COMMAND sh -c "'$<TARGET_FILE:${XTRKCAD_BIN}>' '${_xtrkcad_test_option}${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc' > '${_xtrkcad_nodatadir_out}' 2>&1; code=$?; cat '${_xtrkcad_nodatadir_out}'; echo \"--- exit code $code ---\"; [ $code -eq 1 ] && grep -q 'configuration files could not be located' '${_xtrkcad_nodatadir_out}'"
+        COMMAND sh -c "rm -f '${_xtrkcad_nodatadir_log}'; timeout 30 '$<TARGET_FILE:${XTRKCAD_BIN}>' '${_xtrkcad_option_char}l' '${_xtrkcad_nodatadir_log}' '${_xtrkcad_test_option}${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc' > '${_xtrkcad_nodatadir_out}' 2>&1; code=$?; cat '${_xtrkcad_nodatadir_out}'; echo '--- log ---'; cat '${_xtrkcad_nodatadir_log}' 2>/dev/null; echo \"--- exit code $code ---\"; [ $code -eq 1 ] && grep -q 'configuration files could not be located' '${_xtrkcad_nodatadir_out}'"
     )
     set_tests_properties(RegressionNotice.nodatadir PROPERTIES
         LABELS "regression;regression-ci"
