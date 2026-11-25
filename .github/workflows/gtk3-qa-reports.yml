@@ -512,7 +512,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/select-xcode
       - name: Install dependencies
-        run: brew install ninja gtk+3 cmocka libzip librsvg
+        run: brew install ninja gtk+3 cmocka libzip librsvg libmxml
       - name: Configure with -Wall -Wextra
         run: |
           GTK_PREFIX=$(brew --prefix gtk+3)
