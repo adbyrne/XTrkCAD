@@ -879,6 +879,23 @@ if(NOT WIN32)
         RUN_SERIAL TRUE
     )
 endif()
+# The program run from the build tree, before cmake --install, has no data
+# directory: on Windows it has to say so and exit with 1, instead of failing
+# an assertion on the first toolbar icon (Development Issues #95). The message
+# goes to stderr, as the Windows log is a file. Windows only, as Unix has
+# checked this since before #95. Not with gettext: InitGettext() looks the data
+# directory up before /T is read, so the notice would wait for a click.
+if(WIN32 AND NOT XTRKCAD_USE_GETTEXT)
+    set(_xtrkcad_nodatadir_out "${CMAKE_CURRENT_BINARY_DIR}/notice-nodatadir.out")
+    add_test(NAME RegressionNotice.nodatadir
+        COMMAND sh -c "'$<TARGET_FILE:${XTRKCAD_BIN}>' '${_xtrkcad_test_option}${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc' > '${_xtrkcad_nodatadir_out}' 2>&1; code=$?; cat '${_xtrkcad_nodatadir_out}'; echo \"--- exit code $code ---\"; [ $code -eq 1 ] && grep -q 'configuration files could not be located' '${_xtrkcad_nodatadir_out}'"
+    )
+    set_tests_properties(RegressionNotice.nodatadir PROPERTIES
+        LABELS "regression;regression-ci"
+        TIMEOUT 60
+        RUN_SERIAL TRUE
+    )
+endif()
 # An archive whose manifest can't be read: the layout inside, named like the
 # archive, still has to open (Development Issues #75).
 set(_xtrkcad_badmanifest_home "${XTRKCAD_REGRESSION_HOME_ROOT}/archive-badmanifest")
