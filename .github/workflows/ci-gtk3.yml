@@ -370,6 +370,7 @@ jobs:
             -DXTRKCAD_TESTING=ON \
             -DXTRKCAD_REGRESSION_TESTING=ON \
             -DXTRKCAD_REGRESSION_LEVEL=${{ github.event_name == 'pull_request' && 'critical' || 'ci' }} \
+            -DXTRKCAD_REQUIRE_SVG=ON \
             -DXTRKCAD_USE_GETTEXT=OFF
       - name: Build
         run: cmake --build build --parallel

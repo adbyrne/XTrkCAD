@@ -118,6 +118,7 @@ jobs:
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DXTRKCAD_TESTING=ON \
+            -DXTRKCAD_REQUIRE_SVG=ON \
             -DXTRKCAD_USE_GETTEXT=OFF | tee configure.log
           # A release tag must give the unversioned install name.
           if [ "${{ github.ref_type }}" = tag ]; then
