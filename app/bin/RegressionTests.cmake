@@ -23,8 +23,11 @@ else()
 endif()
 set(_xtrkcad_test_option "${_xtrkcad_option_char}T")
 
+# A scratch install for the tests, not a real one: it may go without the
+# User Guide when Doxygen is missing (Development Issues #98, app/doc)
 add_test(NAME RegressionInstall
-    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR} --prefix ${XTRKCAD_REGRESSION_INSTALL_PREFIX}
+    COMMAND ${CMAKE_COMMAND} -E env XTRKCAD_INSTALL_WITHOUT_HELP=1
+        ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR} --prefix ${XTRKCAD_REGRESSION_INSTALL_PREFIX}
 )
 set_tests_properties(RegressionInstall PROPERTIES
     FIXTURES_SETUP regression_install

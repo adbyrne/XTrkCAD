@@ -29,9 +29,12 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-Doxygen builds the User Guide, the help the program opens. Without it the build still works,
-but has no help: configure says "Doxygen not found -- the User Guide (help-html target) will not
-be built or installed". The same goes for macOS and Windows below.
+Doxygen builds the User Guide, the help the program opens. Without it the program still builds
+and its tests run, but configure warns, and `cmake --install` (and so CPack) stops before it copies
+anything, as an installed program without help is incomplete (Development Issues #98). To install
+without help anyway, set `XTRKCAD_INSTALL_WITHOUT_HELP` in the environment; the regression tests'
+own scratch install (`RegressionInstall`) and the experimental MSVC CI job do. The same goes for
+macOS and Windows below.
 
 CI adds `xvfb` and runs tests under `xvfb-run` because its runners have no display; a normal
 desktop session doesn't need that wrapper. The ARM64 and Clang (`-DCMAKE_C_COMPILER=clang`)

@@ -121,6 +121,9 @@ jobs:
           cl 2>&1 | findstr /c:"Version"
           cmake --preset windows-gvsbuild-release || exit /b 1
           cmake --build --preset windows-gvsbuild-release || exit /b 1
+          rem No Doxygen here, so no User Guide: let the install through
+          rem without it (Development Issues #98)
+          set XTRKCAD_INSTALL_WITHOUT_HELP=1
           cmake --install build\windows-gvsbuild-release --prefix "%RUNNER_TEMP%\staging" || exit /b 1
 
       - name: Create ZIP

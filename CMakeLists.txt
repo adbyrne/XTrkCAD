@@ -264,6 +264,36 @@ if(XTRKCAD_USE_GETTEXT)
 endif()
 
 # Setup the rest of the build ...
+# The User Guide is part of an installed program: without Doxygen (which
+# builds it, app/doc) cmake --install, and so CPack, stops before it copies
+# anything (Development Issues #98, Ken dev ML #4731). Builds that are only
+# tested don't need Doxygen. XTRKCAD_INSTALL_WITHOUT_HELP in the environment
+# lets an install through: the regression tests' scratch install
+# (RegressionInstall) sets it. Declared before add_subdirectory(app), as
+# install rules run in the order they're declared.
+find_package(Doxygen QUIET)
+if(NOT DOXYGEN_FOUND)
+    message(WARNING "Doxygen not found: the User Guide (help) won't be built, and cmake --install will stop. Install Doxygen, or set XTRKCAD_INSTALL_WITHOUT_HELP in the environment to install without help.")
+    install(CODE "
+        if(NOT DEFINED ENV{XTRKCAD_INSTALL_WITHOUT_HELP})
+            message(FATAL_ERROR \"XTrackCAD's User Guide (help) wasn't built: Doxygen wasn't found when the build was configured. Install Doxygen and configure again, or set XTRKCAD_INSTALL_WITHOUT_HELP in the environment to install without help.\")
+        endif()
+        message(STATUS \"Installing without the User Guide (XTRKCAD_INSTALL_WITHOUT_HELP)\")
+    ")
+endif()
+# Configures the source again without Doxygen and checks the install stops.
+# Linux only: on macOS and Windows the build needs paths (Homebrew, gvsbuild)
+# that a CMake preset or the CI job passes, and this second configure
+# wouldn't have them.
+if(XTRKCAD_TESTING AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_test(NAME InstallNeedsHelp
+        COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_SOURCE_DIR}
+            -DWORK=${CMAKE_BINARY_DIR}/install-needs-help-test
+            "-DGENERATOR=${CMAKE_GENERATOR}"
+            -P "${CMAKE_SOURCE_DIR}/CMake/tests/InstallNeedsHelpTest.cmake")
+    set_tests_properties(InstallNeedsHelp PROPERTIES TIMEOUT 300)
+endif()
+
 add_subdirectory(app)
 add_subdirectory(distribution)
 add_subdirectory(docs)
