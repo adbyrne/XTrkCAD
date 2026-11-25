@@ -165,11 +165,9 @@ const char * wGetAppLibDir( void )
 	                      "LIB", NULL );
 
 	for (cp = envvar; *cp; cp++) {
-		*cp = g_ascii_toupper(*cp);
-		if ( *cp == '-' || *cp == '.') {
-			// Env Var cannot contain '-' or '.'
-			*cp = '_';
-		}
+		// a shell can only set a variable whose name is letters,
+		// digits and '_', so any other character becomes '_'
+		*cp = g_ascii_isalnum(*cp) ? g_ascii_toupper(*cp) : '_';
 	}
 	ep = getenv( envvar );
 	//printf("DEBUG: %s=%s\n", envvar, ep);
