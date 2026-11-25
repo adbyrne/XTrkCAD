@@ -598,6 +598,11 @@ EXPORT void MessageListAppend(
         const char * msgSrc )
 {
 	static wBool_t messageListIsEmpty = TRUE;
+	// a message shown before the menus are made, e.g. a missing icon file
+	// (Development Issues #95), has no Messages menu to go into yet
+	if ( messageList_ml == NULL ) {
+		return;
+	}
 	if ( messageListIsEmpty ) {
 		wMenuListDelete(messageList_ml, _(MESSAGE_LIST_EMPTY));
 		messageListIsEmpty = FALSE;

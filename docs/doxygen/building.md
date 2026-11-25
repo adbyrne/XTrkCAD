@@ -83,7 +83,15 @@ pacman -S --needed $MINGW_PACKAGE_PREFIX-{gcc,cmake,ninja,pkgconf,gtk3,zlib,libz
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON -DXTRKCAD_USE_GETTEXT=OFF
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
+cmake --install build --prefix /c/xtrkcad-dev
+/c/xtrkcad-dev/bin/xtrkcad-5.4.0.exe
 ```
+
+Run the installed program, not the one in `build`: it finds its icons, parameter files and help
+in `share\<app name>` next to its `bin` folder, which only the install creates. Started from
+`build`, it says the configuration files could not be located and exits (Development Issues #95).
+Start it from the MSYS2 shell, so the GTK DLLs are found on the `PATH`, and run the install line
+again after each build.
 
 Keep a build directory to one environment: libraries and programs built against one C runtime
 don't mix with the other's. Make a new build directory when you change shells.
@@ -636,7 +644,10 @@ bug:
   `/dev/full` and needs the write-failure message; `frozen` checks that Properties doesn't open on a
   frozen layer unless Shift is held; `noworkdir` (not Windows) starts with a work directory that
   can't be created and needs exit code 1, checked by the shell, as a pass regex ignores the exit
-  code. `RegressionRoundTrip.badmanifest` opens an archive whose
+  code; `noicons` (not Windows) points `<APP NAME>LIB` at an empty directory and needs exit code 1
+  and `MSG_ICON_FILE_MISSING`, not the toolbar's assertion; `nodatadir` (Windows, without gettext)
+  runs the program from the build tree, which has no data directory, and needs exit code 1 and the
+  message on stderr. `RegressionRoundTrip.badmanifest` opens an archive whose
   manifest can't be read, `RegressionParamCheck.longname` enters a name longer than its field, and
   `longsignal` one exactly a character too long.
 - **Undo (`RegressionParamCheck.undo`)** — playback suspends undo, so no demo tests it. A script turns

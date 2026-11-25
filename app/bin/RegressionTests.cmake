@@ -879,6 +879,31 @@ if(NOT WIN32)
         RUN_SERIAL TRUE
     )
 endif()
+# A data directory without the icon files: the program has to say so and exit
+# with 1, instead of failing an assertion on the first toolbar button
+# (Development Issues #95). The <APP NAME>LIB variable points it at an empty
+# directory; its name is built as in ixpaths.c. Not on Windows, which has no
+# such variable: RegressionNotice.nodatadir covers it there.
+if(NOT WIN32)
+    string(TOUPPER "${XTRKCAD_BIN}" _xtrkcad_libdir_var)
+    string(REGEX REPLACE "[^A-Z0-9]" "_" _xtrkcad_libdir_var "${_xtrkcad_libdir_var}")
+    if(XTRKCAD_VERSION MATCHES "Beta")
+        string(APPEND _xtrkcad_libdir_var "BETA")
+    endif()
+    string(APPEND _xtrkcad_libdir_var "LIB")
+    set(_xtrkcad_noicons_home "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-noicons")
+    set(_xtrkcad_noicons_out "${CMAKE_CURRENT_BINARY_DIR}/notice-noicons.out")
+    add_test(NAME RegressionNotice.noicons
+        COMMAND sh -c "${_xtrkcad_wayland_guard}mkdir -p '${_xtrkcad_noicons_home}/data' && ${_xtrkcad_libdir_var}='${_xtrkcad_noicons_home}/data' ${_xtrkcad_wrapper_sh} '${_xtrkcad_regression_exe}' '${_xtrkcad_test_option}${CMAKE_CURRENT_LIST_DIR}/unittest/testfiles/roundtrip-objects.xtc' > '${_xtrkcad_noicons_out}' 2>&1; code=$?; cat '${_xtrkcad_noicons_out}'; echo \"--- exit code $code ---\"; [ $code -eq 1 ] && grep -q 'NOTICE ID: MSG_ICON_FILE_MISSING' '${_xtrkcad_noicons_out}' && ! grep -q 'assertion' '${_xtrkcad_noicons_out}'"
+    )
+    set_tests_properties(RegressionNotice.noicons PROPERTIES
+        FIXTURES_REQUIRED "regression_install;regression_clean_homes"
+        LABELS "regression;regression-ci"
+        TIMEOUT 60
+        ENVIRONMENT "HOME=${_xtrkcad_noicons_home}"
+        RUN_SERIAL TRUE
+    )
+endif()
 # The program run from the build tree, before cmake --install, has no data
 # directory: on Windows it has to say so and exit with 1, instead of failing
 # an assertion on the first toolbar icon (Development Issues #95). The message

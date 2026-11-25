@@ -38,6 +38,9 @@ if(DOXYGEN_FOUND)
 			${CMAKE_CURRENT_BINARY_DIR}/intro.dox
 			${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
 			msgfiles
+			# the message pages: the target alone doesn't rebuild the guide
+			# when a message's help text changes
+			${CMAKE_BINARY_DIR}/app/help/messages.dox
 		COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
 		COMMENT "Building the XTrkCAD User Guide (Doxygen)"
 	)

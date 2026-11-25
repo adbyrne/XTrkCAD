@@ -28,6 +28,8 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
+#include <stdio.h>
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
@@ -40,10 +42,14 @@ wLoadResourceFile(const char* filename)
 	GError* error=NULL;
 
 	resource = g_resource_load(filename, &error);
-	if (resource) {
-		g_resources_register(resource);
-
+	if (resource == NULL) {
+		// without it, every icon it holds is missing (Development Issues #95)
+		fprintf(stderr, "Error loading resource file %s: %s\n", filename,
+		        error ? error->message : "unknown error");
+		g_clear_error(&error);
+		return(FALSE);
 	}
+	g_resources_register(resource);
 
 	return(TRUE);
 }

@@ -1393,6 +1393,14 @@ Unrecognized Option: %s
 #NOHELP
 END
 
+MESSAGE MSG_ICON_FILE_MISSING
+The icon file %s could not be loaded. The installation of XTrackCAD is incomplete: please install it again.
+HELP
+\e{XTrackCAD} keeps the pictures for its toolbar buttons in icon files in its installation directory. Without them it can't make its main window, so it stops.
+
+Install \e{XTrackCAD} again. If you built it yourself, install it with cmake --install and start the installed program, not the one in the build directory.
+END
+
 # various
 MESSAGE MSG_CARIMP_EOL
 End-Of-Line is unexpected in a quoted field.

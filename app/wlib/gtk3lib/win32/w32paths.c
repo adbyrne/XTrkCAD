@@ -26,6 +26,8 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
+#include <stdio.h>
+
 #include <glib.h>
 #include <glib/gstdio.h>
 
@@ -61,6 +63,11 @@ static char *userHomeDir;
  * (XTRKCAD_SHARE_INSTALL_DIR), and the layout Unix finds as
  * ../share/\<app name\> next to the binary.
  *
+ * If the directory doesn't exist, e.g. for a program run from its build
+ * directory before `cmake --install`, the user is told where it was looked for
+ * and the program exits, as on Unix (ixpaths.c). Without it no icon loads and
+ * the first toolbar button fails an assertion (Development Issues #95).
+ *
  *  \return pointer to directory name
  */
 
@@ -77,6 +84,24 @@ wGetAppLibDir(void)
 	moduleDir = g_win32_get_package_installation_directory_of_module(NULL);
 	appLibDir = g_build_filename(moduleDir, "share", wlibGetAppName(), NULL);
 	g_free(moduleDir);
+
+	// appLibDir is set before reporting: wExit() saves the preferences, which
+	// calls back here through wGetAppWorkDir()
+	if (!g_file_test(appLibDir, G_FILE_TEST_IS_DIR)) {
+		gchar *msg;
+
+		msg = g_strdup_printf(
+		              _("The required configuration files could not be located in "
+		                "the expected location:\n\n  %s\n\n"
+		                "Usually this is an installation problem. If you built "
+		                "XTrackCAD yourself, install it with cmake --install and "
+		                "run the installed program."),
+		              appLibDir);
+		fprintf(stderr, "%s\n", msg);
+		wNoticeWithIcon(NT_ERROR, msg, _("Ok"), NULL);
+		g_free(msg); // not necessary as program terminates anyway
+		wExit(1);
+	}
 
 	return(appLibDir);
 }
