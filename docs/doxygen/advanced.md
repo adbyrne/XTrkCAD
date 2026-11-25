@@ -148,7 +148,10 @@ Its pushes use `GITHUB_TOKEN`, which never triggers push-event workflows, so it 
   regression suite (see `regression-gtk3` below) isn't picked up here too. `c-tests-debian` runs
   in `debian:bookworm` and `debian:trixie` containers on amd64 and arm64. The arm64 entries stand
   in for Raspberry Pi OS on a Pi 3/4/5, and Bookworm's older GCC 12, CMake 3.25 and GTK 3.24.38
-  catch code that only builds on newer toolchains.
+  catch code that only builds on newer toolchains. A third, report-only entry (`continue-on-error`)
+  runs Debian testing, `debian:forky`, on amd64: it has the libraries the next Debian and Ubuntu
+  releases will, such as Mini-XML 4 (Development Issues #99), so a coming change shows before it
+  reaches a runner we depend on. Its failures don't fail the run; look at them all the same.
 - **`cmake-presets`, `cmake-presets-macos`, `cmake-presets-windows`** — run each platform's
   workflow preset from `CMakePresets.json` (configure, build, unit tests): `linux-debug`,
   `macos-debug` and `windows-debug`. The Linux job uses CMake 4.0.7, installed by `setup-cmake`,

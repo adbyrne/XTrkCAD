@@ -109,6 +109,13 @@ with no SVG export. The CI and package jobs pass `-DXTRKCAD_REQUIRE_SVG=ON`, whi
 MiniXML fail configure instead: before Development Issues #96, `FindMiniXML.cmake` only looked for
 MSVC's `mxmlstat.lib` on Windows, and the Windows builds had no SVG export without anyone noticing.
 
+Both Mini-XML 3 and 4 work (Development Issues #99). Mini-XML 4 changed how a document is saved,
+so `svgformat.c` picks the API with `MXML_MAJOR_VERSION` from `mxml.h`; only `SvgSaveFile()` and
+its whitespace callback differ. Mini-XML 4 installs beside 3, as `include/libmxml4/mxml.h` and
+`libmxml4`: `FindMiniXML.cmake` finds the header first, mxml 3's where both are installed, and
+takes the library names from its version. Today Homebrew and Debian testing have mxml 4, the
+other platforms 3; CI builds mxml 4 in the `c-tests-debian (forky)` job.
+
 ## Experimental: MSVC with gvsbuild {#windows-msvc-gvsbuild}
 
 A second Windows toolchain, still being tried out: Visual Studio's compiler (`cl.exe`) against a

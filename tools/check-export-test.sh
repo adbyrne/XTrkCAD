@@ -40,6 +40,10 @@ fi
 # SVG: the text and something for each drawn object
 if [ -f "$SVG" ]; then
 	grep -q CHECKTEXT "$SVG" || fail "CHECKTEXT isn't in the SVG"
+	# The DOCTYPE is a declaration, not an element: Mini-XML 4 wrote it
+	# escaped and closed with "/>" until it got its own call (#99)
+	grep -qx '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">' "$SVG" ||
+		fail "the SVG's DOCTYPE isn't right: $(grep -m1 DOCTYPE "$SVG")"
 	[ "$(grep -c '<line\|<path\|<polyline' "$SVG")" -ge 3 ] || fail "SVG has too few lines"
 	# The arc is the only one in the layout. It sweeps more than 180 degrees,
 	# so its large-arc flag has to be 1. Comparing the sweep minus the start

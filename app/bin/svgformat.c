@@ -31,6 +31,22 @@
 
 #include "dynstring.h"
 #include "mxml.h"
+
+/*
+ * Mini-XML 4 changed how a document is saved (Development Issues #99):
+ * mxmlSaveFile() takes an options object holding the whitespace callback and
+ * the wrap margin, and the callback gets a data pointer first. mxml.h's
+ * MXML_MAJOR_VERSION picks the API; only SvgSaveFile() and the callback
+ * differ. mxml 4 also dropped these two, which were NULL in mxml 3.
+ */
+#if MXML_MAJOR_VERSION >= 4
+#ifndef MXML_NO_PARENT
+#define MXML_NO_PARENT NULL
+#endif
+#ifndef MXML_ADD_TO_PARENT
+#define MXML_ADD_TO_PARENT NULL
+#endif
+#endif
 #include "include/svgformat.h"
 #include "include/utlist.h"
 #include "common.h"
@@ -565,9 +581,19 @@ SvgPrologue(SVGDocument *parent, char *id, int layerCount, double x0, double y0,
 {
 	mxml_node_t *xmlData;
 
+	/*
+	 * A declaration: mxml 3 writes an element named "!..." as one, mxml 4
+	 * has its own call and would write the element escaped, with "/>" (#99)
+	 */
+#if MXML_MAJOR_VERSION >= 4
+	xmlData = mxmlNewDeclaration(parent,
+	                             "DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\""
+	                             " \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"");
+#else
 	xmlData = mxmlNewElement(parent,
 	                         "!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\""
 	                         " \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"");
+#endif
 	xmlData = mxmlNewElement(parent, "svg");
 	mxmlElementSetAttr(xmlData, "xmlns", "http://www.w3.org/2000/svg");
 
@@ -591,7 +617,7 @@ SvgPrologue(SVGDocument *parent, char *id, int layerCount, double x0, double y0,
  * \returns Null if it no character to add, else a pointer to the additional chars.
  */
 
-const char *
+static const char *
 whitespace_cb(mxml_node_t *node, int where)
 {
 	const char *element;
@@ -602,6 +628,15 @@ whitespace_cb(mxml_node_t *node, int where)
 	 */
 
 	element = mxmlGetElement(node);
+
+	/*
+	 * Not an element: Mini-XML 4 also asks about the <?xml ...?> directive
+	 * the document starts with, which has no element name; mxml 3 called it
+	 * an element, which matched nothing below (Development Issues #99)
+	 */
+	if (element == NULL) {
+		return (NULL);
+	}
 
 	if (!strcmp(element, "svg") ||
 	    !strncmp(element, "!DOCTYPE", strlen("!DOCTYPE"))) {
@@ -660,6 +695,24 @@ whitespace_cb(mxml_node_t *node, int where)
  * \returns True if it succeeds, false if it fails.
  */
 
+#if MXML_MAJOR_VERSION >= 4
+/**
+ * The whitespace callback in Mini-XML 4's form, which has a data pointer
+ * first and the position as an mxml_ws_t
+ */
+static const char *
+whitespace_cb4(void *cbdata, mxml_node_t *node, mxml_ws_t where)
+{
+	(void)cbdata;
+	// the DOCTYPE is a declaration here, not an element named "!DOCTYPE":
+	// on its own line, as whitespace_cb() puts it with mxml 3
+	if (mxmlGetType(node) == MXML_TYPE_DECLARATION) {
+		return (where == MXML_WS_BEFORE_OPEN ? "\n" : NULL);
+	}
+	return whitespace_cb(node, (int)where);
+}
+#endif
+
 bool
 SvgSaveFile(SVGDocument *svg, const char *filename)
 {
@@ -667,8 +720,16 @@ SvgSaveFile(SVGDocument *svg, const char *filename)
 
 	svgF = fopen(filename, "w");
 	if (svgF) {
+#if MXML_MAJOR_VERSION >= 4
+		mxml_options_t *options = mxmlOptionsNew();
+		mxmlOptionsSetWrapMargin(options, 0);
+		mxmlOptionsSetWhitespaceCallback(options, whitespace_cb4, NULL);
+		mxmlSaveFile(svg, options, svgF);
+		mxmlOptionsDelete(options);
+#else
 		mxmlSetWrapMargin(0);
 		mxmlSaveFile(svg, svgF, whitespace_cb);
+#endif
 		fclose(svgF);
 
 		return (true);
