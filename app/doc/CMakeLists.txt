@@ -96,5 +96,6 @@ if(DOXYGEN_FOUND)
 		)
 	endif()
 else()
-	message(STATUS "Doxygen not found -- the User Guide (help-html target) will not be built or installed")
+	# without Doxygen, the top-level CMakeLists.txt warns and makes
+	# cmake --install stop (Development Issues #98)
 endif()
