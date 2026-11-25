@@ -6,9 +6,10 @@
 # MINIXML_INCLUDE_PATH
 # MINIXML_LIBRARY
 #
-# There is no default installation for minixml on Windows so a
-# XTrackCAD specific directory tree is assumed
-# Windows build uses the static library for minixml
+# On Windows, MSVC builds look in an XTrackCAD specific directory tree
+# ($XTCEXTERNALROOT) for the static mxmlstat.lib. MSYS2 builds find the mxml
+# package's libmxml.a in the MSYS2 prefix; the static library is preferred, so
+# no extra DLL has to be shipped (Development Issues #96).
 
 if (WIN32)
 	set(MXMLBASEDIR "$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/mxml" )
@@ -16,7 +17,7 @@ if (WIN32)
 		PATHS ${MXMLBASEDIR}
 		DOC "The directory where mxml.h resides")
 	find_library( MINIXML_LIBRARY
-		NAMES mxmlstat.lib
+		NAMES mxmlstat.lib libmxml.a mxml
 		PATHS ${MXMLBASEDIR}
 		DOC "The Mini XML static library")
 else ()

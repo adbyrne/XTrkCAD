@@ -88,6 +88,12 @@ ctest --test-dir build --output-on-failure
 Keep a build directory to one environment: libraries and programs built against one C runtime
 don't mix with the other's. Make a new build directory when you change shells.
 
+SVG export needs MiniXML (`mxml` in the `pacman` line, `libmxml.a` in the MSYS2 prefix). Configure
+says whether it found it: "MiniXML found: SVG export is enabled". Without it the program builds
+with no SVG export. The CI and package jobs pass `-DXTRKCAD_REQUIRE_SVG=ON`, which makes a missing
+MiniXML fail configure instead: before Development Issues #96, `FindMiniXML.cmake` only looked for
+MSVC's `mxmlstat.lib` on Windows, and the Windows builds had no SVG export without anyone noticing.
+
 ## Experimental: MSVC with gvsbuild {#windows-msvc-gvsbuild}
 
 A second Windows toolchain, still being tried out: Visual Studio's compiler (`cl.exe`) against a
