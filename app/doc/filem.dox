@@ -531,9 +531,9 @@ Two settings in the <i>Preference</i> section of the XTrackCAD configuration fil
 
 - <i>Preference.PrintScale</i> - if greater than 0, drawing coordinates are scaled by this factor relative to 72 dpi.
 
-- <i>Preference.PrintTextScale</i> - if greater than 0, text is scaled by this factor.  Only used when <i>PrintScale</i> is set.
+- <i>Preference.PrintTextScale</i> - if greater than 0, text is scaled by this factor, with or without <i>PrintScale</i>.
 
-If they are not set in the configuration file, XTrackCAD uses the environment variables <i>XTRKCADPRINTSCALE</i> and <i>XTRKCADPRINTTEXTSCALE</i> instead.
+If they are not set in the configuration file, XTrackCAD uses the environment variables <i>XTRKCADPRINTSCALE</i> and <i>XTRKCADPRINTTEXTSCALE</i> instead.  These two names are the same in every version of XTrackCAD.
 
 */
 

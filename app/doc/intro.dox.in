@@ -386,6 +386,11 @@ Installing from the self-extracting archive.
 Normally <i>XTrkCAD</i> is installed in `/usr/...` or `/usr/local/...`.
 If you install <i>XTrackCAD</i> into another directory, set the `XTRKCADLIB` environment variable to point to that directory.
 
+The name of this variable follows the name the program is installed under: upper case, with every character other than a letter or digit (such as `-` and `.`) replaced by `_`, then `LIB`.
+A release is installed as `xtrkcad`, so the variable is `XTRKCADLIB`.
+A development build is installed with its version, such as `xtrkcad-5.4.0`, so the variable is `XTRKCAD_5_4_0LIB`.
+A beta version adds `BETA` before `LIB`, such as `XTRKCAD_5_4_0BETALIB`.
+
 */
 
 /**
@@ -537,7 +542,7 @@ On MS Windows, the <i>Install</i> directory is set when you install <i>XTrackCAD
 demos, examples) can be found in the `share/xtrkcad` subdirectory underneath the <i>Install</i> directory.
 The <i>Working</i> directory is in your personal profile.
 
-On Linux, the <i>Install</i> directory is usually `/usr/share/xtrkcad/`, but you can change this by defining the `XTRKCADLIB` environment variable before starting <i>XTrackCAD</i>. The working directory is `{HOME}/.xtrkcad/`.
+On Linux, the <i>Install</i> directory is usually `/usr/share/xtrkcad/`, but you can change this by defining the `XTRKCADLIB` environment variable before starting <i>XTrackCAD</i> (see \ref LinuxInstall for how its name changes with the version). The working directory is `{HOME}/.xtrkcad/`.
 
 On Mac OSX, the <i>Install</i> directory is the application package, usually located in the `/Applications` directory.
 All the included parameters, demos and examples can be found inside the package under the  `/Applications/xtrkcad/Contents/Resources/xtrkcad` directory.
