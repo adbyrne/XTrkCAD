@@ -75,6 +75,15 @@ if (MiniXML_FOUND AND NOT TARGET MiniXML::mxml)
   add_library(MiniXML::mxml UNKNOWN IMPORTED)
   set_property(TARGET MiniXML::mxml PROPERTY IMPORTED_LOCATION ${MINIXML_LIBRARY})
   target_include_directories(MiniXML::mxml INTERFACE ${MINIXML_INCLUDE_PATH})
+  # The static library uses pthreads but doesn't carry that dependency: the
+  # Clang linker on Windows ARM64 (CLANGARM64) can't find pthread_once etc.
+  # without it (Development Issues #96)
+  if(MINIXML_LIBRARY MATCHES "\\.a$")
+    find_package(Threads)
+    if(Threads_FOUND)
+      target_link_libraries(MiniXML::mxml INTERFACE Threads::Threads)
+    endif()
+  endif()
 
   set(MXML_VERSION_MAJOR)
   set(MXML_VERSION_MINOR)
