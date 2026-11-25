@@ -992,8 +992,10 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 		return NULL;
 	}
 
-	wSetGeometry(mainW, displayWidth/2, displayWidth, displayHeight/2,
-	             displayHeight, -1, -1, -1);
+	// No maximum size: with one, maximizing leaves the window smaller than
+	// the screen on Windows (see wSetGeometry()).
+	wSetGeometry(mainW, displayWidth/2, -1, displayHeight/2,
+	             -1, -1, -1, -1);
 	InitAppDefaults();
 
 	InitAudio();

@@ -283,12 +283,31 @@ const char * wWinGetTitle(
 }
 
 
+/**
+ * Sets the size limits of window \a win.
+ *
+ * A maximum of -1 (either one) sets no maximum size. Give a maximum only
+ * where the window really must not grow: with one, maximizing goes wrong on
+ * Windows. GDK then leaves the maximized size and position to Windows, which
+ * doesn't know about GTK's own title bar, and the window stays smaller than
+ * the screen while its title bar shows it as maximized.
+ *
+ * \param win IN window
+ * \param min_width, max_width IN width limits, max -1 for none
+ * \param min_height, max_height IN height limits, max -1 for none
+ * \param base_width, base_height IN base size, -1 for none
+ * \param aspect_ratio IN fixed aspect ratio, -1.0 for none
+ */
+
 void wSetGeometry(wControl_p win, wWinPix_t min_width, wWinPix_t max_width,
                   wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width,
                   wWinPix_t base_height, double aspect_ratio )
 {
 	GdkGeometry hints;
-	GdkWindowHints hintMask = GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE;
+	GdkWindowHints hintMask = GDK_HINT_MIN_SIZE;
+	if (max_width > 0 && max_height > 0) {
+		hintMask |= GDK_HINT_MAX_SIZE;
+	}
 	hints.min_width = min_width;
 	hints.max_width = max_width;
 	hints.min_height = min_height;

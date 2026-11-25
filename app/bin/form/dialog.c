@@ -416,10 +416,8 @@ wControl_p FormCreateDialog(
 	/** \todo the following code sets the limits for the window size, needs work */
 	if ((winOption & F_RESIZE)) {
 
-		wWinPix_t scr_w, scr_h;
-		wGetDisplaySize(&scr_w, &scr_h);
-		wSetGeometry(group->win, 10, scr_w - 10, 10, scr_h, -1, -1,
-		             -1);
+		// No maximum size, see wSetGeometry()
+		wSetGeometry(group->win, 10, -1, 10, -1, -1, -1, -1);
 	}
 
 	return group->win;
