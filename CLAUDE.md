@@ -179,7 +179,7 @@ CLAUDE.md                  This file — also committed into xtrkcad-git (main)
 
 The retired GTK3V2MAIN copies (`xtrkcad-hg-gtk3v2main/`, the `xtrkcad-git-gtk3/` worktree and
 `build-gtk3v2main/`) were deleted 2026-10-21 with the user's OK, after the held features reached
-Hg `default`. The frozen git `GTK3V2MAIN` branch stays on GitHub as a record.
+Hg `default`. The frozen git `GTK3V2MAIN` branch was deleted from GitHub 2026-11-25 (user); its last commit, c566664e, is in `main`.
 
 ## SourceForge / Mercurial remote
 
