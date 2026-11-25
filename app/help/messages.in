@@ -3,10 +3,12 @@
 ############################################################
 
 # misc.c
-MESSAGE MSG_BETA_NOTICE
-XTrackCAD Version %s: Please note that this Beta Version of XTrackCAD is still undergoing final testing before its official release. The sole purpose of this Beta Version is to conduct testing and obtain feedback. Should you encounter any bugs, glitches, lack of functionality or other problems, please let us know immediately so we can rectify these accordingly. Your help in this regard is greatly appreciated!
+MESSAGE MSG_PRERELEASE_NOTICE
+XTrackCAD Version %s is a pre-release, still being tested before the official release. It is meant for testing and feedback, and keeps its settings apart from the release's. If you find a bug, a glitch, something missing or any other problem, please let us know, so it can be fixed before the release. Thank you for your help!
 HELP
-XTrackCAD Version %s: Please note that this Beta Version of XTrackCAD is still undergoing final testing before its official release. The sole purpose of this Beta Version is to conduct testing and obtain feedback. Should you encounter any bugs, glitches, lack of functionality or other problems, please let us know immediately so we can rectify these accordingly. Your help in this regard is greatly appreciated!
+A pre-release (a beta or a release candidate) of \e{XTrackCAD} is still being tested. It installs beside the release, and every pre-release shares one settings directory, apart from the release's, so trying it doesn't change how the release is set up.
+
+Please report problems on the \e{XTrackCAD} bug tracker or the mailing list, with the version shown in this message.
 END
 
 # chndldto.c

@@ -38,6 +38,7 @@ target_sources(xtrkcad-wlib
     notice.c
     opendocument.c
     popupmenu.c
+    prerelease.c
     print.c
     pulldnmenu.c
     radio.c

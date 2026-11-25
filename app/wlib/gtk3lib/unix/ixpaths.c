@@ -144,7 +144,7 @@ IsExistingDirectory( char *name)
  */
 const char * wGetAppLibDir( void )
 {
-	char * cp, *ep;
+	char *ep;
 	char *envvar;
 	char pBuf[256];
 	pBuf[0] = '\0'; //Initialize buffer
@@ -157,18 +157,8 @@ const char * wGetAppLibDir( void )
 		return appLibDir;
 	}
 
-	// option 1: search environment
-	// the name is the app name, "BETA" for a Beta version, then "LIB";
-	// g_strconcat() sizes the buffer from the strings themselves
-	envvar = g_strconcat( wlibGetAppName(),
-	                      strstr( XTRKCAD_VERSION, "Beta" ) != NULL ? "BETA" : "",
-	                      "LIB", NULL );
-
-	for (cp = envvar; *cp; cp++) {
-		// a shell can only set a variable whose name is letters,
-		// digits and '_', so any other character becomes '_'
-		*cp = g_ascii_isalnum(*cp) ? g_ascii_toupper(*cp) : '_';
-	}
+	// option 1: search environment, <APP NAME>LIB (prerelease.c)
+	envvar = wlibLibDirEnvVar( wlibGetAppName() );
 	ep = getenv( envvar );
 	//printf("DEBUG: %s=%s\n", envvar, ep);
 	searchDirs[ option++ ] = g_strdup( ep );
@@ -185,8 +175,9 @@ const char * wGetAppLibDir( void )
 	g_free(ep);
 
 	// option 3: OS data directory
-	// if BETA Version, prefer local data dir over system data dir
-	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
+	// a pre-release prefers the local data dir over the system one
+	// (Development Issues #94)
+	if ( XTRKCAD_PRERELEASE ) {
 		searchDirs[option++] = g_strdup_printf("/usr/local/share/%s",
 		                                       wlibGetAppName() );
 		searchDirs[option++] = g_strdup_printf("/usr/share/%s",
@@ -285,12 +276,12 @@ const char * wGetAppWorkDir(
 
 	homeDir = wGetUserHomeDir();
 
-	char * sBeta = "";
-	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
-		sBeta = "-beta";
-	}
-	appWorkDir = g_strdup_printf( "%s/.%s%s%s", homeDir, wlibGetAppName(),
-	                              FP_WORK_SUFFIX, sBeta );
+	// every pre-release shares one work directory (Development Issues #94)
+	const char *prereleaseName =
+	        XTRKCAD_PRERELEASE ? XTRKCAD_PRERELEASE_NAME : NULL;
+	appWorkDir = g_strdup_printf( "%s/.%s%s", homeDir,
+	                              wlibWorkDirName( wlibGetAppName(), prereleaseName ),
+	                              FP_WORK_SUFFIX );
 
 	if (!IsExistingDirectory(appWorkDir)) {
 		if ( g_mkdir( appWorkDir, 0777 ) == -1 ) {

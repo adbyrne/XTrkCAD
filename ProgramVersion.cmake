@@ -6,6 +6,21 @@ set(XTRKCAD_RELEASE_VERSION "0")
 set(XTRKCAD_VERSION_MODIFIER "")
 set(XTRKCAD_VERSION "${XTRKCAD_MAJOR_VERSION}.${XTRKCAD_MINOR_VERSION}.${XTRKCAD_RELEASE_VERSION}${XTRKCAD_VERSION_MODIFIER}")
 
+# A version modifier makes a pre-release (Beta1, RC1, ...; Development
+# Issues #94; before #94 only the word "Beta" counted). Every pre-release
+# keeps its settings in one directory and preferences file named
+# XTRKCAD_PRERELEASE_NAME (~/.xtrkcad-prerelease), apart from the release's,
+# so they carry over from one pre-release to the next (dev ML #4735). A
+# pre-release also shows a first-run notice, and a tagged one installs beside
+# the release (XTRKCAD_VERSIONED_INSTALL below).
+include("${CMAKE_CURRENT_LIST_DIR}/CMake/XtrkcadPrerelease.cmake")
+if(XTRKCAD_VERSION_MODIFIER STREQUAL "")
+    set(XTRKCAD_PRERELEASE OFF)
+else()
+    set(XTRKCAD_PRERELEASE ON)
+endif()
+set(XTRKCAD_PRERELEASE_NAME "xtrkcad-prerelease")
+
 # Dev builds get a short VCS hash of the checked-out commit detected below
 # (e.g. "a1b2c3d4e5f6"). A formal release build — the exact commit a
 # "v<version>" tag points at — has no hash: XTRKCAD_SRC_HASH stays empty.
@@ -122,28 +137,21 @@ endif()
 # ~/.xtrkcad and "XTrkCAD", so installing a new release replaces the
 # previous one, as releases did before #673.
 #
-# AUTO (the default) is OFF for a tagged release build and ON for every
-# other build. ON or OFF forces it either way, e.g. a versioned release
-# candidate, or an unversioned local build that updates the current
-# install in place. It's a STRING rather than an option() so that AUTO is
+# AUTO (the default) is OFF for a tagged final release and ON for every
+# other build, a tagged pre-release (v5.4.0Beta1) included: a beta installs
+# beside the release instead of over it (Development Issues #94). ON or OFF
+# forces it either way, e.g. an unversioned local build that updates the
+# current install in place. It's a STRING rather than an option() so that AUTO is
 # re-evaluated on every configure: a build directory first configured on
 # an untagged commit doesn't keep a cached ON after checking out the tag.
 # Flatpak builds use XTRKCAD_FLATPAK_NOVERSION instead (CMakeLists.txt).
 set(XTRKCAD_VERSIONED_INSTALL "AUTO" CACHE STRING
-    "Put the version in the install identity: AUTO (OFF for a tagged release, ON otherwise), ON or OFF")
+    "Put the version in the install identity: AUTO (OFF for a tagged final release, ON otherwise), ON or OFF")
 set_property(CACHE XTRKCAD_VERSIONED_INSTALL PROPERTY STRINGS AUTO ON OFF)
 
-if(XTRKCAD_VERSIONED_INSTALL STREQUAL "AUTO")
-    if(XTRKCAD_IS_TAGGED_RELEASE)
-        set(XTRKCAD_INSTALL_VERSIONED OFF)
-    else()
-        set(XTRKCAD_INSTALL_VERSIONED ON)
-    endif()
-elseif(XTRKCAD_VERSIONED_INSTALL)
-    set(XTRKCAD_INSTALL_VERSIONED ON)
-else()
-    set(XTRKCAD_INSTALL_VERSIONED OFF)
-endif()
+xtrkcad_install_versioned("${XTRKCAD_VERSIONED_INSTALL}"
+    "${XTRKCAD_IS_TAGGED_RELEASE}" "${XTRKCAD_PRERELEASE}"
+    XTRKCAD_INSTALL_VERSIONED)
 
 # XTRKCAD_INSTALL_SUFFIX goes after "xtrkcad" in file and directory names,
 # XTRKCAD_DISPLAY_SUFFIX after "XTrkCAD" in Windows folder and registry

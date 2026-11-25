@@ -47,7 +47,7 @@ The data directory is found from where the program runs, not from where it was b
   (`win32/w32paths.c`), e.g. `C:\XTrackCAD\share\xtrkcad-5.4.0`. See \ref windows.
 - Linux and macOS (`unix/ixpaths.c`), the first one that exists: the folder in the environment
   variable `<APP NAME>LIB` (upper case, any character but a letter or digit becomes `_`, e.g.
-  `XTRKCAD_5_4_0LIB`; a version containing `Beta` adds `BETA` before `LIB`), then
+  `XTRKCAD_5_4_0LIB`, or `XTRKCAD_5_4_0BETA1LIB` for the pre-release `xtrkcad-5.4.0Beta1`), then
   `../share/<app name>` next to the binary, then `/usr/share/<app name>`, then
   `/usr/local/share/<app name>`. See \ref macos for the macOS package.
 

@@ -36,6 +36,12 @@
 #define XTRKCAD_VERSION "@XTRKCAD_VERSION@"
 #define XTRKCAD_FILE_VERSION "@XTRKCAD_FILE_VERSION@"
 #define XTRKCAD_VERSION_ID "@XTRKCAD_VERSION_ID@"
+
+/* A pre-release (Development Issues #94): a build with a version modifier.
+ * Every pre-release keeps its settings in the work directory and preferences
+ * file named XTRKCAD_PRERELEASE_NAME. */
+#cmakedefine01 XTRKCAD_PRERELEASE
+#define XTRKCAD_PRERELEASE_NAME "@XTRKCAD_PRERELEASE_NAME@"
 #define XTRKCAD_INSTALL_SUFFIX "@XTRKCAD_INSTALL_SUFFIX@"
 #define XTRKCAD_PARAMVERSION (13)
 #define XTRKCAD_PARAMVERSIONVERSION "5.4.0"

@@ -172,7 +172,11 @@ const char* wGetAppWorkDir(void)
 		wNoticeWithIcon(NT_ERROR, "Cannot get user's profile directory", "Exit", NULL);
 		wExit(1);
 	} else {
-		g_snprintf(tempDir, MAX_PATH, "%s\\%s", tempDir,	wlibGetAppName());
+		// every pre-release shares one work directory (Development Issues #94)
+		const char *prereleaseName =
+		        XTRKCAD_PRERELEASE ? XTRKCAD_PRERELEASE_NAME : NULL;
+		g_snprintf(tempDir, MAX_PATH, "%s\\%s", tempDir,
+		           wlibWorkDirName(wlibGetAppName(), prereleaseName));
 		appWorkDir = tempDir;
 
 		if (!g_file_test(appWorkDir, G_FILE_TEST_IS_DIR )) {

@@ -8,7 +8,9 @@ set(CPACK_RPM_PACKAGE_GROUP "Applications/Engineering")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}////xtrkcad-desc.txt")
 set(CPACK_PACKAGE_FILE_NAME "xtrkcad-setup-${XTRKCAD_FILE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
 
-if(XTRKCAD_VERSION_MODIFIER MATCHES "^Beta")
+# a pre-release installs under /usr/local, beside a distribution's release
+# (Development Issues #94: any version modifier, not just "Beta")
+if(XTRKCAD_PRERELEASE)
 	set(CPACK_INSTALL_PREFIX "/usr/local" )
 else()
 	set(CPACK_INSTALL_PREFIX "/usr" )

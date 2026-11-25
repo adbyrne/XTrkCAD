@@ -967,6 +967,16 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 		initialFile = strdup(argv[optind]);
 	}
 
+	/*
+	 * Every pre-release shares one preferences file, as it shares the work
+	 * directory (wGetAppWorkDir()), so its settings carry over to the next
+	 * pre-release (Development Issues #94). "name;config" names the file;
+	 * a configuration given with -c is kept.
+	 */
+	if (XTRKCAD_PRERELEASE && strchr(buffer, ';') == NULL) {
+		strcat(buffer, ";" XTRKCAD_PRERELEASE_NAME);
+	}
+
 	extraButtons = (getenv(sEnvExtra) != NULL);
 	LogOpen(logFileName);
 	log_init = LogFindIndex("init");
@@ -1131,7 +1141,7 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 	/* this has to be called before ShowTip() */
 	InitSmallDlg();
 
-	/* Compare the program version and display Beta warning if appropriate */
+	/* Compare the program version; a new pre-release says what it is (#94) */
 	pref = wPrefGetString("misc", "version");
 	versionChanged = (!pref) || (strcmp(pref, XTRKCAD_VERSION) != 0);
 
@@ -1139,8 +1149,8 @@ EXPORT wControl_p wMain(int argc, char * argv[])
 		wPrefSetString("misc", "version", XTRKCAD_VERSION);
 	}
 
-	if (versionChanged && strstr(XTRKCAD_VERSION, "Beta") != NULL) {
-		NoticeMessage(MSG_BETA_NOTICE, _("Ok"), NULL, XTRKCAD_VERSION);
+	if (versionChanged && XTRKCAD_PRERELEASE) {
+		NoticeMessage(MSG_PRERELEASE_NOTICE, _("Ok"), NULL, XTRKCAD_VERSION);
 	} else {
 		ShowTip(SHOWTIP_NEXTTIP);
 	}

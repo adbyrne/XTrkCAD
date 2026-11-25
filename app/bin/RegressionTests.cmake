@@ -885,14 +885,11 @@ endif()
 # A data directory without the icon files: the program has to say so and exit
 # with 1, instead of failing an assertion on the first toolbar button
 # (Development Issues #95). The <APP NAME>LIB variable points it at an empty
-# directory; its name is built as in ixpaths.c. Not on Windows, which has no
+# directory; its name is built as in prerelease.c. Not on Windows, which has no
 # such variable: RegressionNotice.nodatadir covers it there.
 if(NOT WIN32)
     string(TOUPPER "${XTRKCAD_BIN}" _xtrkcad_libdir_var)
     string(REGEX REPLACE "[^A-Z0-9]" "_" _xtrkcad_libdir_var "${_xtrkcad_libdir_var}")
-    if(XTRKCAD_VERSION MATCHES "Beta")
-        string(APPEND _xtrkcad_libdir_var "BETA")
-    endif()
     string(APPEND _xtrkcad_libdir_var "LIB")
     set(_xtrkcad_noicons_home "${XTRKCAD_REGRESSION_HOME_ROOT}/notice-noicons")
     set(_xtrkcad_noicons_out "${CMAKE_CURRENT_BINARY_DIR}/notice-noicons.out")
