@@ -159,7 +159,8 @@ const char * wGetAppLibDir( void )
 
 	// option 1: search environment
 	cp =wlibGetAppName();
-	envvar = g_malloc(strlen(cp)+4);
+	// room for "BETA", "LIB" and the terminating NUL
+	envvar = g_malloc(strlen(cp)+8);
 
 	for (ep=envvar; *cp; cp++,ep++) {
 		*ep = toupper(*cp);
