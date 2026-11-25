@@ -24,6 +24,19 @@ static void GetLibdir(void **state)
 	(void)state;
 
 	g_mkdir_with_parents("../share/preftest", 0777);
+#ifdef WIN32
+	// Windows looks in share\preftest below the exe's directory (or below
+	// its parent, when that is bin); since Development Issues #95 a missing
+	// data directory ends the program with a notice
+	{
+		gchar *moduleDir =
+		        g_win32_get_package_installation_directory_of_module(NULL);
+		gchar *libDir = g_build_filename(moduleDir, "share", "preftest", NULL);
+		g_mkdir_with_parents(libDir, 0777);
+		g_free(libDir);
+		g_free(moduleDir);
+	}
+#endif
 	const char *str1 = wGetAppLibDir();
 	printf("%s\n", str1 );
 	assert_non_null((void *)&str1);

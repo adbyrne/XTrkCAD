@@ -54,6 +54,28 @@ static char *userHomeDir;
  *******************************************************************************
  */
 
+/*
+ * The data directory's path, without checking that it exists. Finding the
+ * work directory only looks for xtrkcad0.ini in it, which a missing directory
+ * doesn't stop; so that, and saving the preferences when wGetAppLibDir()
+ * exits, never shows the notice.
+ */
+static const char *
+AppLibDirPath(void)
+{
+	gchar* moduleDir;
+
+	if (appLibDir == NULL) {
+		// The install root: GLib drops a trailing bin directory from the
+		// exe's path
+		moduleDir = g_win32_get_package_installation_directory_of_module(NULL);
+		appLibDir = g_build_filename(moduleDir, "share", wlibGetAppName(),
+		                             NULL);
+		g_free(moduleDir);
+	}
+	return appLibDir;
+}
+
 /**
  * Find the directory where configuration files, help, demos etc are installed.
  *
@@ -70,23 +92,17 @@ static char *userHomeDir;
  *
  *  \return pointer to directory name
  */
-
 const char*
 wGetAppLibDir(void)
 {
-	gchar* moduleDir;
+	static gboolean checked = FALSE;
 
-	if (appLibDir != NULL) {
+	AppLibDirPath();
+	if (checked) {
 		return appLibDir;
 	}
+	checked = TRUE;
 
-	// The install root: GLib drops a trailing bin directory from the exe's path
-	moduleDir = g_win32_get_package_installation_directory_of_module(NULL);
-	appLibDir = g_build_filename(moduleDir, "share", wlibGetAppName(), NULL);
-	g_free(moduleDir);
-
-	// appLibDir is set before reporting: wExit() saves the preferences, which
-	// calls back here through wGetAppWorkDir()
 	if (!g_file_test(appLibDir, G_FILE_TEST_IS_DIR)) {
 		gchar *msg;
 
@@ -130,7 +146,7 @@ const char* wGetAppWorkDir(void)
 		return appWorkDir;
 	}
 	tempDir = g_malloc(MAX_PATH);
-	tempIniFile = g_strdup_printf( "%s\\xtrkcad0.ini", wGetAppLibDir());
+	tempIniFile = g_strdup_printf( "%s\\xtrkcad0.ini", AppLibDirPath());
 
 	rc = GetPrivateProfileString("workdir", "path", "", tempDir,
 	                             MAX_PATH, tempIniFile);
