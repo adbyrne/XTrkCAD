@@ -26,6 +26,8 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
+#include <stdio.h>
+
 #include <glib.h>
 #include <glib/gstdio.h>
 
@@ -52,6 +54,28 @@ static char *userHomeDir;
  *******************************************************************************
  */
 
+/*
+ * The data directory's path, without checking that it exists. Finding the
+ * work directory only looks for xtrkcad0.ini in it, which a missing directory
+ * doesn't stop; so that, and saving the preferences when wGetAppLibDir()
+ * exits, never shows the notice.
+ */
+static const char *
+AppLibDirPath(void)
+{
+	gchar* moduleDir;
+
+	if (appLibDir == NULL) {
+		// The install root: GLib drops a trailing bin directory from the
+		// exe's path
+		moduleDir = g_win32_get_package_installation_directory_of_module(NULL);
+		appLibDir = g_build_filename(moduleDir, "share", wlibGetAppName(),
+		                             NULL);
+		g_free(moduleDir);
+	}
+	return appLibDir;
+}
+
 /**
  * Find the directory where configuration files, help, demos etc are installed.
  *
@@ -61,22 +85,39 @@ static char *userHomeDir;
  * (XTRKCAD_SHARE_INSTALL_DIR), and the layout Unix finds as
  * ../share/\<app name\> next to the binary.
  *
+ * If the directory doesn't exist, e.g. for a program run from its build
+ * directory before `cmake --install`, the user is told where it was looked for
+ * and the program exits, as on Unix (ixpaths.c). Without it no icon loads and
+ * the first toolbar button fails an assertion (Development Issues #95).
+ *
  *  \return pointer to directory name
  */
-
 const char*
 wGetAppLibDir(void)
 {
-	gchar* moduleDir;
+	static gboolean checked = FALSE;
 
-	if (appLibDir != NULL) {
+	AppLibDirPath();
+	if (checked) {
 		return appLibDir;
 	}
+	checked = TRUE;
 
-	// The install root: GLib drops a trailing bin directory from the exe's path
-	moduleDir = g_win32_get_package_installation_directory_of_module(NULL);
-	appLibDir = g_build_filename(moduleDir, "share", wlibGetAppName(), NULL);
-	g_free(moduleDir);
+	if (!g_file_test(appLibDir, G_FILE_TEST_IS_DIR)) {
+		gchar *msg;
+
+		msg = g_strdup_printf(
+		              _("The required configuration files could not be located in "
+		                "the expected location:\n\n  %s\n\n"
+		                "Usually this is an installation problem. If you built "
+		                "XTrackCAD yourself, install it with cmake --install and "
+		                "run the installed program."),
+		              appLibDir);
+		fprintf(stderr, "%s\n", msg);
+		wNoticeWithIcon(NT_ERROR, msg, _("Ok"), NULL);
+		g_free(msg); // not necessary as program terminates anyway
+		wExit(1);
+	}
 
 	return(appLibDir);
 }
@@ -105,7 +146,7 @@ const char* wGetAppWorkDir(void)
 		return appWorkDir;
 	}
 	tempDir = g_malloc(MAX_PATH);
-	tempIniFile = g_strdup_printf( "%s\\xtrkcad0.ini", wGetAppLibDir());
+	tempIniFile = g_strdup_printf( "%s\\xtrkcad0.ini", AppLibDirPath());
 
 	rc = GetPrivateProfileString("workdir", "path", "", tempDir,
 	                             MAX_PATH, tempIniFile);

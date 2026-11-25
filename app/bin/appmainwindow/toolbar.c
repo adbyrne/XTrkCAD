@@ -25,6 +25,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include <form.h>
+#include "messages.h"
 #include "misc.h"
 #include "paths.h"
 #include "track.h"
@@ -559,17 +560,33 @@ static char* resourceFiles[] = { "icons16.gresource",
                                  "icons32.gresource"
                                };
 
+/**
+ * Load the toolbar icons of one size.
+ *
+ * Without them no toolbar button can be made (one would fail an assertion),
+ * so a missing or unreadable icon file ends the program with a notice
+ * instead (Development Issues #95).
+ *
+ * \param iconSize IN 0, 1 or 2 for 16, 24 or 32 pixels; others give 16
+ */
 void
 LoadIconResource(unsigned iconSize)
 {
 	char* pathToResourceFile = NULL;
 
+	if (iconSize >= (unsigned)COUNT(resourceFiles)) {
+		iconSize = 0;
+	}
 	MakeFullpath(&pathToResourceFile, wGetAppLibDir(), resourceFiles[iconSize],
 	             NULL);
 	if (pathToResourceFile) {
 		LogPrintf("Loading icons from: %s\n", pathToResourceFile);
 
-		wLoadResourceFile(pathToResourceFile);
+		if (!wLoadResourceFile(pathToResourceFile)) {
+			NoticeMessage(MSG_ICON_FILE_MISSING, _("Ok"), NULL,
+			              pathToResourceFile);
+			wExit(1);
+		}
 
 		free(pathToResourceFile);
 	}
