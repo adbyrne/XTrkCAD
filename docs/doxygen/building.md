@@ -53,7 +53,7 @@ For flatpak information, see \subpage flatpak.
 For the Homebrew-dependent package, file locations and debugging on macOS, see \subpage macos.
 
 ```sh
-brew install ninja gtk+3 cmocka libzip librsvg doxygen
+brew install ninja gtk+3 cmocka libzip librsvg doxygen libmxml
 GTK_PREFIX=$(brew --prefix gtk+3)
 export PKG_CONFIG_PATH="$GTK_PREFIX/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DXTRKCAD_TESTING=ON \
@@ -115,6 +115,11 @@ its whitespace callback differ. Mini-XML 4 installs beside 3, as `include/libmxm
 `libmxml4`: `FindMiniXML.cmake` finds the header first, mxml 3's where both are installed, and
 takes the library names from its version. Today Homebrew and Debian testing have mxml 4, the
 other platforms 3; CI builds mxml 4 in the `c-tests-debian (forky)` job.
+
+On macOS, `libmxml` in the `brew` line gives SVG export (Development Issues #97). The static
+`libmxml4.a` is linked, so the program needs no Mini-XML at run time and the archive's users don't
+install it; `packages-macos.yml` checks that with `otool -L`. The macOS CI and package jobs
+configure with `XTRKCAD_REQUIRE_SVG=ON`, as the Windows ones do.
 
 ## Experimental: MSVC with gvsbuild {#windows-msvc-gvsbuild}
 

@@ -280,7 +280,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/select-xcode
       - name: Install dependencies
-        run: brew install ninja gtk+3 cmocka libzip librsvg
+        run: brew install ninja gtk+3 cmocka libzip librsvg libmxml
       - name: Configure, build and unit-test (workflow preset macos-debug)
         # macos-debug takes its paths from HOMEBREW_PREFIX, which
         # brew shellenv sets; each step is a new shell, so set it here.
@@ -404,7 +404,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/select-xcode
       - name: Install dependencies
-        run: brew install ninja gtk+3 cmocka libzip librsvg
+        run: brew install ninja gtk+3 cmocka libzip librsvg libmxml
       - name: Configure
         run: |
           GTK_PREFIX=$(brew --prefix gtk+3)
@@ -416,7 +416,7 @@ jobs:
             -DXTRKCAD_REGRESSION_LEVEL=${{ github.event_name == 'pull_request' && 'critical' || 'ci' }} \
             -DCMAKE_PREFIX_PATH="$GTK_PREFIX;$(brew --prefix)" \
             -DCMAKE_EXE_LINKER_FLAGS="$GTK_LDFLAGS" \
-            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON
+            -DXTRKCAD_USE_APPLEHELP=OFF -DXTRKCAD_USE_BROWSER=ON -DXTRKCAD_REQUIRE_SVG=ON
       - name: Build
         run: cmake --build build
       - name: Regression suite
