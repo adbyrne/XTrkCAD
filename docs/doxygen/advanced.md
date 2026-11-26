@@ -784,11 +784,6 @@ tool's message alone.
   and a variable that looked like an array but was declared as a bare scalar (SF #669,
   `partcatalog.c`'s `stopwords`, likely collapsed to one entry during a merge conflict per
   `git blame`).
-- **`&&`/`||` swapped in a condition, silently dead-coding a branch.** SF #667 — `cjoin.c`'s
-  `JoinWithStraight()` used `&&` where a complementary check nearby confirmed `||` was intended,
-  permanently preventing a curve-orientation adjustment from ever firing. Confirmed live via the
-  app's own `-d join=3` debug logging (see \ref running-with-debug-logging "Running with debug
-  logging" in the \ref index "Developer Documentation" page), not just by inspection.
 - **Copy-paste debris passing stray arguments to a sibling function's signature.** Adapting a
   nearby call by search-and-replace and forgetting to trim an argument list the new call doesn't
   need. SF #664 — `cbezier.c`; SF #667 — `cgroup.c`'s

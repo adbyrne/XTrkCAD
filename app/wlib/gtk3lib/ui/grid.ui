@@ -97,7 +97,7 @@
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkCheckButton">
-                    <property name="label" translatable="yes"> </property>
+                    <property name="label"> </property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
@@ -125,7 +125,7 @@
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkCheckButton">
-                    <property name="label" translatable="yes"> </property>
+                    <property name="label"> </property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>

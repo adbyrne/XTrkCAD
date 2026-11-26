@@ -712,7 +712,8 @@ static paramData_t layoutPLs[] = {
 	{ PD_COMBOLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), NULL, 0, I2VP(CHANGE_SCALE) },
 #define MINRADIUSENTRY (6)
 	{ PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, NULL, 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
-	{ PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, NULL, 0, I2VP(CHANGE_MAIN) },
+#define MAXGRADEENTRY (7)
+	{ PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF, &r0_90, NULL, 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
 #define BACKGROUNDFILECHECK (8)  //Note this value used in the file section routines above - if it changes, they will need to change
 	{ PD_STRING, &thisLayout.props.backgroundTextBox, "backgroundfile", PDO_NOPSHUPD|PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, NULL, 0, I2VP(CHANGE_BACKGROUND), TEXT_FIELD_LEN },
 	{ PD_BUTTON, ImageFileBrowse, "browse", PDO_DLGHORZ, NULL },
@@ -757,15 +758,24 @@ static void ChangeLayout()
 		file_changed = TRUE;
 	}
 
-	DoChangeNotification(changes);
-
 	if (changes & CHANGE_LIMITS) {
-		char prefString[30];
-		// now set the minimum track radius
-		sprintf(prefString, "minTrackRadius-%s", curScaleName);
-		wPrefSetFloat("misc", prefString, thisLayout.props.minTrackRadius);
+		// store the minimum track radius and maximum grade for the
+		// (possibly new) scale before the change notification: a scale
+		// change reloads both from these preferences
+		DynString prefString = { NULL };
+		char *scaleName = GetScaleName(GetLayoutCurScale());
+
+		DynStringPrintf(&prefString, MINTRACKRADIUSPREFS "-%s", scaleName);
+		wPrefSetFloat("misc", DynStringToCStr(&prefString),
+		              thisLayout.props.minTrackRadius);
+		DynStringPrintf(&prefString, MAXTRACKGRADEPREFS "-%s", scaleName);
+		wPrefSetFloat("misc", DynStringToCStr(&prefString),
+		              thisLayout.props.maxTrackGrade);
+		DynStringFree(&prefString);
 		file_changed = TRUE;
 	}
+
+	DoChangeNotification(changes);
 
 	if (changes & CHANGE_BACKGROUND) {
 
@@ -964,6 +974,11 @@ LayoutDlgUpdate(
 		// put the scale's minimum value into the dialog
 		wEntrySetValue( layoutPLs[MINRADIUSENTRY].control,
 		                FormatDistance(thisLayout.props.minTrackRadius));
+
+		// same for the maximum grade
+		LoadLayoutMaxGradePref(scaleDesc, 5.0);
+		wEntrySetValue( layoutPLs[MAXGRADEENTRY].control,
+		                FormatFloat(thisLayout.props.maxTrackGrade));
 	}
 	if (inx == BACKGROUNDFILEENTRY) {
 		SetName();
